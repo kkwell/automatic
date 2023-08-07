@@ -57,16 +57,16 @@ RBlock::~RBlock() {
 }
 
 void RBlock::init() {
-    RBlock::PropertyCustom.generateId(typeid(RBlock), RObject::PropertyCustom);
-    RBlock::PropertyType.generateId(typeid(RBlock), RObject::PropertyType);
-    RBlock::PropertyHandle.generateId(typeid(RBlock), RObject::PropertyHandle);
-    RBlock::PropertyName.generateId(typeid(RBlock), "", QT_TRANSLATE_NOOP("REntity", "Name"));
-    RBlock::PropertyFrozen.generateId(typeid(RBlock), "", QT_TRANSLATE_NOOP("REntity", "Hidden"));
-    RBlock::PropertyPixelUnit.generateId(typeid(RBlock), "", QT_TRANSLATE_NOOP("REntity", "Pixel Unit"));
-    RBlock::PropertyOriginX.generateId(typeid(RBlock), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RBlock::PropertyOriginY.generateId(typeid(RBlock), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RBlock::PropertyOriginZ.generateId(typeid(RBlock), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "Z"));
-    RBlock::PropertyLayout.generateId(typeid(RBlock), "", QT_TRANSLATE_NOOP("REntity", "Layout"));
+    RBlock::PropertyCustom.generateId(RBlock::getRtti(), RObject::PropertyCustom);
+    RBlock::PropertyType.generateId(RBlock::getRtti(), RObject::PropertyType);
+    RBlock::PropertyHandle.generateId(RBlock::getRtti(), RObject::PropertyHandle);
+    RBlock::PropertyName.generateId(RBlock::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Name"));
+    RBlock::PropertyFrozen.generateId(RBlock::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Hidden"));
+    RBlock::PropertyPixelUnit.generateId(RBlock::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Pixel Unit"));
+    RBlock::PropertyOriginX.generateId(RBlock::getRtti(), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "X"));
+    RBlock::PropertyOriginY.generateId(RBlock::getRtti(), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "Y"));
+    RBlock::PropertyOriginZ.generateId(RBlock::getRtti(), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "Z"));
+    RBlock::PropertyLayout.generateId(RBlock::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Layout"));
 }
 
 RBlock* RBlock::clone() const {
@@ -121,7 +121,7 @@ bool RBlock::setProperty(RPropertyTypeId propertyTypeId, const QVariant& value, 
     return ret;
 }
 
-QPair<QVariant, RPropertyAttributes> RBlock::getProperty(RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes) {
+QPair<QVariant, RPropertyAttributes> RBlock::getProperty(RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes, bool showOnRequest) {
     if (propertyTypeId == PropertyName) {
         return qMakePair(QVariant(name), RPropertyAttributes());
     }
@@ -149,7 +149,7 @@ QPair<QVariant, RPropertyAttributes> RBlock::getProperty(RPropertyTypeId& proper
         return qMakePair(QVariant(layoutId), RPropertyAttributes());
     }
 
-    return RObject::getProperty(propertyTypeId, humanReadable, noAttributes);
+    return RObject::getProperty(propertyTypeId, humanReadable, noAttributes, showOnRequest);
 }
 
 void RBlock::setCustomProperty(const QString& title, const QString& key, const QVariant& value) {
@@ -162,10 +162,6 @@ void RBlock::setCustomProperty(const QString& title, const QString& key, const Q
     }
 
     RObject::setCustomProperty(title, key, value);
-}
-
-bool RBlock::isSelectedForPropertyEditing() {
-    return false;
 }
 
 void RBlock::print(QDebug dbg) const {

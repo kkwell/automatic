@@ -27,11 +27,17 @@ xmlns:rs="http://www.ribbonsoft.com">
       <value name="KnownVariable" />
       <value name="NumericallySorted" />
       <value name="Percentage" />
-      <value name="Integer" />
       <value name="Sum" />
-      <value name="ReadOnly" />
-      <value name="Redundant" />
       <value name="Undeletable" />
+      <value name="OnRequest" />
+      <value name="Location" />
+      <value name="RefPoint" />
+      <value name="Geometry" />
+      <value name="Scale" />
+      <value name="Area" />
+      <value name="UnitLess" />
+      <value name="DimStyleOverride" />
+      <value name="CustomApp001" />
     </enum>
     <constructor>
       <variant />
@@ -227,7 +233,24 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
+    <method name="isOnRequest" cppName="isOnRequest"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setOnRequest" cppName="setOnRequest"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="onRequest"
+        isConst="false" />
+      </variant>
+    </method>
     <method name="isLabel" cppName="isLabel" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="isCustom" cppName="isCustom" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
     </method>
@@ -235,6 +258,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setInteger" cppName="setInteger"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="i"
+        isConst="false" />
+      </variant>
     </method>
     <method name="isInteger" cppName="isInteger" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
@@ -271,18 +302,61 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
-    <method name="getPropertyTypeId" cppName="getPropertyTypeId"
+    <method name="isScaleType" cppName="isScaleType"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
-      <variant returnType="RPropertyTypeId"
-      isPureVirtual="false" />
+      <variant returnType="bool" isPureVirtual="false" />
     </method>
-    <method name="setPropertyTypeId" cppName="setPropertyTypeId"
+    <method name="setScaleType" cppName="setScaleType"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
-        <arg type="RPropertyTypeId" typeName="RPropertyTypeId"
-        name="pid" isConst="false" />
+        <arg type="bool" typeName="bool" name="v"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="isAreaType" cppName="isAreaType"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setAreaType" cppName="setAreaType"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="v"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="isUnitLess" cppName="isUnitLess"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setUnitLess" cppName="setUnitLess"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="v"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="isPercentage" cppName="isPercentage"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="isCustomApp001" cppName="isCustomApp001"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setCustomApp001" cppName="setCustomApp001"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="v"
+        isConst="false" />
       </variant>
     </method>
     <method name="getLabel" cppName="getLabel" specifier="public"

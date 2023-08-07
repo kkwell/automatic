@@ -146,6 +146,10 @@ CircleT2P.prototype.pickEntity = function(event, preview) {
     var shape = undefined;
 
     if (this.state!==CircleT2P.State.ChoosingSolution) {
+        if (!this.isEntitySnappable(entity)) {
+            // entity not on a snappable layer:
+            return;
+        }
         if (isNull(entity)) {
             return;
         }
@@ -280,7 +284,14 @@ CircleT2P.prototype.getShapes = function(preview) {
         var point1 = new RPoint(this.pos2);
         var point2 = new RPoint(this.pos3);
 
-        this.candidates = Apollonius.getSolutions(this.shape1.data(), point1, point2);
+        var s1;
+        if (isFunction(this.shape1.data)) {
+            s1 = this.shape1.data();
+        }
+        else {
+            s1 = this.shape1;
+        }
+        this.candidates = Apollonius.getSolutions(s1, point1, point2);
 
         // filter out lines:
         this.candidates = ShapeAlgorithms.getCircleShapes(this.candidates);

@@ -20,6 +20,7 @@
 #include <QDataStream>
 #include <QTime>
 
+#include "RS.h"
 #include "RLocalPeer.h"
 
 #if defined(Q_OS_WIN)
@@ -45,7 +46,7 @@ RLocalPeer::RLocalPeer(QObject* parent, const QString &appId)
 #endif
         prefix = id.section(QLatin1Char('/'), -1);
     }
-    prefix.remove(QRegExp("[^a-zA-Z]"));
+    prefix.remove(QRegularExpression("[^a-zA-Z]"));
     prefix.truncate(6);
 
     QByteArray idc = id.toUtf8();

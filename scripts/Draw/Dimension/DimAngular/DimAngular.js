@@ -17,24 +17,31 @@
  * along with QCAD.
  */
 
-include("../Dimension.js");
+include("scripts/Draw/Dimension/Dimension.js");
 
 /**
  * \class DimAngular
  * \brief Draw angular dimension.
  * The first entity is a line or arc. If the first entity is a line,
  * a second entity has to be chosen which is also a line.
+ * If using max angle, this action creates a 3 point angular dimension.
  * \ingroup ecma_draw_dimension
  */
 function DimAngular(guiAction) {
     Dimension.call(this, guiAction);
 
-    this.data = new RDimAngularData();
+    // for common dimension data (set by options toolbar in Dimension class)
+    this.data = new RDimensionData();
+
+    //this.data2L = new RDimAngular2LData();
+    //this.data3P = new RDimAngular3PData();
+    this.dimArcPosition = RVector.invalid;
     this.firstEntity = undefined;
     this.firstShape = undefined;
     this.secondEntity = undefined;
     this.secondShape = undefined;
-    this.setUiOptions("../Dimension.ui");
+    this.useMaxAngle = false;
+    this.setUiOptions(["../Dimension.ui", "DimAngular.ui"], false);
 }
 
 DimAngular.prototype = new Dimension();
@@ -60,35 +67,39 @@ DimAngular.prototype.setState = function(state) {
     switch (this.state) {
     case DimAngular.State.SettingFirstEntity:
         this.getDocumentInterface().setClickMode(RAction.PickEntity);
-        this.data.setExtensionLine1Start(RVector.invalid);
-        this.data.setExtensionLine1End(RVector.invalid);
-        this.data.setExtensionLine2Start(RVector.invalid);
-        this.data.setExtensionLine2End(RVector.invalid);
-        this.data.setDimArcPosition(RVector.invalid);
+//        this.data2L.setExtensionLine1Start(RVector.invalid);
+//        this.data2L.setExtensionLine1End(RVector.invalid);
+//        this.data2L.setExtensionLine2Start(RVector.invalid);
+//        this.data2L.setExtensionLine2End(RVector.invalid);
+//        this.data2L.setDimArcPosition(RVector.invalid);
         this.firstEntity = undefined;
         this.firstShape = undefined;
         this.secondEntity = undefined;
         this.secondShape = undefined;
+        this.dimArcPosition = RVector.invalid;
         var trFirstEntity = qsTr("Arc or first of two lines");
         this.setLeftMouseTip(trFirstEntity);
+        this.setCommandPrompt(trFirstEntity);
         this.setRightMouseTip(EAction.trCancel);
         break;
 
     case DimAngular.State.SettingSecondEntity:
         this.getDocumentInterface().setClickMode(RAction.PickEntity);
-        this.data.setExtensionLine2Start(RVector.invalid);
-        this.data.setExtensionLine2End(RVector.invalid);
-        this.data.setDimArcPosition(RVector.invalid);
+//        this.data2L.setExtensionLine2Start(RVector.invalid);
+//        this.data2L.setExtensionLine2End(RVector.invalid);
+//        this.data2L.setDimArcPosition(RVector.invalid);
         this.secondEntity = undefined;
         this.secondShape = undefined;
+        this.dimArcPosition = RVector.invalid;
         var trSecondEntity = qsTr("Second line");
         this.setLeftMouseTip(trSecondEntity);
+        this.setCommandPrompt(trSecondEntity);
         this.setRightMouseTip(EAction.trBack);
         break;
 
     case DimAngular.State.SettingDimPos:
         this.getDocumentInterface().setClickMode(RAction.PickCoordinate);
-        this.data.setDefinitionPoint(RVector.invalid);
+        //this.data2L.setDefinitionPoint(RVector.invalid);
         var trDimPos = qsTr("Dimension arc location");
         this.setCommandPrompt(trDimPos);
         this.setLeftMouseTip(trDimPos);
@@ -117,6 +128,18 @@ DimAngular.prototype.escapeEvent = function() {
             this.setState(DimAngular.State.SettingSecondEntity);
         }
         break;
+    }
+};
+
+DimAngular.prototype.initUiOptions = function(resume, optionsToolBar) {
+    Dimension.prototype.initUiOptions.call(this, resume, optionsToolBar);
+
+    var widgetNames = [ "ScaleAction", "ScaleLabelAction", "ScaleSeparatorAction", "AutoScaleAction" ];
+    for (var i=0; i<widgetNames.length; i++) {
+        var w = optionsToolBar.findChild(widgetNames[i]);
+        if (!isNull(w)) {
+            w.visible = false;
+        }
     }
 };
 
@@ -192,7 +215,7 @@ DimAngular.prototype.pickCoordinate = function(event, preview) {
 
     switch (this.state) {
     case DimAngular.State.SettingDimPos:
-        this.data.setDimArcPosition(event.getModelPosition());
+        this.dimArcPosition = event.getModelPosition();
         if (preview) {
             this.updatePreview();
         }
@@ -208,7 +231,7 @@ DimAngular.prototype.pickCoordinate = function(event, preview) {
     }
 };
 
-DimAngular.prototype.getOperation = function(preview) {
+DimAngular.prototype.getEntity = function(preview) {
     if (!isLineBasedShape(this.firstShape) && !isArcShape(this.firstShape)) {
         return undefined;
     }
@@ -220,57 +243,120 @@ DimAngular.prototype.getOperation = function(preview) {
     var di = this.getDocumentInterface();
 
     if (isLineBasedShape(this.firstShape)) {
-        //this.data.setExtensionLine1Start(this.firstShape.getStartPoint());
-        //this.data.setExtensionLine1End(this.firstShape.getStartPoint());
+        var intersections = this.firstShape.getIntersectionPoints(getPtr(this.secondShape), false);
 
-        var intersections = this.firstShape.getIntersectionPoints(this.secondShape.data(), false);
-
-        if (intersections.length!=1) {
+        if (intersections.length!==1) {
             return undefined;
         }
 
         var center = intersections[0];
 
-        if (center.getDistanceTo(this.firstShape.getStartPoint()) <
+        if (this.useMaxAngle) {
+            this.data3P = new RDimAngular3PData(this.data, RVector.invalid, RVector.invalid, RVector.invalid);
+            this.data3P.setDimArcPosition(this.dimArcPosition);
+            this.data3P.setCenter(center);
+//            this.data3P.setText(this.data.getText());
+//            this.data3P.setUpperTolerance();
+//            this.data3P.setDimArcPosition(this.data2L.getDimArcPosition());
+            if (center.getDistanceTo(this.firstShape.getStartPoint()) <
                 center.getDistanceTo(this.firstShape.getEndPoint())) {
-            this.data.setExtensionLine1Start(this.firstShape.getEndPoint());
-            this.data.setExtensionLine1End(this.firstShape.getStartPoint());
-        } else {
-            this.data.setExtensionLine1Start(this.firstShape.getStartPoint());
-            this.data.setExtensionLine1End(this.firstShape.getEndPoint());
+                this.data3P.setExtensionLine1End(this.firstShape.getEndPoint());
+            }
+            else {
+                this.data3P.setExtensionLine1End(this.firstShape.getStartPoint());
+            }
+            if (center.getDistanceTo(this.secondShape.getStartPoint()) <
+                center.getDistanceTo(this.secondShape.getEndPoint())) {
+                this.data3P.setExtensionLine2End(this.secondShape.getEndPoint());
+            }
+            else {
+                this.data3P.setExtensionLine2End(this.secondShape.getStartPoint());
+            }
         }
 
-        if (center.getDistanceTo(this.secondShape.getStartPoint()) <
+        else {
+            this.data2L = new RDimAngular2LData(this.data, RVector.invalid, RVector.invalid, RVector.invalid, RVector.invalid);
+            this.data2L.setDimArcPosition(this.dimArcPosition);
+            if (center.getDistanceTo(this.firstShape.getStartPoint()) <
+                center.getDistanceTo(this.firstShape.getEndPoint())) {
+                this.data2L.setExtensionLine1Start(this.firstShape.getEndPoint());
+                this.data2L.setExtensionLine1End(this.firstShape.getStartPoint());
+            } else {
+                this.data2L.setExtensionLine1Start(this.firstShape.getStartPoint());
+                this.data2L.setExtensionLine1End(this.firstShape.getEndPoint());
+            }
+
+            if (center.getDistanceTo(this.secondShape.getStartPoint()) <
                 center.getDistanceTo(this.secondShape.getEndPoint())) {
-            this.data.setExtensionLine2Start(this.secondShape.getStartPoint());
-            this.data.setExtensionLine2End(this.secondShape.getEndPoint());
-        } else {
-            this.data.setExtensionLine2Start(this.secondShape.getEndPoint());
-            this.data.setExtensionLine2End(this.secondShape.getStartPoint());
+                this.data2L.setExtensionLine2Start(this.secondShape.getStartPoint());
+                this.data2L.setExtensionLine2End(this.secondShape.getEndPoint());
+            } else {
+                this.data2L.setExtensionLine2Start(this.secondShape.getEndPoint());
+                this.data2L.setExtensionLine2End(this.secondShape.getStartPoint());
+            }
+            if (!preview) {
+                di.setRelativeZero(center);
+            }
         }
-        //graphicView->moveRelativeZero(center);
+
         if (!preview) {
             di.setRelativeZero(center);
         }
-        //setStatus(SetPos);
-    }
-    if (isArcShape(this.firstShape)) {
-        this.data.setExtensionLine1Start(this.firstShape.getCenter());
-        this.data.setExtensionLine1End(this.firstShape.getStartPoint());
-        this.data.setExtensionLine2Start(this.firstShape.getCenter());
-        this.data.setExtensionLine2End(this.firstShape.getEndPoint());
     }
 
-    if (!this.data.isValid()) {
-        return undefined;
+    if (isArcShape(this.firstShape)) {
+        if (this.useMaxAngle) {
+            this.data3P = new RDimAngular3PData(this.data, RVector.invalid, RVector.invalid, RVector.invalid);
+            this.data3P.setDimArcPosition(this.dimArcPosition);
+            this.data3P.setCenter(this.firstShape.getCenter());
+            this.data3P.setExtensionLine1End(this.firstShape.getStartPoint());
+            this.data3P.setExtensionLine2End(this.firstShape.getEndPoint());
+        }
+        else {
+            this.data2L = new RDimAngular2LData(this.data, RVector.invalid, RVector.invalid, RVector.invalid, RVector.invalid);
+            this.data2L.setDimArcPosition(this.dimArcPosition);
+            this.data2L.setExtensionLine1Start(this.firstShape.getCenter());
+            this.data2L.setExtensionLine1End(this.firstShape.getStartPoint());
+            this.data2L.setExtensionLine2Start(this.firstShape.getCenter());
+            this.data2L.setExtensionLine2End(this.firstShape.getEndPoint());
+        }
     }
 
     var doc = this.getDocument();
-    var entity = new RDimAngularEntity(doc, this.data);
+    var entity;
+    if (this.useMaxAngle) {
+        if (isNull(this.data3P) || !this.data3P.isValid()) {
+            return undefined;
+        }
+        entity = new RDimAngular3PEntity(doc, this.data3P);
+    }
+    else {
+        if (isNull(this.data2L) || !this.data2L.isValid()) {
+            return undefined;
+        }
+        entity = new RDimAngular2LEntity(doc, this.data2L);
+    }
+
     if (!isEntity(entity)) {
         return undefined;
     }
 
+    this.initEntity(entity, preview);
+
+    return entity;
+};
+
+/**
+ * Can be overwritten to initialize the added entity.
+ */
+DimAngular.prototype.initEntity = function(entity, preview) {
+};
+
+DimAngular.prototype.getOperation = function(preview) {
+    var entity = this.getEntity(preview);
+    if (isNull(entity)) {
+        return undefined;
+    }
     return new RAddObjectOperation(entity, this.getToolTitle());
 };
 
@@ -285,3 +371,6 @@ DimAngular.prototype.getHighlightedEntities = function() {
     return ret;
 };
 
+DimAngular.prototype.slotUseMaxAngleChanged = function(v) {
+    this.useMaxAngle = v;
+};

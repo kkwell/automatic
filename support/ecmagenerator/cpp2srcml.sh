@@ -10,7 +10,7 @@ else
     exit 0
 fi
 
-maxThreads=16
+maxThreads=1024
 
 src2srcml_output=`src2srcml -h | grep \\\-\\\-output`
 
@@ -48,6 +48,7 @@ do
             echo "processing $cppfile ..."
             #(
                 src2srcml "$f" "$SPATH/$srcmlfile"
+                #src2srcml "$f" -o "$SPATH/$srcmlfile"
                 #if [ `uname` == "Darwin" ]
                 #then
                 #    DYLD_LIBRARY_PATH=$srcmlpath srcml "$f" -o "$SPATH/$srcmlfile"

@@ -75,6 +75,24 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, setOriginalArguments, "setOriginalArguments");
             
+            REcmaHelper::registerFunction(&engine, &ctor, getArgument, "getArgument");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getArguments, "getArguments");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getIntArgument, "getIntArgument");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getIntListArgument, "getIntListArgument");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getFloatArgument, "getFloatArgument");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getColorArgument, "getColorArgument");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getVectorArgument, "getVectorArgument");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getBoxArgument, "getBoxArgument");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, testArgument, "testArgument");
+            
             REcmaHelper::registerFunction(&engine, &ctor, isDeployed, "isDeployed");
             
             REcmaHelper::registerFunction(&engine, &ctor, getApplicationPath, "getApplicationPath");
@@ -137,6 +155,8 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, getSecondaryReferencePointColor, "getSecondaryReferencePointColor");
             
+            REcmaHelper::registerFunction(&engine, &ctor, getTertiaryReferencePointColor, "getTertiaryReferencePointColor");
+            
             REcmaHelper::registerFunction(&engine, &ctor, getHighResolutionGraphicsView, "getHighResolutionGraphicsView");
             
             REcmaHelper::registerFunction(&engine, &ctor, getAutoScaleGrid, "getAutoScaleGrid");
@@ -152,6 +172,8 @@
             REcmaHelper::registerFunction(&engine, &ctor, getColorCorrectionDisableForPrinting, "getColorCorrectionDisableForPrinting");
             
             REcmaHelper::registerFunction(&engine, &ctor, getColorThreshold, "getColorThreshold");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getFadingFactor, "getFadingFactor");
             
             REcmaHelper::registerFunction(&engine, &ctor, getTextHeightThreshold, "getTextHeightThreshold");
             
@@ -257,6 +279,8 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, getStringListValue, "getStringListValue");
             
+            REcmaHelper::registerFunction(&engine, &ctor, getScaleList, "getScaleList");
+            
             REcmaHelper::registerFunction(&engine, &ctor, setValue, "setValue");
             
             REcmaHelper::registerFunction(&engine, &ctor, removeValue, "removeValue");
@@ -283,6 +307,8 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, getAutoScaleLinetypePatterns, "getAutoScaleLinetypePatterns");
             
+            REcmaHelper::registerFunction(&engine, &ctor, getApplyLineweightToPoints, "getApplyLineweightToPoints");
+            
             REcmaHelper::registerFunction(&engine, &ctor, getUseSecondarySelectionColor, "getUseSecondarySelectionColor");
             
             REcmaHelper::registerFunction(&engine, &ctor, getUseSolidLineSelection, "getUseSolidLineSelection");
@@ -306,6 +332,26 @@
             REcmaHelper::registerFunction(&engine, &ctor, getIgnoreBlockReferencePoint, "getIgnoreBlockReferencePoint");
             
             REcmaHelper::registerFunction(&engine, &ctor, getIgnoreAllReferencePoints, "getIgnoreAllReferencePoints");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getReferencePointSize, "getReferencePointSize");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getReferencePointShape, "getReferencePointShape");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getMaxReferencePointEntities, "getMaxReferencePointEntities");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getMaxReferencePointEntitiesDisplay, "getMaxReferencePointEntitiesDisplay");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getPropertyEditorShowOnRequest, "getPropertyEditorShowOnRequest");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getSimpleTextAlignLeft, "getSimpleTextAlignLeft");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getPolarCoordinateSeparator, "getPolarCoordinateSeparator");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getCartesianCoordinateSeparator, "getCartesianCoordinateSeparator");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getRelativeCoordinatePrefix, "getRelativeCoordinatePrefix");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, isDarkMode, "isDarkMode");
             
             REcmaHelper::registerFunction(&engine, &ctor, hasDarkGuiBackground, "hasDarkGuiBackground");
             
@@ -679,7 +725,7 @@
                     context->argument( 0 ).
                     toString();
                 
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QStringList
                     a1;
                     REcmaHelper::fromScriptValue(
@@ -829,7 +875,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QStringList
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -853,6 +899,1181 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSettings::setOriginalArguments", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getArgument", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getArgument";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        RSettings::
+       getArgument(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+     && (
+            context->argument(3).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a3 =
+                    (QString)
+                    
+                    context->argument( 3 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        RSettings::
+       getArgument(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getArgument().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getArgument", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getArguments
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getArguments", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getArguments";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QStringList'
+    QStringList cppResult =
+        RSettings::
+       getArguments(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: QStringList
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getArguments().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getArguments", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getIntArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getIntArgument", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getIntArgument";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+     && (
+            context->argument(3).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+                    // argument isStandardType
+                    int
+                    a3 =
+                    (int)
+                    
+                    context->argument( 3 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        RSettings::
+       getIntArgument(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getIntArgument().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getIntArgument", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getIntListArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getIntListArgument", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getIntListArgument";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < int >'
+    QList < int > cppResult =
+        RSettings::
+       getIntListArgument(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: QList < int >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+     && (
+            context->argument(3).isArray()
+        ) /* type: QList < int > */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+                    // argument isArray or QVariantMap
+                    QList < int >
+                    a3;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(3),
+                        a3
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < int >'
+    QList < int > cppResult =
+        RSettings::
+       getIntListArgument(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: QList < int >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getIntListArgument().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getIntListArgument", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getFloatArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getFloatArgument", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getFloatArgument";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        RSettings::
+       getFloatArgument(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+     && (
+            context->argument(3).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+                    // argument isStandardType
+                    double
+                    a3 =
+                    (double)
+                    
+                    context->argument( 3 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        RSettings::
+       getFloatArgument(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getFloatArgument().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getFloatArgument", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getColorArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getColorArgument", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getColorArgument";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RColor'
+    RColor cppResult =
+        RSettings::
+       getColorArgument(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: RColor
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+     && (
+            context->argument(3).isVariant() || 
+            context->argument(3).isQObject() || 
+            context->argument(3).isNull()
+        ) /* type: RColor */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RColor*
+                    ap3 =
+                    qscriptvalue_cast<
+                    RColor*
+                        >(
+                        context->argument(
+                        3
+                        )
+                    );
+                    if (ap3 == NULL) {
+                           return REcmaHelper::throwError("RSettings: Argument 3 is not of type RColor.",
+                               context);                    
+                    }
+                    RColor 
+                    a3 = 
+                    *ap3;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RColor'
+    RColor cppResult =
+        RSettings::
+       getColorArgument(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: RColor
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getColorArgument().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getColorArgument", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getVectorArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getVectorArgument", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getVectorArgument";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        RSettings::
+       getVectorArgument(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+     && (
+            context->argument(3).isVariant() || 
+            context->argument(3).isQObject() || 
+            context->argument(3).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap3 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        3
+                        )
+                    );
+                    if (ap3 == NULL) {
+                           return REcmaHelper::throwError("RSettings: Argument 3 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a3 = 
+                    *ap3;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        RSettings::
+       getVectorArgument(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getVectorArgument().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getVectorArgument", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getBoxArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getBoxArgument", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getBoxArgument";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RBox'
+    RBox cppResult =
+        RSettings::
+       getBoxArgument(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: RBox
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+     && (
+            context->argument(3).isVariant() || 
+            context->argument(3).isQObject() || 
+            context->argument(3).isNull()
+        ) /* type: RBox */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RBox*
+                    ap3 =
+                    qscriptvalue_cast<
+                    RBox*
+                        >(
+                        context->argument(
+                        3
+                        )
+                    );
+                    if (ap3 == NULL) {
+                           return REcmaHelper::throwError("RSettings: Argument 3 is not of type RBox.",
+                               context);                    
+                    }
+                    RBox 
+                    a3 = 
+                    *ap3;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RBox'
+    RBox cppResult =
+        RSettings::
+       getBoxArgument(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: RBox
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getBoxArgument().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getBoxArgument", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::testArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::testArgument", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::testArgument";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a2 =
+                    (QString)
+                    
+                    context->argument( 2 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RSettings::
+       testArgument(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.testArgument().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::testArgument", context, engine);
             return result;
         }
          QScriptValue
@@ -2109,6 +3330,45 @@
             return result;
         }
          QScriptValue
+        REcmaSettings::getTertiaryReferencePointColor
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getTertiaryReferencePointColor", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getTertiaryReferencePointColor";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RColor'
+    RColor cppResult =
+        RSettings::
+       getTertiaryReferencePointColor();
+        // return type: RColor
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getTertiaryReferencePointColor().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getTertiaryReferencePointColor", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaSettings::getHighResolutionGraphicsView
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -2418,6 +3678,45 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSettings::getColorThreshold", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getFadingFactor
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getFadingFactor", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getFadingFactor";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        RSettings::
+       getFadingFactor();
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getFadingFactor().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getFadingFactor", context, engine);
             return result;
         }
          QScriptValue
@@ -4772,7 +6071,7 @@
                     context->argument( 0 ).
                     toString();
                 
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QStringList
                     a1;
                     REcmaHelper::fromScriptValue(
@@ -4803,6 +6102,56 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSettings::getStringListValue", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getScaleList
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getScaleList", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getScaleList";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: RS::Unit */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    RS::Unit
+                    a0 =
+                    (RS::Unit)
+                    (int)
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QStringList'
+    QStringList cppResult =
+        RSettings::
+       getScaleList(a0);
+        // return type: QStringList
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getScaleList().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getScaleList", context, engine);
             return result;
         }
          QScriptValue
@@ -5435,6 +6784,45 @@
             return result;
         }
          QScriptValue
+        REcmaSettings::getApplyLineweightToPoints
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getApplyLineweightToPoints", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getApplyLineweightToPoints";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RSettings::
+       getApplyLineweightToPoints();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getApplyLineweightToPoints().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getApplyLineweightToPoints", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaSettings::getUseSecondarySelectionColor
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -5900,6 +7288,396 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSettings::getIgnoreAllReferencePoints", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getReferencePointSize
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getReferencePointSize", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getReferencePointSize";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        RSettings::
+       getReferencePointSize();
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getReferencePointSize().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getReferencePointSize", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getReferencePointShape
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getReferencePointShape", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getReferencePointShape";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        RSettings::
+       getReferencePointShape();
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getReferencePointShape().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getReferencePointShape", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getMaxReferencePointEntities
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getMaxReferencePointEntities", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getMaxReferencePointEntities";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        RSettings::
+       getMaxReferencePointEntities();
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getMaxReferencePointEntities().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getMaxReferencePointEntities", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getMaxReferencePointEntitiesDisplay
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getMaxReferencePointEntitiesDisplay", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getMaxReferencePointEntitiesDisplay";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        RSettings::
+       getMaxReferencePointEntitiesDisplay();
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getMaxReferencePointEntitiesDisplay().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getMaxReferencePointEntitiesDisplay", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getPropertyEditorShowOnRequest
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getPropertyEditorShowOnRequest", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getPropertyEditorShowOnRequest";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RSettings::
+       getPropertyEditorShowOnRequest();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getPropertyEditorShowOnRequest().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getPropertyEditorShowOnRequest", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getSimpleTextAlignLeft
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getSimpleTextAlignLeft", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getSimpleTextAlignLeft";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RSettings::
+       getSimpleTextAlignLeft();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getSimpleTextAlignLeft().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getSimpleTextAlignLeft", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getPolarCoordinateSeparator
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getPolarCoordinateSeparator", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getPolarCoordinateSeparator";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        RSettings::
+       getPolarCoordinateSeparator();
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getPolarCoordinateSeparator().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getPolarCoordinateSeparator", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getCartesianCoordinateSeparator
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getCartesianCoordinateSeparator", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getCartesianCoordinateSeparator";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        RSettings::
+       getCartesianCoordinateSeparator();
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getCartesianCoordinateSeparator().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getCartesianCoordinateSeparator", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::getRelativeCoordinatePrefix
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::getRelativeCoordinatePrefix", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::getRelativeCoordinatePrefix";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        RSettings::
+       getRelativeCoordinatePrefix();
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.getRelativeCoordinatePrefix().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::getRelativeCoordinatePrefix", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSettings::isDarkMode
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSettings::isDarkMode", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSettings::isDarkMode";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RSettings::
+       isDarkMode();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSettings.isDarkMode().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSettings::isDarkMode", context, engine);
             return result;
         }
          QScriptValue

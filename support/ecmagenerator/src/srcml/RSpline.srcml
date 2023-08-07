@@ -32,10 +32,11 @@
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RPolyline.h"</cpp:file></cpp:include>
 
+<class_decl>class <name>RLine</name>;</class_decl>
+
 <cpp:ifndef>#<cpp:directive>ifndef</cpp:directive> <name>R_NO_OPENNURBS</name></cpp:ifndef>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"opennurbs/opennurbs.h"</cpp:file></cpp:include>
 <cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
-
 
 <cpp:ifndef>#<cpp:directive>ifndef</cpp:directive> <name>RDEFAULT_MIN1</name></cpp:ifndef>
 <cpp:define>#<cpp:directive>define</cpp:directive> <name>RDEFAULT_MIN1</name> -1</cpp:define>
@@ -56,8 +57,11 @@
 <class>class <macro><name>QCADCORE_EXPORT</name></macro> <name>RSpline</name><super>: <specifier>public</specifier> <name>RShape</name>, <specifier>public</specifier> <name>RExplodable</name></super> <block>{<private type="default">
 </private><public>public:
     <constructor_decl><name>RSpline</name><parameter_list>()</parameter_list>;</constructor_decl>
+    <constructor_decl><name>RSpline</name><parameter_list>(<param><decl><type><name>const</name> <name>RSpline</name>&amp;</type> <name>other</name></decl></param>)</parameter_list>;</constructor_decl>
     <constructor_decl><name>RSpline</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name>&amp;</type> <name>controlPoints</name></decl></param>, <param><decl><type><name>int</name></type> <name>degree</name></decl></param>)</parameter_list>;</constructor_decl>
-    <destructor_decl><specifier>virtual</specifier> <name>~RSpline</name><parameter_list>()</parameter_list>;</destructor_decl>
+    <comment type="line">//virtual ~RSpline();</comment>
+
+    <function_decl><type><name>RSpline</name>&amp;</type> <name>operator =</name><parameter_list>(<param><decl><type><name>const</name> <name>RSpline</name>&amp;</type> <name>other</name></decl></param>)</parameter_list>;</function_decl>
 
     <function><type><name>virtual</name> <name><name>RShape</name>::<name>Type</name></name></type> <name>getShapeType</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><name>Spline</name></expr>;</return>
@@ -103,6 +107,7 @@
     <function_decl><type><name>void</name></type> <name>insertFitPointAt</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>point</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>insertFitPointAt</name><parameter_list>(<param><decl><type><name>double</name></type> <name>t</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>point</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>removeFitPointAt</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>point</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>removeFirstFitPoint</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>removeLastFitPoint</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>setFitPoints</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name>&amp;</type> <name>points</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getFitPoints</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
@@ -115,6 +120,7 @@
     <function_decl><type><name>void</name></type> <name>setKnotVector</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>double</name></argument>&gt;</argument_list></name>&amp;</type> <name>knots</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>appendKnot</name><parameter_list>(<param><decl><type><name>double</name></type> <name>k</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>QList<argument_list>&lt;<argument><name>double</name></argument>&gt;</argument_list></name></type> <name>getWeights</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>setWeights</name><parameter_list>(<param><decl><type><name>QList<argument_list>&lt;<argument><name>double</name></argument>&gt;</argument_list></name>&amp;</type> <name>w</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>void</name></type> <name>setDegree</name><parameter_list>(<param><decl><type><name>int</name></type> <name>d</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>int</name></type> <name>getDegree</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
@@ -164,6 +170,7 @@
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getCenterPoints</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getPointsWithDistanceToEnd</name><parameter_list>(
         <param><decl><type><name>double</name></type> <name>distance</name></decl></param>, <param><decl><type><name>int</name></type> <name>from</name> =<init> <expr><name><name>RS</name>::<name>FromAny</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getPointCloud</name><parameter_list>(<param><decl><type><name>double</name></type> <name>segmentLength</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>RVector</name></type> <name>getVectorTo</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>point</name></decl></param>,
             <param><decl><type><name>bool</name></type> <name>limited</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>double</name></type> <name>strictRange</name> =<init> <expr><name>RMAXDOUBLE</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
@@ -178,6 +185,7 @@
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>flipHorizontal</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>flipVertical</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>reverse</name><parameter_list>()</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>stretch</name><parameter_list>(<param><decl><type><name>const</name> <name>RPolyline</name>&amp;</type> <name>area</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>offset</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></type> <name>getTransformed</name><parameter_list>(<param><decl><type><name>const</name> <name>QTransform</name>&amp;</type> <name>transform</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
@@ -196,7 +204,7 @@
     <function_decl><type><name>QList<argument_list>&lt;<argument><name>RSpline</name></argument>&gt;</argument_list></name></type> <name>splitAtParams</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>double</name></argument>&gt;</argument_list></name>&amp;</type> <name>params</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>RPolyline</name></type> <name>toPolyline</name><parameter_list>(<param><decl><type><name>int</name></type> <name>segments</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>RPolyline</name></type> <name>approximateWithArcs</name><parameter_list>(<param><decl><type><name>double</name></type> <name>tolerance</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>RPolyline</name></type> <name>approximateWithArcs</name><parameter_list>(<param><decl><type><name>double</name></type> <name>tolerance</name></decl></param>, <param><decl><type><name>double</name></type> <name>radiusLimit</name>=<init><expr><name>RDEFAULT_MIN1</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getExploded</name><parameter_list>(<param><decl><type><name>int</name></type> <name>segments</name> =<init> <expr><name>RDEFAULT_MIN1</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getExplodedBezier</name><parameter_list>(<param><decl><type><name>int</name></type> <name>segments</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
@@ -204,7 +212,7 @@
 
     <function_decl><type><name>QList<argument_list>&lt;<argument><name>RSpline</name></argument>&gt;</argument_list></name></type> <name>getBezierSegments</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
-    <function_decl><type><name>bool</name></type> <name>isValid</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>isValid</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>double</name></type> <name>getTDelta</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>double</name></type> <name>getTMin</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>double</name></type> <name>getTMax</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
@@ -226,7 +234,7 @@
         <return>return <expr><name>dirty</name></expr>;</return>
     }</block></function>
 
-    <function_decl><type><name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getSelfIntersectionPoints</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getSelfIntersectionPoints</name><parameter_list>(<param><decl><type><name>double</name></type> <name>tolerance</name>=<init><expr><name><name>RS</name>::<name>PointTolerance</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function><type><name>static</name> <name>bool</name></type> <name>hasProxy</name><parameter_list>()</parameter_list> <block>{
         <return>return <expr><name>splineProxy</name>!=<name>NULL</name></expr>;</return>
@@ -249,12 +257,24 @@
         <return>return <expr><name>splineProxy</name></expr>;</return>
     }</block></function>
 
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+    <comment type="block">/**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */</comment>
+    <function><type><name>RSpline</name></type> <name>copy</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr>*<name>this</name></expr>;</return>
+    }</block></function>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+
 </public><protected>protected:
     <function_decl><type><name>void</name></type> <name>appendToExploded</name><parameter_list>(<param><decl><type><name>const</name> <name>RLine</name>&amp;</type> <name>line</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <comment type="line">//void appendToExploded(QList&lt;QSharedPointer&lt;RShape&gt; &gt;&amp; list) const;</comment>
     <function_decl><type><name>void</name></type> <name>invalidate</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>void</name></type> <name>updateInternal</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>void</name></type> <name>updateBoundingBox</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>print</name><parameter_list>(<param><decl><type><name>QDebug</name></type> <name>dbg</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
 </protected><public>public:
     <comment type="line">// members are mutable, so the spline can update itself from fit points</comment>
@@ -272,6 +292,7 @@
 
     <comment type="block">/**
      * \getter{getWeights}
+     * \setter{setWeights}
      */</comment>
     <decl_stmt><decl><type><name>mutable</name> <name>QList<argument_list>&lt;<argument><name>double</name></argument>&gt;</argument_list></name></type> <name>weights</name></decl>;</decl_stmt>
 
@@ -305,15 +326,14 @@
     <decl_stmt><decl><type><name>mutable</name> <name>bool</name></type> <name>dirty</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>mutable</name> <name>bool</name></type> <name>updateInProgress</name></decl>;</decl_stmt>
 
-</public><protected>protected:
-    <function_decl><type><name>virtual</name> <name>void</name></type> <name>print</name><parameter_list>(<param><decl><type><name>QDebug</name></type> <name>dbg</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
-
-</protected><private>private:
+</public><private>private:
 <cpp:ifndef>#<cpp:directive>ifndef</cpp:directive> <name>R_NO_OPENNURBS</name></cpp:ifndef>
     <decl_stmt><decl><type><name>mutable</name> <name>ON_NurbsCurve</name></type> <name>curve</name></decl>;</decl_stmt>
 <cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
     <decl_stmt><decl><type><name>mutable</name> <name>RBox</name></type> <name>boundingBox</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>mutable</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>exploded</name></decl>;</decl_stmt>
+    <comment type="line">// cached length:</comment>
+    <decl_stmt><decl><type><name>mutable</name> <name>double</name></type> <name>length</name></decl>;</decl_stmt>
 
     <decl_stmt><decl><type><name>static</name> <name>RSplineProxy</name>*</type> <name>splineProxy</name></decl>;</decl_stmt>
 </private>}</block>;</class>

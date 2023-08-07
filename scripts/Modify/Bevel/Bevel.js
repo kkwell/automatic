@@ -83,8 +83,8 @@ Bevel.bevel = function(op, entity1, clickPos1, entity2, clickPos2, trim, distanc
 
     var shape1P = entity1.getClosestShape(clickPos1);
     var shape2P = entity2.getClosestShape(clickPos2);
-    var shape1 = shape1P.data();
-    var shape2 = shape2P.data();
+    var shape1 = getPtr(shape1P);
+    var shape2 = getPtr(shape2P);
 
     var newShapes = Bevel.bevelShapes(shape1, clickPos1, shape2, clickPos2, trim, samePolyline, distance1, distance2);
 
@@ -110,7 +110,9 @@ Bevel.bevel = function(op, entity1, clickPos1, entity2, clickPos2, trim, distanc
         }
     }
 
-    op.addObject(new RLineEntity(entity1.getDocument(), new RLineData(newShapes[1])));
+    if (newShapes[1].getLength()>RS.PointTolerance) {
+        op.addObject(new RLineEntity(entity1.getDocument(), new RLineData(newShapes[1])));
+    }
 
     return true;
 };
@@ -137,7 +139,7 @@ Bevel.bevelShapes = function(shape1, clickPos1, shape2, clickPos2, trim, samePol
         if (i1===-1) {
             return [];
         }
-        simpleShape1 = shape1.getSegmentAt(i1).data();
+        simpleShape1 = getPtr(shape1.getSegmentAt(i1));
     }
 
     if (isPolylineShape(shape2)) {
@@ -145,7 +147,7 @@ Bevel.bevelShapes = function(shape1, clickPos1, shape2, clickPos2, trim, samePol
         if (i2===-1) {
             return [];
         }
-        simpleShape2 = shape2.getSegmentAt(i2).data();
+        simpleShape2 = getPtr(shape2.getSegmentAt(i2));
     }
 
     // get intersection point(s) between two shapes:

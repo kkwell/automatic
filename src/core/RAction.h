@@ -92,7 +92,7 @@ public:
     void setOverride();
     bool isOverride();
 
-    void setNoState();
+    void setNoState(bool on = true);
     bool hasNoState();
 
     void setUniqueGroup(const QString& ug);
@@ -106,11 +106,11 @@ public:
     void setGuiAction(RGuiAction* guiAction);
 
     QList<RGraphicsScene*> getGraphicsScenes();
-    RDocument* getDocument();
-    RDocumentInterface* getDocumentInterface();
+    virtual RDocument* getDocument();
+    virtual RDocumentInterface* getDocumentInterface();
     RStorage* getStorage();
 
-    void setDocumentInterface(RDocumentInterface* di) {
+    virtual void setDocumentInterface(RDocumentInterface* di) {
         documentInterface = di;
     }
 
@@ -251,7 +251,7 @@ public:
     virtual void updatePreview() = 0;
     virtual void applyOperation() = 0;
 
-    RVector snap(RMouseEvent& event);
+    virtual RVector snap(RMouseEvent& event, bool preview = false);
 
 protected:
     bool terminated;

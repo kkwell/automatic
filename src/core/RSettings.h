@@ -27,18 +27,31 @@
 #include <QFont>
 
 #include "RColor.h"
+#include "RBox.h"
 
 // workaround for src2srcml bug:
 #ifndef RDEFAULT_RCOLOR
 #define RDEFAULT_RCOLOR RColor()
 #endif
 
+#ifndef RDEFAULT_RBOX
+#define RDEFAULT_RBOX RBox()
+#endif
+
 #ifndef RDEFAULT_QVARIANT
 #define RDEFAULT_QVARIANT QVariant()
 #endif
 
+#ifndef RDEFAULT_QSTRING
+#define RDEFAULT_QSTRING QString()
+#endif
+
 #ifndef RDEFAULT_QSTRINGLIST
 #define RDEFAULT_QSTRINGLIST QStringList()
+#endif
+
+#ifndef RDEFAULT_QLISTINT
+#define RDEFAULT_QLISTINT QList<int>()
 #endif
 
 /**
@@ -60,6 +73,16 @@ public:
 
     static QStringList getOriginalArguments();
     static void setOriginalArguments(const QStringList& a);
+
+    static QString getArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, const QString& def = RDEFAULT_QSTRING);
+    static QStringList getArguments(const QStringList& args, const QString& shortFlag, const QString& longFlag);
+    static int getIntArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, int def);
+    static QList<int> getIntListArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, QList<int> def = RDEFAULT_QLISTINT);
+    static double getFloatArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, double def = RNANDOUBLE);
+    static RColor getColorArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, const RColor& def = RDEFAULT_RCOLOR);
+    static RVector getVectorArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, const RVector& def = RDEFAULT_RVECTOR);
+    static RBox getBoxArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, const RBox& def = RDEFAULT_RBOX);
+    static bool testArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag);
 
     static bool isDeployed();
     static QString getApplicationPath();
@@ -102,6 +125,7 @@ public:
     static RColor getStartReferencePointColor();
     static RColor getEndReferencePointColor();
     static RColor getSecondaryReferencePointColor();
+    static RColor getTertiaryReferencePointColor();
 
     static bool getHighResolutionGraphicsView();
     static bool getAutoScaleGrid();
@@ -111,6 +135,7 @@ public:
     static bool getColorCorrection();
     static bool getColorCorrectionDisableForPrinting();
     static int getColorThreshold();
+    static double getFadingFactor();
     static int getTextHeightThreshold();
     static double getArcAngleLengthThreshold();
     static double getMinArcAngleStep();
@@ -211,6 +236,8 @@ public:
     static QString getStringValue(const QString& key, const QString& defaultValue);
     static QStringList getStringListValue(const QString& key, const QStringList& defaultValue);
 
+    static QStringList getScaleList(const RS::Unit unit);
+
     /**
      * \nonscriptable
      */
@@ -236,6 +263,7 @@ public:
     static bool isNextVersionEnabled();
 
     static bool getAutoScaleLinetypePatterns();
+    static bool getApplyLineweightToPoints();
     static bool getUseSecondarySelectionColor();
     static bool getUseSolidLineSelection();
 
@@ -250,7 +278,17 @@ public:
     static bool getImportRecomputedDimBlocks();
     static bool getIgnoreBlockReferencePoint();
     static bool getIgnoreAllReferencePoints();
+    static int getReferencePointSize();
+    static int getReferencePointShape();
+    static int getMaxReferencePointEntities();
+    static int getMaxReferencePointEntitiesDisplay();
+    static bool getPropertyEditorShowOnRequest();
+    static bool getSimpleTextAlignLeft();
+    static QString getPolarCoordinateSeparator();
+    static QString getCartesianCoordinateSeparator();
+    static QString getRelativeCoordinatePrefix();
 
+    static bool isDarkMode();
     static bool hasDarkGuiBackground();
     static bool hasCustomStyleSheet();
 
@@ -279,6 +317,8 @@ private:
     static RColor* startReferencePointColor;
     static RColor* endReferencePointColor;
     static RColor* secondaryReferencePointColor;
+    static RColor* tertiaryReferencePointColor;
+    static int darkMode;
     static int darkGuiBackground;
     static int snapRange;
     static int pickRange;
@@ -291,12 +331,14 @@ private:
     static int previewEntities;
     static int limitZoomAndScroll;
     static int autoScaleLinetypePattern;
+    static int applyLineweightToPoints;
     static int useSolidLineSelection;
     static int useSecondarySelectionColor;
     static int mouseThreshold;
     static int positionByMousePress;
     static int allowMouseMoveInterruptions;
     static double arcAngleLengthThreshold;
+    static double fadingFactor;
     static double minArcAngleStep;
     static int dashThreshold;
     static int textRenderedAsText;
@@ -306,6 +348,16 @@ private:
     static int importRecomputedDimBlocks;
     static int ignoreBlockReferencePoint;
     static int ignoreAllReferencePoints;
+    static int referencePointSize;
+    static int referencePointShape;
+    static int maxReferencePointEntities;
+    static int maxReferencePointEntitiesDisplay;
+    static int propertyEditorShowOnRequest;
+    static int simpleTextAlignLeft;
+    static QString polarCoordinateSeparator;
+    static QString cartesianCoordinateSeparator;
+    static QString relativeCoordinatePrefix;
+
     static QStringList recentFiles;
     static QLocale* numberLocale;
 

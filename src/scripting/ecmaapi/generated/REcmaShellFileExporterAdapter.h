@@ -83,6 +83,12 @@
         
     
     
+      void exportRay(
+                const RRay & arg1
+            );
+        
+    
+    
       void exportXLine(
                 const RXLine & arg1
             );
@@ -162,6 +168,10 @@
             );
         
     
+      RColor getColor(
+                const RColor & unresolvedColor
+            );
+        
       RColor getColor(
                 bool resolve
             );
@@ -253,6 +263,11 @@
             );
         
     
+      bool isPatternContinuous(
+                const RLinetypePattern & p
+            );
+        
+    
       void startExport(
                 
             );
@@ -289,6 +304,11 @@
             );
         
     
+      void exportLayerStates(
+                
+            );
+        
+    
       void exportBlocks(
                 
             );
@@ -310,6 +330,11 @@
         
       void exportLayer(
                 RLayer::Id layerId
+            );
+        
+    
+      void exportLayerState(
+                RLayerState & arg1
             );
         
     
@@ -339,6 +364,7 @@
       void exportEntities(
                 bool allBlocks
         = true, bool undone
+        = false, bool invisible
         = false
             );
         
@@ -356,6 +382,7 @@
                 REntity & entity, bool preview
         = false, bool allBlocks
         = true, bool forceSelected
+        = false, bool invisible
         = false
             );
         
@@ -419,11 +446,6 @@
             );
         
     
-      void exportRay(
-                const RRay & ray
-            );
-        
-    
       void exportCircle(
                 const RCircle & circle
             );
@@ -460,7 +482,8 @@
         
     
       void exportPainterPaths(
-                const QList < RPainterPath > & paths
+                const QList < RPainterPath > & paths, double z
+        = 0.0
             );
         
       void exportPainterPaths(
@@ -488,6 +511,16 @@
       void exportClipRectangle(
                 const RBox & clipRectangle, bool forceSelected
         = false
+            );
+        
+    
+      void exportTransform(
+                const RTransform & t
+            );
+        
+    
+      void exportEndTransform(
+                
             );
         
     
@@ -586,7 +619,22 @@
             );
         
     
+      bool getExportInvisible(
+                
+            );
+        
+    
+      void setExportInvisible(
+                bool on
+            );
+        
+    
       double getPixelSizeHint(
+                
+            );
+        
+    
+      double getCurrentPixelSizeHint(
                 
             );
         
@@ -612,6 +660,11 @@
         
     
       void setPixelWidth(
+                bool on
+            );
+        
+    
+      void setEnablePatterns(
                 bool on
             );
         

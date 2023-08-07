@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>466</width>
+    <width>542</width>
     <height>323</height>
    </rect>
   </property>
@@ -29,6 +29,9 @@
             <property name="text">
              <string>&amp;Delete original</string>
             </property>
+            <property name="shortcut">
+             <string notr="true">Ctrl+D</string>
+            </property>
             <property name="checked">
              <bool>true</bool>
             </property>
@@ -39,12 +42,18 @@
             <property name="text">
              <string>&amp;Keep original</string>
             </property>
+            <property name="shortcut">
+             <string notr="true">Ctrl+K</string>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="MultipleCopies">
             <property name="text">
              <string>&amp;Multiple copies</string>
+            </property>
+            <property name="shortcut">
+             <string notr="true">Ctrl+M</string>
             </property>
            </widget>
           </item>
@@ -138,7 +147,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Angle (&amp;a):</string>
+            <string>Angle &amp;a:</string>
            </property>
            <property name="buddy">
             <cstring>PrimaryAngle</cstring>
@@ -158,7 +167,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="label_3">
            <property name="text">
-            <string>Angle (&amp;b):</string>
+            <string>Angle &amp;b:</string>
            </property>
            <property name="buddy">
             <cstring>SecondaryAngle</cstring>

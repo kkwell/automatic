@@ -1,5 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-    ts \
-    ExMathSpiral
+    dir \
+    ExMandelbrot \
+    ExMathSpiral \
+    FlexPainter

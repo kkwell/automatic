@@ -128,7 +128,7 @@ double RUnit::getFactorToM(RS::Unit unit) {
         return 149600000000000.0 / 1000;
         break;
     case RS::Lightyear:
-        return 9460731798000000000.0 / 1000;
+        return 9460730472580800000.0 / 1000;
         break;
     case RS::Parsec:
         return 30857000000000000000.0 / 1000;
@@ -429,7 +429,11 @@ QString RUnit::formatScientific(double length, RS::Unit unit,
 
     char format[128];
     sprintf(format, "%%.%dE%%s", prec);
+#if QT_VERSION >= 0x060000
+    ret = QString::asprintf(format, length, (const char*)unitString.toLatin1());
+#else
     ret.sprintf(format, length, (const char*)unitString.toLatin1());
+#endif
 
     return ret;
 }
@@ -455,7 +459,7 @@ QString RUnit::formatDecimal(double length, RS::Unit unit,
     ret = doubleToString(length, prec,
             showLeadingZeroes, showTrailingZeroes, decimalSeparator);
 
-    if(showUnit) {
+    if (showUnit) {
         ret+=unitToSymbol(unit);
     }
     
@@ -510,9 +514,11 @@ QString RUnit::formatEngineering(double length, RS::Unit unit,
     }
 
     if (feet!=0) {
-        ret.sprintf("%d'-%s\"", feet, (const char*)sInches.toLatin1());
+        QTextStream(&ret) << feet << "'-" << sInches << "\"";
+        //ret.sprintf("%d'-%s\"", feet, (const char*)sInches.toLatin1());
     } else {
-        ret.sprintf("%s\"", (const char*)sInches.toLatin1());
+        QTextStream(&ret) << sInches << "\"";
+        //ret.sprintf("%s\"", (const char*)sInches.toLatin1());
     }
 
     if (sign) {
@@ -571,16 +577,22 @@ QString RUnit::formatArchitectural(double length, RS::Unit unit,
     // suppress 0 feet:
     if (feet==0) {
         if (neg) {
-            ret.sprintf("-%s\"", (const char*)sInches.toLatin1());
+            QTextStream(&ret) << "-" << sInches << "\"";
+            //ret.sprintf("-%s\"", (const char*)sInches.toLatin1());
+            //qDebug() << "neg ret no feet:" << ret;
         } else {
-            ret.sprintf("%s\"", (const char*)sInches.toLatin1());
+            QTextStream(&ret) << sInches << "\"";
+            //ret.sprintf("%s\"", (const char*)sInches.toLatin1());
         }
     }
     else {
         if (neg) {
-            ret.sprintf("-%d'-%s\"", feet, (const char*)sInches.toLatin1());
+            QTextStream(&ret) << "-" << feet << "'-" << sInches << "\"";
+            //ret.sprintf("-%d'-%s\"", feet, (const char*)sInches.toLatin1());
+            //qDebug() << "neg ret:" << ret;
         } else {
-            ret.sprintf("%d'-%s\"", feet, (const char*)sInches.toLatin1());
+            QTextStream(&ret) << feet << "'-" << sInches << "\"";
+            //ret.asprintf("%d'-%s\"", feet, (const char*)sInches.toLatin1());
         }
     }
 
@@ -618,7 +630,6 @@ QString RUnit::formatFractional(double length, RS::Unit /*unit*/,
     denominator = (int)RMath::pow(2, prec);
     nominator = RMath::mround((length-num)*denominator);
 
-
     // fraction rounds up to 1:
     if (nominator==denominator) {
         nominator=0;
@@ -640,14 +651,34 @@ QString RUnit::formatFractional(double length, RS::Unit /*unit*/,
     }
 
     if (onlyPreciseResult) {
-        double res = (double)num + (double)nominator / (double)denominator;
-        if (!RMath::fuzzyCompare(res, length)) {
+        double res = (double)num;
+        if (denominator!=0) {
+            res += (double)nominator / (double)denominator;
+        }
+        if (!RMath::fuzzyCompare(res, length, 0.001)) {
             return "";
         }
     }
 
     QString ret;
 
+#if QT_VERSION >= 0x060000
+    if (num!=0 && nominator!=0 ) {
+        ret = QString::asprintf("%s%d %d/%d",
+                    (const char*)neg.toLatin1(), num,
+                    nominator, denominator);
+    } else if(nominator!=0) {
+        ret = QString::asprintf("%s%d/%d",
+                    (const char*)neg.toLatin1(),
+                    nominator, denominator);
+    } else if(num!=0) {
+        ret = QString::asprintf("%s%d",
+                    (const char*)neg.toLatin1(),
+                    num);
+    } else {
+        ret = QString::asprintf("0");
+    }
+#else
     if (num!=0 && nominator!=0 ) {
         ret.sprintf("%s%d %d/%d",
                     (const char*)neg.toLatin1(), num,
@@ -663,6 +694,7 @@ QString RUnit::formatFractional(double length, RS::Unit /*unit*/,
     } else {
         ret.sprintf("0");
     }
+#endif
 
     return ret;
 }
@@ -795,7 +827,11 @@ QString RUnit::doubleToString(double value, double prec,
     dotPos = exaStr.indexOf('.');
 
     if (dotPos==-1) {
+#if QT_VERSION >= 0x060000
+        ret = QString::asprintf("%d", RMath::mround(num*prec));
+#else
         ret.sprintf("%d", RMath::mround(num*prec));
+#endif
     } else {
         int digits = exaStr.length() - dotPos - 1;
         // num*prec to allow rounding to multiples of 0.2 or 0.5, etc.
@@ -834,7 +870,11 @@ QString RUnit::doubleToString(double value, int prec,
         fuzz*=-1;
     }
 
+#if QT_VERSION >= 0x060000
+    ret = QString::asprintf(formatString.toLatin1(), value + fuzz);
+#else
     ret.sprintf(formatString.toLatin1(), value + fuzz);
+#endif
     //ret = "%1".arg(value+fuzz, 0, 'f', prec);
 
     if (!showTrailingZeroes) {

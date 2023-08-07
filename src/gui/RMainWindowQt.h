@@ -23,6 +23,7 @@
 #include "gui_global.h"
 
 #include <QDockWidget>
+#include <QElapsedTimer>
 #include <QMainWindow>
 #include <QKeyEvent>
 #include <QToolBar>
@@ -45,6 +46,7 @@ class RLayerListener;
 class RMdiArea;
 class RMdiChildQt;
 class RNewDocumentListener;
+class RPaletteListener;
 class RPenListener;
 class RPreferencesListener;
 class RPropertyListener;
@@ -88,6 +90,10 @@ public:
     virtual void postTransactionEvent(
         RTransaction& t,
         bool onlyChanges=false,
+        RS::EntityType entityTypeFilter = RS::EntityAll
+    );
+    virtual void postPropertyEvent(RPropertyTypeId propertyTypeId,
+        const QVariant& value,
         RS::EntityType entityTypeFilter = RS::EntityAll
     );
     virtual void postCloseEvent();
@@ -138,17 +144,17 @@ public slots:
 
 signals:
     /**
-     * Emmitted when the command prompt is requested to change.
+     * Emitted when the command prompt is requested to change.
      */
     void commandPrompt(const QString& text);
 
     /**
-     * Emmitted when the left mouse button tip is requested to change.
+     * Emitted when the left mouse button tip is requested to change.
      */
     void leftMouseTip(const QString& message);
 
     /**
-     * Emmitted when the right mouse button tip is requested to change.
+     * Emitted when the right mouse button tip is requested to change.
      */
     void rightMouseTip(const QString& message);
 
@@ -184,7 +190,7 @@ protected:
 
     virtual bool event(QEvent* e);
 
-protected slots:
+public slots:
     void updateGuiActions(QMdiSubWindow* mdiChild = NULL);
     void initGuiActions();
     void updateScenes(QMdiSubWindow* mdiChild);
@@ -197,7 +203,7 @@ protected:
     int disableCounter;
 
     QString keyLog;
-    QTime keyTimeOut;
+    QElapsedTimer keyTimeOut;
 
 //private:
 //    bool objectWasDestroyed;

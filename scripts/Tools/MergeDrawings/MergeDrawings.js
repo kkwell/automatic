@@ -19,11 +19,10 @@
 
 /**
  * Command line tool.
- * Marges multiple drawing files (DWG, DXF) into one.
+ * Merges multiple drawing files (DWG, DXF) into one.
  */
 
 include("scripts/Tools/arguments.js");
-include("scripts/ImportExport/SvgImporter/SvgImporterInit.js");
 
 function printHelp() {
     print("Usage: " + args[1] + " [OPTIONS]... <XML config file>");
@@ -71,6 +70,7 @@ function main() {
         return;
     }
 
+    include("scripts/ImportExport/SvgImporter/SvgImporterInit.js");
     RFileImporterRegistry.registerFileImporter(new SvgImporterFactory());
 
     var fi = new QFileInfo(xmlFile);
@@ -113,7 +113,7 @@ function main() {
     //file.close();
 
     // target document:
-    var docDest = new RDocument(new RMemoryStorage(), new RSpatialIndexNavel());
+    var docDest = new RDocument(new RMemoryStorage(), new RSpatialIndexSimple());
     docDest.setUnit(handler.outputUnit);
     var diDest = new RDocumentInterface(docDest);
 
@@ -124,7 +124,7 @@ function main() {
             var insert = item.inserts[k];
 
             qDebug("insert: ", item.src, insert.x);
-            var doc = new RDocument(new RMemoryStorage(), new RSpatialIndexNavel());
+            var doc = new RDocument(new RMemoryStorage(), new RSpatialIndexSimple());
             var di = new RDocumentInterface(doc);
 
             var src;
@@ -154,7 +154,7 @@ function main() {
             op.setBlockName(new QFileInfo(src).completeBaseName());
             diDest.applyOperation(op);
 
-            di.destroy();
+            destr(di);
         }
     }
 
@@ -164,7 +164,7 @@ function main() {
     print("  from: " + xmlFile);
     print("  to  : " + outputFile);
 
-    diDest.destroy();
+    destr(diDest);
 }
 
 

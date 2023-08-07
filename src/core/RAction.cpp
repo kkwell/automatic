@@ -105,8 +105,8 @@ bool RAction::isTerminated() {
     return terminated;
 }
 
-void RAction::setNoState() {
-    noState = true;
+void RAction::setNoState(bool on) {
+    noState = on;
 }
 
 bool RAction::hasNoState() {
@@ -220,10 +220,10 @@ void RAction::setClickMode(RAction::ClickMode m) {
  * Uses the currently active snap function to snap to the closest
  * object or grid point.
  */
-RVector RAction::snap(RMouseEvent& event) {
+RVector RAction::snap(RMouseEvent& event, bool preview) {
     RDocumentInterface* documentInterface = getDocumentInterface();
     if (documentInterface!=NULL) {
-        return documentInterface->snap(event);
+        return documentInterface->snap(event, preview);
     }
     else {
         return RVector();

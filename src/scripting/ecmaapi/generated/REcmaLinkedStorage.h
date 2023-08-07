@@ -55,7 +55,13 @@
         clear
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        clearLinked
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         queryAllObjects
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        querySelectedLayers
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         queryAllVisibleEntities
@@ -68,6 +74,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         queryAllLayers
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        queryAllLayerStates
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         queryAllBlocks
@@ -94,6 +103,9 @@
         queryLayerEntities
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        querySelectedLayerEntities
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         hasBlockEntities
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -115,13 +127,25 @@
         queryAllBlockReferences
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        queryAllViewports
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         queryDocumentVariablesDirect
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         queryDocumentVariables
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        queryDimStyle
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        queryDimStyleDirect
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         queryObjectDirect
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        queryObjectCC
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         queryObject
@@ -140,6 +164,12 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         queryLayer
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        queryLayerStateDirect
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        queryLayerState
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         queryLayoutDirect
@@ -190,10 +220,19 @@
         getBlockName
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getBlockNameFromHandle
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getBlockNameFromLayout
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getBlockNames
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getBlockId
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getBlockIdAuto
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getViewName

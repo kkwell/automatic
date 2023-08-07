@@ -20,15 +20,16 @@
 
 #include <QDomNode>
 #include <QFile>
-#include <QRegExp>
 #include <QScriptEngine>
 #include <QScriptValueIterator>
 #include <QStringList>
+#include <QTextCharFormat>
 #include <QTextStream>
 #include <QFontDatabase>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QPrinter>
+#include <QPrinterInfo>
 #include <QPrintDialog>
 #include <QXmlResultItems>
 #include <QXmlStreamWriter>
@@ -67,6 +68,7 @@
 #include "REcmaCircle.h"
 #include "REcmaCircleData.h"
 #include "REcmaCircleEntity.h"
+#include "REcmaClickReferencePointOperation.h"
 #include "REcmaClipboardOperation.h"
 #include "REcmaCloseCurrentEvent.h"
 #include "REcmaColor.h"
@@ -86,6 +88,12 @@
 #include "REcmaDimAlignedEntity.h"
 #include "REcmaDimAngularData.h"
 #include "REcmaDimAngularEntity.h"
+#include "REcmaDimAngular2LData.h"
+#include "REcmaDimAngular2LEntity.h"
+#include "REcmaDimAngular3PData.h"
+#include "REcmaDimAngular3PEntity.h"
+#include "REcmaDimArcLengthData.h"
+#include "REcmaDimArcLengthEntity.h"
 #include "REcmaDimDiametricData.h"
 #include "REcmaDimDiametricEntity.h"
 #include "REcmaDimLinearData.h"
@@ -98,6 +106,7 @@
 #include "REcmaDimRotatedEntity.h"
 #include "REcmaDimensionData.h"
 #include "REcmaDimensionEntity.h"
+#include "REcmaDimStyle.h"
 #include "REcmaDocument.h"
 #include "REcmaDocumentInterface.h"
 #include "REcmaDocumentVariables.h"
@@ -135,7 +144,7 @@
 #include "REcmaFocusListenerAdapter.h"
 #include "REcmaFontChooserWidget.h"
 #include "REcmaFontDatabase.h"
-#include "REcmaFontList.h"
+#include "REcmaFont.h"
 #include "REcmaFontList.h"
 #include "REcmaGraphicsScene.h"
 #include "REcmaGraphicsSceneQt.h"
@@ -160,6 +169,7 @@
 #include "REcmaLayer.h"
 #include "REcmaLayerListener.h"
 #include "REcmaLayerListenerAdapter.h"
+#include "REcmaLayerState.h"
 #include "REcmaLayout.h"
 #include "REcmaLeaderData.h"
 #include "REcmaLeaderEntity.h"
@@ -178,6 +188,7 @@
 #include "REcmaMainWindowQt.h"
 #include "REcmaMath.h"
 #include "REcmaMatrix.h"
+#include "REcmaMathComboBox.h"
 #include "REcmaMathLineEdit.h"
 #include "REcmaMdiArea.h"
 #include "REcmaMdiChildQt.h"
@@ -193,13 +204,17 @@
 #include "REcmaNavigationAction.h"
 #include "REcmaObject.h"
 #include "REcmaOperation.h"
+#include "REcmaOperationUtils.h"
 #include "REcmaOrthoGrid.h"
 #include "REcmaPainterPath.h"
 #include "REcmaPainterPathDevice.h"
 #include "REcmaPasteOperation.h"
 #include "REcmaPattern.h"
+#include "REcmaPatternLine.h"
 #include "REcmaPatternListMetric.h"
 #include "REcmaPatternListImperial.h"
+#include "REcmaPaletteListener.h"
+#include "REcmaPaletteListenerAdapter.h"
 #include "REcmaPenListener.h"
 #include "REcmaPenListenerAdapter.h"
 #include "REcmaPluginLoader.h"
@@ -218,6 +233,7 @@
 #include "REcmaPropertyEditor.h"
 #include "REcmaPropertyEvent.h"
 #include "REcmaPropertyListener.h"
+#include "REcmaPropertyListenerAdapter.h"
 #include "REcmaPropertyTypeId.h"
 #include "REcmaRay.h"
 #include "REcmaRayData.h"
@@ -250,11 +266,15 @@
 #include "REcmaSharedPointerCircleEntity.h"
 #include "REcmaSharedPointerDimAlignedEntity.h"
 #include "REcmaSharedPointerDimAngularEntity.h"
+#include "REcmaSharedPointerDimAngular2LEntity.h"
+#include "REcmaSharedPointerDimAngular3PEntity.h"
+#include "REcmaSharedPointerDimArcLengthEntity.h"
 #include "REcmaSharedPointerDimDiametricEntity.h"
 #include "REcmaSharedPointerDimLinearEntity.h"
 #include "REcmaSharedPointerDimOrdinateEntity.h"
 #include "REcmaSharedPointerDimRadialEntity.h"
 #include "REcmaSharedPointerDimRotatedEntity.h"
+#include "REcmaSharedPointerDimStyle.h"
 #include "REcmaSharedPointerDimensionEntity.h"
 #include "REcmaSharedPointerDocumentVariables.h"
 #include "REcmaSharedPointerEllipse.h"
@@ -264,6 +284,7 @@
 #include "REcmaSharedPointerHatchEntity.h"
 #include "REcmaSharedPointerImageEntity.h"
 #include "REcmaSharedPointerLayer.h"
+#include "REcmaSharedPointerLayerState.h"
 #include "REcmaSharedPointerLayout.h"
 #include "REcmaSharedPointerLeaderEntity.h"
 #include "REcmaSharedPointerLine.h"
@@ -285,6 +306,7 @@
 #include "REcmaSharedPointerTextData.h"
 #include "REcmaSharedPointerTextEntity.h"
 #include "REcmaSharedPointerTextLabel.h"
+#include "REcmaSharedPointerToleranceEntity.h"
 #include "REcmaSharedPointerTraceEntity.h"
 #include "REcmaSharedPointerTriangle.h"
 #include "REcmaSharedPointerUcs.h"
@@ -331,10 +353,15 @@
 #include "REcmaTextLayout.h"
 #include "REcmaTextRenderer.h"
 #include "REcmaThread.h"
+#include "REcmaToleranceData.h"
+#include "REcmaToleranceEntity.h"
+#include "REcmaToolButton.h"
 #include "REcmaToolMatrixItemDelegate.h"
 #include "REcmaTraceData.h"
 #include "REcmaTraceEntity.h"
 #include "REcmaTransformation.h"
+#include "REcmaTransform.h"
+#include "REcmaTransformOp.h"
 #include "REcmaTranslation.h"
 #include "REcmaTransaction.h"
 #include "REcmaTransactionListener.h"
@@ -356,7 +383,8 @@
 #include "REcmaXLine.h"
 #include "REcmaXLineData.h"
 #include "REcmaXLineEntity.h"
-#include "REcmaZip.h"
+#include "REcmaCadToolBar.h"
+#include "REcmaCadToolBarPanel.h"
 
 //#if QT_VERSION < 0x050600
 //#  if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
@@ -439,6 +467,10 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     globalObject.setProperty("qApp", engine->newQObject(dynamic_cast<RSingleApplication*>(qApp)));
     //globalObject.setProperty("getShapeIntersections", engine->newFunction(ecmaGetShapeIntersections));
 
+    globalObject.setProperty("getAvailablePrinterNames", engine->newFunction(ecmaGetAvailablePrinterNames));
+    globalObject.setProperty("getDefaultPrinterName", engine->newFunction(ecmaGetDefaultPrinterName));
+    globalObject.setProperty("createPrinter", engine->newFunction(ecmaCreatePrinter));
+
     // fix Qt wrapper APIs
     QScriptValue classQObject = globalObject.property("QObject");
     classQObject.property("prototype").setProperty("findChild", engine->newFunction(ecmaQObjectFindChild));
@@ -463,6 +495,10 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     classQDomNode.property("prototype").setProperty("removeChild",
             engine->newFunction(ecmaQDomNodeRemoveChild));
 
+    QScriptValue classQTextCharFormat = globalObject.property("QTextCharFormat");
+    classQTextCharFormat.property("prototype").setProperty("setFontFamilies",
+            engine->newFunction(ecmaQTextCharFormatSetFontFamilies));
+
     QScriptValue classQFontMetrics = globalObject.property("QFontMetrics");
     classQFontMetrics.property("prototype").setProperty("destroy",
             engine->newFunction(ecmaObjectDestroy<QFontMetrics>));
@@ -470,6 +506,8 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     QScriptValue classQPrinter = globalObject.property("QPrinter");
     classQPrinter.property("prototype").setProperty("destroy",
             engine->newFunction(ecmaObjectDestroy<QPrinter>));
+    classQPrinter.property("prototype").setProperty("setPdfVersion",
+            engine->newFunction(ecmaQPrinterSetPdfVersion));
 
     QScriptValue classQPrintDialog = globalObject.property("QPrintDialog");
     classQPrintDialog.property("prototype").setProperty("destroy",
@@ -499,6 +537,12 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     classQLayout.property("prototype").setProperty("getWidth",
             engine->newFunction(ecmaQLayoutGetWidth));
 
+    QScriptValue classQGridLayout = globalObject.property("QGridLayout");
+    classQGridLayout.property("prototype").setProperty("getItemRow",
+            engine->newFunction(ecmaQGridLayoutGetItemRow));
+    classQGridLayout.property("prototype").setProperty("getItemColumn",
+            engine->newFunction(ecmaQGridLayoutGetItemColumn));
+
     QScriptValue classQByteArray = globalObject.property("QByteArray");
     classQByteArray.property("prototype").setProperty("toString",
             engine->newFunction(ecmaQByteArrayToString));
@@ -513,16 +557,34 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     classQLocale.setProperty("scriptToString",
             engine->newFunction(ecmaQLocaleScriptToString));
 
+    QScriptValue classQFile = globalObject.property("QFile");
+    classQFile.property("prototype").setProperty("write",
+            engine->newFunction(ecmaQFileWrite));
+
+    QScriptValue classQImage = globalObject.property("QImage");
+    classQImage.property("prototype").setProperty("pixelColor",
+                                                 engine->newFunction(ecmaQImagePixelColor));
+    classQImage.property("prototype").setProperty("setPixelColor",
+                                                 engine->newFunction(ecmaQImageSetPixelColor));
+    classQImage.property("prototype").setProperty("setColorTable",
+                                                  engine->newFunction(ecmaQImageSetColorTable));
+
 #if QT_VERSION >= 0x050000
     QScriptValue classQLineEdit = globalObject.property("QLineEdit");
     classQLineEdit.property("prototype").setProperty("validator",
             engine->newFunction(ecmaQLineEditValidator));
 
+    // workaround API for not scriptable QModelIndexList:
+    QScriptValue classQItemSelectionModel = globalObject.property("QItemSelectionModel");
+    classQItemSelectionModel.property("prototype").setProperty("countSelectedRows",
+            engine->newFunction(ecmaQItemSelectionModelCountSelectedRows));
+    classQItemSelectionModel.property("prototype").setProperty("selectedRow",
+            engine->newFunction(ecmaQItemSelectionModelSelectedRow));
+
 //    QScriptValue classQWebPage = globalObject.property("QWebPage");
 //    classQWebPage.property("prototype").setProperty("setLinkDelegationPolicy",
 //            engine->newFunction(ecmaQWebPageSetLinkDelegationPolicy));
 
-    QScriptValue classQFile = globalObject.property("QFile");
 # if QT_VERSION < 0x050301
     classQFile.property("prototype").setProperty("close",
             engine->newFunction(ecmaQFileClose));
@@ -538,8 +600,7 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
 #endif
 
     QScriptValue classQt = globalObject.property("Qt");
-    classQt.setProperty("escape",
-            engine->newFunction(ecmaQtEscape));
+    classQt.setProperty("escape", engine->newFunction(ecmaQtEscape));
 
     QScriptValue classQCoreApplication = globalObject.property(
             "QCoreApplication");
@@ -564,8 +625,10 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     REcmaRunner::initEcma(*engine);
     REcmaLinetypePattern::initEcma(*engine);
     REcmaPattern::initEcma(*engine);
+    REcmaPatternLine::initEcma(*engine);
     REcmaPatternListMetric::initEcma(*engine);
     REcmaPatternListImperial::initEcma(*engine);
+    REcmaFont::initEcma(*engine);
     REcmaFontList::initEcma(*engine);
     REcmaFileCache::initEcma(*engine);
 
@@ -705,6 +768,8 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     REcmaSharedPointerEntity::initEcma(*engine);
     REcmaLayer::initEcma(*engine);
     REcmaSharedPointerLayer::initEcma(*engine);
+    REcmaLayerState::initEcma(*engine);
+    REcmaSharedPointerLayerState::initEcma(*engine);
     REcmaLayout::initEcma(*engine);
     REcmaSharedPointerLayout::initEcma(*engine);
     REcmaBlock::initEcma(*engine);
@@ -804,6 +869,9 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     REcmaImageEntity::initEcma(*engine);
     REcmaSharedPointerImageEntity::initEcma(*engine);
 
+    REcmaDimStyle::initEcma(*engine);
+    REcmaSharedPointerDimStyle::initEcma(*engine);
+
     REcmaDimensionData::initEcma(*engine);
     REcmaDimensionEntity::initEcma(*engine);
     REcmaSharedPointerDimensionEntity::initEcma(*engine);
@@ -820,6 +888,18 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     REcmaDimAngularEntity::initEcma(*engine);
     REcmaSharedPointerDimAngularEntity::initEcma(*engine);
 
+    REcmaDimAngular2LData::initEcma(*engine);
+    REcmaDimAngular2LEntity::initEcma(*engine);
+    REcmaSharedPointerDimAngular2LEntity::initEcma(*engine);
+
+    REcmaDimAngular3PData::initEcma(*engine);
+    REcmaDimAngular3PEntity::initEcma(*engine);
+    REcmaSharedPointerDimAngular3PEntity::initEcma(*engine);
+
+    REcmaDimArcLengthData::initEcma(*engine);
+    REcmaDimArcLengthEntity::initEcma(*engine);
+    REcmaSharedPointerDimArcLengthEntity::initEcma(*engine);
+
     REcmaDimDiametricData::initEcma(*engine);
     REcmaDimDiametricEntity::initEcma(*engine);
     REcmaSharedPointerDimDiametricEntity::initEcma(*engine);
@@ -835,6 +915,10 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     REcmaDimOrdinateData::initEcma(*engine);
     REcmaDimOrdinateEntity::initEcma(*engine);
     REcmaSharedPointerDimOrdinateEntity::initEcma(*engine);
+
+    REcmaToleranceData::initEcma(*engine);
+    REcmaToleranceEntity::initEcma(*engine);
+    REcmaSharedPointerToleranceEntity::initEcma(*engine);
 
     REcmaTransaction::initEcma(*engine);
 
@@ -869,18 +953,26 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     REcmaMoveSelectionOperation::initEcma(*engine);
     REcmaScaleSelectionOperation::initEcma(*engine);
     REcmaPasteOperation::initEcma(*engine);
+    REcmaClickReferencePointOperation::initEcma(*engine);
+    REcmaOperationUtils::initEcma(*engine);
 
     REcmaTransformation::initEcma(*engine);
 
     REcmaTranslation::initEcma(*engine);
 
+    REcmaTransform::initEcma(*engine);
+    REcmaTransformOp::initEcma(*engine);
+
     REcmaCommandLine::initEcma(*engine);
     REcmaTextEdit::initEcma(*engine);
     REcmaMathLineEdit::initEcma(*engine);
+    REcmaMathComboBox::initEcma(*engine);
     REcmaCharacterWidget::initEcma(*engine);
     REcmaDockWidget::initEcma(*engine);
+    REcmaToolButton::initEcma(*engine);
 
     REcmaPropertyListener::initEcma(*engine);
+    REcmaPropertyListenerAdapter::initEcma(*engine);
     REcmaPropertyEditor::initEcma(*engine);
 
     REcmaToolMatrixItemDelegate::initEcma(*engine);
@@ -896,6 +988,8 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     REcmaViewListenerAdapter::initEcma(*engine);
     REcmaPenListener::initEcma(*engine);
     REcmaPenListenerAdapter::initEcma(*engine);
+    REcmaPaletteListener::initEcma(*engine);
+    REcmaPaletteListenerAdapter::initEcma(*engine);
     REcmaColorCombo::initEcma(*engine);
     REcmaLineweightCombo::initEcma(*engine);
     REcmaLinetypeCombo::initEcma(*engine);
@@ -937,10 +1031,10 @@ RScriptHandlerEcma::RScriptHandlerEcma() : engine(NULL), debugger(NULL) {
     REcmaTextRenderer::initEcma(*engine);
 
     REcmaDxfServices::initEcma(*engine);
+    REcmaCadToolBar::initEcma(*engine);
+    REcmaCadToolBarPanel::initEcma(*engine);
 
     REcmaAutoLoadEcma::initEcma(*engine);
-
-    REcmaZip::initEcma(*engine);
 
 
     // *** end of "do not change the order" ***
@@ -1077,6 +1171,16 @@ RFileImporterAdapter* RScriptHandlerEcma::createFileImporter(const QString& clas
 QString RScriptHandlerEcma::readScript(const QString& fileName, bool forceReload) {
 
     return RFileCache::getContents(fileName, forceReload);
+
+//    QFile f(fileName);
+//    if (!f.open(QIODevice::ReadOnly)) {
+//        qWarning() << "RScriptHandlerEcma::readScript: cannot read file: " << fileName;
+//        return QString();
+//    }
+
+//    QString ret = f.readAll();
+//    f.close();
+//    return ret;
 }
 
 void RScriptHandlerEcma::createActionDocumentLevel(const QString& scriptFile,
@@ -1110,6 +1214,9 @@ void RScriptHandlerEcma::createActionDocumentLevel(const QString& scriptFile,
     }
 
     if (!QFileInfo(scriptFile).exists()) {
+        qWarning() << "RScriptHandlerEcma::createActionDocumentLevel(): "
+                   << scriptFile
+                   << ": file not found.";
         getScriptEngine().currentContext()->throwError(QString(
                 "File %1 does not exists.").arg(scriptFile));
         return;
@@ -1249,6 +1356,8 @@ void RScriptHandlerEcma::initGlobalVariables(const QString& scriptFile) {
     globalObject.setProperty("scriptFile", QScriptValue(engine, scriptFile));
     globalObject.setProperty("includeBasePath", QScriptValue(engine,
             QFileInfo(scriptFile).absolutePath()));
+    globalObject.setProperty("scriptFileBasePath", QScriptValue(engine,
+            QFileInfo(scriptFile).absolutePath()));
 }
 
 QScriptValue RScriptHandlerEcma::ecmaInclude(QScriptContext* context, QScriptEngine* engine) {
@@ -1327,12 +1436,24 @@ QScriptValue RScriptHandlerEcma::doInclude(QScriptEngine* engine, const QString&
     }
 
     QStringList list;
+
+    // Search based on the includeBasePath which changes depending on the plugin
     list << engine->globalObject().property("includeBasePath").toString();
+
+    // ... then search based on the initial script path (does not change)
+    list << engine->globalObject().property("scriptFileBasePath").toString();
+
+    // ... then search based on the local data storage location path (does not change)
+    list << RSettings::getDataLocation();
+
+    // ... then search based on the program path (does not change)
     list << QDir::currentPath();
+
+    // ... then search based on the built in plugin values (does not change)
     list << ":";
 
-    // remove duplicate paths:
-    list = list.toSet().toList();
+    // Remove the duplicates and preserve the order
+    list.removeDuplicates();
 
     QStringListIterator i(list);
     while (i.hasNext()) {
@@ -1505,7 +1626,7 @@ QScriptValue RScriptHandlerEcma::ecmaGray(QScriptContext* context,
 QScriptValue RScriptHandlerEcma::ecmaQtEscape(QScriptContext* context,
         QScriptEngine* engine) {
     if (context->argumentCount() == 1) {
-        QString cppResult = Qt::escape(context->argument(0).toString());
+        QString cppResult;
 #if QT_VERSION >= 0x050000
         cppResult = context->argument(0).toString().toHtmlEscaped();
 #else
@@ -1589,6 +1710,100 @@ QScriptValue RScriptHandlerEcma::ecmaQDomNodeRemoveChild(QScriptContext* context
     } else {
         return throwError(
                 "Wrong number/types of arguments for QDomNode.removeChild().",
+                context);
+    }
+    return result;
+}
+
+QScriptValue RScriptHandlerEcma::ecmaQTextCharFormatSetFontFamilies(QScriptContext* context, QScriptEngine* engine) {
+    QScriptValue result = engine->undefinedValue();
+    QTextCharFormat* self = qscriptvalue_cast<QTextCharFormat*> (context->thisObject());
+    if (self == NULL) {
+        return throwError("QTextCharFormat.setFontFamilies(): This object is not a QTextCharFormat", context);
+    }
+
+    if (context->argumentCount() == 1 && context->argument(0).isArray()) {
+        QStringList v;
+        REcmaHelper::fromScriptValue(engine, context->argument(0), v);
+
+#if QT_VERSION >= 0x050D00
+        self->setFontFamilies(v);
+#else
+        self->setFontFamily(v[0]);
+#endif
+    }
+
+    return result;
+}
+
+QScriptValue RScriptHandlerEcma::ecmaQPrinterSetPdfVersion(QScriptContext* context, QScriptEngine* engine) {
+    QScriptValue result = engine->undefinedValue();
+    QPrinter* self = qscriptvalue_cast<QPrinter*> (context->thisObject());
+
+    if (context->argumentCount() == 1 && context->argument(0).isNumber()) {
+        int v = context->argument(0).toInt32();
+#if QT_VERSION >= 0x050A00
+        // only Qt >= 5.10:
+        self->setPdfVersion((QPagedPaintDevice::PdfVersion)v);
+#else
+        qWarning() << "Setting the PDF version is not supported in this Qt version";
+#endif
+    }
+
+    return result;
+}
+
+QScriptValue RScriptHandlerEcma::ecmaGetAvailablePrinterNames(QScriptContext* context, QScriptEngine* engine) {
+    QScriptValue result = engine->undefinedValue();
+#if QT_VERSION >= 0x050000
+    QStringList cppResult = QPrinterInfo::availablePrinterNames();
+#else
+    QList<QPrinterInfo> printerInfos = QPrinterInfo::availablePrinters();
+    QStringList cppResult;
+    for (int i=0; i<printerInfos.length(); i++) {
+        cppResult.append(printerInfos.at(i).printerName());
+    }
+#endif
+    result = qScriptValueFromValue(engine, cppResult);
+    return result;
+}
+
+QScriptValue RScriptHandlerEcma::ecmaGetDefaultPrinterName(QScriptContext* context, QScriptEngine* engine) {
+    QScriptValue result = engine->undefinedValue();
+#if QT_VERSION >= 0x050000
+    QString cppResult = QPrinterInfo::defaultPrinterName();
+#else
+    QPrinterInfo defaultPrinter = QPrinterInfo::defaultPrinter();
+    QString cppResult = defaultPrinter.printerName();
+#endif
+    result = qScriptValueFromValue(engine, cppResult);
+    return result;
+}
+
+QScriptValue RScriptHandlerEcma::ecmaCreatePrinter(QScriptContext* context, QScriptEngine* engine) {
+    QScriptValue result = engine->undefinedValue();
+    if (context->argumentCount() == 1 && context->argument(0).isString()) {
+        QString name = context->argument(0).toString();
+#if QT_VERSION >= 0x050000
+        QPrinterInfo pi = QPrinterInfo::printerInfo(name);
+#else
+        QPrinterInfo pi;
+        QList<QPrinterInfo> printerInfos = QPrinterInfo::availablePrinters();
+        for (int i=0; i<printerInfos.length(); i++) {
+            if (printerInfos.at(i).printerName().toLower()==name.toLower()) {
+                pi = printerInfos.at(i);
+                break;
+            }
+        }
+#endif
+        if (pi.isNull()) {
+            return result;
+        }
+        QPrinter* cppResult = new QPrinter(pi, QPrinter::HighResolution);
+        result = qScriptValueFromValue(engine, cppResult);
+    } else {
+        return throwError(
+                "Wrong number/types of arguments for createPrinter(name).",
                 context);
     }
     return result;
@@ -1739,6 +1954,46 @@ QScriptValue RScriptHandlerEcma::ecmaQLayoutGetWidth(QScriptContext* context,
     return qScriptValueFromValue(engine, cppResult);
 }
 
+QScriptValue RScriptHandlerEcma::ecmaQGridLayoutGetItemRow(QScriptContext* context, QScriptEngine* engine) {
+    QGridLayout* self = REcmaHelper::scriptValueTo<QGridLayout>(context->thisObject());
+    if (self == NULL) {
+        return throwError("QGridLayout.getItemRow(): Object is NULL", context);
+    }
+
+    if (context->argumentCount() != 1) {
+        return throwError("Wrong number/types of arguments for QGridLayout::getItemRow.", context);
+    }
+
+    int idx = context->argument(0).toInt32();
+    if (idx<0) {
+        return qScriptValueFromValue(engine, -1);
+    }
+
+    int r, c, rs, cs;
+    self->getItemPosition(idx, &r, &c, &rs, &cs);
+    return qScriptValueFromValue(engine, r);
+}
+
+QScriptValue RScriptHandlerEcma::ecmaQGridLayoutGetItemColumn(QScriptContext* context, QScriptEngine* engine) {
+    QGridLayout* self = REcmaHelper::scriptValueTo<QGridLayout>(context->thisObject());
+    if (self == NULL) {
+        return throwError("QGridLayout.getItemColumn(): Object is NULL", context);
+    }
+
+    if (context->argumentCount() != 1) {
+        return throwError("Wrong number/types of arguments for QGridLayout::getItemColumn.", context);
+    }
+
+    int idx = context->argument(0).toInt32();
+    if (idx<0) {
+        return qScriptValueFromValue(engine, -1);
+    }
+
+    int r, c, rs, cs;
+    self->getItemPosition(idx, &r, &c, &rs, &cs);
+    return qScriptValueFromValue(engine, c);
+}
+
 QScriptValue RScriptHandlerEcma::ecmaQByteArrayToString(QScriptContext* context,
         QScriptEngine* engine) {
 
@@ -1763,7 +2018,7 @@ QScriptValue RScriptHandlerEcma::ecmaQUrlQueryItems(QScriptContext* context, QSc
 
     if (context->argumentCount() == 0) {
         //QUrl* url = qscriptvalue_cast<QUrl*> (context->argument(0));
-        QList<QPair<QString, QString> > cppResult = self->queryItems();
+        QList<QPair<QString, QString> > cppResult = QUrlQuery(*self).queryItems();
         result = REcmaHelper::pairListToScriptValue<QString, QString>(engine, cppResult);
     } else {
         return throwError(
@@ -1831,6 +2086,36 @@ QScriptValue RScriptHandlerEcma::ecmaQLineEditValidator(QScriptContext* context,
     //return engine->newQObject();
 }
 
+QScriptValue RScriptHandlerEcma::ecmaQItemSelectionModelCountSelectedRows(QScriptContext* context, QScriptEngine* engine) {
+    QItemSelectionModel* self = REcmaHelper::scriptValueTo<QItemSelectionModel>(context->thisObject());
+    if (self == NULL) {
+        return throwError("QItemSelectionModel.countSelectedRows(): Object is NULL", context);
+    }
+
+    if (context->argumentCount() != 0) {
+        return throwError("Wrong number/types of arguments for QItemSelectionModel.countSelectedRows.", context);
+    }
+
+    int cppResult = self->selectedRows().length();
+    return qScriptValueFromValue(engine, cppResult);
+}
+
+QScriptValue RScriptHandlerEcma::ecmaQItemSelectionModelSelectedRow(QScriptContext* context, QScriptEngine* engine) {
+    QItemSelectionModel* self = REcmaHelper::scriptValueTo<QItemSelectionModel>(context->thisObject());
+    if (self == NULL) {
+        return throwError("QItemSelectionModel.selectedRow(): Object is NULL", context);
+    }
+
+    if (context->argumentCount() != 1) {
+        return throwError("Wrong number/types of arguments for QItemSelectionModel.selectedRow.", context);
+    }
+
+    int idx = context->argument(0).toInt32();
+
+    const QModelIndex cppResult = self->selectedRows().at(idx);
+    return qScriptValueFromValue(engine, cppResult);
+}
+
 //QScriptValue RScriptHandlerEcma::ecmaQWebPageSetLinkDelegationPolicy(QScriptContext* context, QScriptEngine* engine) {
 //    QWebPage* self = REcmaHelper::scriptValueTo<QWebPage>(context->thisObject());
 //    if (self == NULL) {
@@ -1851,7 +2136,7 @@ QScriptValue RScriptHandlerEcma::ecmaMSleep(QScriptContext* context,
         QScriptEngine* engine) {
 
     if (context->argumentCount() == 1 && context->argument(0).isNumber()) {
-        int val = context->argument(0).toInteger();
+        int val = context->argument(0).toInt32();
         QTime dieTime = QTime::currentTime().addMSecs(val);
         int c=0;
         QTime t = QTime::currentTime();
@@ -1954,7 +2239,7 @@ QScriptValue RScriptHandlerEcma::ecmaDownload(QScriptContext* context,
 
     if (context->argumentCount() == 2 && context->argument(0).isString() && context->argument(1).isNumber()) {
         QString url = context->argument(0).toString();
-        int timeout = context->argument(1).toInteger();
+        int timeout = context->argument(1).toInt32();
 
         QNetworkAccessManager manager;
         QEventLoop loop;
@@ -1996,7 +2281,7 @@ QScriptValue RScriptHandlerEcma::ecmaDownloadToFile(QScriptContext* context, QSc
         QString url = context->argument(0).toString();
         QString path = context->argument(1).toString();
         QString fileName = context->argument(2).toString();
-        int timeout = context->argument(3).toInteger();
+        int timeout = context->argument(3).toInt32();
 
         QNetworkAccessManager manager;
         QEventLoop loop;
@@ -2151,6 +2436,87 @@ QScriptValue RScriptHandlerEcma::ecmaQFileFileName(QScriptContext* context, QScr
     QString ret = self->fileName();
 
     return qScriptValueFromValue(engine, ret);
+}
+
+QScriptValue RScriptHandlerEcma::ecmaQFileWrite(QScriptContext* context, QScriptEngine* engine) {
+    QFile* self = qscriptvalue_cast<QFile*>(context->thisObject());
+    if (self == NULL) {
+        return throwError("QFile.write: Object is NULL", context);
+    }
+
+    if (context->argumentCount() != 1) {
+        return throwError("Wrong number/types of arguments for QFile.fileName.", context);
+    }
+
+    QByteArray* ap0 = qscriptvalue_cast<QByteArray*>(context->argument(0));
+    qint64 ret = self->write(*ap0);
+
+    return qScriptValueFromValue(engine, ret);
+}
+
+QScriptValue RScriptHandlerEcma::ecmaQImagePixelColor(QScriptContext* context, QScriptEngine* engine) {
+    QImage* self = qscriptvalue_cast<QImage*>(context->thisObject());
+    if (self == NULL) {
+        return throwError("QImage.pixelColor: Object is NULL", context);
+    }
+
+    if (context->argumentCount() != 2) {
+        return throwError("Wrong number/types of arguments for QImage.pixelColor.", context);
+    }
+
+    int a0 = qscriptvalue_cast<int>(context->argument(0));
+    int a1 = qscriptvalue_cast<int>(context->argument(1));
+#if QT_VERSION >= 0x050600
+    QColor ret = self->pixelColor(a0, a1);
+#else
+    // TODO:
+    QColor ret = QColor("white");
+    Q_ASSERT(false);
+#endif
+
+    return qScriptValueFromValue(engine, ret);
+}
+
+QScriptValue RScriptHandlerEcma::ecmaQImageSetPixelColor(QScriptContext* context, QScriptEngine* engine) {
+    QImage* self = qscriptvalue_cast<QImage*>(context->thisObject());
+    if (self == NULL) {
+        return throwError("QImage.setPixelColor: Object is NULL", context);
+    }
+
+    if (context->argumentCount() != 3) {
+        return throwError("Wrong number/types of arguments for QImage.setPixelColor.", context);
+    }
+
+    int a0 = qscriptvalue_cast<int>(context->argument(0));
+    int a1 = qscriptvalue_cast<int>(context->argument(1));
+    QColor a2 = qscriptvalue_cast<QColor>(context->argument(2));
+#if QT_VERSION >= 0x050600
+    self->setPixelColor(a0, a1, a2);
+#else
+    // TODO:
+    Q_ASSERT(false);
+#endif
+
+    return engine->undefinedValue();
+}
+
+QScriptValue RScriptHandlerEcma::ecmaQImageSetColorTable(QScriptContext *context, QScriptEngine *engine) {
+    QImage* self = qscriptvalue_cast<QImage*>(context->thisObject());
+    if (self == NULL) {
+        return throwError("QImage.setColorTable: Object is NULL", context);
+    }
+
+    if (context->argumentCount() != 1) {
+        return throwError("Wrong number/types of arguments for QImage.setColorTable.", context);
+    }
+
+    QVector<QRgb> a0;
+    REcmaHelper::fromScriptValue(engine, context->argument(0), a0);
+    //int a1 = qscriptvalue_cast<int>(context->argument(1));
+    //QColor a2 = qscriptvalue_cast<QColor>(context->argument(2));
+    self->setColorTable(a0);
+
+    return engine->undefinedValue();
 }
 
 //QScriptValue RScriptHandlerEcma::ecmaBlockEvents(QScriptContext* context,

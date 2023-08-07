@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Help.js");
+include("scripts/Help/Help.js");
 
 function Website(guiAction) {
     Help.call(this, guiAction);
@@ -27,6 +27,6 @@ Website.prototype = new Help();
 
 Website.prototype.beginEvent = function() {
     Help.prototype.beginEvent.call(this);
-    Help.openUrl("http://www.qcad.org");
+    Help.openUrl("https://qcad.org");
 };
 

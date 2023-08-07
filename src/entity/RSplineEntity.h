@@ -45,6 +45,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -84,19 +85,23 @@ public:
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntitySpline;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RSplineEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RSplineEntity::getRtti());
     }
 
     virtual RSplineEntity* clone() const {
         return new RSplineEntity(*this);
     }
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual void exportEntity(RExporter& e, bool preview=false, bool forceSelected=false) const;
 
@@ -297,8 +302,8 @@ public:
         return data.toPolyline(segments);
     }
 
-    RPolyline approximateWithArcs(double tolerance) const {
-        return data.approximateWithArcs(tolerance);
+    RPolyline approximateWithArcs(double tolerance, double radiusLimit=RDEFAULT_MIN1) const {
+        return data.approximateWithArcs(tolerance, radiusLimit);
     }
 
     bool reverse() {
@@ -317,6 +322,10 @@ public:
 
     void simplify(double tolerance) {
         data.simplify(tolerance);
+    }
+
+    QList<RSpline> getBezierSegments(const RBox& queryBox = RDEFAULT_RBOX) const {
+        return data.getBezierSegments(queryBox);
     }
 
     /*

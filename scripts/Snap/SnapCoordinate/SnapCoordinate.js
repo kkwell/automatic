@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Snap.js");
+include("scripts/Snap/Snap.js");
 include("../../WidgetFactory.js");
 
 /**
@@ -81,12 +81,27 @@ RSnapCoordinate.prototype.showUiOptions = function() {
     // init Set button:
     var optionsToolBar = EAction.getOptionsToolBar();
     var setButton = optionsToolBar.findChild("Set");
+    // can't have both Return and Enter here:
     setButton.shortcut = new QKeySequence("Return");
     setButton.toolTip =
         RGuiAction.formatToolTip(
             qsTr("Set coordinate"),
-            setButton.shortcut.toString()
+            qsTr("Enter")
         );
+
+    // trigger snap when number pad enter is pressed in coordinate line edits:
+    var self = this;
+    var widgetNames = ["X", "Y", "R", "A"];
+    for (var i=0; i<widgetNames.length; i++) {
+        var widgetName = widgetNames[i];
+
+        var le = optionsToolBar.findChild(widgetName);
+        if (!isNull(le)) {
+            le.returnPressed.connect(function() {
+                self.action.slotSet();
+            });
+        }
+    }
 };
 
 RSnapCoordinate.prototype.hideUiOptions = function() {
@@ -123,7 +138,7 @@ RSnapCoordinate.prototype.getCoordinateEvent = function() {
     if (isNull(scene)) {
         return undefined;
     }
-    var ce = new RCoordinateEvent(this.getCoordinate(), scene, view.getRGraphicsView());
+    var ce = new RCoordinateEvent(this.getCoordinate(), scene, getRGraphicsView(view));
     return ce;
 };
 

@@ -23,7 +23,7 @@
  *
  * \brief This module contains misc drawing tools.
  */
-include("../Misc.js");
+include("scripts/Misc/Misc.js");
 include("scripts/Draw/Line/Line.js");
 
 /**
@@ -63,7 +63,7 @@ MiscDraw.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(true);
         //action.setIcon(MiscDraw.includeBasePath + "/MiscDraw.svg");
-        action.setStatusTip(qsTr("Show misc drawing tools"));
+        //action.setStatusTip(qsTr("Show misc drawing tools"));
         action.setNoState();
         action.setDefaultCommands(["miscdrawmenu"]);
         action.setGroupSortOrder(90);
@@ -79,6 +79,9 @@ MiscDraw.getCadToolBarPanel = function() {
     return tb;
 };
 
+MiscDraw.getToolMatrixPanel = function() {
+    return EAction.getToolMatrixPanel(qsTr("Misc Draw"), "MiscDrawMatrixPanel", 2050);
+};
 
 MiscDraw.getTitle = function() {
     return qsTr("&Draw");
@@ -92,4 +95,5 @@ MiscDraw.init = function() {
     MiscDraw.getMenu();
     MiscDraw.getToolBar();
     MiscDraw.getCadToolBarPanel();
+    MiscDraw.getToolMatrixPanel();
 };

@@ -17,10 +17,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     </method>
     <method name="init" cppName="init" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false" />
+    </method>
+    <method name="autostart" cppName="autostart" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
         <arg type="QString &amp;" typeName="QString"
         name="autostartFile" hasDefault="true"
-        default="QString :: null" isConst="true" />
+        default="RDEFAULT_QSTRING" isConst="true" />
         <arg type="QStringList &amp;" typeName="QStringList"
         name="arguments" hasDefault="true"
         default="RDEFAULT_QSTRINGLIST" isConst="true" />

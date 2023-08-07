@@ -3,10 +3,69 @@
 xmlns:rs="http://www.ribbonsoft.com">
   <class_decl name="RVector" />
   <class_decl name="RPropertyAttributes" />
+  <class name="QRegularExpressionMatch"
+  xsi:noNamespaceSchemaLocation="../class.xsd" isCopyable="false"
+  hasShell="false" sharedPointerSupport="false" isQObject="false"
+  hasStreamOperator="false" isAbstract="false"
+  isScriptable="false" />
   <class name="RS" xsi:noNamespaceSchemaLocation="../class.xsd"
   isCopyable="false" hasShell="false" sharedPointerSupport="false"
   isQObject="false" hasStreamOperator="false" isAbstract="false"
   isScriptable="true">
+    <enum name="MetaType">
+      <value name="Bool" />
+      <value name="Char" />
+      <value name="Double" />
+      <value name="Int" />
+      <value name="UnknownType" />
+      <value name="LongLong" />
+      <value name="BitArray" />
+      <value name="Bitmap" />
+      <value name="Brush" />
+      <value name="ByteArray" />
+      <value name="Color" />
+      <value name="Cursor" />
+      <value name="Date" />
+      <value name="DateTime" />
+      <value name="EasingCurve" />
+      <value name="Font" />
+      <value name="Hash" />
+      <value name="Icon" />
+      <value name="Image" />
+      <value name="KeySequence" />
+      <value name="Line" />
+      <value name="LineF" />
+      <value name="List" />
+      <value name="Locale" />
+      <value name="Map" />
+      <value name="Matrix4x4" />
+      <value name="Palette" />
+      <value name="Pen" />
+      <value name="Pixmap" />
+      <value name="Point" />
+      <value name="PointF" />
+      <value name="Polygon" />
+      <value name="Rect" />
+      <value name="RectF" />
+      <value name="Region" />
+      <value name="Size" />
+      <value name="SizeF" />
+      <value name="SizePolicy" />
+      <value name="String" />
+      <value name="StringList" />
+      <value name="TextFormat" />
+      <value name="TextLength" />
+      <value name="Time" />
+      <value name="Transform" />
+      <value name="Url" />
+      <value name="Vector2D" />
+      <value name="Vector3D" />
+      <value name="Vector4D" />
+      <value name="Quaternion" />
+      <value name="UInt" />
+      <value name="ULongLong" />
+      <value name="UserType" />
+    </enum>
     <enum name="MessageType">
       <value name="Print" />
       <value name="Debug" />
@@ -17,13 +76,15 @@ xmlns:rs="http://www.ribbonsoft.com">
     <enum name="EntityType">
       <value name="ObjectAll" />
       <value name="ObjectUnknown" />
-      <value name="ObjectBlock" />
-      <value name="ObjectLayer" />
       <value name="ObjectLinetype" />
-      <value name="ObjectView" />
+      <value name="ObjectLayer" />
+      <value name="ObjectBlock" />
       <value name="ObjectLayout" />
+      <value name="ObjectLayerState" />
+      <value name="ObjectView" />
       <value name="ObjectUcs" />
       <value name="ObjectDocumentVariable" />
+      <value name="ObjectDimStyle" />
       <value name="EntityAll" />
       <value name="EntityUnknown" />
       <value name="EntityAttribute" />
@@ -51,12 +112,16 @@ xmlns:rs="http://www.ribbonsoft.com">
       <value name="EntityDimRadial" />
       <value name="EntityDimDiametric" />
       <value name="EntityDimAngular" />
+      <value name="EntityDimAngular2L" />
+      <value name="EntityDimAngular3P" />
+      <value name="EntityDimArcLength" />
       <value name="EntityDimOrdinate" />
       <value name="EntityHatch" />
       <value name="EntityImage" />
       <value name="EntityLeader" />
       <value name="EntitySpline" />
       <value name="EntityViewport" />
+      <value name="EntityTolerance" />
       <value name="EntityUser" />
     </enum>
     <enum name="ProjectionRenderingHint">
@@ -64,6 +129,11 @@ xmlns:rs="http://www.ribbonsoft.com">
       <value name="RenderSide" />
       <value name="RenderFront" />
       <value name="RenderThreeD" />
+    </enum>
+    <enum name="OrthoMode">
+      <value name="OrthoVertical" />
+      <value name="OrthoHorizonal" />
+      <value name="Orthogonal" />
     </enum>
     <enum name="Side">
       <value name="NoSide" />
@@ -103,11 +173,10 @@ xmlns:rs="http://www.ribbonsoft.com">
       <value name="FromStart" />
       <value name="FromEnd" />
       <value name="FromAny" />
-      <value name="FromStart" />
-      <value name="FromEnd" />
       <value name="AlongPolyline" />
     </enum>
     <enum name="IsoProjectionType">
+      <value name="NoProjection" />
       <value name="Top" />
       <value name="Bottom" />
       <value name="Left" />
@@ -126,23 +195,11 @@ xmlns:rs="http://www.ribbonsoft.com">
       <value name="User3" />
       <value name="User4" />
       <value name="IsoTop" />
-      <value name="Top" />
-      <value name="Isometric" />
       <value name="IsoBottom" />
-      <value name="Bottom" />
-      <value name="Isometric" />
       <value name="IsoLeft" />
-      <value name="Left" />
-      <value name="Isometric" />
       <value name="IsoLeftBack" />
-      <value name="LeftBack" />
-      <value name="Isometric" />
       <value name="IsoRight" />
-      <value name="Right" />
-      <value name="Isometric" />
       <value name="IsoRightBack" />
-      <value name="RightBack" />
-      <value name="Isometric" />
     </enum>
     <enum name="Measurement">
       <value name="UnknownMeasurement" />
@@ -172,7 +229,6 @@ xmlns:rs="http://www.ribbonsoft.com">
       <value name="Lightyear" />
       <value name="Parsec" />
       <value name="MaxUnit" />
-      <value name="Parsec" />
     </enum>
     <enum name="AngleFormat">
       <value name="DegreesDecimal" />
@@ -354,8 +410,14 @@ xmlns:rs="http://www.ribbonsoft.com">
       <value name="VISRETAIN" />
       <value name="WORLDVIEW" />
       <value name="MaxKnownVariable" />
-      <value name="WORLDVIEW" />
       <value name="INVALID" />
+    </enum>
+    <enum name="KnownVariableType">
+      <value name="VarTypeBool" />
+      <value name="VarTypeInt" />
+      <value name="VarTypeDouble" />
+      <value name="VarTypeColor" />
+      <value name="VarTypeUnknown" />
     </enum>
     <enum name="BooleanOperation">
       <value name="Intersection" />
@@ -388,6 +450,49 @@ xmlns:rs="http://www.ribbonsoft.com">
       <value name="EndOpenRound" />
       <value name="EndOpenSingle" />
     </enum>
+    <enum name="Easing">
+      <value name="Linear" />
+      <value name="InQuad" />
+      <value name="OutQuad" />
+      <value name="InOutQuad" />
+      <value name="OutInQuad" />
+      <value name="InCubic" />
+      <value name="OutCubic" />
+      <value name="InOutCubic" />
+      <value name="OutInCubic" />
+      <value name="InQuart" />
+      <value name="OutQuart" />
+      <value name="InOutQuart" />
+      <value name="OutInQuart" />
+      <value name="InQuint" />
+      <value name="OutQuint" />
+      <value name="InOutQuint" />
+      <value name="OutInQuint" />
+      <value name="InSine" />
+      <value name="OutSine" />
+      <value name="InOutSine" />
+      <value name="OutInSine" />
+      <value name="InExpo" />
+      <value name="OutExpo" />
+      <value name="InOutExpo" />
+      <value name="OutInExpo" />
+      <value name="InCirc" />
+      <value name="OutCirc" />
+      <value name="InOutCirc" />
+      <value name="OutInCirc" />
+      <value name="InElastic" />
+      <value name="OutElastic" />
+      <value name="InOutElastic" />
+      <value name="OutInElastic" />
+      <value name="InBack" />
+      <value name="OutBack" />
+      <value name="InOutBack" />
+      <value name="OutInBack" />
+      <value name="InBounce" />
+      <value name="OutBounce" />
+      <value name="InOutBounce" />
+      <value name="OutInBounce" />
+    </enum>
     <method name="compare" cppName="compare" specifier="public"
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
@@ -395,6 +500,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="true" />
         <arg type="QVariant &amp;" typeName="QVariant" name="v2"
         isConst="true" />
+        <arg type="bool" typeName="bool" name="noTolerance"
+        hasDefault="true" default="false" isConst="false" />
       </variant>
       <variant returnType="bool" isPureVirtual="false">
         <arg type="QPair &lt; QVariant , RPropertyAttributes &gt; &amp;"
@@ -403,11 +510,18 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="QPair &lt; QVariant , RPropertyAttributes &gt; &amp;"
         typeName="QPair &lt; QVariant , RPropertyAttributes &gt;"
         name="p2" isConst="true" />
+        <arg type="bool" typeName="bool" name="noTolerance"
+        hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
     <method name="getCpuCores" cppName="getCpuCores"
     specifier="public" isStatic="true" isVirtual="false"
     isScriptOverwritable="true">
+      <variant returnType="int" isPureVirtual="false" />
+    </method>
+    <method name="getIdealThreadCount"
+    cppName="getIdealThreadCount" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="int" isPureVirtual="false" />
     </method>
     <method name="getBuildCpuArchitecture"
@@ -428,6 +542,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     specifier="public" isStatic="true" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="QString" isPureVirtual="false" />
+    </method>
+    <method name="showInFileManager" cppName="showInFileManager"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString"
+        name="filePaths" isConst="true" />
+      </variant>
     </method>
     <method name="getDirectoryList" cppName="getDirectoryList"
     specifier="public" isStatic="true" isVirtual="false"
@@ -468,9 +590,115 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
+    <method name="sortAlphanumerical" cppName="sortAlphanumerical"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QStringList" isPureVirtual="false">
+        <arg type="QStringList &amp;" typeName="QStringList"
+        name="list" isConst="true" />
+      </variant>
+    </method>
+    <method name="compareChunkify" cppName="compareChunkify"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QStringList" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString" name="s"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="compareAlphanumerical"
+    cppName="compareAlphanumerical" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="int" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString" name="s1"
+        isConst="true" />
+        <arg type="QString &amp;" typeName="QString" name="s2"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="lessThanAlphanumerical"
+    cppName="lessThanAlphanumerical" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString" name="s1"
+        isConst="true" />
+        <arg type="QString &amp;" typeName="QString" name="s2"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="getFontFamily" cppName="getFontFamily"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QString" isPureVirtual="false">
+        <arg type="QTextCharFormat &amp;"
+        typeName="QTextCharFormat" name="format" isConst="true" />
+      </variant>
+    </method>
+    <method name="getPageSizeId" cppName="getPageSizeId"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="int" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString" name="name"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="getPageSize" cppName="getPageSize"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QSizeF" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString" name="name"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="setUtf8Codec" cppName="setUtf8Codec"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="QTextStream &amp;" typeName="QTextStream"
+        name="ts" isConst="false" />
+      </variant>
+    </method>
+    <method name="escape" cppName="escape" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="QString" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString" name="plain"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="getScreenCount" cppName="getScreenCount"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="int" isPureVirtual="false" />
+    </method>
+    <method name="getAvailableGeometry"
+    cppName="getAvailableGeometry" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="QSize" isPureVirtual="false">
+        <arg type="int" typeName="int" name="screen"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="getMetaType" cppName="getMetaType"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="int" isPureVirtual="false">
+        <arg type="QVariant &amp;" typeName="QVariant" name="v"
+        isConst="true" />
+      </variant>
+    </method>
     <property name="PointTolerance" type="double" isConst="true"
     isStatic="true" />
     <property name="AngleTolerance" type="double" isConst="true"
     isStatic="true" />
+    <property name="MiddleButton" type="Qt :: MouseButton"
+    isConst="true" isStatic="true" />
+    <property name="Portrait" type="QPageLayout :: Orientation"
+    isConst="true" isStatic="true" />
+    <property name="Landscape" type="QPageLayout :: Orientation"
+    isConst="true" isStatic="true" />
+    <property name="Portrait" type="QPrinter :: Orientation"
+    isConst="true" isStatic="true" />
+    <property name="Landscape" type="QPrinter :: Orientation"
+    isConst="true" isStatic="true" />
   </class>
 </unit>

@@ -24,6 +24,7 @@
 RPropertyTypeId RBlockReferenceEntity::PropertyCustom;
 RPropertyTypeId RBlockReferenceEntity::PropertyHandle;
 RPropertyTypeId RBlockReferenceEntity::PropertyProtected;
+RPropertyTypeId RBlockReferenceEntity::PropertyWorkingSet;
 RPropertyTypeId RBlockReferenceEntity::PropertyType;
 RPropertyTypeId RBlockReferenceEntity::PropertyBlock;
 RPropertyTypeId RBlockReferenceEntity::PropertyLayer;
@@ -76,34 +77,38 @@ RBlockReferenceEntity::~RBlockReferenceEntity() {
 }
 
 void RBlockReferenceEntity::init() {
-    RBlockReferenceEntity::PropertyCustom.generateId(typeid(RBlockReferenceEntity), RObject::PropertyCustom);
-    RBlockReferenceEntity::PropertyHandle.generateId(typeid(RBlockReferenceEntity), RObject::PropertyHandle);
-    RBlockReferenceEntity::PropertyProtected.generateId(typeid(RBlockReferenceEntity), RObject::PropertyProtected);
-    RBlockReferenceEntity::PropertyType.generateId(typeid(RBlockReferenceEntity), REntity::PropertyType);
-    RBlockReferenceEntity::PropertyBlock.generateId(typeid(RBlockReferenceEntity), REntity::PropertyBlock);
-    RBlockReferenceEntity::PropertyLayer.generateId(typeid(RBlockReferenceEntity), REntity::PropertyLayer);
-    RBlockReferenceEntity::PropertyLinetype.generateId(typeid(RBlockReferenceEntity), REntity::PropertyLinetype);
-    RBlockReferenceEntity::PropertyLinetypeScale.generateId(typeid(RBlockReferenceEntity), REntity::PropertyLinetypeScale);
-    RBlockReferenceEntity::PropertyLineweight.generateId(typeid(RBlockReferenceEntity), REntity::PropertyLineweight);
-    RBlockReferenceEntity::PropertyColor.generateId(typeid(RBlockReferenceEntity), REntity::PropertyColor);
-    RBlockReferenceEntity::PropertyDisplayedColor.generateId(typeid(RBlockReferenceEntity), REntity::PropertyDisplayedColor);
-    RBlockReferenceEntity::PropertyDrawOrder.generateId(typeid(RBlockReferenceEntity), REntity::PropertyDrawOrder);
+    RBlockReferenceEntity::PropertyCustom.generateId(RBlockReferenceEntity::getRtti(), RObject::PropertyCustom);
+    RBlockReferenceEntity::PropertyHandle.generateId(RBlockReferenceEntity::getRtti(), RObject::PropertyHandle);
+    RBlockReferenceEntity::PropertyProtected.generateId(RBlockReferenceEntity::getRtti(), RObject::PropertyProtected);
+    RBlockReferenceEntity::PropertyWorkingSet.generateId(RBlockReferenceEntity::getRtti(), REntity::PropertyWorkingSet);
+    RBlockReferenceEntity::PropertyType.generateId(RBlockReferenceEntity::getRtti(), REntity::PropertyType);
+    RBlockReferenceEntity::PropertyBlock.generateId(RBlockReferenceEntity::getRtti(), REntity::PropertyBlock);
+    RBlockReferenceEntity::PropertyLayer.generateId(RBlockReferenceEntity::getRtti(), REntity::PropertyLayer);
+    RBlockReferenceEntity::PropertyLinetype.generateId(RBlockReferenceEntity::getRtti(), REntity::PropertyLinetype);
+    RBlockReferenceEntity::PropertyLinetypeScale.generateId(RBlockReferenceEntity::getRtti(), REntity::PropertyLinetypeScale);
+    RBlockReferenceEntity::PropertyLineweight.generateId(RBlockReferenceEntity::getRtti(), REntity::PropertyLineweight);
+    RBlockReferenceEntity::PropertyColor.generateId(RBlockReferenceEntity::getRtti(), REntity::PropertyColor);
+    RBlockReferenceEntity::PropertyDisplayedColor.generateId(RBlockReferenceEntity::getRtti(), REntity::PropertyDisplayedColor);
+    RBlockReferenceEntity::PropertyDrawOrder.generateId(RBlockReferenceEntity::getRtti(), REntity::PropertyDrawOrder);
 
-    RBlockReferenceEntity::PropertyReferencedBlock.generateId(typeid(RBlockReferenceEntity), "", QT_TRANSLATE_NOOP("REntity", "Block"));
-    RBlockReferenceEntity::PropertyPositionX.generateId(typeid(RBlockReferenceEntity), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RBlockReferenceEntity::PropertyPositionY.generateId(typeid(RBlockReferenceEntity), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RBlockReferenceEntity::PropertyPositionZ.generateId(typeid(RBlockReferenceEntity), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Z"));
-    RBlockReferenceEntity::PropertyScaleX.generateId(typeid(RBlockReferenceEntity), QT_TRANSLATE_NOOP("REntity", "Scale"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RBlockReferenceEntity::PropertyScaleY.generateId(typeid(RBlockReferenceEntity), QT_TRANSLATE_NOOP("REntity", "Scale"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RBlockReferenceEntity::PropertyScaleZ.generateId(typeid(RBlockReferenceEntity), QT_TRANSLATE_NOOP("REntity", "Scale"), QT_TRANSLATE_NOOP("REntity", "Z"));
-    RBlockReferenceEntity::PropertyRotation.generateId(typeid(RBlockReferenceEntity), "", QT_TRANSLATE_NOOP("REntity", "Angle"));
-    RBlockReferenceEntity::PropertyColumnCount.generateId(typeid(RBlockReferenceEntity), "", QT_TRANSLATE_NOOP("REntity", "Columns"));
-    RBlockReferenceEntity::PropertyRowCount.generateId(typeid(RBlockReferenceEntity), "", QT_TRANSLATE_NOOP("REntity", "Rows"));
-    RBlockReferenceEntity::PropertyColumnSpacing.generateId(typeid(RBlockReferenceEntity), "", QT_TRANSLATE_NOOP("REntity", "Column Spacing"));
-    RBlockReferenceEntity::PropertyRowSpacing.generateId(typeid(RBlockReferenceEntity), "", QT_TRANSLATE_NOOP("REntity", "Row Spacing"));
+    RBlockReferenceEntity::PropertyReferencedBlock.generateId(RBlockReferenceEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Referenced Block"));
+    RBlockReferenceEntity::PropertyPositionX.generateId(RBlockReferenceEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RBlockReferenceEntity::PropertyPositionY.generateId(RBlockReferenceEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RBlockReferenceEntity::PropertyPositionZ.generateId(RBlockReferenceEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Z"), false, RPropertyAttributes::Geometry);
+    RBlockReferenceEntity::PropertyScaleX.generateId(RBlockReferenceEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Scale"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RBlockReferenceEntity::PropertyScaleY.generateId(RBlockReferenceEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Scale"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RBlockReferenceEntity::PropertyScaleZ.generateId(RBlockReferenceEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Scale"), QT_TRANSLATE_NOOP("REntity", "Z"), false, RPropertyAttributes::Geometry);
+    RBlockReferenceEntity::PropertyRotation.generateId(RBlockReferenceEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Angle"), false, RPropertyAttributes::Geometry);
+    RBlockReferenceEntity::PropertyColumnCount.generateId(RBlockReferenceEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Columns"));
+    RBlockReferenceEntity::PropertyRowCount.generateId(RBlockReferenceEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Rows"));
+    RBlockReferenceEntity::PropertyColumnSpacing.generateId(RBlockReferenceEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Column Spacing"));
+    RBlockReferenceEntity::PropertyRowSpacing.generateId(RBlockReferenceEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Row Spacing"));
+
+    // make sure title of property attributes group is translated:
+    QT_TRANSLATE_NOOP("REntity", "Attributes");
 }
 
-QSet<RPropertyTypeId> RBlockReferenceEntity::getPropertyTypeIds() const {
+QSet<RPropertyTypeId> RBlockReferenceEntity::getPropertyTypeIds(RPropertyAttributes::Option option) const {
     QSet<RPropertyTypeId> ret;
 
     // TODO: move to RObject?
@@ -118,8 +123,12 @@ QSet<RPropertyTypeId> RBlockReferenceEntity::getPropertyTypeIds() const {
             if (child.isNull()) {
                 continue;
             }
+            if (child->isUndone()) {
+                continue;
+            }
 
-            QSet<RPropertyTypeId> childProperties = child->getPropertyTypeIds();
+            // get block attribute properties:
+            QSet<RPropertyTypeId> childProperties = child->getPropertyTypeIds(option);
             QSet<RPropertyTypeId>::iterator it2;
             for (it2=childProperties.begin(); it2!=childProperties.end(); it2++) {
                 RPropertyTypeId pid = *it2;
@@ -133,8 +142,12 @@ QSet<RPropertyTypeId> RBlockReferenceEntity::getPropertyTypeIds() const {
             }
         }
     }
+    else {
+        qWarning() << "document is NULL";
+    }
 
-    ret.unite(REntity::getPropertyTypeIds());
+    ret.unite(REntity::getPropertyTypeIds(option));
+
     return ret;
 }
 
@@ -190,12 +203,12 @@ bool RBlockReferenceEntity::setProperty(RPropertyTypeId propertyTypeId,
     ret = ret || RObject::setMember(data.rowSpacing, value, PropertyRowSpacing == propertyTypeId);
 
     if (propertyTypeId == PropertyReferencedBlock) {
-        if (value.type() == QVariant::Int ||
-            value.type() == QVariant::LongLong) {
+        if (RS::getMetaType(value) == RS::Int ||
+            RS::getMetaType(value) == RS::LongLong) {
 
             ret = ret || RObject::setMember(
                 getData().referencedBlockId, value.toInt(), true);
-        } else if (value.type() == QVariant::String) {
+        } else if (RS::getMetaType(value) == RS::String) {
             RDocument* document = getData().getDocument();
             if (document != NULL) {
                 ret = ret || RObject::setMember(getData().referencedBlockId,
@@ -217,6 +230,10 @@ bool RBlockReferenceEntity::setProperty(RPropertyTypeId propertyTypeId,
                     REntity::Id childId = *it;
                     QSharedPointer<REntity> child = doc->queryEntity(childId);
                     if (child.isNull()) {
+                        continue;
+                    }
+
+                    if (child->isUndone()) {
                         continue;
                     }
 
@@ -246,7 +263,7 @@ bool RBlockReferenceEntity::setProperty(RPropertyTypeId propertyTypeId,
 
 QPair<QVariant, RPropertyAttributes> RBlockReferenceEntity::getProperty(
         RPropertyTypeId& propertyTypeId,
-        bool humanReadable, bool noAttributes) {
+        bool humanReadable, bool noAttributes, bool showOnRequest) {
 
     if (propertyTypeId == PropertyPositionX) {
         return qMakePair(QVariant(data.position.x), RPropertyAttributes());
@@ -255,17 +272,17 @@ QPair<QVariant, RPropertyAttributes> RBlockReferenceEntity::getProperty(
     } else if (propertyTypeId == PropertyPositionZ) {
         return qMakePair(QVariant(data.position.z), RPropertyAttributes());
     } else if (propertyTypeId == PropertyScaleX) {
-        return qMakePair(QVariant(data.scaleFactors.x), RPropertyAttributes());
+        return qMakePair(QVariant(data.scaleFactors.x), RPropertyAttributes(RPropertyAttributes::UnitLess));
     } else if (propertyTypeId == PropertyScaleY) {
-        return qMakePair(QVariant(data.scaleFactors.y), RPropertyAttributes());
+        return qMakePair(QVariant(data.scaleFactors.y), RPropertyAttributes(RPropertyAttributes::UnitLess));
     } else if (propertyTypeId == PropertyScaleZ) {
-        return qMakePair(QVariant(data.scaleFactors.z), RPropertyAttributes());
+        return qMakePair(QVariant(data.scaleFactors.z), RPropertyAttributes(RPropertyAttributes::UnitLess));
     } else if (propertyTypeId == PropertyRotation) {
         return qMakePair(QVariant(data.rotation),  RPropertyAttributes(RPropertyAttributes::Angle));
     } else if (propertyTypeId == PropertyColumnCount) {
-        return qMakePair(QVariant(data.columnCount), RPropertyAttributes());
+        return qMakePair(QVariant(data.columnCount), RPropertyAttributes(RPropertyAttributes::UnitLess));
     } else if (propertyTypeId == PropertyRowCount) {
-        return qMakePair(QVariant(data.rowCount), RPropertyAttributes());
+        return qMakePair(QVariant(data.rowCount), RPropertyAttributes(RPropertyAttributes::UnitLess));
     } else if (propertyTypeId == PropertyColumnSpacing) {
         return qMakePair(QVariant(data.columnSpacing), RPropertyAttributes());
     } else if (propertyTypeId == PropertyRowSpacing) {
@@ -329,7 +346,7 @@ QPair<QVariant, RPropertyAttributes> RBlockReferenceEntity::getProperty(
         }
     }
 
-    return REntity::getProperty(propertyTypeId, humanReadable, noAttributes);
+    return REntity::getProperty(propertyTypeId, humanReadable, noAttributes, showOnRequest);
 }
 
 //void RBlockReferenceEntity::setSelected(bool on) {
@@ -385,31 +402,60 @@ void RBlockReferenceEntity::exportEntity(RExporter& e, bool preview, bool forceS
 //    QSet<REntity::Id> attributeIds = document->queryChildEntities(getId(), RS::EntityAttribute);
 //    QList<REntity::Id> attributeList = document->getStorage().orderBackToFront(attributeIds);
 
+    QSharedPointer<RBlock> block = document->queryBlockDirect(data.referencedBlockId);
+    if (block.isNull()) {
+        recursionDepth--;
+        //qWarning() << "block" << data.referencedBlockId << "is NULL";
+        return;
+    }
+
+    // transform for whole block reference:
+    RTransform blockRefTransform;
+    blockRefTransform = data.getTransform();
+
     int i;
     QList<REntity::Id>::iterator it;
 
     i = 0;
     for (int col=0; col<data.columnCount; col++) {
         for (int row=0; row<data.rowCount; row++) {
+
+            // export transform for entities in current col / row:
+            RVector offs = data.getColumnRowOffset(col, row);
+            if (RMath::fuzzyCompare(data.scaleFactors.x, 0.0)) {
+                offs.x = 0.0;
+            }
+            else {
+                offs.x /= data.scaleFactors.x;
+            }
+            if (RMath::fuzzyCompare(data.scaleFactors.y, 0.0)) {
+                offs.y = 0.0;
+            }
+            else {
+                offs.y /= data.scaleFactors.y;
+            }
+
+            RTransform t = blockRefTransform;
+            if (col!=0 || row!=0) {
+                t.translate(offs.x, offs.y);
+            }
+            e.exportTransform(t);
+
             for (it = entityList.begin(); it != entityList.end(); it++) {
                 i++;
                 if (preview && i>RSettings::getPreviewEntities()) {
                     break;
                 }
 
+                // query entity from block reference (does NOT apply transformations):
                 QSharedPointer<REntity> entityBase = data.queryEntity(*it);
                 if (entityBase.isNull()) {
                     continue;
                 }
 
+                // col / row transform:
                 QSharedPointer<REntity> entity;
-                if (col!=0 || row!=0) {
-                    entity = QSharedPointer<REntity>(entityBase->clone());
-                    data.applyColumnRowOffsetTo(*entity, col, row);
-                }
-                else {
-                    entity = entityBase;
-                }
+                entity = entityBase;
 
                 // special visibility case:
                 // if entity is on layer 0 and rendered in the context of a block reference
@@ -438,8 +484,11 @@ void RBlockReferenceEntity::exportEntity(RExporter& e, bool preview, bool forceS
                     }
                 }
 
-                e.exportEntity(*entity, preview, true, isSelected() || forceSelected);
+                e.exportEntity(*entity, preview, true, isSelected() || isSelectedWorkingSet() || forceSelected);
             }
+
+            // clear transform:
+            e.exportEndTransform();
 
             /*
             TODO:

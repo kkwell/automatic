@@ -109,6 +109,9 @@
         postCloseEvent
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        postPropertyEvent
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         addPropertyListener
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -278,6 +281,15 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         notifyPenListeners
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        addPaletteListener
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        removePaletteListener
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        notifyPaletteListeners
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         ucsSetEvent

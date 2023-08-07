@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Information.js");
+include("scripts/Information/Information.js");
 
 /**
  * \class InfoPosition
@@ -98,7 +98,7 @@ InfoPosition.prototype.pickCoordinate = function(event, preview) {
                     di.applyOperation(op);
                 }
                 else {
-                    op.destroy();
+                    destr(op);
                 }
             }
         }
@@ -120,7 +120,7 @@ InfoPosition.prototype.getOperation = function(preview) {
 
     var di = this.getDocumentInterface();
     var view = di.getLastKnownViewWithFocus();
-    view = view.getRGraphicsView();
+    view = getRGraphicsView(view);
     view.clearTextLabels();
 
     this.addShape(op, new RPoint(this.pos), preview);

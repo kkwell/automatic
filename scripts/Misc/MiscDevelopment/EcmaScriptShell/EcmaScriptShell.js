@@ -48,7 +48,7 @@ EcmaScriptShell.prototype.beginEvent = function() {
 
     var appWin = RMainWindowQt.getMainWindow();
     var dock = appWin.findChild("EcmaScriptShellDock");
-    if (!QCoreApplication.arguments().contains("-no-show")) {
+    if (!RSettings.getOriginalArguments().contains("-no-show")) {
 
         if (dock.visible===false) {
             // show warning:
@@ -62,12 +62,12 @@ EcmaScriptShell.prototype.beginEvent = function() {
                 l.openExternalLinks = true;
                 var ret = dialog.exec();
                 if (ret!==QDialog.Accepted.valueOf()) {
-                    dialog.destroy();
+                    destr(dialog);
                     EAction.activateMainWindow();
                     return;
                 }
                 WidgetFactory.saveState(dialog);
-                dialog.destroy();
+                destr(dialog);
                 EAction.activateMainWindow();
             }
         }
@@ -89,6 +89,23 @@ EcmaScriptShell.prototype.finishEvent = function() {
 //    QDesktopServices.openUrl(url);
 //};
 
+EcmaScriptShell.col = "#000";
+EcmaScriptShell.colWarning = "#cc0000";
+EcmaScriptShell.colPrompt = "#0000cc";
+
+
+EcmaScriptShell.initStyle = function() {
+    if (RSettings.hasDarkGuiBackground()) {
+        EcmaScriptShell.col = "#fff";
+        EcmaScriptShell.colWarning = "#cc0000";
+        EcmaScriptShell.colPrompt = "#2E9AFE";
+    }
+    else {
+        EcmaScriptShell.col = "#000";
+        EcmaScriptShell.colWarning = "#cc0000";
+        EcmaScriptShell.colPrompt = "#0000cc";
+    }
+};
 
 EcmaScriptShell.init = function(basePath) {
     var appWin = EAction.getMainWindow();
@@ -103,16 +120,26 @@ EcmaScriptShell.init = function(basePath) {
     action.setSortOrder(100);
     action.setWidgetNames(["MiscDevelopmentMenu", "MiscDevelopmentToolBar", "MiscDevelopmentToolsPanel"]);
 
-    var col = "#000";
-    var colWarning = "#cc0000";
-    var colPrompt = "#0000cc";
-    if (RSettings.hasDarkGuiBackground()) {
-        col = "#fff";
-        colWarning = "#cc0000";
-        colPrompt = "#2E9AFE";
-    }
+    EcmaScriptShell.initStyle();
+
+    var pl = new RPaletteListenerAdapter();
+    appWin.addPaletteListener(pl);
+    pl.paletteChanged.connect(EcmaScriptShell.initStyle);
 
     var formWidget = WidgetFactory.createWidget(basePath, "EcmaScriptShell.ui");
+
+    var frame = formWidget.findChild("Frame");
+//    var p = frame.palette;
+//    if (!RSettings.hasDarkGuiBackground()) {
+//        // white background of command line label:
+//        p.setColor(QPalette.Active, QPalette.Window, new QColor(Qt.white));
+//    }
+//    else {
+//        p.setColor(QPalette.Active, QPalette.Window, new QColor("#1e1e1e"));
+//    }
+//    frame.palette = p;
+//    frame.autoFillBackground = true;
+
     var teHistory = formWidget.findChild("History");
     var leCommand = formWidget.findChild("CommandEdit");
     leCommand.setHistory(RSettings.getStringListValue("EcmaScriptShell/History", []));
@@ -131,7 +158,7 @@ EcmaScriptShell.init = function(basePath) {
     if (!isNull(warning)) {
         // initialize simple API warning handler:
         warning.handler = function(msg) {
-            appendAndScroll("<span style='color:"+colWarning+"'>WARNING: " +  Qt.escape(msg) + "</span>");
+            appendAndScroll("<span style='color:"+EcmaScriptShell.colWarning+"'>WARNING: " +  RS.escape(msg) + "</span>");
         };
     }
 
@@ -225,8 +252,8 @@ EcmaScriptShell.init = function(basePath) {
             teHistory.setPlainText(buf.slice(-historySize).join("\n"));
         }
 
-        appendAndScroll("<span style='font-style:italic;color:"+colPrompt+";'>" + Qt.escape("ecma> ") + "</span>"
-                        + "<span style='color:"+col+"'>" + Qt.escape(command) + "</span>");
+        appendAndScroll("<span style='font-style:italic;color:"+EcmaScriptShell.colPrompt+";'>" + RS.escape("ecma> ") + "</span>"
+                        + "<span style='color:"+EcmaScriptShell.col+"'>" + RS.escape(command) + "</span>");
         leCommand.appendCommand(command);
 
         // if we have open brackets: continue entering:
@@ -239,7 +266,8 @@ EcmaScriptShell.init = function(basePath) {
             var res;
             try {
                 //startTransaction();
-                res = RMainWindow.getMainWindow().eval("js", expression);
+                //res = RMainWindow.getMainWindow().eval("js", expression);
+                res = EcmaScriptShell.eval(expression);
                 //endTransaction();
 
                 // make sure input is enabled again:
@@ -247,10 +275,14 @@ EcmaScriptShell.init = function(basePath) {
                     enableInput();
                 }
 
-                appendAndScroll("<span style='color:"+col+";'>" + Qt.escape(res) + "</span>");
+                if (res==undefined) {
+                    res = "undefined";
+                }
+
+                appendAndScroll("<span style='color:"+EcmaScriptShell.col+";'>" + RS.escape(res.toString()) + "</span>");
             }
-            catch(e) {
-                appendAndScroll("<span style='color:"+colWarning+";'>" + Qt.escape(e) + "</span>");
+            catch (e) {
+                appendAndScroll("<span style='color:"+EcmaScriptShell.colWarning+";'>" + RS.escape(e.toString()) + "</span>");
                 //qDebug("error: ", e);
                 //qDebug("error: res:", res);
             }
@@ -328,5 +360,9 @@ EcmaScriptShell.init = function(basePath) {
         }
     });
 
-    leCommand.clearHistory.connect(teHistory, "clear");
+    leCommand.clearHistory.connect(teHistory.clear);
 };
+
+EcmaScriptShell.eval = function(expression) {
+    return RMainWindowQt.getMainWindow().eval("js", expression);
+}

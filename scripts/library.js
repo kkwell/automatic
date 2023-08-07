@@ -116,7 +116,46 @@ function getTypeOf(v) {
  * derived from QWidget.
  */
 function isOfType(obj, type) {
-    return !isNull(obj) && obj.constructor===type;
+    if (RSettings.getQtVersion() < 0x060000) {
+        return !isNull(obj) && obj.constructor===type;
+    }
+    else {
+        //return !isNull(obj) && (obj.constructor===type || (isFunction(obj.getObjectType) && obj.getObjectType()===type.getObjectType()));
+        return !isNull(obj) && isFunction(obj.getObjectType) && obj.getObjectType()===type.getObjectType();
+    }
+}
+
+/**
+ * Destroys the given object with C++ ownership.
+ */
+function destr(obj) {
+    if (RSettings.getQtVersion() >= 0x060000) {
+        // destroy does not work in Qt 6 / QJSEngine:
+        // ("Invalid attempt to destroy() an indestructible object")
+        obj.destr();
+    }
+    else {
+        if (isFunction(obj.destroy)) {
+            obj.destroy();
+        }
+    }
+}
+
+/**
+ * Get pointer from shared pointer object using data() (Qt5) or implicitly (Qt6).
+ */
+function getPtr(p) {
+    if (RSettings.getQtVersion() > 0x060000) {
+        return p;
+    }
+    else {
+        if (isFunction(p.data)) {
+            return p.data();
+        }
+        else {
+            return p;
+        }
+    }
 }
 
 /**
@@ -130,8 +169,13 @@ function isNull(obj) {
         return true;
     }
 
-    return (obj==null ||
-            (typeof(obj.isNull)==="function" && obj.isNull()===true));
+    return (
+        obj==null ||
+        // wrapped object is NULL:
+        (typeof(obj.isNullWrapper)==="function" && obj.isNullWrapper()===true) ||
+        // shared pointer is NULL:
+        (typeof(obj.data)==="function" && typeof(obj.isNull)==="function" && obj.isNull()===true)
+    );
 }
 
 /**
@@ -167,7 +211,7 @@ function isString(obj) {
  * \return true if the given object is an RVector object.
  */
 function isVector(obj) {
-    return (typeof(obj)==="object" && obj.toString().startsWith("RVector"));
+    return (typeof(obj)==="object" && isOfType(obj, RVector));
 }
 
 /**
@@ -177,6 +221,24 @@ function isVector(obj) {
  */
 function isValidVector(obj) {
     return (isVector(obj) && obj.isValid() && isNumber(obj.x) && isNumber(obj.y));
+}
+
+/**
+ * Checks if the given object is a color.
+ *
+ * \return true if the given object is an RColor object.
+ */
+function isColor(obj) {
+    return (typeof(obj)==="object" && isOfType(obj, RColor));
+}
+
+/**
+ * Checks if the given object is a valid color.
+ *
+ * \return true if the given object is a valid RColor object.
+ */
+function isValidColor(obj) {
+    return (isColor(obj) && obj.isValid());
 }
 
 /**
@@ -228,7 +290,12 @@ function isSeparator(obj) {
  * \return true if the given object is a layer.
  */
 function isLayer(obj) {
-    return isOfType(obj, RLayer) || isOfType(obj, RLayerPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RLayer) || isOfType(obj, RLayerPointer);
+    }
+    else {
+        return isOfType(obj, RLayer);
+    }
 }
 
 /**
@@ -237,7 +304,12 @@ function isLayer(obj) {
  * \return true if the given object is a block.
  */
 function isBlock(obj) {
-    return isOfType(obj, RBlock) || isOfType(obj, RBlockPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RBlock) || isOfType(obj, RBlockPointer);
+    }
+    else {
+        return isOfType(obj, RBlock);
+    }
 }
 
 /**
@@ -246,7 +318,12 @@ function isBlock(obj) {
  * \return true if the given object is a layout.
  */
 function isLayout(obj) {
-    return isOfType(obj, RLayout) || isOfType(obj, RLayoutPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RLayout) || isOfType(obj, RLayoutPointer);
+    }
+    else {
+        return isOfType(obj, RLayout);
+    }
 }
 
 /**
@@ -281,6 +358,7 @@ function isEntity(obj) {
 function isDimensionEntity(obj) {
     return isDimAlignedEntity(obj)
         || isDimAngularEntity(obj)
+        || isDimArcLengthEntity(obj)
         || isDimDiametricEntity(obj)
         || isDimLinearEntity(obj)
         || isDimOrdinateEntity(obj)
@@ -295,7 +373,12 @@ function isDimensionEntity(obj) {
  * (RDimDiametricEntity).
  */
 function isDimDiametricEntity(obj) {
-    return isOfType(obj, RDimDiametricEntity) || isOfType(obj, RDimDiametricEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RDimDiametricEntity) || isOfType(obj, RDimDiametricEntityPointer);
+    }
+    else {
+        return isOfType(obj, RDimDiametricEntity);
+    }
 }
 
 /**
@@ -305,7 +388,12 @@ function isDimDiametricEntity(obj) {
  * (RDimAlignedEntity).
  */
 function isDimAlignedEntity(obj) {
-    return isOfType(obj, RDimAlignedEntity) || isOfType(obj, RDimAlignedEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RDimAlignedEntity) || isOfType(obj, RDimAlignedEntityPointer);
+    }
+    else {
+        return isOfType(obj, RDimAlignedEntity);
+    }
 }
 
 /**
@@ -315,7 +403,12 @@ function isDimAlignedEntity(obj) {
  * (RDimRotatedEntity).
  */
 function isDimRotatedEntity(obj) {
-    return isOfType(obj, RDimRotatedEntity) || isOfType(obj, RDimRotatedEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RDimRotatedEntity) || isOfType(obj, RDimRotatedEntityPointer);
+    }
+    else {
+        return isOfType(obj, RDimRotatedEntity);
+    }
 }
 
 /**
@@ -325,7 +418,12 @@ function isDimRotatedEntity(obj) {
  * (RDimOrdinateEntity).
  */
 function isDimOrdinateEntity(obj) {
-    return isOfType(obj, RDimOrdinateEntity) || isOfType(obj, RDimOrdinateEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RDimOrdinateEntity) || isOfType(obj, RDimOrdinateEntityPointer);
+    }
+    else {
+        return isOfType(obj, RDimOrdinateEntity);
+    }
 }
 
 /**
@@ -335,17 +433,67 @@ function isDimOrdinateEntity(obj) {
  * (RDimRadialEntity).
  */
 function isDimRadialEntity(obj) {
-    return isOfType(obj, RDimRadialEntity) || isOfType(obj, RDimRadialEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RDimRadialEntity) || isOfType(obj, RDimRadialEntityPointer);
+    }
+    else {
+        return isOfType(obj, RDimRadialEntity);
+    }
 }
 
 /**
  * Checks if the given object is an angular dimension entity.
  * 
  * \return true if the given object is an angular dimension entity
- * (RDimAngularEntity).
+ * (RDimAngular2LEntity or RDimAngular3PEntity).
  */
 function isDimAngularEntity(obj) {
-    return isOfType(obj, RDimAngularEntity) || isOfType(obj, RDimAngularEntityPointer);
+    return isDimAngular2LEntity(obj) || isDimAngular3PEntity(obj);
+}
+
+/**
+ * Checks if the given object is an angular dimension from 2 lines entity.
+ *
+ * \return true if the given object is an angular dimension entity
+ * (RDimAngular2LEntity).
+ */
+function isDimAngular2LEntity(obj) {
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RDimAngular2LEntity) || isOfType(obj, RDimAngular2LEntityPointer);
+    }
+    else {
+        return isOfType(obj, RDimAngular2LEntity);
+    }
+}
+
+/**
+ * Checks if the given object is an angular dimension from 3 points entity.
+ *
+ * \return true if the given object is an angular dimension entity
+ * (RDimAngular3PEntity).
+ */
+function isDimAngular3PEntity(obj) {
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RDimAngular3PEntity) || isOfType(obj, RDimAngular3PEntityPointer);
+    }
+    else {
+        return isOfType(obj, RDimAngular3PEntity);
+    }
+}
+
+/**
+ * Checks if the given object is an arc length dimension entity.
+ *
+ * \return true if the given object is an arc length dimension entity
+ * (RDimArcLengthEntity).
+ */
+function isDimArcLengthEntity(obj) {
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RDimArcLengthEntity) || isOfType(obj, RDimArcLengthEntityPointer);
+    }
+    else {
+        return isOfType(obj, RDimArcLengthEntity);
+    }
 }
 
 /**
@@ -355,7 +503,12 @@ function isDimAngularEntity(obj) {
  * (RDimLinearEntity).
  */
 function isDimLinearEntity(obj) {
-    return isOfType(obj, RDimLinearEntity) || isOfType(obj, RDimLinearEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RDimLinearEntity) || isOfType(obj, RDimLinearEntityPointer);
+    }
+    else {
+        return isOfType(obj, RDimLinearEntity);
+    }
 }
 
 /**
@@ -364,7 +517,12 @@ function isDimLinearEntity(obj) {
  * \return true if the given object is an arc entity (RHatchEntity).
  */
 function isHatchEntity(obj) {
-    return isOfType(obj, RHatchEntity) || isOfType(obj, RHatchEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RHatchEntity) || isOfType(obj, RHatchEntityPointer);
+    }
+    else {
+        return isOfType(obj, RHatchEntity);
+    }
 }
 
 /**
@@ -373,7 +531,12 @@ function isHatchEntity(obj) {
  * \return true if the given object is an arc entity (RArcEntity).
  */
 function isArcEntity(obj) {
-    return isOfType(obj, RArcEntity) || isOfType(obj, RArcEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RArcEntity) || isOfType(obj, RArcEntityPointer);
+    }
+    else {
+        return isOfType(obj, RArcEntity);
+    }
 }
 
 /**
@@ -382,7 +545,12 @@ function isArcEntity(obj) {
  * \return true if the given object is a line entity (RCircleEntity).
  */
 function isCircleEntity(obj) {
-    return isOfType(obj, RCircleEntity) || isOfType(obj, RCircleEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RCircleEntity) || isOfType(obj, RCircleEntityPointer);
+    }
+    else {
+        return isOfType(obj, RCircleEntity);
+    }
 }
 
 /**
@@ -391,7 +559,26 @@ function isCircleEntity(obj) {
  * \return true if the given object is an ellipse entity (REllipseEntity).
  */
 function isEllipseEntity(obj) {
-    return isOfType(obj, REllipseEntity) || isOfType(obj, REllipseEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, REllipseEntity) || isOfType(obj, REllipseEntityPointer);
+    }
+    else {
+        return isOfType(obj, REllipseEntity);
+    }
+}
+
+/**
+ * Checks if the given object is an ellipse entity and represents an ellipse arc (not a full ellipse).
+ *
+ * \return true if the given object is an ellipse arc entity (REllipseEntity).
+ */
+function isEllipseArcEntity(obj) {
+    if (RSettings.getQtVersion() < 0x060000) {
+        return (isOfType(obj, REllipseEntity) || isOfType(obj, REllipseEntityPointer)) && !obj.isFullEllipse();
+    }
+    else {
+        return isOfType(obj, REllipseEntity);
+    }
 }
 
 /**
@@ -409,7 +596,12 @@ function isFullEllipseEntity(obj) {
  * \return true if the given object is a line entity (RLineEntity).
  */
 function isLineEntity(obj) {
-    return isOfType(obj, RLineEntity) || isOfType(obj, RLineEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RLineEntity) || isOfType(obj, RLineEntityPointer);
+    }
+    else {
+        return isOfType(obj, RLineEntity);
+    }
 }
 
 /**
@@ -427,7 +619,12 @@ function isLineBasedEntity(obj) {
  * \return true if the given object is an xline entity (RXLineEntity).
  */
 function isXLineEntity(obj) {
-    return isOfType(obj, RXLineEntity) || isOfType(obj, RXLineEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RXLineEntity) || isOfType(obj, RXLineEntityPointer);
+    }
+    else {
+        return isOfType(obj, RXLineEntity);
+    }
 }
 
 /**
@@ -436,7 +633,12 @@ function isXLineEntity(obj) {
  * \return true if the given object is a ray entity (RRayEntity).
  */
 function isRayEntity(obj) {
-    return isOfType(obj, RRayEntity) || isOfType(obj, RRayEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RRayEntity) || isOfType(obj, RRayEntityPointer);
+    }
+    else {
+        return isOfType(obj, RRayEntity);
+    }
 }
 
 /**
@@ -445,7 +647,12 @@ function isRayEntity(obj) {
  * \return true if the given object is a point entity (RPointEntity).
  */
 function isPointEntity(obj) {
-    return isOfType(obj, RPointEntity) || isOfType(obj, RPointEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RPointEntity) || isOfType(obj, RPointEntityPointer);
+    }
+    else {
+        return isOfType(obj, RPointEntity);
+    }
 }
 
 /**
@@ -454,14 +661,24 @@ function isPointEntity(obj) {
  * \return true if the given object is an image entity (RImageEntity).
  */
 function isImageEntity(obj) {
-    return isOfType(obj, RImageEntity) || isOfType(obj, RImageEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RImageEntity) || isOfType(obj, RImageEntityPointer);
+    }
+    else {
+        return isOfType(obj, RImageEntity);
+    }
 }
 
 /**
  * \return true if the given object is a polyline entity (RPolylineEntity).
  */
 function isPolylineEntity(obj) {
-    return isOfType(obj, RPolylineEntity) || isOfType(obj, RPolylineEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RPolylineEntity) || isOfType(obj, RPolylineEntityPointer);
+    }
+    else {
+        return isOfType(obj, RPolylineEntity);
+    }
 }
 
 /**
@@ -477,12 +694,29 @@ function isClosedPolylineEntity(obj, tolerance) {
 }
 
 /**
+ * \return true if the given object is a geometrically open polyline entity.
+ */
+function isOpenPolylineEntity(obj, tolerance) {
+    if (isNull(tolerance)) {
+        return isPolylineEntity(obj) && !obj.isGeometricallyClosed();
+    }
+    else {
+        return isPolylineEntity(obj) && !obj.isGeometricallyClosed(tolerance);
+    }
+}
+
+/**
  * Checks if the given object is a solid entity.
  *
  * \return true if the given object is a solid entity (RSolidEntity).
  */
 function isSolidEntity(obj) {
-    return isOfType(obj, RSolidEntity) || isOfType(obj, RSolidEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RSolidEntity) || isOfType(obj, RSolidEntityPointer);
+    }
+    else {
+        return isOfType(obj, RSolidEntity);
+    }
 }
 
 /**
@@ -491,7 +725,12 @@ function isSolidEntity(obj) {
  * \return true if the given object is a trace entity (RTraceEntity).
  */
 function isTraceEntity(obj) {
-    return isOfType(obj, RTraceEntity) || isOfType(obj, RTraceEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RTraceEntity) || isOfType(obj, RTraceEntityPointer);
+    }
+    else {
+        return isOfType(obj, RTraceEntity);
+    }
 }
 
 /**
@@ -500,7 +739,12 @@ function isTraceEntity(obj) {
  * \return true if the given object is a face entity (RFaceEntity).
  */
 function isFaceEntity(obj) {
-    return isOfType(obj, RFaceEntity) || isOfType(obj, RFaceEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RFaceEntity) || isOfType(obj, RFaceEntityPointer);
+    }
+    else {
+        return isOfType(obj, RFaceEntity);
+    }
 }
 
 /**
@@ -509,7 +753,12 @@ function isFaceEntity(obj) {
  * \return true if the given object is a viewport entity (RViewportEntity).
  */
 function isViewportEntity(obj) {
-    return isOfType(obj, RViewportEntity) || isOfType(obj, RViewportEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RViewportEntity) || isOfType(obj, RViewportEntityPointer);
+    }
+    else {
+        return isOfType(obj, RViewportEntity);
+    }
 }
 
 /**
@@ -518,7 +767,21 @@ function isViewportEntity(obj) {
  * \return true if the given object is a spline entity (RSplineEntity).
  */
 function isSplineEntity(obj) {
-    return isOfType(obj, RSplineEntity) || isOfType(obj, RSplineEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RSplineEntity) || isOfType(obj, RSplineEntityPointer);
+    }
+    else {
+        return isOfType(obj, RSplineEntity);
+    }
+}
+
+/**
+ * Checks if the given object is a spline entity with fit points.
+ *
+ * \return true if the given object is a spline entity (RSplineEntity) with fit points.
+ */
+function isSplineEntityWithFitPoints(obj) {
+    return isSplineEntity(obj) && obj.hasFitPoints();
 }
 
 function isClosedSplineEntity(obj, tolerance) {
@@ -545,7 +808,12 @@ function isTextBasedEntity(obj) {
  * \return true if the given object is a text entity (RTextEntity).
  */
 function isTextEntity(obj) {
-    return isOfType(obj, RTextEntity) || isOfType(obj, RTextEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RTextEntity) || isOfType(obj, RTextEntityPointer);
+    }
+    else {
+        return isOfType(obj, RTextEntity);
+    }
 }
 
 /**
@@ -563,7 +831,12 @@ function isSimpleTextEntity(obj) {
  * \return true if the given object is a block reference entity (RBlockReferenceEntity).
  */
 function isBlockReferenceEntity(obj) {
-    return isOfType(obj, RBlockReferenceEntity) || isOfType(obj, RBlockReferenceEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RBlockReferenceEntity) || isOfType(obj, RBlockReferenceEntityPointer);
+    }
+    else {
+        return isOfType(obj, RBlockReferenceEntity);
+    }
 }
 
 /**
@@ -572,7 +845,12 @@ function isBlockReferenceEntity(obj) {
  * \return true if the given object is an attribute definition entity (RAttributeDefinitionEntity).
  */
 function isAttributeDefinitionEntity(obj) {
-    return isOfType(obj, RAttributeDefinitionEntity) || isOfType(obj, RAttributeDefinitionEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RAttributeDefinitionEntity) || isOfType(obj, RAttributeDefinitionEntityPointer);
+    }
+    else {
+        return isOfType(obj, RAttributeDefinitionEntity);
+    }
 }
 
 /**
@@ -581,7 +859,12 @@ function isAttributeDefinitionEntity(obj) {
  * \return true if the given object is an attribute entity (RAttributeEntity).
  */
 function isAttributeEntity(obj) {
-    return isOfType(obj, RAttributeEntity) || isOfType(obj, RAttributeEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RAttributeEntity) || isOfType(obj, RAttributeEntityPointer);
+    }
+    else {
+        return isOfType(obj, RAttributeEntity);
+    }
 }
 
 /**
@@ -591,7 +874,26 @@ function isAttributeEntity(obj) {
  * (RLeaderEntity).
  */
 function isLeaderEntity(obj) {
-    return isOfType(obj, RLeaderEntity) || isOfType(obj, RLeaderEntityPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RLeaderEntity) || isOfType(obj, RLeaderEntityPointer);
+    }
+    else {
+        return isOfType(obj, RLeaderEntity);
+    }
+}
+
+/**
+ * Checks if the given object is a tolerance entity.
+ *
+ * \return true if the given object is a tolerance entity (RToleranceEntity).
+ */
+function isToleranceEntity(obj) {
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RToleranceEntity) || isOfType(obj, RToleranceEntityPointer);
+    }
+    else {
+        return isOfType(obj, RToleranceEntity);
+    }
 }
 
 /**
@@ -615,6 +917,10 @@ function isEntityType(obj, type) {
         if (isDimensionEntity(obj)) {
             return true;
         }
+    }
+
+    if (type===RS.EntityAll) {
+        return true;
     }
 
     return false;
@@ -646,7 +952,12 @@ function isDirectedShape(obj) {
  * \return true if the given object is an arc shape (RArc).
  */
 function isArcShape(obj) {
-    return isOfType(obj, RArc) || isOfType(obj, RArcPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RArc) || isOfType(obj, RArcPointer);
+    }
+    else {
+        return isOfType(obj, RArc);
+    }
 }
 
 /**
@@ -655,7 +966,12 @@ function isArcShape(obj) {
  * \return true if the given object is a circle shape (RCircle).
  */
 function isCircleShape(obj) {
-    return isOfType(obj, RCircle) || isOfType(obj, RCirclePointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RCircle) || isOfType(obj, RCirclePointer);
+    }
+    else {
+        return isOfType(obj, RCircle);
+    }
 }
 
 /**
@@ -664,7 +980,12 @@ function isCircleShape(obj) {
  * \return true if the given object is an ellipse shape (REllipse).
  */
 function isEllipseShape(obj) {
-    return isOfType(obj, REllipse) || isOfType(obj, REllipsePointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, REllipse) || isOfType(obj, REllipsePointer);
+    }
+    else {
+        return isOfType(obj, REllipse);
+    }
 }
 
 /**
@@ -700,7 +1021,12 @@ function isLineBasedShape(obj) {
  * \return true if the given object is a line shape (RLine).
  */
 function isLineShape(obj) {
-    return isOfType(obj, RLine) || isOfType(obj, RLinePointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RLine) || isOfType(obj, RLinePointer);
+    }
+    else {
+        return isOfType(obj, RLine);
+    }
 }
 
 /**
@@ -709,7 +1035,12 @@ function isLineShape(obj) {
  * \return true if the given object is an xline shape (RXLine).
  */
 function isXLineShape(obj) {
-    return isOfType(obj, RXLine) || isOfType(obj, RXLinePointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RXLine) || isOfType(obj, RXLinePointer);
+    }
+    else {
+        return isOfType(obj, RXLine);
+    }
 }
 
 /**
@@ -718,7 +1049,12 @@ function isXLineShape(obj) {
  * \return true if the given object is a ray shape (RRay).
  */
 function isRayShape(obj) {
-    return isOfType(obj, RRay) || isOfType(obj, RRayPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RRay) || isOfType(obj, RRayPointer);
+    }
+    else {
+        return isOfType(obj, RRay);
+    }
 }
 
 /**
@@ -727,7 +1063,12 @@ function isRayShape(obj) {
  * \return true if the given object is a point shape (RPoint).
  */
 function isPointShape(obj) {
-    return isOfType(obj, RPoint) || isOfType(obj, RPointPointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RPoint) || isOfType(obj, RPointPointer);
+    }
+    else {
+        return isOfType(obj, RPoint);
+    }
 }
 
 /**
@@ -736,7 +1077,12 @@ function isPointShape(obj) {
  * \return true if the given object is a polyline shape (RPolyline).
  */
 function isPolylineShape(obj) {
-    return isOfType(obj, RPolyline) || isOfType(obj, RPolylinePointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RPolyline) || isOfType(obj, RPolylinePointer);
+    }
+    else {
+        return isOfType(obj, RPolyline);
+    }
 }
 
 /**
@@ -752,7 +1098,12 @@ function isClosedPolylineShape(obj) {
  * \return true if the given object is a spline shape (RSpline).
  */
 function isSplineShape(obj) {
-    return isOfType(obj, RSpline) || isOfType(obj, RSplinePointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RSpline) || isOfType(obj, RSplinePointer);
+    }
+    else {
+        return isOfType(obj, RSpline);
+    }
 }
 
 /**
@@ -775,9 +1126,110 @@ function isClosedSplineShape(obj, tolerance) {
  * \return true if the given object is a triangle shape (RTriangle).
  */
 function isTriangleShape(obj) {
-    return isOfType(obj, RTriangle) || isOfType(obj, RTrianglePointer);
+    if (RSettings.getQtVersion() < 0x060000) {
+        return isOfType(obj, RTriangle) || isOfType(obj, RTrianglePointer);
+    }
+    else {
+        return isOfType(obj, RTriangle);
+    }
 }
 
+/**
+ * Converts the given entity type enum to the class name.
+ *
+ * \return Class name (e.g. "RLineEntity" for RS.EntityLine
+ *
+ * \param type Entity type (RS::EntityType)
+ */
+function entityTypeToClass(type) {
+    switch (type) {
+    case RS.ObjectAll:
+        return "RObject";
+    case RS.ObjectUnknown:
+        return "RObject";
+    case RS.ObjectBlock:
+        return "RBlock";
+    case RS.ObjectLayer:
+        return "RLayer";
+    case RS.ObjectLayout:
+        return "RLayout";
+    case RS.ObjectLinetype:
+        return "RLinetype";
+    case RS.ObjectView:
+        return "RView";
+    case RS.ObjectDimStyle:
+        return "RDimStyle";
+
+    case RS.EntityAll:
+        return "REntity";
+    case RS.EntityBlockRef:
+        return "RBlockReferenceEntity";
+    case RS.EntityArc:
+        return "RArcEntity";
+    case RS.EntityAttribute:
+        return "RAttributeEntity";
+    case RS.EntityAttributeDefinition:
+        return "RAttributeDefinitionEntity";
+    case RS.EntityCircle:
+        return "RCircleEntity";
+    case RS.EntityDimension:
+        return "RDimensionEntity";
+    case RS.EntityDimAligned:
+        return "RDimAlignedEntity";
+    case RS.EntityDimAngular:
+        return "RDimAngularEntity";
+    case RS.EntityDimAngular2L:
+        return "RDimAngular2LEntity";
+    case RS.EntityDimAngular3P:
+        return "RDimAngular3PEntity";
+    case RS.EntityDimArcLength:
+        return "RDimArcLengthEntity";
+    case RS.EntityDimDiametric:
+        return "RDimDiametricEntity";
+    case RS.EntityDimOrdinate:
+        return "RDimOrdinateEntity";
+    case RS.EntityDimRotated:
+        return "RDimRotatedEntity";
+    case RS.EntityDimRadial:
+        return "RDimRadialEntity";
+    case RS.EntityEllipse:
+        return "REllipseEntity";
+    case RS.EntityHatch:
+        return "RHatchEntity";
+    case RS.EntityImage:
+        return "RImageEntity";
+    case RS.EntityLeader:
+        return "RLeaderEntity";
+    case RS.EntityTolerance:
+        return "RToleranceEntity";
+    case RS.EntityLine:
+        return "RLineEntity";
+    case RS.EntityXLine:
+        return "RXLineEntity";
+    case RS.EntityRay:
+        return "RRayEntity";
+    case RS.EntityPoint:
+        return "RPointEntity";
+    case RS.EntityPolyline:
+        return "RPolylineEntity";
+    case RS.EntitySolid:
+        return "RSolidEntity";
+    case RS.EntityTrace:
+        return "RTraceEntity";
+    case RS.EntityFace:
+        return "RFaceEntity";
+    case RS.EntitySpline:
+        return "RSplineEntity";
+    case RS.EntityTextBased:
+        return "RTextBasedEntity";
+    case RS.EntityText:
+        return "RTextEntity";
+    case RS.EntityViewport:
+        return "RViewportEntity";
+    default:
+        return undefined;
+    }
+}
 
 /**
  * Converts the given entity type enum to a human readable,
@@ -808,6 +1260,8 @@ function entityTypeToString(type, plural) {
         return plural ? qsTr("Linetypes") : qsTr("Linetype");
     case RS.ObjectView:
         return plural ? qsTr("Views") : qsTr("View");
+    case RS.ObjectDimStyle:
+        return plural ? qsTr("Dimension Styles") : qsTr("Dimension Style");
 
     case RS.EntityAll:
         return plural ? qsTr("Entities") : qsTr("Entity");
@@ -831,6 +1285,12 @@ function entityTypeToString(type, plural) {
         return plural ? qsTr("Aligned Dimensions") : qsTr("Aligned Dimension");
     case RS.EntityDimAngular:
         return plural ? qsTr("Angular Dimensions") : qsTr("Angular Dimension");
+    case RS.EntityDimAngular2L:
+        return plural ? qsTr("Angular Dimensions (2 Line)") : qsTr("Angular Dimension (2 Line)");
+    case RS.EntityDimAngular3P:
+        return plural ? qsTr("Angular Dimensions (3 Point)") : qsTr("Angular Dimension (3 Point)");
+    case RS.EntityDimArcLength:
+        return plural ? qsTr("Arc Dimension") : qsTr("Arc Dimension");
     case RS.EntityDimDiametric:
         return plural ? qsTr("Diametric Dimensions") : qsTr("Diametric Dimension");
     case RS.EntityDimOrdinate:
@@ -847,6 +1307,8 @@ function entityTypeToString(type, plural) {
         return plural ? qsTr("Images") : qsTr("Image");
     case RS.EntityLeader:
         return plural ? qsTr("Leaders") : qsTr("Leader");
+    case RS.EntityTolerance:
+        return plural ? qsTr("Tolerances") : qsTr("Tolerance");
     case RS.EntityLine:
         return plural ? qsTr("Lines") : qsTr("Line");
     case RS.EntityXLine:
@@ -877,69 +1339,114 @@ function entityTypeToString(type, plural) {
     }
 }
 
-//function getEntityTypeProperties(type) {
-//    switch (type) {
-//    case RS.EntityAll:
-//        return REntity.getStaticPropertyTypeIds();
-//    case RS.EntityBlockReferenceEntity:
-//        return RBlockReferenceEntity.getStaticPropertyTypeIds();
-//    case RS.EntityArc:
-//        return RArcEntity.getStaticPropertyTypeIds();
-//    case RS.EntityAttribute:
-//        return RAttributeEntity.getStaticPropertyTypeIds();
-//    case RS.EntityAttributeDefinition:
-//        return RAttributeDefinitionEntity.getStaticPropertyTypeIds();
-//    case RS.EntityCircle:
-//        return RCircleEntity.getStaticPropertyTypeIds();
-//    case RS.EntityDimension:
-//        return RDimensionEntity.getStaticPropertyTypeIds();
-//    case RS.EntityDimAligned:
-//        return RDimAlignedEntity.getStaticPropertyTypeIds();
-//    case RS.EntityDimAngular:
-//        return RDimAngularEntity.getStaticPropertyTypeIds();
-//    case RS.EntityDimDiametric:
-//        return RDimDiametricEntity.getStaticPropertyTypeIds();
-//    case RS.EntityDimOrdinate:
-//        return RDimOrdinateEntity.getStaticPropertyTypeIds();
-//    case RS.EntityDimRotated:
-//        return RDimRotatedEntity.getStaticPropertyTypeIds();
-//    case RS.EntityDimRadial:
-//        return RDimRadialEntity.getStaticPropertyTypeIds();
-//    case RS.EntityEllipse:
-//        return REllipseEntity.getStaticPropertyTypeIds();
-//    case RS.EntityHatch:
-//        return RHatchEntity.getStaticPropertyTypeIds();
-//    case RS.EntityImage:
-//        return RImageEntity.getStaticPropertyTypeIds();
-//    case RS.EntityLeader:
-//        return RLeaderEntity.getStaticPropertyTypeIds();
-//    case RS.EntityLine:
-//        return RLineEntity.getStaticPropertyTypeIds();
-//    case RS.EntityPoint:
-//        return RPointEntity.getStaticPropertyTypeIds();
-//    case RS.EntityPolyline:
-//        return RPolylineEntity.getStaticPropertyTypeIds();
-//    case RS.EntitySolid:
-//        return RSolidEntity.getStaticPropertyTypeIds();
-//    case RS.EntityTrace:
-//        return RTraceEntity.getStaticPropertyTypeIds();
-//    case RS.EntityViewport:
-//        return RViewportEntity.getStaticPropertyTypeIds();
-//    case RS.EntityRay:
-//        return RRayEntity.getStaticPropertyTypeIds();
-//    case RS.EntityXLine:
-//        return RXLineEntity.getStaticPropertyTypeIds();
-//    case RS.EntitySpline:
-//        return RSplineEntity.getStaticPropertyTypeIds();
-//    case RS.EntityTextBased:
-//        return RTextBasedEntity.getStaticPropertyTypeIds();
-//    case RS.EntityText:
-//        return RTextEntity.getStaticPropertyTypeIds();
-//    case RS.EntityUnknown:
-//    default:
-//        return [];
-//    }
-//}
+/**
+ * Converts the given entity type name to the entity type enum.
+ *
+ * \return entity type enum.
+ *
+ * \param typeName Entity type name ("Line", "Arc", ...)
+ */
+function getEntityType(typeName) {
+    switch (typeName) {
+    case "Block":
+        return RS.ObjectBlock;
+    case "Layer":
+        return RS.ObjectLayer;
+    case "Layout":
+        return RS.ObjectLayout;
+    case "Linetype":
+        return RS.ObjectLinetype;
+    case "View":
+        return RS.ObjectView;
+
+    case "Entity":
+        return RS.EntityAll;
+    case "3dFace":
+        return RS.Entity3dFace;
+    case "Block Reference":
+        return RS.EntityBlockRef;
+    case "Block Reference and Attributes":
+        return RS.EntityBlockRefAttr;
+    case "Arc":
+        return RS.EntityArc;
+    case "Attribute":
+        return RS.EntityAttribute;
+    case "Attribute Definition":
+        return RS.EntityAttributeDefinition;
+    case "Circle":
+        return RS.EntityCircle;
+    case "Dimension":
+        return RS.EntityDimension;
+    case "Aligned Dimension":
+        return RS.EntityDimAligned;
+    case "Angular Dimension":
+        return RS.EntityDimAngular;
+    case "Angular Dimension (2 Line)":
+        return RS.EntityDimAngular2L;
+    case "Angular Dimension (3 Point)":
+        return RS.EntityDimAngular3P;
+    case "Arc Dimension":
+        return RS.EntityDimArcLength;
+    case "Diametric Dimension":
+        return RS.EntityDimDiametric;
+    case "Ordinate Dimension":
+        return RS.EntityDimOrdinate;
+    case "Rotated Dimension":
+        return RS.EntityDimRotated;
+    case "Radial Dimension":
+        return RS.EntityDimRadial;
+    case "Ellipse":
+        return RS.EntityEllipse;
+    case "Hatch":
+        return RS.EntityHatch;
+    case "Image":
+        return RS.EntityImage;
+    case "Leader":
+        return RS.EntityLeader;
+    case "Tolerance":
+        return RS.EntityTolerance;
+    case "Line":
+        return RS.EntityLine;
+    case "Infinite Line":
+    case "XLine":
+        return RS.EntityXLine;
+    case "Ray":
+        return RS.EntityRay;
+    case "Point":
+        return RS.EntityPoint;
+    case "Polyline":
+        return RS.EntityPolyline;
+    case "Solid":
+        return RS.EntitySolid;
+    case "Trace":
+        return RS.EntityTrace;
+    case "Face":
+        return RS.EntityFace;
+    case "Spline":
+        return RS.EntitySpline;
+    case "Text based":
+        return RS.EntityTextBased;
+    case "Text":
+        return RS.EntityText;
+    case "Viewport":
+        return RS.EntityViewport;
+    default:
+        return RS.ObjectUnknown;
+    }
+}
+
+function translateFilterStrings(filterStrings) {
+    for (var i=0; i<filterStrings.length; i++) {
+        filterStrings[i] = filterStrings[i].replace("All CAD Files", qsTr("All CAD Files"));
+        filterStrings[i] = filterStrings[i].replace("DXF Files", qsTr("DXF Files"));
+        filterStrings[i] = filterStrings[i].replace("SVG Files", qsTr("SVG Files"));
+        filterStrings[i] = filterStrings[i].replace("DXF Drawing", qsTr("DXF Drawing"));
+        filterStrings[i] = filterStrings[i].replace("DWG Drawing", qsTr("DWG Drawing"));
+        filterStrings[i] = filterStrings[i].replace("PDF File", qsTr("PDF File"));
+        filterStrings[i] = filterStrings[i].replace("PDF/A-1B File", qsTr("PDF/A-1B File"));
+    }
+    return filterStrings;
+}
 
 /**
  * Checks the type of the given object.
@@ -1024,7 +1531,7 @@ function getWidgets(widget, ca, allowDuplicates) {
     var children = widget.children();
     for (var i = 0; i < children.length; ++i) {
         var child = children[i];
-        if (isDeleted(child)) {
+        if (isNull(child) || isDeleted(child)) {
             continue;
         }
         if (!isNull(child.objectName) && child.objectName !== "") {
@@ -1049,20 +1556,6 @@ function getWidgets(widget, ca, allowDuplicates) {
     }
 
     return ca;
-}
-
-/**
- * Sleeps for the given milliseconds.
- * \param msec the time to sleep
- */
-function sleep(msec) {
-    var date = new Date();
-    var curDate = null;
-    var c = 0;
-    do {
-        curDate = new Date();
-        ++c;
-    } while (curDate - date < msec);
 }
 
 /**
@@ -1115,8 +1608,8 @@ function copyDirectory(sourceDirPath, destDirPath) {
     var files;
     var srcName;
     var destName;
-    var filterFlags = new QDir.Filters(QDir.Files);
-    var sortFlags = new QDir.SortFlags(QDir.NoSort);
+    var filterFlags = makeQDirFilters(QDir.Files);
+    var sortFlags = makeQDirSortFlags(QDir.NoSort);
     files = sourceDir.entryList(filterFlags, sortFlags);
     for(i = 0; i< files.length; i++) {
         srcName = sourceDirPath + QDir.separator + files[i];
@@ -1126,7 +1619,7 @@ function copyDirectory(sourceDirPath, destDirPath) {
         }
     }
 
-    var flags = new QDir.Filters(QDir.AllDirs, QDir.NoDotAndDotDot);
+    var flags = makeQDirFilters(QDir.AllDirs, QDir.NoDotAndDotDot);
     files = sourceDir.entryList(flags);
     for(i = 0; i< files.length; i++) {
         srcName = sourceDirPath + QDir.separator + files[i];
@@ -1145,8 +1638,7 @@ function removeDirectory(dirPath) {
     var dir = new QDir(dirPath);
     var hasErr = false;
     if (dir.exists()) {
-        var flags = new QDir.Filters(QDir.NoDotAndDotDot, 
-                QDir.Dirs, QDir.Files, QDir.Hidden);
+        var flags = makeQDirFilters(QDir.NoDotAndDotDot, QDir.Dirs, QDir.Files, QDir.Hidden);
         var entries = dir.entryInfoList(flags);
         for (var i = 0; i <  entries.length; i++) {
             var entryInfo = entries[i];
@@ -1191,14 +1683,14 @@ function findFile(dirPath, fileName, ignoreDirs) {
     var i;
     var files;
     var name;
-    var filterFlags = new QDir.Filters(QDir.Files);
-    var sortFlags = new QDir.SortFlags(QDir.NoSort);
+    var filterFlags = makeQDirFilters(QDir.Files);
+    var sortFlags = makeQDirSortFlags(QDir.NoSort);
     files = dir.entryList([fileName], filterFlags, sortFlags);
     for (i=0; i<files.length; i++) {
         res = res.concat(dirPath + QDir.separator + files[i]);
     }
 
-    var flags = new QDir.Filters(QDir.AllDirs, QDir.NoDotAndDotDot);
+    var flags = makeQDirFilters(QDir.AllDirs, QDir.NoDotAndDotDot);
     files = dir.entryList(flags);
     for (i = 0; i< files.length; i++) {
         var nextDir = dirPath + QDir.separator + files[i];
@@ -1306,6 +1798,23 @@ Array.prototype.containsIgnoreCase = function(obj) {
 };
 
 /**
+ * \return True if this array contains all items of the given array.
+ */
+Array.prototype.containsAll = function(obj) {
+    if (obj.length>this.length) {
+        return false;
+    }
+
+    for (var i=0; i<obj.length; i++) {
+        if (this.indexOf(obj[i])<0) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
+/**
  * \return Array with all elements of this array that are not also
  * in the given array (subtract).
  */
@@ -1367,6 +1876,21 @@ Array.prototype.remove = function(val, compareFunction) {
 };
 
 /**
+ * Removes all matches of the given value from the array.
+ * \param The value(s) to remove.
+ */
+Array.prototype.removeAll = function() {
+    var what, a = arguments, l = a.length, ax;
+    while (l && this.length) {
+        what = a[--l];
+        while ((ax = this.indexOf(what)) !== -1) {
+            this.splice(ax, 1);
+        }
+    }
+    return this;
+};
+
+/**
  * Remove the first case insensitive match of the given string value from the array.
  * \param val The value to remove.
  */
@@ -1376,7 +1900,7 @@ Array.prototype.removeIgnoreCase = function(val) {
 
 /**
  * Remove the given parameter from an array (by default 'undefined').
- * 
+ *
  * test = new Array("","One","Two","", "Three","","Four").clean("");
  *
  * test2 = [1,2,,3,,3,,,,,,4,,4,,5,,6,,,,];
@@ -1387,7 +1911,7 @@ Array.prototype.removeIgnoreCase = function(val) {
  */
 Array.prototype.clean = function(deleteValue) {
     for (var i = 0; i < this.length; i++) {
-        if (this[i] == deleteValue) {         
+        if (this[i] == deleteValue) {
             this.splice(i, 1);
             i--;
         }
@@ -1397,7 +1921,7 @@ Array.prototype.clean = function(deleteValue) {
 
 /**
  * Clones (copies) the array.
- * 
+ *
  * \returns the cloned array
  */
 Array.prototype.clone = function() {
@@ -1411,84 +1935,95 @@ Array.prototype.sortNumerical = function() {
     Array.prototype.sort.call(this, function(a,b) { return a - b });
 }
 
-//Array.alphaNumericalSorter = function(a, b) {
-//    var aVal = parseInt(a);
-//    var bVal = parseInt(b);
-//    if (isNaN(aVal) && isNaN(bVal)) {
-//        // alphabetical:
-//        return a.localeCompare(b);
-//    }
-//    else if (isNaN(aVal)) {
-//        // text before numbers:
-//        return -1;
-//    }
-//    else if (isNaN(bVal)) {
-//        // numbers after texts:
-//        return 1;
-//    }
-//    else {
-//        // nummerical:
-//        return aVal - bVal;
-//    }
-//};
-
-/* alphanum.js (C) Brian Huisman
- * Based on the Alphanum Algorithm by David Koelle
- * The Alphanum Algorithm is discussed at http://www.DaveKoelle.com
- *
- * Distributed under same license as original
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
 Array.alphaNumericalSorter = function(a, b) {
-    function chunkify(t) {
-        var tz = new Array();
-        var x = 0, y = -1, n = 0, i, j;
-
-        while (i = (j = t.charAt(x++)).charCodeAt(0)) {
-            var m = (i == 46 || (i >=48 && i <= 57));
-            if (m !== n) {
-                tz[++y] = "";
-                n = m;
-            }
-            tz[y] += j;
-        }
-        return tz;
-    }
-
-    var aa = chunkify(a.toLowerCase());
-    var bb = chunkify(b.toLowerCase());
-
-    for (x = 0; aa[x] && bb[x]; x++) {
-        if (aa[x] !== bb[x]) {
-            var c = Number(aa[x]), d = Number(bb[x]);
-            if (c == aa[x] && d == bb[x]) {
-                return c - d;
-            } else return (aa[x] > bb[x]) ? 1 : -1;
-        }
-    }
-    return aa.length - bb.length;
+    return RS.compareAlphanumerical(a, b);
 };
+
+Array.prototype.filter = function(func, thisArg) {
+    if ( ! ((typeof func === 'Function' || typeof func === 'function') && this) )
+        throw new TypeError();
+
+    var len = this.length >>> 0,
+        res = new Array(len), // preallocate array
+        t = this, c = 0, i = -1;
+
+    var kValue;
+    if (thisArg === undefined){
+      while (++i !== len){
+        // checks to see if the key was set
+        if (i in this){
+          kValue = t[i]; // in case t is changed in callback
+          if (func(t[i], i, t)){
+            res[c++] = kValue;
+          }
+        }
+      }
+    }
+    else{
+      while (++i !== len){
+        // checks to see if the key was set
+        if (i in this){
+          kValue = t[i];
+          if (func.call(thisArg, t[i], i, t)){
+            res[c++] = kValue;
+          }
+        }
+      }
+    }
+
+    res.length = c; // shrink down array to proper size
+    return res;
+};
+
+Array.prototype.flat = function(depth) {
+    // If no depth is specified, default to 1
+    if (depth === undefined) {
+        depth = 1;
+    }
+
+    // Recursively reduce sub-arrays to the specified depth
+    var flatten = function (arr, depth) {
+
+        // If depth is 0, return the array as-is
+        if (depth < 1) {
+            return arr.slice();
+        }
+
+        // Otherwise, concatenate into the parent array
+        return arr.reduce(function (acc, val) {
+            return acc.concat(Array.isArray(val) ? flatten(val, depth - 1) : val);
+        }, []);
+
+    };
+
+    return flatten(this, depth);
+
+};
+
 
 /**
  * Sorts this array with string items (case insensitive)
  */
-Array.prototype.sortCaseInsensitive = function() {
-    Array.prototype.sort.call(this, function (a, b) {
-        return a.toLowerCase().localeCompare(b.toLowerCase());
-    });
+//Array.prototype.sortCaseInsensitive = function() {
+//    Array.prototype.sort.call(this, function (a, b) {
+//        return a.toLowerCase().localeCompare(b.toLowerCase());
+//    });
+//};
+
+Array.union = function(x, y) {
+    var i;
+    var obj = {};
+    for (i=x.length-1; i>=0; --i) {
+        obj[x[i]] = x[i];
+    }
+    for (i=y.length-1; i>=0; --i) {
+        obj[y[i]] = y[i];
+    }
+    var res = []
+    for (var k in obj) {
+        res.push(obj[k]);
+    }
+    return res;
 };
 
 /* Finds the intersection of two sorted arrays.
@@ -1602,8 +2137,12 @@ String.prototype.trim = function() {
  */
 String.prototype.elidedText = function(font, pixel) {
     var fm = new QFontMetrics(font);
-    var t = fm.elidedText(this, Qt.ElideMiddle, pixel);
-    fm.destroy();
+    var s = this;
+    if (!isString(s)) {
+        s = s.toString();
+    }
+    var t = fm.elidedText(s, Qt.ElideMiddle, pixel);
+    destr(fm);
     // replace HORIZONTAL ELLIPSIS (not every GUI font has those):
     t = t.replace(/\u2026/g, '...');
     return t;
@@ -1740,7 +2279,7 @@ String.prototype.wordWrap = function(m, c, b){
 String.prototype.regexIndexOf = function(regex, startpos) {
     var indexOf = this.substring(startpos || 0).search(regex);
     return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
-}
+};
 
 String.prototype.regexLastIndexOf = function(regex, startpos) {
     regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
@@ -1757,7 +2296,55 @@ String.prototype.regexLastIndexOf = function(regex, startpos) {
         regex.lastIndex = ++nextStop;
     }
     return lastIndexOf;
-}
+};
+
+String.prototype.padStart = function(targetLength, padString) {
+    targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
+    padString = String(typeof padString !== 'undefined' ? padString : ' ');
+    if (this.length > targetLength) {
+        return String(this);
+    } else {
+        targetLength = targetLength - this.length;
+        if (targetLength > padString.length) {
+            padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
+        }
+        return padString.slice(0, targetLength) + String(this);
+    }
+};
+
+String.prototype.repeat = function(count) {
+    var str = '' + this;
+    // To convert string to integer.
+    count = +count;
+    // Check NaN
+    if (count != count)
+        count = 0;
+
+    if (count < 0)
+        throw new RangeError('repeat count must be non-negative');
+
+    if (count == Infinity)
+        throw new RangeError('repeat count must be less than infinity');
+
+    count = Math.floor(count);
+    if (str.length == 0 || count == 0)
+        return '';
+
+    // Ensuring count is a 31-bit integer allows us to heavily optimize the
+    // main part. But anyway, most current (August 2014) browsers can't handle
+    // strings 1 << 28 chars or longer, so:
+    if (str.length * count >= 1 << 28)
+        throw new RangeError('repeat count must not overflow maximum string size');
+
+    var maxCount = str.length * count;
+    count = Math.floor(Math.log(count) / Math.log(2));
+    while (count) {
+        str += str;
+        count--;
+    }
+    str += str.substring(0, maxCount - str.length);
+    return str;
+};
 
 /**
  * Modulo which works also for negative numbers (workaround for
@@ -1817,7 +2404,7 @@ function coordinateToString(coordinate, decimals, relative, polar, doc) {
     var second;
     var sep;
     if (polar) {
-        sep = RSettings.getStringValue("Input/PolarCoordinateSeparator", "<");
+        sep = RSettings.getPolarCoordinateSeparator();
         if (!isNull(doc)) {
             first = doc.formatLinear(coordinate.getMagnitude());
             second = doc.formatAngle(coordinate.getAngle());
@@ -1828,7 +2415,7 @@ function coordinateToString(coordinate, decimals, relative, polar, doc) {
         }
     }
     else {
-        sep = RSettings.getStringValue("Input/CartesianCoordinateSeparator", ",");
+        sep = RSettings.getCartesianCoordinateSeparator();
         if (!isNull(doc)) {
             first = doc.formatLinear(coordinate.x);
             second = doc.formatLinear(coordinate.y);
@@ -1841,10 +2428,7 @@ function coordinateToString(coordinate, decimals, relative, polar, doc) {
 
     var prefix;
     if (relative) {
-        prefix = RSettings.getStringValue(
-                    "Input/RelativeCoordinatePrefix",
-                    String.fromCharCode(64)  // @ (doxygen can't cope with an @ here)
-        );
+        prefix = RSettings.getRelativeCoordinatePrefix();
     }
     else {
         prefix = "";
@@ -1914,38 +2498,43 @@ function stringToDirectDistanceEntry(relativeZero, cursorPosition, str) {
  * Creates and returns a new entity based on the given shape.
  */
 function shapeToEntity(document, shape) {
-    if (isPointShape(shape)) {
-        return new RPointEntity(document, new RPointData(shape.getPosition()));
-    }
-    else if (isLineShape(shape)) {
-        return new RLineEntity(document, new RLineData(shape));
-    }
-    else if (isRayShape(shape)) {
-        return new RRayEntity(document, new RRayData(shape));
-    }
-    else if (isXLineShape(shape)) {
-        return new RXLineEntity(document, new RXLineData(shape));
-    }
-    else if (isArcShape(shape)) {
-        return new RArcEntity(document, new RArcData(shape));
-    }
-    else if (isCircleShape(shape)) {
-        return new RCircleEntity(document, new RCircleData(shape));
-    }
-    else if (isEllipseShape(shape)) {
-        return new REllipseEntity(document, new REllipseData(shape));
-    }
-    else if (isPolylineShape(shape)) {
-        return new RPolylineEntity(document, new RPolylineData(shape));
-    }
-    else if (isSplineShape(shape)) {
-        return new RSplineEntity(document, new RSplineData(shape));
-    }
-    else if (isTriangleShape(shape)) {
-        return new RSolidEntity(document, new RSolidData(shape));
+    var s = shape;
+    if (isFunction(s.data)) {
+        s = s.data();
     }
 
-    qWarning("shapeToEntity: unknown shape: ", shape);
+    if (isPointShape(s)) {
+        return new RPointEntity(document, new RPointData(s.getPosition()));
+    }
+    else if (isLineShape(s)) {
+        return new RLineEntity(document, new RLineData(s));
+    }
+    else if (isRayShape(s)) {
+        return new RRayEntity(document, new RRayData(s));
+    }
+    else if (isXLineShape(s)) {
+        return new RXLineEntity(document, new RXLineData(s));
+    }
+    else if (isArcShape(s)) {
+        return new RArcEntity(document, new RArcData(s));
+    }
+    else if (isCircleShape(s)) {
+        return new RCircleEntity(document, new RCircleData(s));
+    }
+    else if (isEllipseShape(s)) {
+        return new REllipseEntity(document, new REllipseData(s));
+    }
+    else if (isPolylineShape(s)) {
+        return new RPolylineEntity(document, new RPolylineData(s));
+    }
+    else if (isSplineShape(s)) {
+        return new RSplineEntity(document, new RSplineData(s));
+    }
+    else if (isTriangleShape(s)) {
+        return new RSolidEntity(document, new RSolidData(s));
+    }
+
+    qWarning("shapeToEntity: unknown shape: ", s);
     return undefined;
 }
 
@@ -2072,7 +2661,12 @@ function getMainWindow() {
 }
 
 function getCurrentDateTime(format) {
-    return new QDateTime(QDateTime.currentDateTime()).toString(format);
+    if (RSettings.getQtVersion() >= 0x060000) {
+        return QDateTime.currentDateTime().toString(format);
+    }
+    else {
+        return new QDateTime(QDateTime.currentDateTime()).toString(format);
+    }
 }
 
 function mergeProperties(obj1,obj2) {
@@ -2091,7 +2685,7 @@ function mergeProperties(obj1,obj2) {
  * (i.e. contains invalid characters).
  */
 function fixSymbolTableName(name) {
-    // trim white space at begining and end to avoid invalid block name:
+    // trim white space at beginning and end to avoid invalid block name:
     name = name.trim();
 
     // max length:
@@ -2196,7 +2790,6 @@ function restoreOverrideCursor() {
 }
 
 function initUserShortcuts() {
-    var settings = RSettings.getQSettings();
     var keys = RSettings.getAllKeys("Shortcuts");
 
     var i, key, action;
@@ -2207,19 +2800,32 @@ function initUserShortcuts() {
         if (isNull(action)) {
             continue;
         }
-        var scStringList = settings.value("Shortcuts/" + key);
 
-        // explicitely no shortcuts:
+        var match = action.getScriptFile().contains("OpenFile");
+
+        var scStringList = RSettings.getValue("Shortcuts/" + key);
+
+        if (match) qDebug("scStringList", scStringList);
+
+        // explicitly no shortcuts:
         if (isNull(scStringList)) {
+            if (match) qDebug("explicitly no shortcuts");
             action.setShortcuts([]);
+            action.removeShortcuts();
             continue;
         }
+
+        if (match) qDebug("setting shortcuts to ", scStringList);
+
+        //action.setShortcutsFromStrings(scStringList);
+        //action.setShortcuts(scStringList);
 
         var scList = [];
         for (var k=0; k<scStringList.length; k++) {
             var sc = new QKeySequence(scStringList[k]);
             scList.push(sc);
         }
+        action.removeShortcuts();
         action.setShortcuts(scList);
     }
 
@@ -2231,9 +2837,9 @@ function initUserShortcuts() {
         if (isNull(action)) {
             continue;
         }
-        var cmStringList = settings.value("Commands/" + key);
+        var cmStringList = RSettings.getValue("Commands/" + key);
 
-        // explicitely no commands:
+        // explicitly no commands:
         if (isNull(cmStringList)) {
             action.setCommands([]);
             continue;
@@ -2250,6 +2856,7 @@ function addActionsToWidgets() {
 
     // delete previous shortcut delegates:
     // part of workaround for QTBUG-38256, QTBUG-57990:
+    /*
     if ((RSettings.getQtVersion()<0x050500 && RSettings.getQtVersion()>=0x050000) ||
         (RSettings.getQtVersion()===0x050800 && RS.getSystemId()==="linux")) {
 
@@ -2259,14 +2866,15 @@ function addActionsToWidgets() {
                 if (isNull(scObjs[si])) {
                     continue;
                 }
-                scObjs[si].destroy();
+                destr(scObjs[si]);
             }
         }
         appWin.setProperty("DelegatedShortcutsObjs", []);
     }
+    */
 
     var actions = RGuiAction.getActions();
-    var widgetTypes = ["Menu", "ToolBar", "MatrixPanel", "Panel"];
+    var widgetTypes = ["Menu", "ToolBar", "MatrixPanel", "Panel", "UserToolBar1", "UserToolBar2"];
     for (var c=0; c<actions.length; ++c) {
         var a = actions[c];
         if (a.icon.isNull() && !a.isIconDisabled()) {
@@ -2284,6 +2892,7 @@ function addActionsToWidgets() {
 
             var visibility = true;
             if (wn[0]==="!") {
+                // action not visible by default in this widget:
                 visibility = false;
                 wn = wn.substring(1);
             }
@@ -2312,6 +2921,7 @@ function addActionsToWidgets() {
 
                 // workaround for QTBUG-38256 (action not triggered for letter based shortcuts in SUB menus):
                 // workaround for QTBUG-57990 (action not triggered for letter based shortcuts in ALL menus):
+                /*
                 if ((RSettings.getQtVersion()<0x050500 && RSettings.getQtVersion()>=0x050000) ||
                     (RSettings.getQtVersion()===0x050800 && RS.getSystemId()==="linux")) {
 
@@ -2342,6 +2952,7 @@ function addActionsToWidgets() {
                         a.setDefaultShortcuts([]);
                     }
                 }
+                */
 
                 if (visibility) {
                     RGuiAction.addToWidget(a, w);
@@ -2362,7 +2973,9 @@ function addActionsToWidgets() {
             }
         }
 
-        if (!addedToWidget) {
+        if ((RSettings.getQtVersion()<0x050500 && RSettings.getQtVersion()>=0x050000) ||
+            (RSettings.getQtVersion()===0x050800 && RS.getSystemId()==="linux") ||
+            !addedToWidget) {
             // always add action to main window to make sure keycodes
             // are active even if action is invisible:
             RGuiAction.addToWidget(a, appWin);
@@ -2433,46 +3046,118 @@ function neutralPath(path) {
     return path;
 }
 
+/**
+ * \return Mapped icon path for the given icon for the current theme or
+ * mapped icon path for a dark theme (-inverse) or the same path or undefined if no such
+ * icon can be found.
+ */
 function autoIconPath(path) {
-    if (RSettings.hasDarkGuiBackground()) {
-        var pathDark = path.replace(/\.svg$/, "-inverse.svg");
-        if (new QFileInfo(pathDark).exists()) {
-            return pathDark;
+    // set theme specific icon:
+    var themePath = RSettings.getThemePath();
+    var themeIconFile = undefined;
+    if (themePath.length>0) {
+        var fi = new QFileInfo(path);
+        var iconFileName = fi.fileName();
+        themeIconFile = themePath + "/icons/" + iconFileName;
+        if (!new QFileInfo(themeIconFile).exists()) {
+            // no SVG found, look up PNG:
+            var iconBaseName = fi.baseName();
+            themeIconFile = themePath + "/icons/" + iconBaseName + ".png";
+            if (!new QFileInfo(themeIconFile).exists()) {
+                // no PNG found, use default icon:
+                themeIconFile = undefined;
+            }
         }
+    }
+
+    if (!isNull(themeIconFile)) {
+        // got icon from theme:
+        return themeIconFile;
+    }
+
+    // no theme icon, try dark mode icon:
+    var darkModeIconFile = undefined;
+    if (RSettings.hasDarkGuiBackground()) {
+        darkModeIconFile = path.replace(/\.svg$/, "-inverse.svg");
+        darkModeIconFile = darkModeIconFile.replace(/\.png$/, "-inverse.png");
+        if (!new QFileInfo(darkModeIconFile).exists()) {
+            darkModeIconFile = undefined;
+        }
+    }
+
+    if (!isNull(darkModeIconFile)) {
+        // got dark mode icon:
+        return darkModeIconFile;
+    }
+
+    if (!new QFileInfo(path).exists()) {
+        // given icon does not exist (for icons based on object names, e.g. in options toolbar):
+        return undefined;
     }
 
     return path;
 }
 
 function applyTheme() {
+    var systemId = RS.getSystemId();
     var theme = RSettings.getValue("Theme/ThemeName", undefined);
-    if (!isNull(theme)) {
-        var prefix = "themes/" + theme + "/";
-        var fn = prefix + "stylesheet.css";
-        if (new QFileInfo(fn).exists()) {
-            var file = new QFile(fn);
-            var flags = new QIODevice.OpenMode(QIODevice.ReadOnly | QIODevice.Text);
-            if (file.open(flags)) {
-                var textStream = new QTextStream(file);
-                var allLines = textStream.readAll();
-                file.close();
-                allLines = allLines.replace(/url\(/g, "url(" + prefix);
-                qApp.setStyleSheet(allLines);
-                return;
+    if (systemId!=="osx" && !isNull(theme)) {
+        var path = "themes/" + theme + "/";
+
+        qApp.styleSheet = "";
+
+        // load stylesheet.css, stylesheet_[win|macos|linux].css:
+        var found = false;
+        if (systemId==="osx") systemId = "macos";
+
+        var postfixes = ["", "_" + systemId];
+        for (var i=0; i<postfixes.length; i++) {
+            var postfix = postfixes[i];
+            var fn = path + "stylesheet" + postfix + ".css";
+            qDebug("trying to load theme stylesheet: ", fn);
+
+            if (new QFileInfo(fn).exists()) {
+                var css = readTextFile(fn);
+                if (css.contains("RequiresPlugin:true")) {
+                    // only load theme if plugin loaded:
+                    var pluginId = theme.toUpperCase() + "STYLE";
+                    if (!RPluginLoader.hasPlugin(pluginId)) {
+                        qWarning("Theme not loaded: ", theme);
+                        qWarning("Theme plugin not found:", pluginId);
+                        return;
+                    }
+                }
+
+                css = css.replace(/url\(/g, "url(" + path);
+                qApp.styleSheet = qApp.styleSheet + "\n" + css;
+                found = true;
             }
         }
-        if (theme!=="Default") {
-            qWarning("Cannot open theme: ", theme);
+
+        if (!found) {
+            if (theme!=="Default") {
+                qWarning("Cannot open theme: ", theme);
+            }
         }
-        qApp.setStyleSheet("");
     }
 }
 
+function setUtf8Codec(ts) {
+    if (RSettings.getQtVersion() >= 0x060000) {
+        ts.setEncoding(QStringConverter.Utf8);
+    }
+    else {
+        ts.setCodec("UTF-8");
+    }
+}
+
+
 function readTextFile(fileName) {
     var file = new QFile(fileName);
-    var flags = new QIODevice.OpenMode(QIODevice.ReadOnly | QIODevice.Text);
+    var flags = makeQIODeviceOpenMode(QIODevice.ReadOnly, QIODevice.Text);
     if (file.open(flags)) {
         var textStream = new QTextStream(file);
+        setUtf8Codec(textStream);
         var contents = textStream.readAll();
         file.close();
         return contents;
@@ -2483,30 +3168,62 @@ function readTextFile(fileName) {
 
 function writeTextFile(fileName, str) {
     var file = new QFile(fileName);
-    var flags = new QIODevice.OpenMode(QIODevice.WriteOnly | QIODevice.Text);
+    var flags = makeQIODeviceOpenMode(QIODevice.WriteOnly, QIODevice.Text);
     if (file.open(flags)) {
         var textStream = new QTextStream(file);
+        setUtf8Codec(textStream);
         textStream.writeString(str);
+        file.close();
     }
-    file.close();
-};
+}
 
-function getKeyboardModifiers() {
+function getKeyboardModifiers(event) {
+    if (!isNull(event)) {
+        if (isFunction(event.getModifiers)) {
+            return event.getModifiers();
+        }
+        else {
+            return event.modifiers();
+        }
+    }
+
     if (RSettings.isQt(5)) {
-        return QGuiApplication.keyboardModifiers();
+        return QGuiApplication.queryKeyboardModifiers();
     }
     else {
-        return QApplication.keyboardModifiers();
+        return QApplication.queryKeyboardModifiers();
     }
-};
+}
 
-function isShiftPressed() {
-    return getKeyboardModifiers().valueOf() & Qt.ShiftModifier.valueOf();
-};
+function isShiftPressed(event) {
+    return (getKeyboardModifiers(event) & Qt.ShiftModifier) > 0 ||
+           (getKeyboardModifiers() & Qt.ShiftModifier) > 0;
+}
+
+function isAltPressed(event) {
+    return (getKeyboardModifiers(event) & Qt.AltModifier) > 0 ||
+           (getKeyboardModifiers() & Qt.AltModifier) > 0;
+}
+
+function isControlPressed(event) {
+    return (getKeyboardModifiers(event) & Qt.ControlModifier) > 0 ||
+           (getKeyboardModifiers() & Qt.ControlModifier) > 0;
+}
+
+function createSpatialIndex() {
+    if (!isNull(global.SpatialIndexClass)) {
+        // use class defined as global variable "SpatialIndexClass":
+        // allows plugins to override the default spatial index class:
+        return new global[global.SpatialIndexClass]();
+    }
+    //return new RSpatialIndexSimple();
+    return new RSpatialIndexNavel();
+}
 
 // Qt 4 API workaround:
 function qsTranslate2(context, sourceText, disambiguation, n) {
-    if (RSettings.isQt(4)) {
+    // Qt 4:
+    if (RSettings.getQtVersion() < 0x050000) {
         if (isNull(disambiguation)) {
             return qsTranslate(context, sourceText);
         }
@@ -2515,7 +3232,250 @@ function qsTranslate2(context, sourceText, disambiguation, n) {
         }
         return qsTranslate(context, sourceText, disambiguation, "UnicodeUTF8", n);
     }
+
+    // Qt > 5
     return qsTranslate(context, sourceText, disambiguation, n);
+}
+
+function makeQDirFilters() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(QDir.Filters);
+    return makeFlags.apply(null, argumentsNew);
+}
+
+function makeQDirSortFlags() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(QDir.SortFlags);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQtMatchFlags() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(Qt.MatchFlags);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQtToolBarAreas() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(Qt.ToolBarAreas);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQtWindowFlags() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(Qt.WindowFlags);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQtAlignment() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(Qt.Alignment);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQIODeviceOpenMode() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(QIODevice.OpenMode);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQMessageBoxStandardButtons() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(QMessageBox.StandardButtons);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQtItemFlags() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(Qt.ItemFlags);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQtKeyboardModifiers() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(Qt.KeyboardModifiers);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQtMouseButtons() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(Qt.MouseButtons);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQEventLoopProcessEventsFlags() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(QEventLoop.ProcessEventsFlags);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQItemSelectionModelSelectionFlags() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(QItemSelectionModel.SelectionFlags);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeQAbstractItemViewEditTriggers() {
+    var argumentsNew = [].slice.call(arguments, 0);
+    argumentsNew.unshift(QAbstractItemView.EditTriggers);
+    return makeFlags.apply(this, argumentsNew);
+}
+
+function makeFlags() {
+    if (RSettings.isQt(6)) {
+        var ret = 0;
+        for (var i=1; i<arguments.length; i++) {
+            ret |= arguments[i];
+        }
+        return ret;
+    }
+    else {
+        var argumentsNew = [].slice.call(arguments, 0);
+        var flgs = argumentsNew.shift();
+        return flgs.apply(this, argumentsNew);
+    }
+}
+
+function getRGraphicsView(view) {
+    if (RSettings.getQtVersion()>=0x060000) {
+        return view;
+    }
+    else {
+        if (isFunction(view.getRGraphicsView)) {
+            return view.getRGraphicsView();
+        }
+        else {
+            return view;
+        }
+    }
+}
+
+/**
+ * Open files given as arguments args
+ *
+ * \param createNew Creates a new document if no files are given
+ * \param close Closes existing open MDI widgets
+ */
+function openFiles(args, createNew, close) {
+    qDebug("openFiles: " + args);
+
+    var appWin = RMainWindowQt.getMainWindow();
+    if (isNull(appWin)) {
+        // application is shutting down..
+        return;
+    }
+    var mdiArea = appWin.getMdiArea();
+    var mdiChildren = mdiArea.subWindowList();
+    var foundFile = false;
+    var filter = undefined;
+
+    for (var i = 0; i < args.length; ++i) {
+        // arguments with one parameter:
+        if (args[i] === "-locale" || args[i] === "-autostart"
+            || args[i] === "-app-id" || args[i] === "-ignore"
+            || args[i] === "-config") {
+            // skip 2 arguments
+            i++;
+            if (i>=args.length) {
+                break;
+            }
+            continue;
+        }
+
+        // argument with two parameters
+        if (args[i] === "-font-substitution" || args[i] === "-fs" || args[i] === "-ts") {
+            // skip 3 arguments
+            i+=2;
+            if (i>=args.length) {
+                break;
+            }
+            continue;
+        }
+
+        if (isNull(args[i])) {
+            continue;
+        }
+
+        // all arguments after -exec are script files or script arguments:
+        if (args[i] === "-exec") {
+            break;
+        }
+
+        if (args[i] === "-filter") {
+            if (++i>=args.length) {
+                break;
+            }
+            filter = args[i];
+            continue;
+        }
+
+
+        // skip other arguments without parameter:
+        if (args[i][0] === "-") {
+            continue;
+        }
+
+        foundFile = true;
+        var foundExisting = false;
+
+        var arg = args[i];
+        var isLocalFile = true;
+
+        if (isUrl(arg)) {
+            var url = new QUrl(arg);
+            if (url.isLocalFile()) {
+                // arg is now a path:
+                arg = url.toLocalFile();
+            }
+            else {
+                isLocalFile = false;
+            }
+        }
+
+        if (isLocalFile) {
+            // if the file is already open, activate that appropriate sub window instead
+            // of opening the file again:
+            var document = undefined;
+            var fileName = undefined;
+            var fileInfo = undefined;
+            var argFileInfo = undefined;
+            for (var k=0; k<mdiChildren.length; k++) {
+                document = mdiChildren[k].getDocument();
+                fileName = document.getFileName();
+                fileInfo = new QFileInfo(fileName);
+                argFileInfo = new QFileInfo(getAbsolutePathForArg(arg));
+
+                if (fileInfo.absoluteFilePath()===argFileInfo.absoluteFilePath()) {
+                    mdiArea.setActiveSubWindow(mdiChildren[k]);
+                    if (close) {
+                        mdiArea.closeActiveSubWindow();
+                    }
+                    else {
+                        foundExisting = true;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // open the file if it is not already open:
+        if (!foundExisting) {
+            if (isLocalFile) {
+                NewFile.createMdiChild(getAbsolutePathForArg(arg), filter);
+            }
+            else {
+                NewFile.createMdiChild(arg, filter);
+            }
+        }
+    }
+
+    // create new document if no files were loaded:
+    if (!foundFile && createNew===true) {
+        var fileNewAction = RGuiAction.getByScriptFile("scripts/File/NewFile/NewFile.js");
+        if (!isNull(fileNewAction)) {
+            fileNewAction.slotTrigger();
+        }
+    }
 }
 
 // fix QPlainTextEdit API for Qt 5:

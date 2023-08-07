@@ -51,6 +51,9 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getType
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -135,9 +138,6 @@
         setProperty
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        isSelectedForPropertyEditing
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
         hasChildLayers
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -178,6 +178,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         hasProxy
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        print
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

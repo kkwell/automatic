@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>Scale Options</string>
   </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>Scale.svg</normaloff>Scale.svg</iconset>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -33,6 +29,9 @@
             <property name="text">
              <string>&amp;Delete original</string>
             </property>
+            <property name="shortcut">
+             <string notr="true">Ctrl+D</string>
+            </property>
             <property name="checked">
              <bool>true</bool>
             </property>
@@ -43,12 +42,18 @@
             <property name="text">
              <string>&amp;Keep original</string>
             </property>
+            <property name="shortcut">
+             <string notr="true">Ctrl+K</string>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="MultipleCopies">
             <property name="text">
              <string>&amp;Multiple copies</string>
+            </property>
+            <property name="shortcut">
+             <string notr="true">Ctrl+M</string>
             </property>
            </widget>
           </item>
@@ -160,7 +165,7 @@
             <item row="0" column="0">
              <widget class="QLabel" name="LabelX">
               <property name="text">
-               <string>Factor &amp;x:</string>
+               <string>Factor x:</string>
               </property>
               <property name="buddy">
                <cstring>FactorX</cstring>
@@ -209,7 +214,7 @@
                <bool>false</bool>
               </property>
               <property name="text">
-               <string>Factor &amp;y:</string>
+               <string>Factor y:</string>
               </property>
               <property name="buddy">
                <cstring>FactorY</cstring>
@@ -251,6 +256,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Define factor using mouse cursor</string>
               </property>
               <property name="icon">
                <iconset>

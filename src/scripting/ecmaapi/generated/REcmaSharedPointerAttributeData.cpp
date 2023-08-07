@@ -96,6 +96,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, getColor, "getColor");
             
+            REcmaHelper::registerFunction(&engine, proto, getReferencePoints, "getReferencePoints");
+            
         engine.setDefaultPrototype(
             qMetaTypeId<RAttributeDataPointer>(), *proto);
       
@@ -675,6 +677,27 @@
                 
     
     if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RLinetype::Id'
+    RLinetype::Id cppResult =
+        
+               self->getLinetypeId();
+        // return type: RLinetype::Id
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
     2 && (
             context->argument(0).isBool()
         ) /* type: bool */
@@ -756,6 +779,27 @@
                     return REcmaHelper::throwError("self is NULL", context);
                 }
                 
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RLineweight::Lineweight'
+    RLineweight::Lineweight cppResult =
+        
+               self->getLineweight();
+        // return type: RLineweight::Lineweight
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
     
     if( context->argumentCount() ==
     2 && (
@@ -920,6 +964,66 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerAttributeData::getColor", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerAttributeData::getReferencePoints
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerAttributeData::getReferencePoints", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerAttributeData::getReferencePoints";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RAttributeData* self = 
+                        getSelf("getReferencePoints", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: RS::ProjectionRenderingHint */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    RS::ProjectionRenderingHint
+                    a0 =
+                    (RS::ProjectionRenderingHint)
+                    (int)
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RRefPoint >'
+    QList < RRefPoint > cppResult =
+        
+               self->getReferencePoints(a0);
+        // return type: QList < RRefPoint >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RAttributeData.getReferencePoints().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerAttributeData::getReferencePoints", context, engine);
             return result;
         }
          QScriptValue REcmaSharedPointerAttributeData::toString

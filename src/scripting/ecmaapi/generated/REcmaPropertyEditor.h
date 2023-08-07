@@ -55,6 +55,9 @@
 
     // public methods:
     static  QScriptValue
+        getInstance
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         updateFromDocument
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -62,6 +65,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         clearEditor
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getFixedCustomPropertyNames
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         updateLayers
@@ -106,7 +112,13 @@
         getEntityTypeFilter
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getAppProperties
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         checkType
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        makeReadOnly
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

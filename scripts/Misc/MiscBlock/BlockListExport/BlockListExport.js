@@ -42,23 +42,25 @@ BlockListExport.prototype.beginEvent = function() {
     }
 
     var file = new QFile(fileName);
-    var flags = new QIODevice.OpenMode(QIODevice.WriteOnly | QIODevice.Text);
+    var flags = makeQIODeviceOpenMode(QIODevice.WriteOnly, QIODevice.Text);
     if (!file.open(flags)) {
         this.terminate();
         return;
     }
 
     var ts = new QTextStream(file);
+    setUtf8Codec(ts);
     ts.writeString("Reference Count\tBlock Name");
 
     var doc = this.getDocument();
 
     var block;
     var result = doc.queryAllBlocks();
+    result = doc.sortBlocks(result);
     for (var i=0; i<result.length; ++i) {
         var id = result[i];
         block = doc.queryBlock(id);
-        if (block.isNull()) {
+        if (isNull(block)) {
             continue;
         }
         var blockRefIds = doc.queryBlockReferences(id);

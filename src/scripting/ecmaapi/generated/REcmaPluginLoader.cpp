@@ -69,6 +69,8 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, postInitPlugins, "postInitPlugins");
             
+            REcmaHelper::registerFunction(&engine, &ctor, initTranslations, "initTranslations");
+            
             REcmaHelper::registerFunction(&engine, &ctor, countPlugins, "countPlugins");
             
             REcmaHelper::registerFunction(&engine, &ctor, getPluginInfo, "getPluginInfo");
@@ -76,6 +78,10 @@
             REcmaHelper::registerFunction(&engine, &ctor, getPluginsPath, "getPluginsPath");
             
             REcmaHelper::registerFunction(&engine, &ctor, hasPlugin, "hasPlugin");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, checkPluginLicenses, "checkPluginLicenses");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, checkPluginLicense, "checkPluginLicense");
             
 
     // static properties:
@@ -528,6 +534,40 @@
             return result;
         }
          QScriptValue
+        REcmaPluginLoader::initTranslations
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPluginLoader::initTranslations", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPluginLoader::initTranslations";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    RPluginLoader::
+       initTranslations();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPluginLoader.initTranslations().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPluginLoader::initTranslations", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaPluginLoader::countPlugins
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -735,6 +775,98 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaPluginLoader::hasPlugin", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPluginLoader::checkPluginLicenses
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPluginLoader::checkPluginLicenses", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPluginLoader::checkPluginLicenses";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RPluginLoader::
+       checkPluginLicenses();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPluginLoader.checkPluginLicenses().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPluginLoader::checkPluginLicenses", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPluginLoader::checkPluginLicense
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPluginLoader::checkPluginLicense", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPluginLoader::checkPluginLicense";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isQObject()
+        ) /* type: QObject * */
+    
+    ){
+    // prepare arguments:
+    
+            // argument isQObject
+            QObject *
+            a0 =
+            qobject_cast<
+            QObject *>
+            ( context->argument(
+            0
+            ).
+            toQObject()
+            );
+        
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RPluginLoader::
+       checkPluginLicense(a0);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPluginLoader.checkPluginLicense().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPluginLoader::checkPluginLicense", context, engine);
             return result;
         }
          QScriptValue REcmaPluginLoader::toString

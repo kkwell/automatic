@@ -28,6 +28,8 @@
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RFlowLayout.h"</cpp:file></cpp:include>
 
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>RDEFAULT_QT_WINDOWFLAGS</name> <name>Qt</name>::WindowFlags()</cpp:define>
+
 <comment type="block">/**
  * \scriptable
  * \ingroup gui
@@ -37,8 +39,8 @@
 <macro><name>Q_OBJECT</name></macro>
 
 </private><public>public:
-    <constructor_decl><name>RDockWidget</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>title</name></decl></param>, <param><decl><type><name>QWidget</name>*</type> <name>parent</name> =<init> <expr><name>NULL</name></expr></init></decl></param>, <param><decl><type><name><name>Qt</name>::<name>WindowFlags</name></name></type> <name>flags</name> =<init> <expr>0</expr></init></decl></param>)</parameter_list>;</constructor_decl>
-    <constructor_decl><name>RDockWidget</name><parameter_list>(<param><decl><type><name>QWidget</name>*</type> <name>parent</name> =<init> <expr><name>NULL</name></expr></init></decl></param>, <param><decl><type><name><name>Qt</name>::<name>WindowFlags</name></name></type> <name>flags</name> =<init> <expr>0</expr></init></decl></param>)</parameter_list>;</constructor_decl>
+    <constructor_decl><name>RDockWidget</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>title</name></decl></param>, <param><decl><type><name>QWidget</name>*</type> <name>parent</name> =<init> <expr><name>NULL</name></expr></init></decl></param>, <param><decl><type><name><name>Qt</name>::<name>WindowFlags</name></name></type> <name>flags</name> =<init> <expr><name>RDEFAULT_QT_WINDOWFLAGS</name></expr></init></decl></param>)</parameter_list>;</constructor_decl>
+    <constructor_decl><name>RDockWidget</name><parameter_list>(<param><decl><type><name>QWidget</name>*</type> <name>parent</name> =<init> <expr><name>NULL</name></expr></init></decl></param>, <param><decl><type><name><name>Qt</name>::<name>WindowFlags</name></name></type> <name>flags</name> =<init> <expr><name>RDEFAULT_QT_WINDOWFLAGS</name></expr></init></decl></param>)</parameter_list>;</constructor_decl>
 
 <label><name>signals</name>:</label>
     <function_decl><type><name>void</name></type> <name>shown</name><parameter_list>()</parameter_list>;</function_decl>
@@ -48,7 +50,7 @@
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>showEvent</name><parameter_list>(<param><decl><type><name>QShowEvent</name>*</type> <name>event</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>hideEvent</name><parameter_list>(<param><decl><type><name>QHideEvent</name>*</type> <name>event</name></decl></param>)</parameter_list>;</function_decl>
 <cpp:ifdef>#<cpp:directive>ifdef</cpp:directive> <name>Q_OS_MAC</name></cpp:ifdef>
-<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x050601 &amp;&amp; <name>QT_VERSION</name> &lt;= 0x050602</expr></cpp:if>
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr>(<name>QT_VERSION</name> &gt;= 0x050601 &amp;&amp; <name>QT_VERSION</name> &lt;= 0x050602) || <name>QT_VERSION</name> &gt;= 0x050F00</expr></cpp:if>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>closeEvent</name><parameter_list>(<param><decl><type><name>QCloseEvent</name>*</type> <name>event</name></decl></param>)</parameter_list>;</function_decl>
 <cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
 <cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
@@ -57,7 +59,7 @@
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>event</name><parameter_list>(<param><decl><type><name>QEvent</name>*</type> <name>e</name></decl></param>)</parameter_list>;</function_decl>
 
 </protected><private>private:
-    <decl_stmt><decl><type><name>RFlowLayout</name>*</type> <name>layout</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>RFlowLayout</name>*</type> <name>flowLayout</name></decl>;</decl_stmt>
 </private>}</block>;</class>
 
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RDockWidget*</argument>)</argument_list></macro>

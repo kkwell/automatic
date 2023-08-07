@@ -52,16 +52,27 @@ public:
 
     virtual QList<RRefPoint> getReferencePoints(RS::ProjectionRenderingHint hint = RS::RenderTop) const;
 
-    virtual bool moveReferencePoint(const RVector& referencePoint, 
-        const RVector& targetPoint);
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
     virtual void recomputeDefinitionPoint(
         const RVector& oldExtPoint1, const RVector& oldExtPoint2,
         const RVector& newExtPoint1, const RVector& newExtPoint2);
 
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const;
     virtual double getMeasuredValue() const;
     virtual QString getAutoLabel() const;
+    double getAngle() const;
+
+    void updateRefDefinitionPoint1(const RVector& v) const {
+        refDefinitionPoint1 = v;
+    }
+    void updateRefDefinitionPoint2(const RVector& v) const {
+        refDefinitionPoint2 = v;
+    }
+    virtual void to2D() {
+        RDimLinearData::to2D();
+        refDefinitionPoint1.z = 0.0;
+        refDefinitionPoint2.z = 0.0;
+    }
 
 private:
     // for caching only:

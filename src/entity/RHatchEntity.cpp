@@ -18,17 +18,19 @@
  */
 #include "RArc.h"
 #include "RCircle.h"
-#include "RMetaTypes.h"
 #include "REllipse.h"
 #include "RExporter.h"
 #include "RHatchEntity.h"
 #include "RLine.h"
+#include "RMetaTypes.h"
+#include "RPluginLoader.h"
 #include "RPoint.h"
 #include "RSpline.h"
 
 RPropertyTypeId RHatchEntity::PropertyCustom;
 RPropertyTypeId RHatchEntity::PropertyHandle;
 RPropertyTypeId RHatchEntity::PropertyProtected;
+RPropertyTypeId RHatchEntity::PropertyWorkingSet;
 RPropertyTypeId RHatchEntity::PropertyType;
 RPropertyTypeId RHatchEntity::PropertyBlock;
 RPropertyTypeId RHatchEntity::PropertyLayer;
@@ -40,6 +42,7 @@ RPropertyTypeId RHatchEntity::PropertyDisplayedColor;
 RPropertyTypeId RHatchEntity::PropertyDrawOrder;
 
 RPropertyTypeId RHatchEntity::PropertySolid;
+RPropertyTypeId RHatchEntity::PropertyTransparency;
 
 RPropertyTypeId RHatchEntity::PropertyPatternName;
 RPropertyTypeId RHatchEntity::PropertyEntityPattern;
@@ -52,6 +55,11 @@ RPropertyTypeId RHatchEntity::PropertyOriginY;
 RPropertyTypeId RHatchEntity::PropertyVertexNX;
 RPropertyTypeId RHatchEntity::PropertyVertexNY;
 RPropertyTypeId RHatchEntity::PropertyVertexNZ;
+
+RPropertyTypeId RHatchEntity::PropertyLength;
+RPropertyTypeId RHatchEntity::PropertyTotalLength;
+RPropertyTypeId RHatchEntity::PropertyArea;
+RPropertyTypeId RHatchEntity::PropertyTotalArea;
 
 
 RHatchEntity::RHatchEntity(RDocument* document, const RHatchData& data) :
@@ -66,32 +74,41 @@ RHatchEntity* RHatchEntity::clone() const {
 }
 
 void RHatchEntity::init() {
-    RHatchEntity::PropertyCustom.generateId(typeid(RHatchEntity), RObject::PropertyCustom);
-    RHatchEntity::PropertyHandle.generateId(typeid(RHatchEntity), RObject::PropertyHandle);
-    RHatchEntity::PropertyProtected.generateId(typeid(RHatchEntity), RObject::PropertyProtected);
-    RHatchEntity::PropertyType.generateId(typeid(RHatchEntity), REntity::PropertyType);
-    RHatchEntity::PropertyBlock.generateId(typeid(RHatchEntity), REntity::PropertyBlock);
-    RHatchEntity::PropertyLayer.generateId(typeid(RHatchEntity), REntity::PropertyLayer);
-    RHatchEntity::PropertyLinetype.generateId(typeid(RHatchEntity), REntity::PropertyLinetype);
-    RHatchEntity::PropertyLinetypeScale.generateId(typeid(RHatchEntity), REntity::PropertyLinetypeScale);
-    RHatchEntity::PropertyLineweight.generateId(typeid(RHatchEntity), REntity::PropertyLineweight);
-    RHatchEntity::PropertyColor.generateId(typeid(RHatchEntity), REntity::PropertyColor);
-    RHatchEntity::PropertyDisplayedColor.generateId(typeid(RHatchEntity), REntity::PropertyDisplayedColor);
-    RHatchEntity::PropertyDrawOrder.generateId(typeid(RHatchEntity), REntity::PropertyDrawOrder);
+    RHatchEntity::PropertyCustom.generateId(RHatchEntity::getRtti(), RObject::PropertyCustom);
+    RHatchEntity::PropertyHandle.generateId(RHatchEntity::getRtti(), RObject::PropertyHandle);
+    RHatchEntity::PropertyProtected.generateId(RHatchEntity::getRtti(), RObject::PropertyProtected);
+    RHatchEntity::PropertyWorkingSet.generateId(RHatchEntity::getRtti(), RObject::PropertyWorkingSet);
+    RHatchEntity::PropertyType.generateId(RHatchEntity::getRtti(), REntity::PropertyType);
+    RHatchEntity::PropertyBlock.generateId(RHatchEntity::getRtti(), REntity::PropertyBlock);
+    RHatchEntity::PropertyLayer.generateId(RHatchEntity::getRtti(), REntity::PropertyLayer);
+    RHatchEntity::PropertyLinetype.generateId(RHatchEntity::getRtti(), REntity::PropertyLinetype);
+    RHatchEntity::PropertyLinetypeScale.generateId(RHatchEntity::getRtti(), REntity::PropertyLinetypeScale);
+    RHatchEntity::PropertyLineweight.generateId(RHatchEntity::getRtti(), REntity::PropertyLineweight);
+    RHatchEntity::PropertyColor.generateId(RHatchEntity::getRtti(), REntity::PropertyColor);
+    RHatchEntity::PropertyDisplayedColor.generateId(RHatchEntity::getRtti(), REntity::PropertyDisplayedColor);
+    RHatchEntity::PropertyDrawOrder.generateId(RHatchEntity::getRtti(), REntity::PropertyDrawOrder);
 
-    RHatchEntity::PropertySolid.generateId(typeid(RHatchEntity), "", QT_TRANSLATE_NOOP("REntity", "Solid"));
+    RHatchEntity::PropertySolid.generateId(RHatchEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Solid"));
+    RHatchEntity::PropertyTransparency.generateId(RHatchEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Alpha"));
 
-    RHatchEntity::PropertyPatternName.generateId(typeid(RHatchEntity), QT_TRANSLATE_NOOP("REntity", "Pattern"), QT_TRANSLATE_NOOP("REntity", "Name"));
-    RHatchEntity::PropertyEntityPattern.generateId(typeid(RHatchEntity), QT_TRANSLATE_NOOP("REntity", "Pattern"), QT_TRANSLATE_NOOP("REntity", "From Entity"));
-    RHatchEntity::PropertyAngle.generateId(typeid(RHatchEntity), QT_TRANSLATE_NOOP("REntity", "Pattern"), QT_TRANSLATE_NOOP("REntity", "Angle"));
-    RHatchEntity::PropertyScaleFactor.generateId(typeid(RHatchEntity), QT_TRANSLATE_NOOP("REntity", "Pattern"), QT_TRANSLATE_NOOP("REntity", "Scale"));
+    RHatchEntity::PropertyPatternName.generateId(RHatchEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Pattern"), QT_TRANSLATE_NOOP("REntity", "Name"));
+    RHatchEntity::PropertyEntityPattern.generateId(RHatchEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Pattern"), QT_TRANSLATE_NOOP("REntity", "From Entity"));
+    RHatchEntity::PropertyAngle.generateId(RHatchEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Pattern"), QT_TRANSLATE_NOOP("REntity", "Angle"), false, RPropertyAttributes::Geometry);
+    RHatchEntity::PropertyScaleFactor.generateId(RHatchEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Pattern"), QT_TRANSLATE_NOOP("REntity", "Scale"), false, RPropertyAttributes::Geometry);
 
-    RHatchEntity::PropertyOriginX.generateId(typeid(RHatchEntity), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RHatchEntity::PropertyOriginY.generateId(typeid(RHatchEntity), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "Y"));
+    RHatchEntity::PropertyOriginX.generateId(RHatchEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "X"));
+    RHatchEntity::PropertyOriginY.generateId(RHatchEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "Y"));
 
-    RHatchEntity::PropertyVertexNX.generateId(typeid(RHatchEntity), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RHatchEntity::PropertyVertexNY.generateId(typeid(RHatchEntity), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RHatchEntity::PropertyVertexNZ.generateId(typeid(RHatchEntity), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "Z"));
+    RHatchEntity::PropertyVertexNX.generateId(RHatchEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RHatchEntity::PropertyVertexNY.generateId(RHatchEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RHatchEntity::PropertyVertexNZ.generateId(RHatchEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "Z"), false, RPropertyAttributes::Geometry);
+
+    if (RPluginLoader::hasPlugin("PROTOOLS")) {
+        RHatchEntity::PropertyLength.generateId(RHatchEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Length"));
+        RHatchEntity::PropertyTotalLength.generateId(RHatchEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Total Length"));
+        RHatchEntity::PropertyArea.generateId(RHatchEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Area"));
+        RHatchEntity::PropertyTotalArea.generateId(RHatchEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Total Area"));
+    }
 }
 
 bool RHatchEntity::setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
@@ -100,6 +117,7 @@ bool RHatchEntity::setProperty(RPropertyTypeId propertyTypeId, const QVariant& v
     bool ret = REntity::setProperty(propertyTypeId, value, transaction);
 
     ret = ret || RObject::setMember(data.solid, value, PropertySolid == propertyTypeId);
+    ret = ret || RObject::setMember(data.transparency, value, PropertyTransparency == propertyTypeId);
 
     ret = ret || RObject::setMember(data.patternName, value, PropertyPatternName == propertyTypeId);
     ret = ret || RObject::setMember(data.scaleFactor, value, PropertyScaleFactor == propertyTypeId);
@@ -258,7 +276,7 @@ RVector RHatchEntity::setComponent(const RVector& p, double v, RObject::XYZ xyz)
 }
 
 QPair<QVariant, RPropertyAttributes> RHatchEntity::getProperty(
-        RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes) {
+        RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes, bool showOnRequest) {
 
     if (propertyTypeId == PropertySolid) {
         //return qMakePair(QVariant(data.solid), RPropertyAttributes(RPropertyAttributes::AffectsOtherProperties));
@@ -272,12 +290,16 @@ QPair<QVariant, RPropertyAttributes> RHatchEntity::getProperty(
         name = "SOLID";
     }
 
+    if (propertyTypeId == PropertyTransparency) {
+        return qMakePair(QVariant(data.transparency), RPropertyAttributes(RPropertyAttributes::UnitLess));
+    }
+
     if (propertyTypeId == PropertyPatternName) {
         return qMakePair(QVariant(name), RPropertyAttributes(RPropertyAttributes::Pattern|op));
     } else if (propertyTypeId == PropertyEntityPattern) {
         return qMakePair(QVariant(data.hasCustomPattern() ? QT_TRANSLATE_NOOP("REntity", "Yes") : QT_TRANSLATE_NOOP("REntity", "No")), RPropertyAttributes(RPropertyAttributes::ReadOnly));
     } else if (propertyTypeId == PropertyScaleFactor) {
-        return qMakePair(QVariant(data.scaleFactor), RPropertyAttributes(op));
+        return qMakePair(QVariant(data.scaleFactor), RPropertyAttributes(RPropertyAttributes::UnitLess|op));
     } else if (propertyTypeId == PropertyAngle) {
         return qMakePair(QVariant(data.angle), RPropertyAttributes(RPropertyAttributes::Angle|op));
     } else if (propertyTypeId == PropertyOriginX) {
@@ -354,13 +376,55 @@ QPair<QVariant, RPropertyAttributes> RHatchEntity::getProperty(
         return qMakePair(v, RPropertyAttributes(RPropertyAttributes::List));
     }
 
-    return REntity::getProperty(propertyTypeId, humanReadable, noAttributes);
+    // human readable properties (not relevant for transactions):
+    if (humanReadable) {
+        if (propertyTypeId == PropertyLength) {
+            QVariant v;
+            v.setValue(data.getLength());
+            return qMakePair(v, RPropertyAttributes(RPropertyAttributes::Redundant|RPropertyAttributes::ReadOnly));
+        } else if (propertyTypeId == PropertyTotalLength) {
+            if (showOnRequest) {
+                QVariant v;
+                v.setValue(data.getLength());
+                return qMakePair(v, RPropertyAttributes(RPropertyAttributes::Sum));
+            }
+            else {
+                QVariant v;
+                v.setValue(0.0);
+                return qMakePair(v, RPropertyAttributes(RPropertyAttributes::Redundant|RPropertyAttributes::OnRequest));
+            }
+        } else if (propertyTypeId == PropertyArea) {
+            if (showOnRequest) {
+                QVariant v;
+                v.setValue(data.getArea());
+                return qMakePair(v, RPropertyAttributes(RPropertyAttributes::Redundant|RPropertyAttributes::ReadOnly|RPropertyAttributes::Area));
+            }
+            else {
+                QVariant v;
+                v.setValue(0.0);
+                return qMakePair(v, RPropertyAttributes(RPropertyAttributes::Redundant|RPropertyAttributes::OnRequest|RPropertyAttributes::Area));
+            }
+        } else if (propertyTypeId == PropertyTotalArea) {
+            if (showOnRequest) {
+                QVariant v;
+                v.setValue(data.getArea());
+                return qMakePair(v, RPropertyAttributes(RPropertyAttributes::Sum|RPropertyAttributes::Area));
+            }
+            else {
+                QVariant v;
+                v.setValue(0.0);
+                return qMakePair(v, RPropertyAttributes(RPropertyAttributes::Redundant|RPropertyAttributes::OnRequest|RPropertyAttributes::Area));
+            }
+        }
+    }
+
+    return REntity::getProperty(propertyTypeId, humanReadable, noAttributes, showOnRequest);
 }
 
 
 void RHatchEntity::exportEntity(RExporter& e, bool preview, bool forceSelected) const {
-    Q_UNUSED(preview);
-    Q_UNUSED(forceSelected);
+    Q_UNUSED(preview)
+    Q_UNUSED(forceSelected)
 
     e.exportPainterPathSource(data);
 }
@@ -380,8 +444,24 @@ void RHatchEntity::print(QDebug dbg) const {
         QList<QSharedPointer<RShape> > loop = data.boundary.at(i);
         for (int k=0; k<loop.size(); ++k) {
             QSharedPointer<RShape> shape = loop.at(k);
-            dbg.nospace() << *shape << "\n";
+            dbg.nospace() << "   " << shape->getStartPoint() << ", " << shape->getEndPoint() << "\n";
         }
     }
     dbg.nospace() << ")";
+}
+
+void RHatchEntity::setViewportContext(const RViewportData& vp) {
+    // apply viewport transforms:
+    RVector offs =  vp.getViewCenter()*vp.getScale() + vp.getViewTarget()*vp.getScale() - data.getOriginPoint()*vp.getScale();
+    offs.rotate(vp.getRotation());
+
+    // make sure custom pattern is not cleared here:
+    data.setOriginPoint(vp.getCenter() - offs, false);
+
+    // rotate custom pattern:
+    if (data.hasCustomPattern()) {
+        RPattern p = data.getCustomPattern();
+        p.rotate(vp.getRotation());
+        data.setCustomPattern(p);
+    }
 }

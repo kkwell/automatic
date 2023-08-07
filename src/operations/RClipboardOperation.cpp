@@ -27,7 +27,7 @@
 #include "RUnit.h"
 
 
-RClipboardOperation::RClipboardOperation() {
+RClipboardOperation::RClipboardOperation() : copyEmptyBlocks(false), copyAllLayers(false), keepSelection(false) {
 }
 
 void RClipboardOperation::copy(RDocument& src, RDocument& dest,
@@ -232,12 +232,99 @@ void RClipboardOperation::copy(RDocument& src, RDocument& dest,
                 continue;
             }
 
+
             copyEntityLayer(
                         *entity.data(),
                         src, dest,
                         overwriteLayers,
                         transaction
                         );
+        }
+    }
+
+    // copy all (even empty or unused) layers:
+    if (copyAllLayers && !preview) {
+        QSet<RLayer::Id> layerIds = src.queryAllLayers();
+        QSet<RLayer::Id>::iterator it;
+
+        for (it=layerIds.begin(); it!=layerIds.end(); ++it) {
+            RLayer::Id layerId = *it;
+
+           // QList<REntity::Id> blockEntityIds = src.queryBlockEntities(layerId).toList();
+
+            //if (blockEntityIds.isEmpty()) {
+                //copyBlock(blockId, src, dest, overwriteBlocks, toCurrentBlock, blockName, transaction);
+                //copyBlock(layerId, src, dest, false, false, blockName, transaction);
+            //}
+            copyLayer(layerId, src, dest, overwriteLayers, transaction);
+        }
+    }
+
+    // copy all (even empty or unused) blocks:
+    if (copyEmptyBlocks && !preview) {
+        QSet<RBlock::Id> blockIds = src.queryAllBlocks();
+        QSet<RBlock::Id>::iterator it;
+
+        // copy empty blocks first (these do not reference other blocks):
+        for (it=blockIds.begin(); it!=blockIds.end(); ++it) {
+            RBlock::Id blockId = *it;
+
+            if (blockId==src.getModelSpaceBlockId()) {
+                // do not copy model space block (again):
+                continue;
+            }
+
+            QList<REntity::Id> blockEntityIds = RS::toList(src.queryBlockEntities(blockId));
+
+            if (blockEntityIds.isEmpty()) {
+                //copyBlock(blockId, src, dest, overwriteBlocks, toCurrentBlock, blockName, transaction);
+                copyBlock(blockId, src, dest, false, false, blockName, transaction);
+            }
+        }
+
+        // copy non-empty, but possibly unreferenced blocks:
+        // these might reference each other, referenced blocks are coped when encountered:
+        for (it=blockIds.begin(); it!=blockIds.end(); ++it) {
+            RBlock::Id blockId = *it;
+
+            if (blockId==src.getModelSpaceBlockId()) {
+                // do not copy model space block (again):
+                continue;
+            }
+
+            QList<REntity::Id> blockEntityIds = RS::toList(src.queryBlockEntities(blockId));
+
+            if (!blockEntityIds.isEmpty()) {
+                bool first = true;
+                QList<REntity::Id>::iterator it2;
+                for (it2=blockEntityIds.begin(); it2!=blockEntityIds.end(); ++it2) {
+                    QSharedPointer<REntity> entity = src.queryEntityDirect(*it2);
+                    if (entity.isNull() || entity->isUndone()) {
+                        continue;
+                    }
+
+                    copyEntity(
+                                *entity.data(),
+                                src, dest,
+                                RVector::nullVector,
+                                1.0,          // scale from user options not applied to block contents
+                                // but to block reference
+                                unitScale,
+                                0.0,
+                                RVector(0,0),
+                                false, false, // no flips
+                                false, false, // keep original block and layer
+                                false/*overwriteLayers*/, first && overwriteBlocks,
+                                QString(),
+                                QString(),
+                                transaction,
+                                false,         // not to model space but actual block
+                                attributes
+                                );
+
+                    first = false;
+                }
+            }
         }
     }
 
@@ -340,7 +427,7 @@ void RClipboardOperation::copyEntity(
         // make sure the top level block ref uses the top draw order,
         // when pasting from a part library document which contains
         // a block reference:
-        if (blockRef->getBlockId()==src.getModelSpaceBlockId()) {
+        if (blockRef->getBlockId()==src.getModelSpaceBlockId() && !toModelSpaceBlock) {
             blockRef->setDrawOrder(REntityData::getDefaultDrawOrder());
         }
 
@@ -388,7 +475,10 @@ void RClipboardOperation::copyEntity(
     QSharedPointer<REntity> destEntity = QSharedPointer<REntity>(entity.clone());
     //dest.getStorage().setObjectId(*destEntity.data(), RObject::INVALID_ID);
     dest.getStorage().setObjectHandle(*destEntity.data(), RObject::INVALID_HANDLE);
-    destEntity->setSelected(false);
+
+    if (!keepSelection) {
+        destEntity->setSelected(false);
+    }
 
     // apply attribute values:
     // create attribute for each attribute definition in block with
@@ -410,12 +500,18 @@ void RClipboardOperation::copyEntity(
         destEntity->flipVertical();
     }
     if (blockRef!=NULL) {
-        // don't scale block ref, scale block contents:
+        // don't scale block ref by unit scale,
+        // block contents is scaled by unit scale:
         destEntity->scale(scale);
 
-        // scale block ref position:
-        destEntity->move(-blockRef->getPosition());
-        destEntity->move(blockRef->getPosition() * unitScale);
+        // scale block ref position by unit scale:
+        QSharedPointer<RBlockReferenceEntity> destBlockRef = destEntity.dynamicCast<RBlockReferenceEntity>();
+        if (!destBlockRef.isNull()) {
+            destBlockRef->setPosition(destBlockRef->getPosition() * unitScale);
+        }
+
+        //destEntity->move(-blockRef->getPosition());
+        //destEntity->move(blockRef->getPosition() * unitScale);
     }
     else {
         destEntity->scale(scale * unitScale);
@@ -444,6 +540,7 @@ void RClipboardOperation::copyEntity(
     destEntity->setLinetypeId(destLinetype->getId());
 
     if (toModelSpaceBlock) {
+        // copy to clipboard (always copy to model space block of clipboard):
         destEntity->setBlockId(dest.getModelSpaceBlockId());
     }
     else {
@@ -495,9 +592,11 @@ QSharedPointer<RBlock> RClipboardOperation::copyBlock(
     QString srcBlockName = srcBlock->getName();
     QSharedPointer<RBlock> destBlock;
     if (copiedBlocks.contains(srcBlockName)) {
+        // block was already copied and was added to cache:
         destBlock = copiedBlocks.value(srcBlockName);
     }
     else {
+        // copy block:
         QString destBlockName;
         if (!blockName.isNull()) {
             destBlockName = blockName;

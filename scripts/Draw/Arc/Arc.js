@@ -23,7 +23,7 @@
  *
  * \brief This module contains ECMAScript implementations of various arc drawing tools.
  */
-include("../Draw.js");
+include("scripts/Draw/Draw.js");
 
 /**
  * \class Arc
@@ -73,7 +73,7 @@ Arc.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(true);
         action.setIcon(Arc.includeBasePath + "/Arc.svg");
-        action.setStatusTip(qsTr("Show arc tools"));
+        //action.setStatusTip(qsTr("Show arc tools"));
         action.setDefaultShortcut(new QKeySequence("w,a"));
         action.setNoState();
         action.setDefaultCommands(["arcmenu"]);

@@ -70,7 +70,7 @@ LineDove.prototype.setState = function(state) {
       var trCorner2 = qsTr("Second point");
       this.setCommandPrompt(trCorner2);
       this.setLeftMouseTip(trCorner2);
-      this.setRightMouseTip(qsTr("Done"));
+      this.setRightMouseTip(EAction.trDone);
       break;
   }
   
@@ -168,7 +168,7 @@ qDebug("-------------------------------------------------------");
   // distance from Dovetail Top to Border
   var ldovetailTopToBorder = ldovetailBottomToBorder-lUnderDovetailSlope;
 
-  // lenght of dovetail slope
+  // length of dovetail slope
   var lDovetailSlope = Math.sqrt(hDovetail*hDovetail + lUnderDovetailSlope*lUnderDovetailSlope); 
 
 /*

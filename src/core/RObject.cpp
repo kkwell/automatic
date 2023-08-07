@@ -33,6 +33,9 @@ RPropertyTypeId RObject::PropertyCustom;
 RPropertyTypeId RObject::PropertyType;
 RPropertyTypeId RObject::PropertyHandle;
 RPropertyTypeId RObject::PropertyProtected;
+RPropertyTypeId RObject::PropertyWorkingSet;
+RPropertyTypeId RObject::PropertySelected;
+RPropertyTypeId RObject::PropertyInvisible;
 
 RObject::RObject(RDocument* document) :
     document(document),
@@ -57,11 +60,18 @@ RObject::~RObject() {
     //RDebug::decCounter("RObject");
 }
 
+void RObject::setDocument(RDocument* document) {
+    this->document = document;
+}
+
 void RObject::init() {
-    RObject::PropertyCustom.generateId(typeid(RObject), "", QT_TRANSLATE_NOOP("REntity", "Custom"));
-    RObject::PropertyType.generateId(typeid(RObject), "", QT_TRANSLATE_NOOP("REntity", "Type"));
-    RObject::PropertyHandle.generateId(typeid(RObject), "", QT_TRANSLATE_NOOP("REntity", "Handle"));
-    RObject::PropertyProtected.generateId(typeid(RObject), "", QT_TRANSLATE_NOOP("REntity", "Protected"));
+    RObject::PropertyCustom.generateId(RObject::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Custom"));
+    RObject::PropertyType.generateId(RObject::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Type"));
+    RObject::PropertyHandle.generateId(RObject::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Handle"));
+    RObject::PropertyProtected.generateId(RObject::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Protected"));
+    RObject::PropertySelected.generateId(RObject::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Selected"));
+    RObject::PropertyInvisible.generateId(RObject::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Object Invisible"));
+    RObject::PropertyWorkingSet.generateId(RObject::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Working Set"));
 }
 
 void RObject::setUndone(bool on) {
@@ -93,34 +103,72 @@ void RObject::setUndone(bool on) {
     }
 }
 
-QPair<QVariant, RPropertyAttributes> RObject::getProperty(RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes) {
+//QList<RProperty> RObject::getAllProperties(bool showOnRequest) const {
+//    Q_UNUSED(showOnRequest)
+
+//    QList<RProperty> ret;
+
+//    ret << RProperty(RObject::PropertyType, getType(), RPropertyAttributes(RPropertyAttributes::ReadOnly));
+//    ret << RProperty(RObject::PropertyHandle, getHandle(), RPropertyAttributes(RPropertyAttributes::ReadOnly));
+
+//    if (customProperties.contains("QCAD")) {
+//        const QVariantMap& vm = customProperties["QCAD"];
+
+//        //QVariantMap::const_iterator it;
+//        //for (it=vm.constBegin(); it!=vm.constEnd(); it++) {
+//        QStringList propertyKeys = vm.keys();
+//        for (int i=0; i<propertyKeys.length(); i++) {
+//            const QString& propertyKey = propertyKeys[i];
+//            const QVariant& v = vm[propertyKey];
+//            if (v.type()==QVariant::Int) {
+//                ret << RProperty(RPropertyTypeId("QCAD", propertyKey), v, RPropertyAttributes(RPropertyAttributes::Custom|RPropertyAttributes::Integer));
+//            }
+//            else {
+//                ret << RProperty(RPropertyTypeId("QCAD", propertyKey), v, RPropertyAttributes(RPropertyAttributes::Custom));
+//            }
+//        }
+//    }
+
+//    return ret;
+//}
+
+QPair<QVariant, RPropertyAttributes> RObject::getProperty(RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes, bool showOnRequest) {
     Q_UNUSED(humanReadable)
     Q_UNUSED(noAttributes)
+    Q_UNUSED(showOnRequest)
 
-    if (propertyTypeId == PropertyType) {
+    if (propertyTypeId==PropertyType) {
         return qMakePair(QVariant(getType()), RPropertyAttributes(RPropertyAttributes::ReadOnly));
     }
-    if (propertyTypeId == PropertyHandle) {
+    else if (propertyTypeId==PropertyHandle) {
         return qMakePair(QVariant(handle), RPropertyAttributes(RPropertyAttributes::ReadOnly));
     }
-    if (propertyTypeId == PropertyProtected) {
-        //return qMakePair(QVariant(protect), RPropertyAttributes(RPropertyAttributes::Invisible));
+    else if (propertyTypeId==PropertyProtected) {
         return qMakePair(QVariant(isProtected()), RPropertyAttributes(RPropertyAttributes::ReadOnly));
     }
+    else if (propertyTypeId==PropertySelected) {
+        return qMakePair(QVariant(isSelected()), RPropertyAttributes(RPropertyAttributes::Invisible));
+    }
+    else if (propertyTypeId==PropertyInvisible) {
+        return qMakePair(QVariant(isInvisible()), RPropertyAttributes(RPropertyAttributes::Invisible));
+    }
+    else if (propertyTypeId==PropertyWorkingSet) {
+        return qMakePair(QVariant(isWorkingSet()), RPropertyAttributes(RPropertyAttributes::Invisible));
+    }
+
     if (propertyTypeId.isCustom()) {
         QString appId = propertyTypeId.getCustomPropertyTitle();
         QString name = propertyTypeId.getCustomPropertyName();
         if (customProperties.contains(appId)) {
+            // don't use [] here for thread safety:
             QVariantMap vm = customProperties.value(appId);
             if (vm.contains(name)) {
-                RPropertyAttributes attr;
-                if  (vm.value(name).type()==QVariant::Int) {
-                    attr = RPropertyAttributes(RPropertyAttributes::Custom|RPropertyAttributes::Integer);
+                if  (RS::getMetaType(vm.value(name))==RS::Int) {
+                    return qMakePair(vm.value(name), RPropertyAttributes(RPropertyAttributes::Custom|RPropertyAttributes::Integer));
                 }
                 else {
-                    attr = RPropertyAttributes(RPropertyAttributes::Custom);
+                    return qMakePair(vm.value(name), RPropertyAttributes(RPropertyAttributes::Custom));
                 }
-                return qMakePair(vm.value(name), attr);
             }
         }
     }
@@ -134,6 +182,9 @@ bool RObject::setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
     bool ret = false;
 
     ret = ret || RObject::setMemberFlag(RObject::Protect, value, PropertyProtected == propertyTypeId);
+    ret = ret || RObject::setMemberFlag(RObject::Selected, value, PropertySelected == propertyTypeId);
+    ret = ret || RObject::setMemberFlag(RObject::Invisible, value, PropertyInvisible == propertyTypeId);
+    ret = ret || RObject::setMemberFlag(RObject::WorkingSet, value, PropertyWorkingSet == propertyTypeId);
 
     // set custom property:
     if (propertyTypeId.getId()==RPropertyTypeId::INVALID_ID) {
@@ -335,6 +386,7 @@ bool RObject::setMemberVector(QList<RVector>& variable, const QVariant& value, R
                 variable[i].z = v;
                 break;
             }
+            variable[i].valid = true;
         }
 
         else {
@@ -397,9 +449,11 @@ bool RObject::setMember(QList<double>& variable, const QVariant& value, bool con
  *      The IDs that are returned can be translated into a group title and
  *      a property title using \ref getPropertyGroupTitle and \ref getPropertyTitle.
  */
-QSet<RPropertyTypeId> RObject::getPropertyTypeIds() const {
-    QSet<RPropertyTypeId> ret = RPropertyTypeId::getPropertyTypeIds(typeid(*this));
-    ret.unite(getCustomPropertyTypeIds());
+QSet<RPropertyTypeId> RObject::getPropertyTypeIds(RPropertyAttributes::Option option) const {
+    QSet<RPropertyTypeId> ret = RPropertyTypeId::getPropertyTypeIds(getType(), option);
+    if (option==RPropertyAttributes::NoOptions) {
+        ret.unite(getCustomPropertyTypeIds());
+    }
     return ret;
 }
 
@@ -435,7 +489,7 @@ bool RObject::hasCustomProperty(const QString& title, const QString& key) const 
     return customProperties.value(title).contains(key);
 }
 
-bool RObject::hasCustomProperty(const QString& title, const QRegExp& key) const {
+bool RObject::hasCustomProperty(const QString& title, const QRegularExpression& key) const {
     if (!customProperties.contains(title)) {
         return false;
     }
@@ -461,10 +515,13 @@ QVariant RObject::getCustomProperty(const QString& title, const QString& key, co
 
 double RObject::getCustomDoubleProperty(const QString& title, const QString& key, double defaultValue) const {
     QVariant ret = getCustomProperty(title, key, defaultValue);
-    if (ret.type()==QVariant::Double) {
+    if (RS::getMetaType(ret)==RS::Double ||
+        RS::getMetaType(ret)==RS::Int || RS::getMetaType(ret)==RS::UInt ||
+        RS::getMetaType(ret)==RS::LongLong || RS::getMetaType(ret)==RS::ULongLong) {
+
         return ret.toDouble();
     }
-    if (ret.type()==QVariant::String) {
+    if (RS::getMetaType(ret)==RS::String) {
         QString s = ret.toString();
         bool ok;
         double d = s.toDouble(&ok);
@@ -477,10 +534,10 @@ double RObject::getCustomDoubleProperty(const QString& title, const QString& key
 
 int RObject::getCustomIntProperty(const QString& title, const QString& key, int defaultValue) const {
     QVariant ret = getCustomProperty(title, key, defaultValue);
-    if (ret.type()==QVariant::Int) {
+    if (RS::getMetaType(ret)==RS::Int) {
         return ret.toInt();
     }
-    if (ret.type()==QVariant::String) {
+    if (RS::getMetaType(ret)==RS::String) {
         QString s = ret.toString();
         bool ok;
         int i = s.toInt(&ok);
@@ -493,10 +550,10 @@ int RObject::getCustomIntProperty(const QString& title, const QString& key, int 
 
 bool RObject::getCustomBoolProperty(const QString& title, const QString& key, bool defaultValue) const {
     QVariant ret = getCustomProperty(title, key, defaultValue);
-    if (ret.type()==QVariant::Bool) {
+    if (RS::getMetaType(ret)==RS::Bool) {
         return ret.toBool();
     }
-    if (ret.type()==QVariant::String) {
+    if (RS::getMetaType(ret)==RS::String) {
         QString s = ret.toString().toLower();
         return s=="true" || s=="1";
     }
@@ -561,7 +618,8 @@ QMap<QString, QVariantMap> RObject::getCustomProperties() const {
 }
 
 /**
- * Copies all custom properties from the given object. Existing properties are overwritten.
+ * Copies all custom properties from the given object.
+ * Existing properties can be overwritten.
  */
 void RObject::copyCustomPropertiesFrom(RObject* other, const QString& title,
                                        bool overwrite, const QStringList& ignoreList,
@@ -632,6 +690,8 @@ void RObject::print(QDebug dbg) const {
             << ", address: " << QString("0x%1").arg((long int) this, 0, 16)
             << ", undone: " << (int)isUndone()
             << ", protected: " << (int)isProtected()
+            << ", selected: " << (int)isSelected()
+            << ", working set: " << (int)isWorkingSet()
             << ")";
 
     if (!customProperties.isEmpty()) {

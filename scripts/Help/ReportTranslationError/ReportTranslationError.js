@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Help.js");
+include("scripts/Help/Help.js");
 
 function ReportTranslationError(guiAction) {
     Help.call(this, guiAction);
@@ -27,6 +27,6 @@ ReportTranslationError.prototype = new Help();
 
 ReportTranslationError.prototype.beginEvent = function() {
     Help.prototype.beginEvent.call(this);
-    Help.openUrl("http://www.qcad.org/translationreport");
+    Help.openUrl("https://qcad.org/translationreport");
 };
 

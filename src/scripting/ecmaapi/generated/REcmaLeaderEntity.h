@@ -53,6 +53,9 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getStaticPropertyTypeIds
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -75,6 +78,12 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         hasArrowHead
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setSplineShaped
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isSplineShaped
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         clear
@@ -137,10 +146,28 @@
         isClosed
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        getDimScale
+        getDimscale
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setDimscale
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getDimasz
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setDimasz
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getExploded
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getDimLeaderBlockId
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setDimLeaderBlockId
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        clearStyleOverrides
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         exportEntity

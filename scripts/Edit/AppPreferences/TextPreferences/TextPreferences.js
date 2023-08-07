@@ -43,8 +43,15 @@ TextPreferences.initPreferences = function(pageWidget, calledByPrefDialog, docum
     lReducedList.addItems(cadList);
 
     // add system fonts to list:
-    var fontDb = new RFontDatabase();
-    var families = fontDb.families();
+    var families;
+    if (RSettings.getQtVersion() >= 0x060000) {
+        families = QFontDatabase.families();
+    }
+    else {
+        var fontDb = new RFontDatabase();
+        families = fontDb.families();
+    }
+
     lReducedList.addItems(families);
 
     var list = RSettings.getValue("Text/ReducedFontList", []);
@@ -54,12 +61,23 @@ TextPreferences.initPreferences = function(pageWidget, calledByPrefDialog, docum
 
     for (var row = 0; row<lReducedList.count; row++) {
         var item = lReducedList.item(row);
-        var flags = new Qt.ItemFlags(item.flags() | Qt.ItemIsUserCheckable);
+        var flags;
+        if (RSettings.getQtVersion() >= 0x060000) {
+            flags = makeQtItemFlags(item.flags(), Qt.ItemIsUserCheckable);
+        }
+        else {
+            flags = new Qt.ItemFlags(item.flags() | Qt.ItemIsUserCheckable);
+        }
 
         // always check 'standard' and make it immutable:
         if (item.text().toLowerCase()==="standard") {
             item.setCheckState(Qt.Checked);
-            flags = new Qt.ItemFlags(item.flags() & ~(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled));
+            if (RSettings.getQtVersion() >= 0x060000) {
+                flags = makeQtItemFlags(item.flags() & ~(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled));
+            }
+            else {
+                flags = new Qt.ItemFlags(item.flags() & ~(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled));
+            }
         }
         else if (list.contains(item.text())) {
             item.setCheckState(Qt.Checked);

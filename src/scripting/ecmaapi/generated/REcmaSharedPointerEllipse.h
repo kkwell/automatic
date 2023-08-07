@@ -62,6 +62,9 @@
 
     // public methods:
     static  QScriptValue
+        createInscribed
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getShapeType
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -99,6 +102,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getPointsWithDistanceToEnd
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getPointCloud
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getVectorTo

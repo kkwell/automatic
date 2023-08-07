@@ -65,7 +65,7 @@ public:
         RMessageHandler* messageHandler = NULL, RProgressHandler* progressHandler = NULL);
     virtual ~RDxfImporter();
 
-    virtual bool importFile(const QString& fileName, const QString& nameFilter);
+    virtual bool importFile(const QString& fileName, const QString& nameFilter, const QVariantMap& params = RDEFAULT_QVARIANTMAP);
 
     virtual void processCodeValuePair(unsigned int groupCode, const std::string& groupValue);
 
@@ -106,7 +106,7 @@ private:
     virtual void addDimLinear(const DL_DimensionData& data, const DL_DimLinearData& edata);
     virtual void addDimRadial(const DL_DimensionData& data, const DL_DimRadialData& edata);
     virtual void addDimDiametric(const DL_DimensionData& data, const DL_DimDiametricData& edata);
-    virtual void addDimAngular(const DL_DimensionData& data, const DL_DimAngularData& edata);
+    virtual void addDimAngular(const DL_DimensionData& data, const DL_DimAngular2LData& edata);
     virtual void addDimAngular3P(const DL_DimensionData& data, const DL_DimAngular3PData& edata);
     virtual void addDimOrdinate(const DL_DimensionData& data, const DL_DimOrdinateData& edata);
     virtual void addLeader(const DL_LeaderData &data);

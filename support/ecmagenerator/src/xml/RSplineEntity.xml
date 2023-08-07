@@ -24,6 +24,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="getRtti" cppName="getRtti" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RS::EntityType" isPureVirtual="false" />
+    </method>
     <method name="getStaticPropertyTypeIds"
     cppName="getStaticPropertyTypeIds" specifier="public"
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
@@ -36,7 +40,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       isPureVirtual="false" />
     </method>
     <method name="setProperty" cppName="setProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
         <arg type="RPropertyTypeId" typeName="RPropertyTypeId"
@@ -49,7 +53,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       </variant>
     </method>
     <method name="getProperty" cppName="getProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="QPair &lt; QVariant , RPropertyAttributes &gt;"
       isPureVirtual="false">
@@ -59,6 +63,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="humanReadable"
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="noAttributes"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
@@ -409,6 +415,9 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="RPolyline" isPureVirtual="false">
         <arg type="double" typeName="double" name="tolerance"
         isConst="false" />
+        <arg type="double" typeName="double" name="radiusLimit"
+        hasDefault="true" default="RDEFAULT_MIN1"
+        isConst="false" />
       </variant>
     </method>
     <method name="reverse" cppName="reverse" specifier="public"
@@ -445,6 +454,15 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
+    <method name="getBezierSegments" cppName="getBezierSegments"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QList &lt; RSpline &gt;"
+      isPureVirtual="false">
+        <arg type="RBox &amp;" typeName="RBox" name="queryBox"
+        hasDefault="true" default="RDEFAULT_RBOX" isConst="true" />
+      </variant>
+    </method>
     <method name="print" cppName="print" specifier="protected"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
@@ -457,6 +475,8 @@ xmlns:rs="http://www.ribbonsoft.com">
     <property name="PropertyHandle" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyProtected" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyWorkingSet" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyType" type="RPropertyTypeId"
     isConst="false" isStatic="true" />

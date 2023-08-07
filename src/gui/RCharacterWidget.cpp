@@ -50,8 +50,7 @@ void RCharacterWidget::updateSize(const QString &fontSize) {
 void RCharacterWidget::updateStyle(const QString &fontStyle) {
     QFontDatabase fontDatabase;
     const QFont::StyleStrategy oldStrategy = displayFont.styleStrategy();
-    displayFont = fontDatabase.font(displayFont.family(), fontStyle,
-            displayFont.pointSize());
+    displayFont = fontDatabase.font(displayFont.family(), fontStyle, displayFont.pointSize());
     displayFont.setStyleStrategy(oldStrategy);
     squareSize = qMax(24, QFontMetrics(displayFont).xHeight() * 3);
     adjustSize();
@@ -129,8 +128,15 @@ void RCharacterWidget::paintEvent(QPaintEvent *event) {
                 painter.fillRect(column * squareSize + 1, row * squareSize + 1,
                         squareSize, squareSize, QBrush(Qt::red));
 
+#if QT_VERSION >= 0x050B00
+            // Qt >= 5.11
+            int hAdvance = fontMetrics.horizontalAdvance(QChar(key));
+#else
+            int hAdvance = fontMetrics.width(QChar(key));
+#endif
+
             painter.drawText(column * squareSize + (squareSize / 2)
-                    - fontMetrics.width(QChar(key)) / 2, row * squareSize + 4
+                    - hAdvance / 2, row * squareSize + 4
                     + fontMetrics.ascent(), QString(QChar(key)));
         }
     }

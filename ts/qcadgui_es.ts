@@ -2,48 +2,34 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="es_ES">
 <context>
-    <name>ExitTrialDialog</name>
+    <name>RCadToolBar</name>
     <message>
-        <source>Trial Version</source>
-        <translatorcomment>--google--</translatorcomment>
-        <translation type="obsolete">Versión de prueba</translation>
-    </message>
-    <message>
-        <source>QCAD Trial</source>
-        <translatorcomment>--google--</translatorcomment>
-        <translation type="obsolete">QCAD versión de prueba</translation>
+        <location filename="../src/gui/RCadToolBar.cpp" line="+138"/>
+        <source>Vertical/Horizontal</source>
+        <translation>Vertical/Horizontal</translation>
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>RCadToolBarPanel</name>
     <message>
-        <source>Cannot find user manual at: %1</source>
-        <translatorcomment>--google--</translatorcomment>
-        <translation type="obsolete">No se puede encontrar manual del usuario: %1</translation>
-    </message>
-    <message>
-        <source>Unable to launch Qt Assistant (%1)</source>
-        <translatorcomment>--google--</translatorcomment>
-        <translation type="obsolete">No se puede iniciar Asistente de Qt (%1)</translation>
+        <location filename="../src/gui/RCadToolBarPanel.cpp" line="+21"/>
+        <location line="+63"/>
+        <source>Back</source>
+        <translation>Volver</translation>
     </message>
 </context>
 <context>
     <name>RColorCombo</name>
     <message>
-        <location filename="../src/gui/RColorCombo.cpp" line="+126"/>
+        <location filename="../src/gui/RColorCombo.cpp" line="+157"/>
         <source>Custom</source>
-        <translatorcomment>--exact match--
---file: es.po--
-No objetos de dimensión seleccionados con una posición de texto personalizado.
-No objetos de dimensión seleccionados con una posición de texto personalizado
-Personalizado</translatorcomment>
         <translation>Personalizado</translation>
     </message>
 </context>
 <context>
     <name>REventHandler</name>
     <message>
-        <location filename="../src/gui/REventHandler.cpp" line="+195"/>
+        <location filename="../src/gui/REventHandler.cpp" line="+201"/>
         <source>Grid</source>
         <translation>Rejilla</translation>
     </message>
@@ -91,27 +77,9 @@ Personalizado</translatorcomment>
 <context>
     <name>RMathLineEdit</name>
     <message>
-        <location filename="../src/gui/RMathLineEdit.cpp" line="+156"/>
+        <location filename="../src/gui/RMathLineEdit.cpp" line="+186"/>
         <source>Invalid</source>
         <translation>Inválido</translation>
-    </message>
-</context>
-<context>
-    <name>RSingleApplication</name>
-    <message>
-        <source>This software is not intended for production use.</source>
-        <translatorcomment>--google--</translatorcomment>
-        <translation type="obsolete">Este software no está diseñado para uso en producción.</translation>
-    </message>
-    <message>
-        <source>To continue trying out QCAD, please restart the software.</source>
-        <translatorcomment>--google--</translatorcomment>
-        <translation type="obsolete">Para continuar probando QCAD, reinicie el software.</translation>
-    </message>
-    <message>
-        <source>To start using QCAD without any limitations, please buy the full version for a small license fee from %1.</source>
-        <translatorcomment>--google--</translatorcomment>
-        <translation type="obsolete">Para empezar a utilizar QCAD, sin limitación, por favor, compre la versión completa por una tarifa de licencia pequeños de %1.</translation>
     </message>
 </context>
 </TS>

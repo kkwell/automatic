@@ -22,9 +22,10 @@
 
 #include "core_global.h"
 
-#include <QMetaType>
 #include <QChar>
+#include <QList>
 #include <QMap>
+#include <QMetaType>
 #include <QPainterPath>
 #include <QString>
 #include <QStringList>
@@ -82,6 +83,18 @@ public:
         return lineSpacingFactor;
     }
 
+    QList<double> getAuxLinePositions() const {
+        return auxLinePositions;
+    }
+
+    QString getAuxLinePositionsString() const {
+        QStringList ret;
+        for (int i=0; i<auxLinePositions.length(); i++) {
+            ret.append(QString("%1").arg(auxLinePositions[i]));
+        }
+        return ret.join(",");
+    }
+
     bool load();
 
     /**
@@ -98,15 +111,17 @@ public:
         return glyphMap;
     }
 
-    /**
-     * \nonscriptable
-     */
+    QList<QChar> getGlyphNames() const {
+        return glyphMap.keys();
+    }
+
     RPainterPath getGlyph(const QChar& ch, bool draft = false) const;
 
-    /**
-     * \nonscriptable
-     */
-    QPainterPath getShape(const QString& name) const;
+    QList<QString> getShapeNames() const {
+        return shapeMap.keys();
+    }
+
+    RPainterPath getShape(const QString& name) const;
 
     /**
      * \nonscriptable
@@ -125,7 +140,7 @@ private:
     //! list of glyphs as painter paths (letters)
     QMap<QChar, RPainterPath> glyphMap;
     //! list of shapes (used for complex line types)
-    QMap<QString, QPainterPath> shapeMap;
+    QMap<QString, RPainterPath> shapeMap;
     QMap<QChar, QString> numNameMap;
     QMap<QChar, QPainterPath> glyphDraftMap;
 
@@ -152,6 +167,9 @@ private:
 
     //! Default line spacing factor for this font
     double lineSpacingFactor;
+
+    //! Aux line positions for CXF editing
+    QList<double> auxLinePositions;
 };
 
 Q_DECLARE_METATYPE(RFont)

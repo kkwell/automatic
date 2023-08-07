@@ -27,6 +27,7 @@ include("../Shape.js");
 function ShapePolygonCP(guiAction) {
     Shape.call(this, guiAction);
 
+    this.numberOfCorners = undefined;
     this.center = undefined;
     this.corner = undefined;
 
@@ -55,6 +56,8 @@ ShapePolygonCP.prototype.setState = function(state) {
     var appWin = RMainWindowQt.getMainWindow();
     switch (this.state) {
     case ShapePolygonCP.State.SettingCenter:
+        this.center = undefined;
+        this.corner = undefined;
         var trCenter = qsTr("Center");
         this.setCommandPrompt(trCenter);
         this.setLeftMouseTip(trCenter);
@@ -65,7 +68,7 @@ ShapePolygonCP.prototype.setState = function(state) {
         var trCornerPoint = qsTr("Corner point");
         this.setCommandPrompt(trCornerPoint);
         this.setLeftMouseTip(trCornerPoint);
-        this.setRightMouseTip(qsTr("Done"));
+        this.setRightMouseTip(EAction.trDone);
         break;
     }
 

@@ -141,8 +141,8 @@ public:
     void restoreViewport();
     void zoomIn();
     void zoomOut();
-    void zoomIn(const RVector& center);
-    void zoomOut(const RVector& center);
+    void zoomIn(const RVector& center, double factor=1.2);
+    void zoomOut(const RVector& center, double factor=1.2);
     virtual void zoom(const RVector& center, double factor);
     virtual void zoomTo(const RBox& window, int margin = 0);
     void zoomPrevious();
@@ -220,18 +220,7 @@ public:
         return grid;
     }
 
-    /**
-     * Sets the current grid. This graphics view takes ownership
-     * of the grid. The previous grid is deleted. Setting the grid
-     * to NULL disables the grid.
-     */
-    void setGrid(RGrid* g) {
-        if (grid!=NULL) {
-            delete grid;
-            grid = NULL;
-        }
-        grid = g;
-    }
+    void setGrid(RGrid* g);
 
     void setGridVisible(bool on);
     bool isGridVisible() const;

@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Arc.js");
+include("scripts/Draw/Arc/Arc.js");
 include("scripts/ShapeAlgorithms.js");
 
 /**
@@ -133,6 +133,11 @@ ArcTPR.prototype.pickEntity = function(event, preview) {
     var shape = undefined;
 
     if (this.state!==ArcTPR.State.ChoosingSolution) {
+        if (!this.isEntitySnappable(entity)) {
+            // entity not on a snappable layer:
+            return;
+        }
+
         if (isNull(entity)) {
             return;
         }
@@ -213,7 +218,7 @@ ArcTPR.prototype.pickCoordinate = function(event, preview) {
                 }
                 // multiple solutions:
                 else {
-                    op.destroy();
+                    destr(op);
                     this.setState(ArcTPR.State.ChoosingSolution);
                 }
             }

@@ -102,6 +102,23 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
+    <method name="getNameList" cppName="getNameList"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QStringList" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="onlyFixed"
+        hasDefault="true" default="false" isConst="false" />
+      </variant>
+    </method>
+    <method name="getColorList" cppName="getColorList"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QList &lt; RColor &gt;"
+      isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="onlyFixed"
+        hasDefault="true" default="false" isConst="false" />
+      </variant>
+    </method>
     <method name="getIcon" cppName="getIcon" specifier="public"
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="QIcon" isPureVirtual="false">
@@ -159,6 +176,17 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="75" isConst="false" />
       </variant>
     </method>
+    <method name="getFaded" cppName="getFaded" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RColor" isPureVirtual="false">
+        <arg type="RColor &amp;" typeName="RColor" name="color"
+        isConst="true" />
+        <arg type="QColor &amp;" typeName="QColor" name="bgColor"
+        isConst="true" />
+        <arg type="double" typeName="double" name="factor"
+        hasDefault="true" default="1" isConst="false" />
+      </variant>
+    </method>
     <method name="operator==" cppName="operator=="
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -182,6 +210,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="RColor &amp;" typeName="RColor" name="color"
         isConst="true" />
       </variant>
+    </method>
+    <method name="reinit" cppName="reinit" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false" />
     </method>
     <property name="CompatByLayer" type="QColor" isConst="false"
     isStatic="true" />

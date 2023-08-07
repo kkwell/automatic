@@ -61,6 +61,9 @@
         getGraphicsViewWithFocus
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getGraphicsSceneWithFocus
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         addCoordinateListener
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -76,7 +79,19 @@
         notifyLayerListeners
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        addTransactionListener
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        removeTransactionListener
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        notifyTransactionListeners
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         clear
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        deleteScriptHandler
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getScriptHandler
@@ -202,6 +217,9 @@
         disableMouseTracking
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        setAllowSnapInterruption
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         updateAllEntities
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -238,6 +256,12 @@
         exportFile
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        tagState
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        undoToTag
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         undo
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -256,6 +280,9 @@
         getSnap
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getSnapStatus
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         setSnapRestriction
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -263,6 +290,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         snap
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        restrictOrtho
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getClosestEntity

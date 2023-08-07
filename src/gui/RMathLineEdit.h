@@ -23,7 +23,6 @@
 #include "gui_global.h"
 
 #include <QMetaType>
-#include <QLabel>
 #include <QLineEdit>
 
 #include "RMath.h"
@@ -38,6 +37,7 @@ Q_OBJECT
 
 // keep extra ';' in place for the benefit of ecmagenerator:
 Q_PROPERTY(bool angle READ isAngle WRITE setAngle);
+Q_PROPERTY(bool scale READ isScale WRITE setScale);
 Q_PROPERTY(bool integer READ isInteger WRITE setInteger);
 //Q_PROPERTY(double defaultValue READ getDefaultValue WRITE setDefaultValue);
 //Q_PROPERTY(int defaultUnit READ getDefaultUnit WRITE setDefaultUnit);
@@ -53,6 +53,14 @@ public:
     void setAngle(bool on) {
        angle = on;
     }
+
+    bool isScale() const {
+        return scale;
+    }
+    void setScale(bool on) {
+        scale = on;
+    }
+
     bool isInteger() const {
         return integer;
     }
@@ -74,6 +82,9 @@ public:
     }
 
     void setToolTip(const QString& toolTip);
+
+    QColor getNormalTextColor() const;
+    void setTextColor(bool error);
 
     /*
     double getDefaultValue() {
@@ -105,6 +116,7 @@ signals:
 private:
     QPalette oriPalette;
     bool angle;
+    bool scale;
     bool integer;
     double value;
     //RS::Unit defaultUnit;
@@ -113,7 +125,6 @@ private:
     bool noEmit;
     bool noResultInToolTip;
     //double defaultValue;
-//    QLabel* resultTip;
 };
 
 Q_DECLARE_METATYPE(RMathLineEdit*)

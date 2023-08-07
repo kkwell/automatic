@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>User Interface Theme:</string>
+      <string>User interface theme:</string>
      </property>
     </widget>
    </item>
@@ -28,6 +28,9 @@
        <width>200</width>
        <height>0</height>
       </size>
+     </property>
+     <property name="RequiresRestart" stdset="0">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

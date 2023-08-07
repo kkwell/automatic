@@ -88,6 +88,10 @@
             
             REcmaHelper::registerFunction(&engine, proto, hasArrowHead, "hasArrowHead");
             
+            REcmaHelper::registerFunction(&engine, proto, setSplineShaped, "setSplineShaped");
+            
+            REcmaHelper::registerFunction(&engine, proto, isSplineShaped, "isSplineShaped");
+            
             REcmaHelper::registerFunction(&engine, proto, clear, "clear");
             
             REcmaHelper::registerFunction(&engine, proto, normalize, "normalize");
@@ -128,9 +132,21 @@
             
             REcmaHelper::registerFunction(&engine, proto, isClosed, "isClosed");
             
-            REcmaHelper::registerFunction(&engine, proto, getDimScale, "getDimScale");
+            REcmaHelper::registerFunction(&engine, proto, getDimscale, "getDimscale");
+            
+            REcmaHelper::registerFunction(&engine, proto, setDimscale, "setDimscale");
+            
+            REcmaHelper::registerFunction(&engine, proto, getDimasz, "getDimasz");
+            
+            REcmaHelper::registerFunction(&engine, proto, setDimasz, "setDimasz");
             
             REcmaHelper::registerFunction(&engine, proto, getExploded, "getExploded");
+            
+            REcmaHelper::registerFunction(&engine, proto, getDimLeaderBlockId, "getDimLeaderBlockId");
+            
+            REcmaHelper::registerFunction(&engine, proto, setDimLeaderBlockId, "setDimLeaderBlockId");
+            
+            REcmaHelper::registerFunction(&engine, proto, clearStyleOverrides, "clearStyleOverrides");
             
             REcmaHelper::registerFunction(&engine, proto, exportEntity, "exportEntity");
             
@@ -144,6 +160,8 @@
     // static methods:
     
             REcmaHelper::registerFunction(&engine, &ctor, init, "init");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getRtti, "getRtti");
             
             REcmaHelper::registerFunction(&engine, &ctor, getStaticPropertyTypeIds, "getStaticPropertyTypeIds");
             
@@ -160,6 +178,10 @@
             
             ctor.setProperty("PropertyProtected",
                 qScriptValueFromValue(&engine, RLeaderEntity::PropertyProtected),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyWorkingSet",
+                qScriptValueFromValue(&engine, RLeaderEntity::PropertyWorkingSet),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
             ctor.setProperty("PropertyType",
@@ -202,6 +224,10 @@
                 qScriptValueFromValue(&engine, RLeaderEntity::PropertyArrowHead),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
+            ctor.setProperty("PropertySplineShaped",
+                qScriptValueFromValue(&engine, RLeaderEntity::PropertySplineShaped),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
             ctor.setProperty("PropertyDimLeaderBlock",
                 qScriptValueFromValue(&engine, RLeaderEntity::PropertyDimLeaderBlock),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
@@ -218,8 +244,12 @@
                 qScriptValueFromValue(&engine, RLeaderEntity::PropertyVertexNZ),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
-            ctor.setProperty("PropertyDimScale",
-                qScriptValueFromValue(&engine, RLeaderEntity::PropertyDimScale),
+            ctor.setProperty("PropertyDimscale",
+                qScriptValueFromValue(&engine, RLeaderEntity::PropertyDimscale),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimasz",
+                qScriptValueFromValue(&engine, RLeaderEntity::PropertyDimasz),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
 
@@ -488,6 +518,45 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::init", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerLeaderEntity::getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::getRtti", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::getRtti";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RS::EntityType'
+    RS::EntityType cppResult =
+        RLeaderEntity::
+       getRtti();
+        // return type: RS::EntityType
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.getRtti().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::getRtti", context, engine);
             return result;
         }
          QScriptValue
@@ -1001,6 +1070,105 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RPropertyTypeId */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(3).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RPropertyTypeId*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RPropertyTypeId*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RLeaderEntity: Argument 0 is not of type RPropertyTypeId.",
+                               context);                    
+                    }
+                    RPropertyTypeId 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a3 =
+                    (bool)
+                    
+                    context->argument( 3 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QPair < QVariant , RPropertyAttributes >'
+    QPair < QVariant , RPropertyAttributes > cppResult =
+        
+               self->getProperty(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: QPair < QVariant , RPropertyAttributes >
+                // Pair of ...:
+                //result = REcmaHelper::pairToScriptValue(engine, cppResult);
+                QVariantList vl;
+                QVariant v;
+                
+                    // first type of pair is variant:
+                    if (QString(cppResult.first.typeName())=="RLineweight::Lineweight") {
+                        v.setValue((int)cppResult.first.value<RLineweight::Lineweight>());
+                    }
+                    else {
+                        v.setValue(cppResult.first);
+                    }
+                  
+
+                vl.append(v);
+                v.setValue(cppResult.second);
+                vl.append(v);
+                result = qScriptValueFromValue(engine, vl);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.getProperty().",
                    context);
@@ -1249,6 +1417,110 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::hasArrowHead", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerLeaderEntity::setSplineShaped
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::setSplineShaped", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::setSplineShaped";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RLeaderEntity* self = 
+                        getSelf("setSplineShaped", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setSplineShaped(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.setSplineShaped().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::setSplineShaped", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerLeaderEntity::isSplineShaped
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::isSplineShaped", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::isSplineShaped";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RLeaderEntity* self = 
+                        getSelf("isSplineShaped", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->isSplineShaped();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.isSplineShaped().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::isSplineShaped", context, engine);
             return result;
         }
          QScriptValue
@@ -2483,19 +2755,19 @@
             return result;
         }
          QScriptValue
-        REcmaSharedPointerLeaderEntity::getDimScale
+        REcmaSharedPointerLeaderEntity::getDimscale
         (QScriptContext* context, QScriptEngine* engine) 
         
         {
-            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::getDimScale", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::getDimScale";
+            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::getDimscale", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::getDimscale";
             //QCoreApplication::processEvents();
 
             QScriptValue result = engine->undefinedValue();
             
                     // public function: can be called from ECMA wrapper of ECMA shell:
                     RLeaderEntity* self = 
-                        getSelf("getDimScale", context);
+                        getSelf("getDimscale", context);
                   
 
                 //Q_ASSERT(self!=NULL);
@@ -2515,7 +2787,111 @@
     // return type 'double'
     double cppResult =
         
-               self->getDimScale();
+               self->getDimscale();
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.getDimscale().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::getDimscale", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerLeaderEntity::setDimscale
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::setDimscale", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::setDimscale";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RLeaderEntity* self = 
+                        getSelf("setDimscale", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setDimscale(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.setDimscale().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::setDimscale", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerLeaderEntity::getDimasz
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::getDimasz", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::getDimasz";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RLeaderEntity* self = 
+                        getSelf("getDimasz", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        
+               self->getDimasz();
         // return type: double
                 // standard Type
                 result = QScriptValue(cppResult);
@@ -2547,7 +2923,7 @@
     // return type 'double'
     double cppResult =
         
-               self->getDimScale(a0);
+               self->getDimasz(a0);
         // return type: double
                 // standard Type
                 result = QScriptValue(cppResult);
@@ -2557,10 +2933,65 @@
 
         
             {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.getDimScale().",
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.getDimasz().",
                    context);
             }
-            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::getDimScale", context, engine);
+            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::getDimasz", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerLeaderEntity::setDimasz
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::setDimasz", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::setDimasz";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RLeaderEntity* self = 
+                        getSelf("setDimasz", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setDimasz(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.setDimasz().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::setDimasz", context, engine);
             return result;
         }
          QScriptValue
@@ -2610,6 +3041,154 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::getExploded", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerLeaderEntity::getDimLeaderBlockId
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::getDimLeaderBlockId", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::getDimLeaderBlockId";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RLeaderEntity* self = 
+                        getSelf("getDimLeaderBlockId", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'REntity::Id'
+    REntity::Id cppResult =
+        
+               self->getDimLeaderBlockId();
+        // return type: REntity::Id
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.getDimLeaderBlockId().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::getDimLeaderBlockId", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerLeaderEntity::setDimLeaderBlockId
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::setDimLeaderBlockId", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::setDimLeaderBlockId";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RLeaderEntity* self = 
+                        getSelf("setDimLeaderBlockId", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: REntity::Id */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    REntity::Id
+                    a0 =
+                    (REntity::Id)
+                    (int)
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setDimLeaderBlockId(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.setDimLeaderBlockId().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::setDimLeaderBlockId", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerLeaderEntity::clearStyleOverrides
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerLeaderEntity::clearStyleOverrides", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerLeaderEntity::clearStyleOverrides";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RLeaderEntity* self = 
+                        getSelf("clearStyleOverrides", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->clearStyleOverrides();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLeaderEntity.clearStyleOverrides().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerLeaderEntity::clearStyleOverrides", context, engine);
             return result;
         }
          QScriptValue

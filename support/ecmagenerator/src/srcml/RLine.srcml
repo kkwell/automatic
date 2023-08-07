@@ -45,7 +45,6 @@
     <constructor_decl><name>RLine</name><parameter_list>(<param><decl><type><name>double</name></type> <name>x1</name></decl></param>, <param><decl><type><name>double</name></type> <name>y1</name></decl></param>, <param><decl><type><name>double</name></type> <name>x2</name></decl></param>, <param><decl><type><name>double</name></type> <name>y2</name></decl></param>)</parameter_list>;</constructor_decl>
     <constructor_decl><name>RLine</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>startPoint</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>endPoint</name></decl></param>)</parameter_list>;</constructor_decl>
     <constructor_decl><name>RLine</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>startPoint</name></decl></param>, <param><decl><type><name>double</name></type> <name>angle</name></decl></param>, <param><decl><type><name>double</name></type> <name>distance</name></decl></param>)</parameter_list>;</constructor_decl>
-    <destructor_decl><specifier>virtual</specifier> <name>~RLine</name><parameter_list>()</parameter_list>;</destructor_decl>
 
     <function><type><name>virtual</name> <name><name>RShape</name>::<name>Type</name></name></type> <name>getShapeType</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><name>Line</name></expr>;</return>
@@ -63,7 +62,7 @@
 
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getVectorProperties</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
-    <function_decl><type><name>bool</name></type> <name>isValid</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>isValid</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>RBox</name></type> <name>getBoundingBox</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
@@ -72,6 +71,7 @@
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getCenterPoints</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getPointsWithDistanceToEnd</name><parameter_list>(
         <param><decl><type><name>double</name></type> <name>distance</name></decl></param>, <param><decl><type><name>int</name></type> <name>from</name> =<init> <expr><name><name>RS</name>::<name>FromAny</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getPointCloud</name><parameter_list>(<param><decl><type><name>double</name></type> <name>segmentLength</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>double</name></type> <name>getAngleAt</name><parameter_list>(<param><decl><type><name>double</name></type> <name>distance</name></decl></param>, <param><decl><type><name><name>RS</name>::<name>From</name></name></type> <name>from</name> =<init> <expr><name><name>RS</name>::<name>FromStart</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
@@ -88,8 +88,10 @@
     <function_decl><type><name>double</name></type> <name>getLength</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>double</name></type> <name>getAngle</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
-    <function_decl><type><name>void</name></type> <name>setLength</name><parameter_list>(<param><decl><type><name>double</name></type> <name>l</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>setLength</name><parameter_list>(<param><decl><type><name>double</name></type> <name>l</name></decl></param>, <param><decl><type><name>bool</name></type> <name>fromStart</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>setAngle</name><parameter_list>(<param><decl><type><name>double</name></type> <name>a</name></decl></param>)</parameter_list>;</function_decl>
+
+    <function_decl><type><name>bool</name></type> <name>isParallel</name><parameter_list>(<param><decl><type><name>const</name> <name>RLine</name>&amp;</type> <name>line</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>bool</name></type> <name>isVertical</name><parameter_list>(<param><decl><type><name>double</name></type> <name>tolerance</name> =<init> <expr><name><name>RS</name>::<name>PointTolerance</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>bool</name></type> <name>isHorizontal</name><parameter_list>(<param><decl><type><name>double</name></type> <name>tolerance</name> =<init> <expr><name><name>RS</name>::<name>PointTolerance</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
@@ -130,6 +132,16 @@
     }</block></function>
 
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>splitAt</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name>&amp;</type> <name>points</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+    <comment type="block">/**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */</comment>
+    <function><type><name>RLine</name></type> <name>copy</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr>*<name>this</name></expr>;</return>
+    }</block></function>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
 
 </public><protected>protected:
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>print</name><parameter_list>(<param><decl><type><name>QDebug</name></type> <name>dbg</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>

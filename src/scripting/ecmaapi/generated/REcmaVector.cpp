@@ -150,11 +150,17 @@
             
             REcmaHelper::registerFunction(&engine, proto, rotate, "rotate");
             
+            REcmaHelper::registerFunction(&engine, proto, getRotated, "getRotated");
+            
             REcmaHelper::registerFunction(&engine, proto, rotate3D, "rotate3D");
             
             REcmaHelper::registerFunction(&engine, proto, scale, "scale");
             
+            REcmaHelper::registerFunction(&engine, proto, getScaled, "getScaled");
+            
             REcmaHelper::registerFunction(&engine, proto, mirror, "mirror");
+            
+            REcmaHelper::registerFunction(&engine, proto, getMirrored, "getMirrored");
             
             REcmaHelper::registerFunction(&engine, proto, flipHorizontal, "flipHorizontal");
             
@@ -203,6 +209,8 @@
             REcmaHelper::registerFunction(&engine, proto, operator_divide, "operator_divide");
             
             REcmaHelper::registerFunction(&engine, proto, getNegated, "getNegated");
+            
+            REcmaHelper::registerFunction(&engine, proto, getAbsolute, "getAbsolute");
             
             REcmaHelper::registerFunction(&engine, proto, dot, "dot");
             
@@ -578,7 +586,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < double >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -2825,6 +2833,91 @@
             return result;
         }
          QScriptValue
+        REcmaVector::getRotated
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaVector::getRotated", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaVector::getRotated";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RVector* self = 
+                        getSelf("getRotated", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RVector: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        
+               self->getRotated(a0
+        ,
+    a1);
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RVector.getRotated().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaVector::getRotated", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaVector::rotate3D
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -3182,6 +3275,103 @@
             return result;
         }
          QScriptValue
+        REcmaVector::getScaled
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaVector::getScaled", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaVector::getScaled";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RVector* self = 
+                        getSelf("getScaled", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RVector: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RVector: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        
+               self->getScaled(a0
+        ,
+    a1);
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RVector.getScaled().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaVector::getScaled", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaVector::mirror
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -3320,6 +3510,78 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaVector::mirror", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaVector::getMirrored
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaVector::getMirrored", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaVector::getMirrored";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RVector* self = 
+                        getSelf("getMirrored", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RLine */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RLine*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RLine*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RVector: Argument 0 is not of type RLine.",
+                               context);                    
+                    }
+                    RLine 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        
+               self->getMirrored(a0);
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RVector.getMirrored().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaVector::getMirrored", context, engine);
             return result;
         }
          QScriptValue
@@ -4299,7 +4561,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -4360,7 +4622,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -4424,7 +4686,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -4495,7 +4757,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -4531,7 +4793,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -4602,7 +4864,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -4965,6 +5227,55 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaVector::getNegated", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaVector::getAbsolute
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaVector::getAbsolute", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaVector::getAbsolute";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RVector* self = 
+                        getSelf("getAbsolute", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        
+               self->getAbsolute();
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RVector.getAbsolute().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaVector::getAbsolute", context, engine);
             return result;
         }
          QScriptValue
@@ -5792,7 +6103,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5853,7 +6164,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5939,7 +6250,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6000,7 +6311,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6081,7 +6392,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6201,7 +6512,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6321,7 +6632,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6372,7 +6683,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6423,7 +6734,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6474,7 +6785,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6594,7 +6905,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6648,7 +6959,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6657,7 +6968,7 @@
                         a0
                     );
                 
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a1;
                     REcmaHelper::fromScriptValue(
@@ -6698,7 +7009,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6707,7 +7018,7 @@
                         a0
                     );
                 
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a1;
                     REcmaHelper::fromScriptValue(
@@ -6770,7 +7081,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6806,7 +7117,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6867,7 +7178,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6918,7 +7229,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6969,7 +7280,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -7784,7 +8095,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -7855,7 +8166,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -7914,7 +8225,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(

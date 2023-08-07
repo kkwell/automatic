@@ -62,6 +62,7 @@ InsertBlock.prototype.beginEvent = function() {
     if (!isNull(doc)) {
         var ids = doc.queryBlockEntities(blockId);
         var first = true;
+        var items = [];
         for (i=0; i<ids.length; i++) {
             var id = ids[i];
             var e = doc.queryEntityDirect(id);
@@ -77,9 +78,17 @@ InsertBlock.prototype.beginEvent = function() {
             var tag = e.getTag();
             var prompt = e.getPrompt();
             var defaultValue = e.getEscapedText();
+            items.push([prompt, [tag, defaultValue]]);
+        }
 
-            var tagCombo = optionsToolBar.findChild("AttributeTag");
-            tagCombo.addItem(prompt, [tag, defaultValue]);
+        items.sort(function(a, b) {
+            return Array.alphaNumericalSorter(a[0], b[0]);
+        });
+
+        var tagCombo = optionsToolBar.findChild("AttributeTag");
+        for (i=0; i<items.length; i++) {
+            var item = items[i];
+            tagCombo.addItem(item[0], item[1]);
         }
     }
 
@@ -220,14 +229,16 @@ InsertBlock.prototype.slotKeepProportionsChanged = function(value) {
 }
 
 InsertBlock.prototype.slotScaleXChanged = function(value) {
+    if (!isNumber(value)) {
+        this.blockReferenceData.setScaleFactors(new RVector(1, 1));
+        return;
+    }
+
     var optionsToolBar = EAction.getOptionsToolBar();
     var keepProportionsSwitch = optionsToolBar.findChild("KeepProportions");
     var keepProportions = keepProportionsSwitch.checked;
 
-    var scaleX = RMath.eval(value);
-    if (!RMath.getError().isEmpty()) {
-        return;
-    }
+    var scaleX = value;
     var scaleY = this.blockReferenceData.getScaleFactors().y;
 
     // if keep proportions is checked, adjust y scale proportionally to x scale:
@@ -244,18 +255,16 @@ InsertBlock.prototype.slotScaleXChanged = function(value) {
 };
 
 InsertBlock.prototype.slotScaleYChanged = function(value) {
-    var scaleY = RMath.eval(value);
-    if (RMath.getError().isEmpty()) {
-        this.blockReferenceData.setScaleFactors(new RVector(this.blockReferenceData.getScaleFactors().x, scaleY));
+    if (isNumber(value)) {
+        this.blockReferenceData.setScaleFactors(new RVector(this.blockReferenceData.getScaleFactors().x, value));
     } else {
         this.blockReferenceData.setScaleFactors(new RVector(this.blockReferenceData.getScaleFactors().x, 1.0));
     }
 };
 
 InsertBlock.prototype.slotRotationChanged = function(value) {
-    var rotation = RMath.eval(value);
-    if (RMath.getError().isEmpty()) {
-        this.blockReferenceData.setRotation(RMath.deg2rad(rotation));
+    if (isNumber(value)) {
+        this.blockReferenceData.setRotation(value);
     } else {
         this.blockReferenceData.setRotation(0);
     }
@@ -287,7 +296,7 @@ InsertBlock.prototype.slotArray = function() {
 
     dialog.exec();
     WidgetFactory.saveState(dialog, this.settingsGroup);
-    dialog.destroy();
+    destr(dialog);
     EAction.activateMainWindow();
 };
 

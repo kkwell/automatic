@@ -141,8 +141,8 @@ HatchFromSelection.verifyBoundaryEntity = function(doc, entity) {
         var ids = doc.queryBlockEntities(blockReferenceData.getReferencedBlockId());
         var ret = true;
         for (var i=0; i<ids.length; i++) {
-            var bEntity = blockReferenceData.queryEntity(ids[i]);
-            if (bEntity.isNull()) {
+            var bEntity = blockReferenceData.queryEntity(ids[i], true);
+            if (isNull(bEntity)) {
                 continue;
             }
             if (!bEntity.isVisible()) {
@@ -210,7 +210,7 @@ HatchFromSelection.createHatchData = function(doc, entityIds, ignoreOpenLoops) {
 
 /**
  * Traverses the given candidates recursively for connected entities.
- * Resulting loops are appened to the given hatch data.
+ * Resulting loops are appended to the given hatch data.
  */
 HatchFromSelection.traverse = function(hatchData, docOrBlockRef, entity, candidateIds) {
     var i;
@@ -226,7 +226,12 @@ HatchFromSelection.traverse = function(hatchData, docOrBlockRef, entity, candida
         var segments = entity.getExploded();
         for (i=0; i<segments.length; i++) {
             var segment = segments[i];
-            hatchData.addBoundary(segment);
+            if (RSettings.getQtVersion() >= 0x060000) {
+                hatchData.addBoundary(segment.clone());
+            }
+            else {
+                hatchData.addBoundary(segment);
+            }
         }
         // TODO: add polyline as boundary:
 //        hatchData.addBoundary(entity.getData().castToShape());
@@ -237,7 +242,12 @@ HatchFromSelection.traverse = function(hatchData, docOrBlockRef, entity, candida
     // handle circle, full ellipse and closed spline loops:
     if (HatchFromSelection.isClosedCurve(entity)) {
         hatchData.newLoop();
-        hatchData.addBoundary(entity.getData().castToShape());
+        if (RSettings.getQtVersion() >= 0x060000) {
+            hatchData.addBoundary(entity.getData().castToShape().clone());
+        }
+        else {
+            hatchData.addBoundary(entity.getData().castToShape());
+        }
         docOrBlockRef.traversed[entity.getId()] = true;
         return true;
     }
@@ -255,8 +265,8 @@ HatchFromSelection.traverse = function(hatchData, docOrBlockRef, entity, candida
                 continue;
             }
 
-            var bEntity = blockReferenceData.queryEntity(ids[i]);
-            if (bEntity.isNull()) {
+            var bEntity = blockReferenceData.queryEntity(ids[i], true);
+            if (isNull(bEntity)) {
                 continue;
             }
             if (!bEntity.isVisible()) {
@@ -270,7 +280,11 @@ HatchFromSelection.traverse = function(hatchData, docOrBlockRef, entity, candida
         return ret;
     }
 
-    var shape = entity.getData().castToShape().clone();
+    var shape = entity.getData().castToShape();
+    if (isNull(shape)) {
+        return false;
+    }
+    shape = shape.clone();
     if (isFunction(shape.getLength)) {
         if (shape.getLength()<RS.PointTolerance) {
             // ignore zero length entity:
@@ -281,7 +295,12 @@ HatchFromSelection.traverse = function(hatchData, docOrBlockRef, entity, candida
     // connect 'loose' boundary elements into loops:
     hatchData.newLoop();
     docOrBlockRef.traversed[entity.getId()] = true;
-    hatchData.addBoundary(shape);
+    if (RSettings.getQtVersion() >= 0x060000) {
+        hatchData.addBoundary(shape.clone());
+    }
+    else {
+        hatchData.addBoundary(shape);
+    }
     var currentShape = shape;
     var loopStartPoint = shape.getStartPoint();
 
@@ -303,7 +322,7 @@ HatchFromSelection.traverse = function(hatchData, docOrBlockRef, entity, candida
             }
             else {
                 // query entity from block reference:
-                entity = docOrBlockRef.queryEntity(entityId);
+                entity = docOrBlockRef.queryEntity(entityId, true);
             }
 
             if (isBlockReferenceEntity(entity)) {
@@ -322,6 +341,11 @@ HatchFromSelection.traverse = function(hatchData, docOrBlockRef, entity, candida
                 }
             }
 
+            if (!isFunction(entity.getStartPoint)) {
+                // ignore entities without start / end points (existing hatches, etc..):
+                continue;
+            }
+
             var sp = entity.getStartPoint();
             var ep = entity.getEndPoint();
 
@@ -334,7 +358,12 @@ HatchFromSelection.traverse = function(hatchData, docOrBlockRef, entity, candida
                 if (epConnects) {
                     shape.reverse();
                 }
-                hatchData.addBoundary(shape);
+                if (RSettings.getQtVersion() >= 0x060000) {
+                    hatchData.addBoundary(shape.clone());
+                }
+                else {
+                    hatchData.addBoundary(shape);
+                }
                 currentShape = shape;
                 done2 = false;
                 //qDebug("Hatch: next loop shape: ", shape, epConnects ? " (reversed)" : "");

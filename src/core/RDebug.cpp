@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QStringList>
 
+#include "RS.h"
 #include "RDebug.h"
 
 //FILE* RDebug::stream=stderr;
@@ -32,21 +33,33 @@ QMap<int, QTime> RDebug::timer;
 #endif
 QMap<QString, int> RDebug::counter;
 QString RDebug::prefix;
+QMutex RDebug::mutexCounter;
 
 void RDebug::printBacktrace(const QString& prefix) {
 #if !defined(Q_OS_WIN) && !defined(Q_OS_ANDROID)
     void *array[20];
     size_t size;
     char **strings;
-    size_t i;
+    int i;
 
     size = backtrace(array, 20);
     strings = backtrace_symbols(array, size);
 
     qDebug("Obtained %zd stack frames.\n", size);
 
-    for(i = 0; i < size; i++) {
-        qDebug("%s%s\n", (const char*)prefix.toUtf8(), strings[i]);
+    for(i = size-1; i>=0; i--) {
+        QString str(strings[i]);
+        str.replace("\t", "    ");
+        str = str.mid(59);
+        str = str.replace(QRegularExpression("_[ZNK]*[0-9]*"), "");
+        str = str.replace(QRegularExpression("[ERK]*[0-9]+"), "::");
+        str = str.replace(QRegularExpression("E[ibd]* \\+ ::$"), "");
+        str = str.replace(QRegularExpression("bbb \\+ ::$"), "");
+        str = str.replace(QRegularExpression(" \\+ ::$"), "");
+        //qDebug("%s%s\n", (const char*)prefix.toUtf8(), strings[i]);
+        QString ind = "";
+        ind = ind.leftJustified(size-i);
+        qDebug("%s%s%s\n", (const char*)prefix.toUtf8(), (const char*)ind.toUtf8(), (const char*)str.toUtf8());
     }
 
     free(strings);
@@ -64,11 +77,12 @@ void RDebug::startTimer(int id) {
 }
 
 
-int RDebug::stopTimer(int id, const QString& msg, int msThreshold) {
+uint RDebug::stopTimer(int id, const QString& msg, uint msThreshold) {
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS)
     Nanoseconds elapsedNano;
     uint64_t end = mach_absolute_time();
     uint64_t elapsed = end - timerMac[id];
+    // TODO: deprecated, no replacement:
     elapsedNano = AbsoluteToNanoseconds( *(AbsoluteTime *) &elapsed );
     uint64_t t = (* (uint64_t *) &elapsedNano);
     timerMac.remove(id);
@@ -77,7 +91,7 @@ int RDebug::stopTimer(int id, const QString& msg, int msThreshold) {
     timer.remove(id);
 #endif
 
-    if (t/1000000>=(unsigned long long)msThreshold) {
+    if (t/1000000>=msThreshold) {
         qDebug() << "TIMER: " << t << "ns (" << t/1000000 << "ms )" << " - " << msg;
     }
     return t;
@@ -95,19 +109,23 @@ void RDebug::hexDump(const QString& str) {
 }
 
 void RDebug::incCounter(const QString& id) {
+    mutexCounter.lock();
     if (!counter.contains(id)) {
         counter[id] = 0;
     }
-    //qDebug() << id << "+";
     counter[id]++;
+    mutexCounter.unlock();
 }
 
 void RDebug::decCounter(const QString& id) {
+    mutexCounter.lock();
     if (!counter.contains(id)) {
+        Q_ASSERT(false);
         counter[id] = 0;
     }
     //qDebug() << id << "-";
     counter[id]--;
+    mutexCounter.unlock();
 }
 
 int RDebug::getCounter(const QString& id) {
@@ -124,9 +142,23 @@ void RDebug::printCounter(const QString& id) {
     qDebug() << "counter: " << id << ": " << counter[id];
 }
 
-void RDebug::printCounters() {
-    QStringList keys = counter.keys();
-    for (int i=0; i<keys.length(); i++) {
-        qDebug() << "counter: " << keys[i] << ": " << counter[keys[i]];
+void RDebug::printCounters(const QString& prefix) {
+    std::vector<std::pair<QString, int>> sortedPairs;
+    for (auto it = counter.begin(); it != counter.end(); ++it) {
+        sortedPairs.push_back(std::pair<QString, int>(it.key(), it.value()));
     }
+
+    std::sort(sortedPairs.begin(), sortedPairs.end(),
+              [](const std::pair<QString, int>& a, const std::pair<QString, int>& b) {
+                  return a.second < b.second;
+              });
+
+    for (const auto& pair : sortedPairs) {
+        qDebug() << prefix << "counter: " << pair.first << ": " << pair.second;
+    }
+
+//    QStringList keys = counter.keys();
+//    for (int i=0; i<keys.length(); i++) {
+//        qDebug() << prefix << "counter: " << keys[i] << ": " << counter[keys[i]];
+//    }
 }

@@ -95,7 +95,7 @@
         stretch
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        updateTextData
+        to2D
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

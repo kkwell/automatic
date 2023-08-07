@@ -30,11 +30,13 @@
 #include "RShape.h"
 #include "RSpline.h"
 #include "RSplineProxy.h"
+#include "RTriangle.h"
 #include "RXLine.h"
 
 double RShape::twopi = M_PI*2;
 double RShape::epsTolerance = 1.0e-02;
 int RShape::errorCode = 0;
+RShapeProxy* RShape::shapeProxy = NULL;
 
 bool RShape::isFullEllipseShape(const RShape& s) {
     return s.getShapeType()==RShape::Ellipse && dynamic_cast<const REllipse&>(s).isFullEllipse();
@@ -50,6 +52,18 @@ double RShape::getDistanceTo(const RVector& point, bool limited, double strictRa
         return v.getMagnitude();
     }
     return RNANDOUBLE;
+}
+
+/**
+ * \return Maximum shortest distance from this shape to any of the given points.
+ */
+double RShape::getMaxDistanceTo(const QList<RVector>& points, bool limited, double strictRange) const {
+    double ret = 0.0;
+    for (int i=0; i<points.length(); i++) {
+        double d = getDistanceTo(points[i], limited, strictRange);
+        ret = qMax(ret, d);
+    }
+    return ret;
 }
 
 /**
@@ -149,6 +163,20 @@ bool RShape::equals(const RShape& other, double tolerance) const {
     return true;
 }
 
+RVector RShape::getPointOnShape() const {
+    QList<RVector> midPoints = getMiddlePoints();
+    if (midPoints.size()>0) {
+        return midPoints[0];
+    }
+
+    QList<RVector> endPoints = getEndPoints();
+    if (endPoints.size()>0) {
+        return endPoints[0];
+    }
+
+    return getClosestPointOnShape(RVector(0.0,0.0));
+}
+
 /**
  * \return Point at given percentile.
  */
@@ -160,6 +188,15 @@ RVector RShape::getPointAtPercent(double p) const {
         return RVector::invalid;
     }
     return candidates.at(0);
+}
+
+/**
+ * \return Angle at given percentile.
+ */
+double RShape::getAngleAtPercent(double p) const {
+    double length = getLength();
+    double distance = p * length;
+    return getAngleAt(distance);
 }
 
 /**
@@ -185,10 +222,10 @@ QList<RVector> RShape::getIntersectionPoints(const RShape& shape1,
     QList<RVector> empty;
 
     bool gotInfiniteShape = false;
-    if (typeid(shape1) == typeid(RXLine) ||
-        typeid(shape2) == typeid(RXLine) ||
-        typeid(shape1) == typeid(RRay) ||
-        typeid(shape2) == typeid(RRay)) {
+    if (shape1.getShapeType() == RShape::XLine ||
+        shape2.getShapeType() == RShape::XLine ||
+        shape1.getShapeType() == RShape::Ray ||
+        shape2.getShapeType() == RShape::Ray) {
 
         gotInfiniteShape = true;
     }
@@ -1023,19 +1060,22 @@ QList<RVector> RShape::getIntersectionPointsCC(const RCircle& circle1, const RCi
     RVector u = c2 - c1;
     double uMag = u.getMagnitude();
 
+    // concentric
+    if (uMag < RS::PointTolerance) {
+        return res;
+    }
+
+    double tol = (r1+r2)/200000;
+
     // the two circles (almost) touch externally / internally in one point (tangent):
-    if (RMath::fuzzyCompare(uMag, r1+r2, 1.0e-4) ||
-        RMath::fuzzyCompare(uMag, fabs(r1-r2), 1.0e-4)) {
+    if (RMath::fuzzyCompare(uMag, r1+r2, tol) ||
+        RMath::fuzzyCompare(uMag, fabs(r1-r2), tol)) {
 
         u.setMagnitude2D(r1);
         res.append(c1 + u);
         return res;
     }
 
-    // concentric
-    if (uMag < RS::PointTolerance) {
-        return res;
-    }
 
     RVector v = RVector(u.y, -u.x);
 
@@ -1057,7 +1097,7 @@ QList<RVector> RShape::getIntersectionPointsCC(const RCircle& circle1, const RCi
     RVector sol1 = c1 + u*s + v*t1;
     RVector sol2 = c1 + u*s + v*t2;
 
-    if (sol1.equalsFuzzy(sol2, 1.0e-4)) {
+    if (sol1.equalsFuzzy(sol2, tol)) {
         res.append(sol1);
     }
     else {
@@ -1381,7 +1421,7 @@ QList<RVector> RShape::getIntersectionPointsEE(const REllipse& ellipse1, const R
     //qDebug() << "PHI_2R: " << PHI_2R;
 
     // Calculate implicit (Polynomial) coefficients for the second ellipse
-    // in its translated-by (-H1, -H2) and rotated-by -PHI_1 postion
+    // in its translated-by (-H1, -H2) and rotated-by -PHI_1 position
     // AA*x^2 + BB*x*y + CC*y^2 + DD*x + EE*y + FF = 0
     // Formulas derived in the reference
     // To speed things up, store multiply-used expressions first
@@ -1641,11 +1681,11 @@ QList<RVector> RShape::getIntersectionPointsSX(const RSpline& spline1,
 }
 
 QList<RVector> RShape::getIntersectionPointsSS(const RSpline& spline1,
-        const RSpline& spline2, bool limited, bool same) {
+        const RSpline& spline2, bool limited, bool same, double tolerance) {
 
     if (RSpline::hasProxy()) {
         RSplineProxy* proxy = RSpline::getSplineProxy();
-        return proxy->getIntersectionPoints(spline1, spline2, limited, same);
+        return proxy->getIntersectionPoints(spline1, spline2, limited, same, tolerance);
     }
 
     return QList<RVector>();
@@ -1706,10 +1746,14 @@ bool RShape::stretch(const RBox& area, const RVector& offset) {
 }
 
 bool RShape::stretch(const RPolyline& area, const RVector& offset) {
-    Q_UNUSED(area)
-    Q_UNUSED(offset)
+    bool ret = false;
 
-    return false;
+    if (area.containsShape(*this)) {
+        // whole shape inside stretch area:
+        return move(offset);
+    }
+
+    return ret;
 }
 
 bool RShape::scale(double scaleFactor, const RVector& center) {
@@ -1720,6 +1764,100 @@ void RShape::print(QDebug dbg) const {
     dbg.nospace() << "RShape("
             << "address: " << QString("0x%1").arg((long int) this, 0, 16)
             << ")";
+}
+
+QList<QSharedPointer<RShape> > RShape::getOrderedShapes(const QList<QSharedPointer<RShape> >& shapes) {
+    QList<QSharedPointer<RShape> > ret;
+    //RVector cursor = RVector::invalid;
+    QSet<int> traversed;
+
+    // find next first entity of a contour:
+    for (int i=0; i<shapes.size(); ++i) {
+        if (traversed.contains(i)) {
+            continue;
+        }
+
+        QSharedPointer<RShape> shape = shapes.at(i);
+        //qDebug() << "RShape::order: shape: " << *shape;
+
+        // circle:
+        QSharedPointer<RCircle> circle = shape.dynamicCast<RCircle>();
+        if (!circle.isNull()) {
+            ret.append(shape);
+            traversed.insert(i);
+            continue;
+        }
+
+        // full ellipse:
+        QSharedPointer<REllipse> ellipseArc = shape.dynamicCast<REllipse>();
+        if (!ellipseArc.isNull() && ellipseArc->isFullEllipse()) {
+            ret.append(shape);
+            traversed.insert(i);
+            continue;
+        }
+
+        // full spline:
+        QSharedPointer<RSpline> spline = shape.dynamicCast<RSpline>();
+        if (!spline.isNull()) {
+            if (spline->isPeriodic()) {
+                ret.append(shape);
+                traversed.insert(i);
+                continue;
+            }
+        }
+
+        // line, arc, ellipse arc, spline loop segment:
+        if (shape->isDirected()) {
+            QList<QSharedPointer<RShape> > contour;
+            RVector sp = shape->getStartPoint();
+            RVector ep = shape->getEndPoint();
+            bool found = false;
+
+            // first shape of contour:
+            contour.append(shape);
+            traversed.insert(i);
+
+            // extend contour on both sides:
+            do {
+                found = false;
+                for (int k=0; k<shapes.size(); ++k) {
+                    if (traversed.contains(k)) {
+                        continue;
+                    }
+
+                    QSharedPointer<RShape> shape2 = shapes.at(k);
+                    if (ep.equalsFuzzy(shape2->getStartPoint())) {
+                        contour.append(shape2);
+                        traversed.insert(k);
+                        found = true;
+                    }
+                    if (ep.equalsFuzzy(shape2->getEndPoint())) {
+                        RShape* s = shape2->clone();
+                        s->reverse();
+                        contour.append(QSharedPointer<RShape>(s));
+                        traversed.insert(k);
+                        found = true;
+                    }
+                    if (sp.equalsFuzzy(shape2->getEndPoint())) {
+                        contour.prepend(shape2);
+                        traversed.insert(k);
+                        found = true;
+                    }
+                    if (sp.equalsFuzzy(shape2->getStartPoint())) {
+                        RShape* s = shape2->clone();
+                        s->reverse();
+                        contour.append(QSharedPointer<RShape>(s));
+                        traversed.insert(k);
+                        found = true;
+                    }
+                }
+            } while(found);
+
+            ret.append(contour);
+        }
+    }
+
+    return ret;
 }
 
 /**
@@ -1736,7 +1874,8 @@ bool RShape::order(QList<QList<QSharedPointer<RShape> > >& boundary) {
         QList<QSharedPointer<RShape> > loop = boundary.at(i);
         qDebug() << "loop: " << i;
         for (int k=0; k<loop.size(); ++k) {
-            qDebug() << "boundary shape: " << *loop.at(k);
+            //qDebug() << "   boundary shape: " << *loop.at(k);
+            qDebug() << "   boundary shape: " << loop.at(k)->getStartPoint() << loop.at(k)->getEndPoint();
         }
     }
     */
@@ -1867,11 +2006,14 @@ bool RShape::order(QList<QList<QSharedPointer<RShape> > >& boundary) {
         */
 
         if (cursor.isValid() && loopStartPoint.isValid() &&
-                !cursor.equalsFuzzy(loopStartPoint, 0.001)) {
+            !cursor.equalsFuzzy(loopStartPoint, 0.001)) {
 
             qWarning() << "RShape::order: loop not closed: "
                        << "end (cursor): " << cursor <<  " does not connect to "
                        << "start: " << loopStartPoint << "";
+
+            //newBoundary.last().append(QSharedPointer<RLine>(new RLine(cursor, loopStartPoint)));
+
             return false;
         }
     }
@@ -2278,7 +2420,315 @@ QList<QSharedPointer<RShape> > RShape::trim(
     return ret;
 }
 
-void RShape::dump() {
+/**
+ * Round every corner of the list of given (connected) shapes with the given radius.
+ */
+QList<QSharedPointer<RShape> > RShape::roundCorners(const QList<QSharedPointer<RShape> >& shapes, double radius) {
+    if (RShape::hasProxy()) {
+        return RShape::getShapeProxy()->roundAllCorners(shapes, radius);
+    }
+    return shapes;
+}
+
+/**
+ * Rounds the given shape1 against shape2.
+ *
+ * \param shape1 First shape of corner.
+ * \param clickPos1 Coordinate that was clicked when the user selected shape1.
+ * \param shape2 Second shape of corner.
+ * \param clickPos2 Coordinate that was clicked when the user selected shape2.
+ * \param trim true: Trim both shapes to rounding arc.
+ * \param radius Radius of rounding.
+ * \param solutionPos Position that determines which solution to apply (optional, defaults to clickPos1)
+ *
+ * \return Array of three shapes: shape1 (trimmed), rounding, shape2 (trimmed)
+ * or empty array.
+ */
+QList<QSharedPointer<RShape> > RShape::roundShapes(
+        const QSharedPointer<RShape> shape1, const RVector& clickPos1,
+        const QSharedPointer<RShape> shape2, const RVector& clickPos2,
+        bool trim, bool samePolyline, double radius, const RVector& pos) {
+
+    QList<QSharedPointer<RShape> > ret;
+
+    if (shape1.isNull() || !clickPos1.isValid() ||
+        shape2.isNull() || !clickPos2.isValid()) {
+        return ret;
+    }
+
+    RVector p = pos;
+    if (!p.isValid()) {
+        p = clickPos2;
+    }
+
+    // convert circles to arcs:
+    QSharedPointer<RShape> s1 = shape1;
+    QSharedPointer<RShape> s2 = shape2;
+    if (shape1->getShapeType()==RShape::Circle) {
+        QSharedPointer<RCircle> circle1 = shape1.dynamicCast<RCircle>();
+        s1 = QSharedPointer<RShape>(new RArc(circle1->toArc()));
+    }
+    if (shape2->getShapeType()==RShape::Circle) {
+        QSharedPointer<RCircle> circle2 = shape2.dynamicCast<RCircle>();
+        s2 = QSharedPointer<RShape>(new RArc(circle2->toArc()));
+    }
+
+    QSharedPointer<RShape> simpleShape1 = s1;
+    QSharedPointer<RShape> simpleShape2 = s2;
+    int i1, i2;
+
+    // rounding polylines?
+    // round segments instead:
+    if (shape1->getShapeType()==RShape::Polyline) {
+        QSharedPointer<RPolyline> pl1 = shape1.dynamicCast<RPolyline>();
+        i1 = pl1->getClosestSegment(clickPos1);
+        if (i1==-1) {
+            return ret;
+        }
+        simpleShape1 = pl1->getSegmentAt(i1);
+    }
+
+    if (shape2->getShapeType()==RShape::Polyline) {
+        QSharedPointer<RPolyline> pl2 = shape2.dynamicCast<RPolyline>();
+        i2 = pl2->getClosestSegment(clickPos2);
+        if (i2==-1) {
+            return ret;
+        }
+        simpleShape2 = pl2->getSegmentAt(i2);
+    }
+
+    // create two temporary parallels:
+    QList<QSharedPointer<RShape> > parallels1 = simpleShape1->getOffsetShapes(radius, 1, RS::NoSide, p);
+    QList<QSharedPointer<RShape> > parallels2 = simpleShape2->getOffsetShapes(radius, 1, RS::NoSide, p);
+
+    if (parallels1.length()!=1 || parallels2.length()!=1) {
+        return ret;
+    }
+
+    QSharedPointer<RShape> parallel1 = parallels1[0];
+    QSharedPointer<RShape> parallel2 = parallels2[0];
+
+    QList<RVector> ipParallel = parallel1->getIntersectionPoints(*parallel2.data(), false);
+    if (ipParallel.isEmpty()) {
+        return ret;
+    }
+
+    QList<RVector> sol2 = simpleShape1->getIntersectionPoints(*simpleShape2.data(), false);
+
+    // there might be two intersections: choose the closest:
+    RVector ip = p.getClosest(ipParallel);
+    RVector p1 = simpleShape1->getClosestPointOnShape(ip, false);
+    RVector p2 = simpleShape2->getClosestPointOnShape(ip, false);
+    double ang1 = ip.getAngleTo(p1);
+    double ang2 = ip.getAngleTo(p2);
+    bool reversed = (RMath::getAngleDifference(ang1, ang2) > M_PI);
+
+    RArc arc(ip, radius, ang1, ang2, reversed);
+
+    //RVector bp1 = arc.getStartPoint();
+    //RVector bp2 = arc.getEndPoint();
+
+    QSharedPointer<RShape> trimmed1, trimmed2;
+    if (samePolyline) {
+        trimmed1 = QSharedPointer<RShape>(simpleShape1->clone());
+        trimmed2 = QSharedPointer<RShape>(simpleShape2->clone());
+    }
+    else {
+        trimmed1 = QSharedPointer<RShape>(shape1->clone());
+        trimmed2 = QSharedPointer<RShape>(shape2->clone());
+    }
+
+    RS::Ending ending1 = RS::EndingNone;
+    RS::Ending ending2 = RS::EndingNone;
+
+    if (trim || samePolyline) {
+        // trim entities to intersection
+        RVector is2 = clickPos2.getClosest(sol2);
+        ending1 = trimmed1->getTrimEnd(is2, clickPos1);
+        switch (ending1) {
+        case RS::EndingStart:
+            trimmed1->trimStartPoint(p1, clickPos1);
+            if (isXLineShape(*trimmed1)) {
+                trimmed1 = xLineToRay(trimmed1);
+            }
+            break;
+        case RS::EndingEnd:
+            trimmed1->trimEndPoint(p1, clickPos1);
+            if (isXLineShape(*trimmed1)) {
+                trimmed1 = xLineToRay(trimmed1);
+            }
+            else if (isRayShape(*trimmed1)) {
+                trimmed1 = rayToLine(trimmed1);
+            }
+            break;
+        default:
+            break;
+        }
+
+        is2 = clickPos1.getClosest(sol2);
+        ending2 = trimmed2->getTrimEnd(is2, clickPos2);
+        switch (ending2) {
+        case RS::EndingStart:
+            trimmed2->trimStartPoint(p2, clickPos2);
+            if (isXLineShape(*trimmed2)) {
+                trimmed2 = xLineToRay(trimmed2);
+            }
+            break;
+        case RS::EndingEnd:
+            trimmed2->trimEndPoint(p2, clickPos2);
+            if (isXLineShape(*trimmed2)) {
+                trimmed2 = xLineToRay(trimmed2);
+            }
+            else if (isRayShape(*trimmed2)) {
+                trimmed2 = rayToLine(trimmed2);
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    if (samePolyline) {
+        QSharedPointer<RPolyline> pl1 = shape1.dynamicCast<RPolyline>();
+        RPolyline pl = pl1->modifyPolylineCorner(*trimmed1.data(), ending1, i1, *trimmed2.data(), ending2, i2, &arc);
+        return QList<QSharedPointer<RShape> >() <<  QSharedPointer<RShape>(new RPolyline(pl));
+    }
+
+    if (RMath::fuzzyAngleCompare(arc.getStartAngle(), arc.getEndAngle())) {
+        // rounding is full circle (two shapes are tangential):
+        return ret;
+    }
+
+    if (RShape::isArcShape(*trimmed1)) {
+        QSharedPointer<RArc> arc1 = trimmed1.dynamicCast<RArc>();
+        if (RMath::fuzzyAngleCompare(arc1->getStartAngle(), arc1->getEndAngle())) {
+            // trimmed shape is full circle (two shapes are tangential):
+            return ret;
+        }
+    }
+    if (RShape::isArcShape(*trimmed2)) {
+        QSharedPointer<RArc> arc2 = trimmed2.dynamicCast<RArc>();
+        if (RMath::fuzzyAngleCompare(arc2->getStartAngle(), arc2->getEndAngle())) {
+            // trimmed shape is full circle (two shapes are tangential):
+            return ret;
+        }
+    }
+
+    ret.append(trimmed1);
+    ret.append(QSharedPointer<RShape>(new RArc(arc)));
+    ret.append(trimmed2);
+
+//    shape1 = trimmed1;
+//    shape2 = trimmed2;
+//    return QSharedPointer<RShape>(new RArc(arc));
+    //return [ trimmed1, arc, trimmed2 ];
+
+    return ret;
+}
+
+QSharedPointer<RShape> RShape::xLineToRay(QSharedPointer<RShape> shape) {
+    QSharedPointer<RXLine> xLine = shape.dynamicCast<RXLine>();
+    if (!xLine.isNull()) {
+        return QSharedPointer<RShape>(new RRay(xLine->getBasePoint(), xLine->getDirectionVector()));
+    }
+    return shape;
+}
+
+QSharedPointer<RShape> RShape::rayToLine(QSharedPointer<RShape> shape) {
+    QSharedPointer<RRay> ray = shape.dynamicCast<RRay>();
+    if (!ray.isNull()) {
+        return QSharedPointer<RShape>(new RLine(ray->getBasePoint(), ray->getSecondPoint()));
+    }
+    return shape;
+}
+
+QSharedPointer<RShape> RShape::transformArc(const RShape& shape, RShapeTransformation& transformation) {
+    RVector r1, r2;
+    RVector c;
+
+    if (isEllipseShape(shape)) {
+        const REllipse& ellipse = dynamic_cast<const REllipse&>(shape);
+        r1 = ellipse.getMajorPoint();
+        r2 = ellipse.getMinorPoint();
+        c = ellipse.getCenter();
+    }
+    else if (isArcShape(shape)) {
+        const RArc& arc = dynamic_cast<const RArc&>(shape);
+        r1 = RVector(arc.getRadius(), 0);
+        r2 = RVector(0, arc.getRadius());
+        c = arc.getCenter();
+    }
+    else if (isCircleShape(shape)) {
+        const RCircle& circle = dynamic_cast<const RCircle&>(shape);
+        r1 = RVector(circle.getRadius(), 0);
+        r2 = RVector(0, circle.getRadius());
+        c = circle.getCenter();
+    }
+
+    RVector v1 = c + r1 + r2;
+    RVector v2 = c + r1 - r2;
+    RVector v3 = c - r1 - r2;
+    RVector v4 = c - r1 + r2;
+
+    v1 = transformation.transform(v1);
+    v2 = transformation.transform(v2);
+    v3 = transformation.transform(v3);
+    v4 = transformation.transform(v4);
+
+    //var ret = [];
+    REllipse ellipse = REllipse::createInscribed(v1, v2, v3, v4);
+    //var ellipse = ShapeAlgorithms.createEllipseInscribedFromVertices(v1, v2, v3, v4);
+    //ret.push(ellipse.copy());
+
+    if (isArcShape(shape) || isEllipseShape(shape)) {
+        RVector sp = shape.getStartPoint();
+        RVector ep = shape.getEndPoint();
+        RVector mp = shape.getMiddlePoint();
+
+        sp = transformation.transform(sp);
+        ep = transformation.transform(ep);
+        mp = transformation.transform(mp);
+
+        ellipse.setStartParam(ellipse.getParamTo(sp));
+        ellipse.setEndParam(ellipse.getParamTo(ep));
+
+        double d1 = ellipse.getMiddlePoint().getDistanceTo(mp);
+        ellipse.setReversed(true);
+        double d2 = ellipse.getMiddlePoint().getDistanceTo(mp);
+
+        if (d1<d2) {
+            ellipse.setReversed(false);
+        }
+    }
+
+    //ret.push(ShapeAlgorithms.ellipseToArcCircleEllipse(ellipse));
+    //ret = ret.concat([new RLine(v1, v2), new RLine(v2, v3), new RLine(v3, v4), new RLine(v4, v1)]);
+
+    return RShape::ellipseToArcCircleEllipse(ellipse);
+}
+
+QSharedPointer<RShape> RShape::ellipseToArcCircleEllipse(const REllipse& ellipse) {
+    if (ellipse.isCircular()) {
+        if (ellipse.isFullEllipse()) {
+            return QSharedPointer<RShape>(new RCircle(ellipse.getCenter(), ellipse.getMajorRadius()));
+        }
+        else {
+            RVector c = ellipse.getCenter();
+            QSharedPointer<RArc> ret(new RArc(c, ellipse.getMajorRadius(),
+                //ellipse.getStartAngle(), ellipse.getEndAngle(),
+                0.0, 2*M_PI,
+                ellipse.isReversed()));
+            ret->setStartAngle(c.getAngleTo(ellipse.getStartPoint()));
+            ret->setEndAngle(c.getAngleTo(ellipse.getEndPoint()));
+            return ret.dynamicCast<RShape>();
+        }
+    }
+    else {
+        return QSharedPointer<RShape>(ellipse.clone());
+    }
+}
+
+void RShape::dump() const{
     qDebug() << *this;
 }
 

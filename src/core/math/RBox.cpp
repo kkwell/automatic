@@ -17,8 +17,9 @@
  * along with QCAD.
  */
 #include "RBox.h"
+#include "RLine.h"
 #include "RPolyline.h"
-
+#include "RTriangle.h"
 
 
 /**
@@ -81,6 +82,14 @@ bool RBox::isSane() const {
     return (c1.isSane() && c2.isSane());
 }
 
+bool RBox::equalsFuzzy(const RBox& b, double tol) const {
+    return c1.equalsFuzzy(b.c1, tol) && c2.equalsFuzzy(b.c2, tol);
+}
+
+bool RBox::equalsFuzzy2D(const RBox& b, double tol) const {
+    return c1.equalsFuzzy2D(b.c1, tol) && c2.equalsFuzzy2D(b.c2, tol);
+}
+
 /**
  * Grows this box by the given offset in X, Y and Z (!).
  * \return pointer to this box
@@ -110,11 +119,175 @@ RBox& RBox::growXY(double offset) {
 }
 
 /**
+ * Grows this box by the given offsets in X and Y only.
+ * \return pointer to this box
+ */
+RBox& RBox::growXY(double offsetX, double offsetY) {
+    RVector min = getMinimum();
+    RVector max = getMaximum();
+    min -= RVector(offsetX, offsetY);
+    max += RVector(offsetX, offsetY);
+    c1 = min;
+    c2 = max;
+    return *this;
+}
+
+/**
  * Moves this box by the given offset.
  */
 void RBox::move(const RVector& offset) {
     c1.move(offset);
     c2.move(offset);
+}
+
+/**
+ * \todo implement fromCenter
+ */
+bool RBox::scaleByReference(const RVector& referencePoint, const RVector& targetPoint, bool keepAspectRatio, bool fromCenter) {
+    RVector oriSize = getSize().getAbsolute();
+
+    // prevent division by 0:
+    if (RMath::fuzzyCompare(oriSize.x, 0.0)) oriSize.x = 1;
+    if (RMath::fuzzyCompare(oriSize.y, 0.0)) oriSize.y = 1;
+    if (RMath::fuzzyCompare(oriSize.z, 0.0)) oriSize.z = 1;
+
+    int match = -1;
+    if (referencePoint.equalsFuzzy(c1)) match = 1;
+    if (referencePoint.equalsFuzzy(c2)) match = 2;
+
+    RVector c3 = RVector(c2.x, c1.y);
+    RVector c4 = RVector(c1.x, c2.y);
+    if (referencePoint.equalsFuzzy(c3)) match = 3;
+    if (referencePoint.equalsFuzzy(c4)) match = 4;
+
+    if (match==-1) {
+        return false;
+    }
+
+    RVector center = getCenter();
+
+    // vector of translation of corner:
+    RVector vf;
+    switch (match) {
+    case 1:
+        vf = (c2-targetPoint);
+        break;
+    case 2:
+        vf = (targetPoint-c1);
+        break;
+    case 3:
+        vf = (targetPoint-c4);
+        vf.y*=-1;
+        break;
+    case 4:
+        vf = (c3-targetPoint);
+        vf.y*=-1;
+        break;
+    }
+    vf = vf.getDividedComponents(oriSize);
+
+    if (keepAspectRatio) {
+        if (qAbs(vf.x)>qAbs(vf.y)) {
+            if (vf.x*vf.y>=0.0) {
+                vf.y = vf.x;
+            }
+            else {
+                vf.y = -vf.x;
+            }
+        }
+        else {
+            if (vf.x*vf.y>=0.0) {
+                vf.x = vf.y;
+            }
+            else {
+                vf.x = -vf.y;
+            }
+        }
+        //vf.x = vf.y = qMax(vf.x, vf.y);
+    }
+
+    switch (match) {
+    case 1:
+        c1.scale(vf, c2);
+        break;
+    case 2:
+        c2.scale(vf, c1);
+        break;
+    case 3:
+        c3.scale(vf, c4);
+        break;
+    case 4:
+        c4.scale(vf, c3);
+        break;
+    }
+
+    if (match==3 || match==4) {
+        c1 = RVector(c4.x, c3.y);
+        c2 = RVector(c3.x, c4.y);
+    }
+
+    return true;
+
+//    else if (referencePoint.equalsFuzzy(c2)) {
+//        RVector vf = (targetPoint-c1).getDividedComponents(oriSize);
+//        if (keepAspectRatio) {
+//            if (qAbs(vf.x)>qAbs(vf.y)) {
+//                vf.y = vf.x;
+//            }
+//            else {
+//                vf.x = vf.y;
+//            }
+//            //vf.x = vf.y = qMax(vf.x, vf.y);
+//        }
+//        c2.scale(vf, c1);
+//        return true;
+//    }
+//    else {
+//        RVector c3 = RVector(c2.x, c1.y);
+//        RVector c4 = RVector(c1.x, c2.y);
+//        bool ret = false;
+
+//        if (referencePoint.equalsFuzzy(c3)) {
+//            RVector vf = (c4-targetPoint).getDividedComponents(oriSize).getAbsolute();
+//            if (keepAspectRatio) {
+//                vf.x = vf.y = qMax(vf.x, vf.y);
+//            }
+//            c3.scale(vf, c4);
+//            ret = true;
+//        }
+//        else if (referencePoint.equalsFuzzy(c4)) {
+//            RVector vf = (c3-targetPoint).getDividedComponents(oriSize).getAbsolute();
+//            if (keepAspectRatio) {
+//                vf.x = vf.y = qMax(vf.x, vf.y);
+//            }
+//            c4.scale(vf, c3);
+//            ret = true;
+//        }
+
+//        if (ret) {
+//            c1 = RVector(c4.x, c3.y);
+//            c2 = RVector(c3.x, c4.y);
+//        }
+//        return ret;
+//    }
+//    else if (referencePointPx.equalsFuzzy(cornersPx[1], 0.01)) {
+//        cornersPx[1] = targetPointPx;
+//        cornersPx[0].y = targetPointPx.y;
+//        cornersPx[2].x = targetPointPx.x;
+//        ret = true;
+//    }
+//    else if (referencePointPx.equalsFuzzy(cornersPx[2], 0.01)) {
+//        cornersPx[2] = targetPointPx;
+//        cornersPx[1].x = targetPointPx.x;
+//        cornersPx[3].y = targetPointPx.y;
+//        ret = true;
+//    }
+//    else if (referencePointPx.equalsFuzzy(cornersPx[3], 0.01)) {
+//        cornersPx[3] = targetPointPx;
+//        cornersPx[0].x = targetPointPx.x;
+//        cornersPx[2].y = targetPointPx.y;
+//        ret = true;
+//    }
 }
 
 /**
@@ -136,6 +309,10 @@ double RBox::getHeight() const {
  */
 RVector RBox::getSize() const {
     return c2 - c1;
+}
+
+double RBox::getArea() const {
+    return getWidth() * getHeight();
 }
 
 /**
@@ -263,7 +440,7 @@ bool RBox::intersects(const RBox& other) const {
 /**
  * \return True if this box intersects the given shape.
  * \param limited True to limit the shape to its actual length,
- * false to return true if the extended shape interesects this box.
+ * false to return true if the extended shape intersects this box.
  */
 bool RBox::intersectsWith(const RShape& shape, bool limited) const {
     if (limited && !intersects(shape.getBoundingBox())) {
@@ -335,7 +512,7 @@ void RBox::growToInclude(const RVector& v) {
  * as \c c1, counter-clockwise.
  * The next four corners are on the same Z-level as \c c2
  * starting with the corner at the same X/Y position as \c c1,
- * continueing counter-clockwise.
+ * continuing counter-clockwise.
  */
 QList<RVector> RBox::getCorners() const {
     QList<RVector> ret;
@@ -432,6 +609,20 @@ QList<RTriangle> RBox::getTriangles() const {
  */
 QRectF RBox::toQRectF() const {
     return QRectF(c1.x, c1.y, c2.x - c1.x, c2.y - c1.y);
+}
+
+void RBox::transform(QTransform& t) {
+    RBox res;
+
+    QList<RVector> corners = getCorners2d();
+    for (int i=0; i<corners.length(); i++) {
+        QPointF qp(corners[i].x, corners[i].y);
+        QPointF qpTransformed = t.map(qp);
+        res.growToIncludePoint(RVector(qpTransformed.x(), qpTransformed.y()));
+    }
+
+    c1 = res.c1;
+    c2 = res.c2;
 }
 
 /**

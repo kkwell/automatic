@@ -30,6 +30,7 @@
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QPen&gt;</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QStack&gt;</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QTextLayout&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QTransform&gt;</cpp:file></cpp:include>
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"REntity.h"</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RImageData.h"</cpp:file></cpp:include>
@@ -89,7 +90,7 @@
     <comment type="block">/**
      * \nonscriptoverwritable
      */</comment>
-    <function_decl><type><name>RDocument</name>&amp;</type> <name>getDocument</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>RDocument</name>&amp;</type> <name>getDocument</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>void</name></type> <name>setProjectionRenderingHint</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>ProjectionRenderingHint</name></name></type> <name>p</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name><name>RS</name>::<name>ProjectionRenderingHint</name></name></type> <name>getProjectionRenderingHint</name><parameter_list>()</parameter_list>;</function_decl>
@@ -105,6 +106,7 @@
     <function_decl><type><name>virtual</name> <name>QBrush</name></type> <name>getBrush</name><parameter_list>(<param><decl><type><name>const</name> <name>RPainterPath</name>&amp;</type> <name>path</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>QBrush</name></type> <name>getBrush</name><parameter_list>()</parameter_list>;</function_decl>
 
+    <function_decl><type><name>virtual</name> <name>RColor</name></type> <name>getColor</name><parameter_list>(<param><decl><type><name>const</name> <name>RColor</name>&amp;</type> <name>unresolvedColor</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>RColor</name></type> <name>getColor</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>resolve</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>setEntityAttributes</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>forceSelected</name>=<init><expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
@@ -135,6 +137,7 @@
     <function_decl><type><name>virtual</name> <name>const</name> <name>REntity</name>*</type> <name>getEntity</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>isEntitySelected</name><parameter_list>()</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>isPatternContinuous</name><parameter_list>(<param><decl><type><name>const</name> <name>RLinetypePattern</name>&amp;</type> <name>p</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>startExport</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>endExport</name><parameter_list>()</parameter_list>;</function_decl>
@@ -146,22 +149,24 @@
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportIntListWithName</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>dictionaryName</name></decl></param>, <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>name</name></decl></param>, <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>listName</name></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name>int64_t</name></argument>&gt;</argument_list></name>&amp;</type> <name>values</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportLayers</name><parameter_list>()</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportLayerStates</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportBlocks</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportViews</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportLinetypes</name><parameter_list>()</parameter_list>;</function_decl>
 
     <function><type><name>virtual</name> <name>void</name></type> <name>exportLayer</name><parameter_list>(<param><decl><type><name>RLayer</name>&amp;</type></decl></param> <comment type="block">/*layer*/</comment>)</parameter_list> <block>{}</block></function>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportLayer</name><parameter_list>(<param><decl><type><name><name>RLayer</name>::<name>Id</name></name></type> <name>layerId</name></decl></param>)</parameter_list>;</function_decl>
+    <function><type><name>virtual</name> <name>void</name></type> <name>exportLayerState</name><parameter_list>(<param><decl><type><name>RLayerState</name>&amp;</type></decl></param> <comment type="block">/*layerState*/</comment>)</parameter_list> <block>{}</block></function>
     <function><type><name>virtual</name> <name>void</name></type> <name>exportBlock</name><parameter_list>(<param><decl><type><name>RBlock</name>&amp;</type></decl></param> <comment type="block">/*block*/</comment>)</parameter_list> <block>{}</block></function>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportBlock</name><parameter_list>(<param><decl><type><name><name>RBlock</name>::<name>Id</name></name></type> <name>blockId</name></decl></param>)</parameter_list>;</function_decl>
     <function><type><name>virtual</name> <name>void</name></type> <name>exportView</name><parameter_list>(<param><decl><type><name>RView</name>&amp;</type></decl></param> <comment type="block">/*view*/</comment>)</parameter_list> <block>{}</block></function>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportView</name><parameter_list>(<param><decl><type><name><name>RView</name>::<name>Id</name></name></type> <name>viewId</name></decl></param>)</parameter_list>;</function_decl>
     <function><type><name>virtual</name> <name>void</name></type> <name>exportLinetype</name><parameter_list>(<param><decl><type><name>RLinetype</name>&amp;</type></decl></param> <comment type="block">/*linetype*/</comment>)</parameter_list> <block>{}</block></function>
 
-    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportEntities</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>allBlocks</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>undone</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportEntities</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>allBlocks</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>undone</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>invisible</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportEntities</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>box</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportEntities</name><parameter_list>(<param><decl><type><name>QSet<argument_list>&lt;<argument><name><name>REntity</name>::<name>Id</name></name></argument>&gt;</argument_list></name>&amp;</type> <name>entityIds</name></decl></param>, <param><decl><type><name>bool</name></type> <name>allBlocks</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list>;</function_decl>
-    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportEntity</name><parameter_list>(<param><decl><type><name>REntity</name>&amp;</type> <name>entity</name></decl></param>, <param><decl><type><name>bool</name></type> <name>preview</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>allBlocks</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>forceSelected</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportEntity</name><parameter_list>(<param><decl><type><name>REntity</name>&amp;</type> <name>entity</name></decl></param>, <param><decl><type><name>bool</name></type> <name>preview</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>allBlocks</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>forceSelected</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>invisible</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportEntity</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>, <param><decl><type><name>bool</name></type> <name>allBlocks</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>forceSelected</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>QSharedPointer<argument_list>&lt;<argument><name>RLayer</name></argument>&gt;</argument_list></name></type> <name>getEntityLayer</name><parameter_list>(<param><decl><type><name>REntity</name>&amp;</type> <name>entity</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>isVisible</name><parameter_list>(<param><decl><type><name>REntity</name>&amp;</type> <name>entity</name></decl></param>)</parameter_list>;</function_decl>
@@ -228,9 +233,9 @@
     <comment type="block">/**
      * \nonscriptable
      */</comment>
-    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportPainterPathSource</name><parameter_list>(<param><decl><type><name>const</name> <name>RPainterPathSource</name>&amp;</type> <name>pathSource</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportPainterPathSource</name><parameter_list>(<param><decl><type><name>const</name> <name>RPainterPathSource</name>&amp;</type> <name>pathSource</name></decl></param>, <param><decl><type><name>double</name></type> <name>z</name> =<init> <expr>0.0</expr></init></decl></param>)</parameter_list>;</function_decl>
 
-    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportPainterPaths</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RPainterPath</name></argument>&gt;</argument_list></name>&amp;</type> <name>paths</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportPainterPaths</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RPainterPath</name></argument>&gt;</argument_list></name>&amp;</type> <name>paths</name></decl></param>, <param><decl><type><name>double</name></type> <name>z</name> =<init> <expr>0.0</expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportPainterPaths</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RPainterPath</name></argument>&gt;</argument_list></name>&amp;</type> <name>paths</name></decl></param>, <param><decl><type><name>double</name></type> <name>angle</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>pos</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportBoundingBoxPaths</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RPainterPath</name></argument>&gt;</argument_list></name>&amp;</type> <name>paths</name></decl></param>)</parameter_list>;</function_decl>
@@ -238,6 +243,8 @@
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportImage</name><parameter_list>(<param><decl><type><name>const</name> <name>RImageData</name>&amp;</type> <name>image</name></decl></param>, <param><decl><type><name>bool</name></type> <name>forceSelected</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RPainterPath</name></argument>&gt;</argument_list></name></type> <name>exportText</name><parameter_list>(<param><decl><type><name>const</name> <name>RTextBasedData</name>&amp;</type> <name>text</name></decl></param>, <param><decl><type><name>bool</name></type> <name>forceSelected</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportClipRectangle</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>clipRectangle</name></decl></param>, <param><decl><type><name>bool</name></type> <name>forceSelected</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportTransform</name><parameter_list>(<param><decl><type><name>const</name> <name>RTransform</name>&amp;</type> <name>t</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportEndTransform</name><parameter_list>()</parameter_list>;</function_decl>
 
     <function><type><name>virtual</name> <name>void</name></type> <name>exportThickPolyline</name><parameter_list>(<param><decl><type><name>const</name> <name>RPolyline</name>&amp;</type> <name>polyline</name></decl></param>)</parameter_list> <block>{
         <decl_stmt><decl><type><name>RPolyline</name></type> <name>pl</name> =<init> <expr><name>polyline</name></expr></init></decl>;</decl_stmt>
@@ -284,7 +291,7 @@
     <comment type="block">/**
      * Override to force text rendering mode.
      */</comment>
-    <function><type><name>virtual</name> <name>bool</name></type> <name>isTextRenderedAsText</name><parameter_list>()</parameter_list> <block>{
+    <function><type><name>virtual</name> <name>bool</name></type> <name>isTextRenderedAsText</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><call><name><name>RSettings</name>::<name>isTextRenderedAsText</name></name><argument_list>()</argument_list></call></expr>;</return>
     }</block></function>
 
@@ -333,9 +340,19 @@
         <expr_stmt><expr><name>visualExporter</name> = <name>on</name></expr>;</expr_stmt>
     }</block></function>
 
+    <function><type><name>bool</name></type> <name>getExportInvisible</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>exportInvisible</name></expr>;</return>
+    }</block></function>
+
+    <function><type><name>void</name></type> <name>setExportInvisible</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>exportInvisible</name> = <name>on</name></expr>;</expr_stmt>
+    }</block></function>
+
     <function><type><name>double</name></type> <name>getPixelSizeHint</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><name>pixelSizeHint</name></expr>;</return>
     }</block></function>
+
+    <function_decl><type><name>virtual</name> <name>double</name></type> <name>getCurrentPixelSizeHint</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function><type><name>void</name></type> <name>setPixelSizeHint</name><parameter_list>(<param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
         <expr_stmt><expr><name>pixelSizeHint</name> = <name>v</name></expr>;</expr_stmt>
@@ -357,8 +374,21 @@
         <expr_stmt><expr><name>pixelWidth</name> = <name>on</name></expr>;</expr_stmt>
     }</block></function>
 
+    <function><type><name>void</name></type> <name>setEnablePatterns</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>enablePatterns</name> = <name>on</name></expr>;</expr_stmt>
+    }</block></function>
+
+<comment type="line">//    bool getCombineTransforms() const {</comment>
+<comment type="line">//        return combineTransforms;</comment>
+<comment type="line">//    }</comment>
+
+<comment type="line">//    void setCombineTransforms(bool on) {</comment>
+<comment type="line">//        combineTransforms = on;</comment>
+<comment type="line">//    }</comment>
+
 </public><protected>protected:
     <decl_stmt><decl><type><name>RDocument</name>*</type> <name>document</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>QTransform</name></type> <name>transform</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>QPen</name></type> <name>currentPen</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>RLinetypePattern</name></type> <name>currentLinetypePattern</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>QBrush</name></type> <name>currentBrush</name></decl>;</decl_stmt>
@@ -371,12 +401,15 @@
     <decl_stmt><decl><type><name>bool</name></type> <name>twoColorSelectedMode</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>bool</name></type> <name>screenBasedLinetypes</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>bool</name></type> <name>visualExporter</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>bool</name></type> <name>exportInvisible</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>QString</name></type> <name>errorMessage</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>double</name></type> <name>pixelSizeHint</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>bool</name></type> <name>pixelUnit</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>bool</name></type> <name>clipping</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>bool</name></type> <name>pixelWidth</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name><name>Qt</name>::<name>PenCapStyle</name></name></type> <name>penCapStyle</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>bool</name></type> <name>enablePatterns</name></decl>;</decl_stmt>
+    <comment type="line">//bool combineTransforms;</comment>
 
 </protected><private>private:
     <decl_stmt><decl><type><name><name>RS</name>::<name>ProjectionRenderingHint</name></name></type> <name>projectionRenderingHint</name></decl>;</decl_stmt>

@@ -19,8 +19,11 @@
 #include "RBlockReferenceData.h"
 #include "RBlockReferenceEntity.h"
 #include "RDocument.h"
+#include "RExporter.h"
 #include "RMainWindow.h"
 #include "RMouseEvent.h"
+#include "RStorage.h"
+#include "RTransform.h"
 
 RBlockReferenceData::RBlockReferenceData() :
     referencedBlockId(RBlock::INVALID_ID),
@@ -42,7 +45,8 @@ RBlockReferenceData::RBlockReferenceData(
         RBlock::Id referencedBlockId, const RVector& position,
         const RVector& scaleFactors, double rotation,
         int columnCount, int rowCount,
-        double columnSpacing, double rowSpacing) :
+        double columnSpacing, double rowSpacing,
+        double visualPropertiesScale) :
         referencedBlockId(referencedBlockId),
         position(position),
         scaleFactors(scaleFactors),
@@ -50,7 +54,8 @@ RBlockReferenceData::RBlockReferenceData(
         columnCount(columnCount),
         rowCount(rowCount),
         columnSpacing(columnSpacing),
-        rowSpacing(rowSpacing) {
+        rowSpacing(rowSpacing),
+        visualPropertiesScale(visualPropertiesScale) {
 }
 
 void RBlockReferenceData::setReferencedBlockName(const QString& blockName) {
@@ -99,14 +104,19 @@ RVector RBlockReferenceData::getVectorTo(const RVector& point, bool limited, dou
     for (int col=0; col<columnCount; col++) {
         for (int row=0; row<rowCount; row++) {
             for (it = ids.begin(); it != ids.end(); it++) {
-                QSharedPointer<REntity> entity = queryEntity(*it);
+                QSharedPointer<REntity> entity = queryEntity(*it, true);
                 if (entity.isNull()) {
                     continue;
                 }
+
+                if (entity->getType()!=RS::EntityBlockRef) {
+                    entity->scaleVisualProperties(getScaleFactors().x);
+                }
+
                 if (col!=0 || row!=0) {
                     // entity might be from cache: clone:
                     entity = QSharedPointer<REntity>(entity->clone());
-                    applyColumnRowOffsetTo(*entity, col, row);
+                    applyColumnRowOffsetTo(*entity, col, row, true);
                 }
                 RVector v = entity->getVectorTo(point, limited);
                 double dist = v.getMagnitude();
@@ -161,14 +171,19 @@ double RBlockReferenceData::getDistanceTo(const RVector& point,
     for (int col=0; col<columnCount; col++) {
         for (int row=0; row<rowCount; row++) {
             for (it = ids.begin(); it != ids.end(); it++) {
-                QSharedPointer<REntity> entity = queryEntity(*it);
+                QSharedPointer<REntity> entity = queryEntity(*it, true);
                 if (entity.isNull()) {
                     continue;
                 }
+
+                if (entity->getType()!=RS::EntityBlockRef) {
+                    entity->scaleVisualProperties(getScaleFactors().x);
+                }
+
                 if (col!=0 || row!=0) {
                     // entity might be from cache: clone:
                     entity = QSharedPointer<REntity>(entity->clone());
-                    applyColumnRowOffsetTo(*entity, col, row);
+                    applyColumnRowOffsetTo(*entity, col, row, true);
                 }
                 // TODO: range might have to be scaled here:
                 double dist = entity->getDistanceTo(point, limited, range, draft, strictRange);
@@ -205,10 +220,10 @@ bool RBlockReferenceData::isPointType() const {
 QList<RBox> RBlockReferenceData::getBoundingBoxes(bool ignoreEmpty) const {
     QList<RBox>* bbs;
     if (ignoreEmpty) {
-        bbs = &boundingBoxes;
+        bbs = &boundingBoxesIgnoreEmpty;
     }
     else {
-        bbs = &boundingBoxesIgnoreEmpty;
+        bbs = &boundingBoxes;
     }
 
     if (!bbs->isEmpty()) {
@@ -216,7 +231,6 @@ QList<RBox> RBlockReferenceData::getBoundingBoxes(bool ignoreEmpty) const {
     }
 
     if (document == NULL) {
-        qWarning() << "RBlockReferenceData::getBoundingBox: document is NULL";
         return QList<RBox>();
     }
 
@@ -240,6 +254,9 @@ QList<RBox> RBlockReferenceData::getBoundingBoxes(bool ignoreEmpty) const {
         return QList<RBox>();
     }
 
+    // transform for whole block reference:
+    QTransform blockRefTransform = getTransform();
+
     QSet<REntity::Id> ids = document->queryBlockEntities(referencedBlockId);
 
     // TODO: take into account block references in all instances of block array:
@@ -253,13 +270,44 @@ QList<RBox> RBlockReferenceData::getBoundingBoxes(bool ignoreEmpty) const {
                 if (entity.isNull()) {
                     continue;
                 }
-                if (col!=0 || row!=0) {
-                    // entity might be from cache: clone:
-                    entity = QSharedPointer<REntity>(entity->clone());
-                    applyColumnRowOffsetTo(*entity, col, row);
+                if (ignoreEmpty) {
+                    if (!entity->isVisible()) {
+                        continue;
+                    }
                 }
-                entity->update();
-                bbs->append(entity->getBoundingBoxes(ignoreEmpty));
+
+                QTransform t = blockRefTransform;
+                if (col!=0 || row!=0) {
+                    RVector offs = getColumnRowOffset(col, row);
+
+                    if (RMath::fuzzyCompare(scaleFactors.x, 0.0)) {
+                        offs.x = 0.0;
+                    }
+                    else {
+                        offs.x /= scaleFactors.x;
+                    }
+                    if (RMath::fuzzyCompare(scaleFactors.y, 0.0)) {
+                        offs.y = 0.0;
+                    }
+                    else {
+                        offs.y /= scaleFactors.y;
+                    }
+
+                    t.translate(offs.x, offs.y);
+                }
+
+                QList<RBox> ebs = entity->getBoundingBoxes(ignoreEmpty);
+
+                // transform bounding box according to block / row / col transformation:
+                for (int i=0; i<ebs.length(); i++) {
+                    RBox eb = ebs[i];
+                    QList<RVector> corners = eb.getCorners();
+                    for (int k=0; k<corners.length(); k++) {
+                        corners[k].transform2D(t);
+                    }
+                    RBox b(RVector::getMinimum(corners), RVector::getMaximum(corners));
+                    bbs->append(b);
+                }
             }
         }
     }
@@ -282,13 +330,52 @@ RBox RBlockReferenceData::getBoundingBox(bool ignoreEmpty) const {
     return ret;
 }
 
-/**
- * \return The entity with the given ID, transformed according to
- *     the transformation of this block reference.
- */
-QSharedPointer<REntity> RBlockReferenceData::queryEntity(REntity::Id entityId) const {
+void RBlockReferenceData::to2D() {
+    position.z = 0.0;
+    update();
+}
 
-    if (cache.contains(entityId)) {
+RVector RBlockReferenceData::getPointOnEntity() const {
+    if (document == NULL) {
+        return RVector::invalid;
+    }
+
+    QSet<REntity::Id> ids = document->queryBlockEntities(referencedBlockId);
+    if (ids.isEmpty()) {
+        return RVector::invalid;
+    }
+
+    RVector ret = RVector::invalid;
+
+    QList<REntity::Id> idsOrdered = document->getStorage().orderBackToFront(ids);
+
+    QList<REntity::Id>::iterator it;
+    for (it=idsOrdered.begin(); it!=idsOrdered.end(); it++) {
+        QSharedPointer<REntity> entity = queryEntity(*it, true);
+        if (entity.isNull()) {
+            continue;
+        }
+
+        if (entity->getType()!=RS::EntityBlockRef) {
+            entity->scaleVisualProperties(getScaleFactors().x);
+        }
+
+        ret = entity->getPointOnEntity();
+        break;
+    }
+
+    // no valid entity in block:
+    return ret;
+}
+
+/**
+ * \return The entity with the given ID.
+ *
+ * \param transform Transform according to the transformation of this block reference.
+ */
+QSharedPointer<REntity> RBlockReferenceData::queryEntity(REntity::Id entityId, bool transform, bool ignoreAttDef) const {
+
+    if (cache.contains(entityId) && !transform) {
         QSharedPointer<REntity> e = cache.value(entityId);
 
         // additional check if entity has been deleted:
@@ -315,34 +402,59 @@ QSharedPointer<REntity> RBlockReferenceData::queryEntity(REntity::Id entityId) c
     }
 
     // never render attribute definition as part of a block reference:
-    if (entity->getType()==RS::EntityAttributeDefinition) {
+    if (ignoreAttDef && entity->getType()==RS::EntityAttributeDefinition) {
         return QSharedPointer<REntity>();
     }
 
-    if (!applyTransformationTo(*entity)) {
-        return QSharedPointer<REntity>();
+    // transform entity into (new type of) entity:
+    if (transform) {
+        // this also scales visual properties:
+        applyTransformationTo(entity);
+    }
+    else {
+        if (!RMath::fuzzyCompare(visualPropertiesScale, 1.0)) {
+            entity->scaleVisualProperties(visualPropertiesScale);
+        }
     }
 
-    cache.insert(entityId, entity);
+    if (!transform) {
+        cache.insert(entityId, entity);
+    }
 
     return entity;
 }
 
-RVector RBlockReferenceData::getColumnRowOffset(int col, int row) const {
+RVector RBlockReferenceData::getColumnRowOffset(int col, int row, bool rotated) const {
     if (col==0 && row==0) {
         return RVector(0,0);
     }
 
-    RVector offset(col*columnSpacing, row*rowSpacing);
-    offset.rotate(rotation);
+    RVector offset;
+    if (RMath::fuzzyCompare(scaleFactors.x, 0.0)) {
+        offset.x = 0.0;
+    }
+    else {
+        offset.x = col*columnSpacing;
+        //offset.x = col*columnSpacing/scaleFactors.x;
+    }
+    if (RMath::fuzzyCompare(scaleFactors.y, 0.0)) {
+        offset.y = 0.0;
+    }
+    else {
+        offset.y = row*rowSpacing;
+        //offset.y = row*rowSpacing/scaleFactors.y;
+    }
+    if (rotated) {
+        offset.rotate(rotation);
+    }
     return offset;
 }
 
-void RBlockReferenceData::applyColumnRowOffsetTo(REntity& entity, int col, int row) const {
+void RBlockReferenceData::applyColumnRowOffsetTo(REntity& entity, int col, int row, bool rotated) const {
     if (col==0 && row==0) {
         return;
     }
-    entity.move(getColumnRowOffset(col, row));
+    entity.move(getColumnRowOffset(col, row, rotated));
 }
 
 bool RBlockReferenceData::applyTransformationTo(REntity& entity) const {
@@ -367,16 +479,83 @@ bool RBlockReferenceData::applyTransformationTo(REntity& entity) const {
         return true;
     }
 
-    entity.move(-block->getOrigin());
-    entity.scale(scaleFactors);
-    entity.rotate(rotation);
-    entity.move(position);
-
     if (!RMath::fuzzyCompare(visualPropertiesScale, 1.0)) {
         entity.scaleVisualProperties(visualPropertiesScale);
     }
 
+    // note: no non-uniform scaling:
+    entity.move(-block->getOrigin());
+    entity.scale(scaleFactors, RVector());
+    //entity.scale(scaleFactors, RVector(), newShapes);
+    entity.rotate(rotation);
+    entity.move(position);
+
     return true;
+}
+
+bool RBlockReferenceData::applyTransformationTo(QSharedPointer<REntity>& entity) const {
+    QSharedPointer<RBlock> block = document->queryBlockDirect(referencedBlockId);
+    if (block.isNull()) {
+        qWarning("RBlockReferenceData::applyTransformationTo: "
+            "block %d is NULL", referencedBlockId);
+        return false;
+    }
+
+    // nested block reference with negative scale factors (flipped):
+    RBlockReferenceEntity* blockReference = dynamic_cast<RBlockReferenceEntity*>(entity.data());
+    if (blockReference!=NULL && scaleFactors.y<0.0) {
+        blockReference->move(-block->getOrigin());
+        blockReference->scale(scaleFactors);
+        blockReference->rotate(-2*blockReference->getRotation(), blockReference->getPosition());
+        blockReference->rotate(rotation);
+        blockReference->move(position);
+        if (!RMath::fuzzyCompare(visualPropertiesScale, 1.0)) {
+            blockReference->scaleVisualProperties(visualPropertiesScale);
+        }
+        return true;
+    }
+
+    if (!RMath::fuzzyCompare(visualPropertiesScale, 1.0)) {
+        entity->scaleVisualProperties(visualPropertiesScale);
+    }
+
+    entity->move(-block->getOrigin());
+    if (RMath::fuzzyCompare(scaleFactors.x, scaleFactors.y)) {
+        // uniform scale:
+        entity->scale(scaleFactors.x, RVector());
+    }
+    else if (RMath::fuzzyCompare(scaleFactors.x, -scaleFactors.y)) {
+        entity->scale(scaleFactors.x, RVector());
+        entity->mirror(RVector(0,0), RVector::createPolar(1.0, 0.0));
+    }
+    else {
+        // non-uniform scale:
+        QSharedPointer<REntity> e = entity->scaleNonUniform(scaleFactors, RVector());
+        if (!e.isNull() && e.data()!=entity.data()) {
+            entity.swap(e);
+        }
+    }
+    entity->rotate(rotation);
+    entity->move(position);
+    entity->getBoundingBoxes();
+
+    return true;
+}
+
+RTransform RBlockReferenceData::getTransform() const {
+    QSharedPointer<RBlock> block = document->queryBlockDirect(referencedBlockId);
+    if (block.isNull()) {
+        qWarning("RBlockReferenceData::getTransform: "
+                 "block %d is NULL", referencedBlockId);
+        return RTransform();
+    }
+
+    RTransform ret;
+    ret.translate(position.x, position.y);
+    ret.rotateRadians(rotation);
+    ret.scale(scaleFactors.x, scaleFactors.y);
+    ret.translate(-block->getOrigin().x, -block->getOrigin().y);
+    return ret;
 }
 
 RVector RBlockReferenceData::mapToBlock(const RVector& v) const {
@@ -410,34 +589,63 @@ bool RBlockReferenceData::isPixelUnit() const {
     return block->isPixelUnit();
 }
 
-QList<RRefPoint> RBlockReferenceData::getInternalReferencePoints(RS::ProjectionRenderingHint hint) const {
+QList<RRefPoint> RBlockReferenceData::getInternalReferencePoints(RS::ProjectionRenderingHint hint, QList<REntity::Id>* subEntityIds) const {
     QList<RRefPoint> ret;
 
-    if (document == NULL) {
-        return ret;
-    }
+    QList<REntity::Id> entityIds;
+    QList<QSharedPointer<RShape> > shapes = getShapes(RDEFAULT_RBOX, false, false, &entityIds);
 
-    static int recursionDepth=0;
-    if (recursionDepth++>16) {
-        recursionDepth--;
-        qWarning() << "RBlockReferenceData::getInternalReferencePoints: "
-            << "maximum recursion depth reached: block: " << getBlockName();
-        groundReferencedBlockId();
-        return ret;
-    }
+    for (int i=0; i<shapes.length() && i<entityIds.length(); i++) {
+        QSharedPointer<RShape> shape = shapes[i];
+        REntity::Id entityId = entityIds[i];
 
-    QSet<REntity::Id> ids = document->queryBlockEntities(referencedBlockId);
-    QSet<REntity::Id>::iterator it;
-    for (it = ids.begin(); it != ids.end(); it++) {
-        QSharedPointer<REntity> entity = queryEntity(*it);
-        if (entity.isNull()) {
-            continue;
+        QList<RVector> ps = shape->getArcReferencePoints();
+        for (int k=0; k<ps.length(); k++) {
+            ret.append(RRefPoint(ps[k], RRefPoint::Tertiary));
+            subEntityIds->append(entityId);
         }
-        ret.append(entity->getInternalReferencePoints(hint));
     }
 
-    recursionDepth--;
     return ret;
+
+//    QList<RRefPoint> ret;
+
+
+//    if (document == NULL) {
+//        return ret;
+//    }
+
+//    static int recursionDepth=0;
+//    if (recursionDepth++>16) {
+//        recursionDepth--;
+//        qWarning() << "RBlockReferenceData::getInternalReferencePoints: "
+//            << "maximum recursion depth reached: block: " << getBlockName();
+//        groundReferencedBlockId();
+//        return ret;
+//    }
+
+//    // transform for whole block reference:
+//    QTransform blockRefTransform = getTransform();
+
+//    QSet<REntity::Id> ids = document->queryBlockEntities(referencedBlockId);
+//    QSet<REntity::Id>::iterator it;
+//    for (it = ids.begin(); it != ids.end(); it++) {
+//        QSharedPointer<REntity> entity = queryEntity(*it);
+//        if (entity.isNull()) {
+//            continue;
+//        }
+
+//        // transform ref points:
+//        QList<RRefPoint> refPoints = entity->getInternalReferencePoints(hint);
+//        for (int i=0; i<refPoints.length(); i++) {
+//            RRefPoint refPoint = refPoints[i];
+//            refPoint.transform2D(blockRefTransform);
+//            ret.append(refPoint);
+//        }
+//    }
+
+//    recursionDepth--;
+//    return ret;
 }
 
 QList<RRefPoint> RBlockReferenceData::getReferencePoints(RS::ProjectionRenderingHint hint) const {
@@ -467,7 +675,10 @@ RBox RBlockReferenceData::getQueryBoxInBlockCoordinates(const RBox& box) const {
     return RBox(RVector::getMinimum(corners), RVector::getMaximum(corners));
 }
 
-QList<QSharedPointer<RShape> > RBlockReferenceData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment) const {
+/**
+ * Block shapes, transformed.
+ */
+QList<QSharedPointer<RShape> > RBlockReferenceData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment, QList<REntity::Id>* entityIds) const {
     Q_UNUSED(segment)
 
     QList<QSharedPointer<RShape> > ret;
@@ -482,20 +693,28 @@ QList<QSharedPointer<RShape> > RBlockReferenceData::getShapes(const RBox& queryB
     }
 
     bool isArray = (columnCount!=1 || rowCount!=1);
+    bool isUniform = RMath::fuzzyCompare(scaleFactors.x, scaleFactors.y) || RMath::fuzzyCompare(scaleFactors.x, -scaleFactors.y);
+
+    RBox queryBoxBlockCoordinates;
+    if (queryBox.isValid()) {
+        if (isUniform) {
+            // query box optimization only available for uniform scales:
+            queryBoxBlockCoordinates = getQueryBoxInBlockCoordinates(queryBox);
+            //qDebug() << "queryBoxBlockCoordinates:" << queryBoxBlockCoordinates;
+        }
+    }
 
     // query entities in query box that are part of the block definition:
     // ignore query box for block arrays:
     QSet<REntity::Id> ids;
-    if (queryBox.isValid() && !isArray) {
+    if (queryBoxBlockCoordinates.isValid() && !isArray) {
 //        QList<RVector> corners = queryBox.getCorners2d();
 //        RVector::moveList(corners, -position);
 //        RVector::rotateList(corners, -rotation);
 //        RVector::scaleList(corners, RVector(1.0/scaleFactors.x, 1.0/scaleFactors.y));
 //        RBox queryBoxNeutral(RVector::getMinimum(corners), RVector::getMaximum(corners));
-        RBox queryBoxNeutral = getQueryBoxInBlockCoordinates(queryBox);
-        //qDebug() << "queryBoxNeutral:" << queryBoxNeutral;
-
-        ids = document->queryIntersectedEntitiesXY(queryBoxNeutral, true, true, referencedBlockId);
+        //RBox queryBoxNeutral = getQueryBoxInBlockCoordinates(queryBox);
+        ids = document->queryIntersectedEntitiesXY(queryBoxBlockCoordinates, true, true, referencedBlockId);
     }
     else {
         ids = document->queryBlockEntities(referencedBlockId);
@@ -511,7 +730,7 @@ QList<QSharedPointer<RShape> > RBlockReferenceData::getShapes(const RBox& queryB
                     return QList<QSharedPointer<RShape> >();
                 }
 
-                QSharedPointer<REntity> entity = queryEntity(*it);
+                QSharedPointer<REntity> entity = queryEntity(*it, true);
                 if (entity.isNull()) {
                     continue;
                 }
@@ -532,29 +751,37 @@ QList<QSharedPointer<RShape> > RBlockReferenceData::getShapes(const RBox& queryB
                     continue;
                 }
 
-                if (isArray && (col>0 || row>0)) {
-                    // entity might be from cache: clone:
-                    entity = QSharedPointer<REntity>(entity->clone());
-                    applyColumnRowOffsetTo(*entity, col, row);
+                if (entity->getType()!=RS::EntityBlockRef) {
+                    entity->scaleVisualProperties(getScaleFactors().x);
+                }
 
-                    // bounding box check for arrays:
-                    if (queryBox.isValid()) {
-                        if (!queryBox.intersects(entity->getBoundingBox())) {
-                            continue;
-                        }
+                if (isArray) {
+                    if (col>0 || row>0) {
+                        // entity might be from cache:
+                        // clone and transform to col / row coordinates:
+                        entity = QSharedPointer<REntity>(entity->clone());
+                        applyColumnRowOffsetTo(*entity, col, row, true);
                     }
                 }
-                ret.append(entity->getShapes(queryBox, ignoreComplex));
+                QList<QSharedPointer<RShape> > shapes = entity->getShapes(queryBox, ignoreComplex);
+                ret.append(shapes);
+                if (entityIds!=NULL) {
+                    for (int c=0; c<shapes.length(); c++) {
+                        // make sure the indices in ret and entityIds match, insert duplicates if necessary:
+                        entityIds->append(entity->getId());
+                    }
+                }
             }
         }
     }
 
     recursionDepth--;
+
     return ret;
 }
 
-bool RBlockReferenceData::moveReferencePoint(const RVector& referencePoint,
-        const RVector& targetPoint) {
+bool RBlockReferenceData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers) {
+    Q_UNUSED(modifiers)
 
     bool ret = false;
     if (referencePoint.getDistanceTo(position) < RS::PointTolerance) {
@@ -604,6 +831,8 @@ bool RBlockReferenceData::mirror(const RLine& axis) {
 
 bool RBlockReferenceData::scale(const RVector& scaleFactors, const RVector& center) {
     position.scale(scaleFactors, center);
+    columnSpacing*=scaleFactors.x;
+    rowSpacing*=scaleFactors.x;
 
     if (!isPixelUnit()) {
         this->scaleFactors.scale(scaleFactors);

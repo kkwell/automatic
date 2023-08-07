@@ -84,8 +84,74 @@
         
     
     
+      RPropertyEditor * REcmaShellPropertyEditor::getInstance(
+                
+            ) {
+                QScriptEngine* engine = __qtscript_self.engine();
+                //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::getInstance", engine);
+                QScriptValue _q_function = __qtscript_self.property("getInstance");
+
+
+
+                if (!_q_function.isFunction() || 
+                    QTSCRIPT_IS_GENERATED_FUNCTION(_q_function) ||
+                    QTSCRIPT_IS_FUNCTION_IN_CALL(_q_function)
+                    
+                    /* function might have more arguments than expected:
+                    || _q_function.property("length").toInt32()!=0*/
+                    /*|| (__qtscript_self.propertyFlags("atEnd") & QScriptValue::QObjectMember)*/
+                    ) {
+                    //QString cppSig = "RPropertyEditor::getInstance";
+                    
+                        // re-enable recursion for calls from C++ into ECMAScript functions
+                        // leave it marked as generated though if appropriate:
+                        
+                        quint32 prev = _q_function.data().toUInt32();
+                        //if (cppSig!="RGraphicsViewQt::event") {
+                            _q_function.setData(QScriptValue(engine, prev & 0xFFFF0000));
+                        //}
+                        RPropertyEditor * ret =
+                        RPropertyEditor::getInstance(
+                            
+                        );
+
+                        // block recursion again:
+                        _q_function.setData(QScriptValue(engine, prev));
+
+                        //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::getInstance", engine);
+
+                        
+                            return ret;
+                          
+                }
+                    // prevent recursion if script implementation calls base implementation
+                    // mark function as 'in call':
+                    quint32 prev = _q_function.data().toUInt32();
+                    _q_function.setData(QScriptValue(engine, uint(prev | 0x0000B000)));
+                    RPropertyEditor * res;
+                      
+                          res = qscriptvalue_cast< 
+                            RPropertyEditor *
+                          >(
+                        
+                            _q_function.call(__qtscript_self)
+                        
+                      )
+                    
+                    ;
+                    _q_function.setData(QScriptValue(engine, prev));
+
+                    //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::getInstance", engine);
+
+                    
+                            return res;
+                          
+            }
+        
+    
+    
       void REcmaShellPropertyEditor::updateFromDocument(
-                RDocument * document, bool onlyChanges, RS::EntityType filter, bool manual
+                RDocument * document, bool onlyChanges, RS::EntityType filter, bool manual, bool showOnRequest
             ) {
                 QScriptEngine* engine = __qtscript_self.engine();
                 //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::updateFromDocument", engine);
@@ -98,7 +164,7 @@
                     QTSCRIPT_IS_FUNCTION_IN_CALL(_q_function)
                     
                     /* function might have more arguments than expected:
-                    || _q_function.property("length").toInt32()!=4*/
+                    || _q_function.property("length").toInt32()!=5*/
                     /*|| (__qtscript_self.propertyFlags("atEnd") & QScriptValue::QObjectMember)*/
                     ) {
                     //QString cppSig = "RPropertyEditor::updateFromDocument";
@@ -111,7 +177,7 @@
                             _q_function.setData(QScriptValue(engine, prev & 0xFFFF0000));
                         //}
                         RPropertyEditor::updateFromDocument(
-                            document, onlyChanges, filter, manual
+                            document, onlyChanges, filter, manual, showOnRequest
                         );
 
                         // block recursion again:
@@ -165,6 +231,15 @@
         << qScriptValueFromValue(engine, 
 
         manual
+        )
+      
+
+
+
+    // type: bool, copyable: true
+        << qScriptValueFromValue(engine, 
+
+        showOnRequest
         )
       
                             )
@@ -312,6 +387,159 @@
         
     
     
+      QStringList REcmaShellPropertyEditor::getFixedCustomPropertyNames(
+                const QList < RS::EntityType > & objectTypes
+            ) {
+                QScriptEngine* engine = __qtscript_self.engine();
+                //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::getFixedCustomPropertyNames", engine);
+                QScriptValue _q_function = __qtscript_self.property("getFixedCustomPropertyNames");
+
+
+
+                if (!_q_function.isFunction() || 
+                    QTSCRIPT_IS_GENERATED_FUNCTION(_q_function) ||
+                    QTSCRIPT_IS_FUNCTION_IN_CALL(_q_function)
+                    
+                    /* function might have more arguments than expected:
+                    || _q_function.property("length").toInt32()!=1*/
+                    /*|| (__qtscript_self.propertyFlags("atEnd") & QScriptValue::QObjectMember)*/
+                    ) {
+                    //QString cppSig = "RPropertyEditor::getFixedCustomPropertyNames";
+                    
+                        // re-enable recursion for calls from C++ into ECMAScript functions
+                        // leave it marked as generated though if appropriate:
+                        
+                        quint32 prev = _q_function.data().toUInt32();
+                        //if (cppSig!="RGraphicsViewQt::event") {
+                            _q_function.setData(QScriptValue(engine, prev & 0xFFFF0000));
+                        //}
+                        QStringList ret =
+                        RPropertyEditor::getFixedCustomPropertyNames(
+                            objectTypes
+                        );
+
+                        // block recursion again:
+                        _q_function.setData(QScriptValue(engine, prev));
+
+                        //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::getFixedCustomPropertyNames", engine);
+
+                        
+                            return ret;
+                          
+                }
+                    // prevent recursion if script implementation calls base implementation
+                    // mark function as 'in call':
+                    quint32 prev = _q_function.data().toUInt32();
+                    _q_function.setData(QScriptValue(engine, uint(prev | 0x0000B000)));
+                    QStringList res;
+                      
+                          res = qscriptvalue_cast< 
+                            QStringList
+                          >(
+                        
+                            _q_function.call(__qtscript_self,
+                                QScriptValueList()
+                                
+
+
+
+    // type: QList < RS::EntityType > &, copyable: false
+        // List of ...:
+        << REcmaHelper::listToScriptValue(engine, 
+          objectTypes
+        )
+      
+                            )
+                        
+                      )
+                    
+                    ;
+                    _q_function.setData(QScriptValue(engine, prev));
+
+                    //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::getFixedCustomPropertyNames", engine);
+
+                    
+                            return res;
+                          
+            }
+        
+    
+    
+      void REcmaShellPropertyEditor::updateLayers(
+                RDocumentInterface * documentInterface, QList < RLayer::Id > & layerIds
+            ) {
+                QScriptEngine* engine = __qtscript_self.engine();
+                //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::updateLayers", engine);
+                QScriptValue _q_function = __qtscript_self.property("updateLayers");
+
+
+
+                if (!_q_function.isFunction() || 
+                    QTSCRIPT_IS_GENERATED_FUNCTION(_q_function) ||
+                    QTSCRIPT_IS_FUNCTION_IN_CALL(_q_function)
+                    
+                    /* function might have more arguments than expected:
+                    || _q_function.property("length").toInt32()!=2*/
+                    /*|| (__qtscript_self.propertyFlags("atEnd") & QScriptValue::QObjectMember)*/
+                    ) {
+                    //QString cppSig = "RPropertyEditor::updateLayers";
+                    
+                        // re-enable recursion for calls from C++ into ECMAScript functions
+                        // leave it marked as generated though if appropriate:
+                        
+                        quint32 prev = _q_function.data().toUInt32();
+                        //if (cppSig!="RGraphicsViewQt::event") {
+                            _q_function.setData(QScriptValue(engine, prev & 0xFFFF0000));
+                        //}
+                        RPropertyEditor::updateLayers(
+                            documentInterface, layerIds
+                        );
+
+                        // block recursion again:
+                        _q_function.setData(QScriptValue(engine, prev));
+
+                        //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::updateLayers", engine);
+
+                        
+                            return;
+                          
+                }
+                    // prevent recursion if script implementation calls base implementation
+                    // mark function as 'in call':
+                    quint32 prev = _q_function.data().toUInt32();
+                    _q_function.setData(QScriptValue(engine, uint(prev | 0x0000B000)));
+                    
+                            _q_function.call(__qtscript_self,
+                                QScriptValueList()
+                                
+
+
+
+    // type: RDocumentInterface *, copyable: false
+        << qScriptValueFromValue(engine, 
+
+        documentInterface
+        )
+      
+
+
+
+    // type: QList < RLayer::Id > &, copyable: false
+        // List of ...:
+        << REcmaHelper::listToScriptValue(engine, 
+          layerIds
+        )
+      
+                            )
+                        
+                    ;
+                    _q_function.setData(QScriptValue(engine, prev));
+
+                    //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::updateLayers", engine);
+
+                    
+            }
+        
       void REcmaShellPropertyEditor::updateLayers(
                 RDocumentInterface * documentInterface
             ) {
@@ -381,7 +609,7 @@
     
     
       void REcmaShellPropertyEditor::setCurrentLayer(
-                RDocumentInterface * documentInterface
+                RDocumentInterface * documentInterface, RLayer::Id previousLayerId
             ) {
                 QScriptEngine* engine = __qtscript_self.engine();
                 //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::setCurrentLayer", engine);
@@ -394,7 +622,7 @@
                     QTSCRIPT_IS_FUNCTION_IN_CALL(_q_function)
                     
                     /* function might have more arguments than expected:
-                    || _q_function.property("length").toInt32()!=1*/
+                    || _q_function.property("length").toInt32()!=2*/
                     /*|| (__qtscript_self.propertyFlags("atEnd") & QScriptValue::QObjectMember)*/
                     ) {
                     //QString cppSig = "RPropertyEditor::setCurrentLayer";
@@ -407,7 +635,7 @@
                             _q_function.setData(QScriptValue(engine, prev & 0xFFFF0000));
                         //}
                         RPropertyEditor::setCurrentLayer(
-                            documentInterface
+                            documentInterface, previousLayerId
                         );
 
                         // block recursion again:
@@ -434,6 +662,15 @@
         << qScriptValueFromValue(engine, 
 
         documentInterface
+        )
+      
+
+
+
+    // type: RLayer::Id, copyable: true
+        << qScriptValueFromValue(engine, 
+
+        previousLayerId
         )
       
                             )
@@ -505,7 +742,7 @@
     
     
       void REcmaShellPropertyEditor::propertyChanged(
-                RPropertyTypeId propertyTypeId, QVariant propertyValue, QVariant::Type typeHint
+                RPropertyTypeId propertyTypeId, QVariant propertyValue, RS::MetaType typeHint
             ) {
                 QScriptEngine* engine = __qtscript_self.engine();
                 //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::propertyChanged", engine);
@@ -572,7 +809,7 @@
 
 
 
-    // type: QVariant::Type, copyable: true
+    // type: RS::MetaType, copyable: true
         << qScriptValueFromValue(engine, 
 
         typeHint
@@ -1515,6 +1752,72 @@
         
     
     
+      QStringList REcmaShellPropertyEditor::getAppProperties(
+                
+            ) {
+                QScriptEngine* engine = __qtscript_self.engine();
+                //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::getAppProperties", engine);
+                QScriptValue _q_function = __qtscript_self.property("getAppProperties");
+
+
+
+                if (!_q_function.isFunction() || 
+                    QTSCRIPT_IS_GENERATED_FUNCTION(_q_function) ||
+                    QTSCRIPT_IS_FUNCTION_IN_CALL(_q_function)
+                    
+                    /* function might have more arguments than expected:
+                    || _q_function.property("length").toInt32()!=0*/
+                    /*|| (__qtscript_self.propertyFlags("atEnd") & QScriptValue::QObjectMember)*/
+                    ) {
+                    //QString cppSig = "RPropertyEditor::getAppProperties";
+                    
+                        // re-enable recursion for calls from C++ into ECMAScript functions
+                        // leave it marked as generated though if appropriate:
+                        
+                        quint32 prev = _q_function.data().toUInt32();
+                        //if (cppSig!="RGraphicsViewQt::event") {
+                            _q_function.setData(QScriptValue(engine, prev & 0xFFFF0000));
+                        //}
+                        QStringList ret =
+                        RPropertyEditor::getAppProperties(
+                            
+                        );
+
+                        // block recursion again:
+                        _q_function.setData(QScriptValue(engine, prev));
+
+                        //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::getAppProperties", engine);
+
+                        
+                            return ret;
+                          
+                }
+                    // prevent recursion if script implementation calls base implementation
+                    // mark function as 'in call':
+                    quint32 prev = _q_function.data().toUInt32();
+                    _q_function.setData(QScriptValue(engine, uint(prev | 0x0000B000)));
+                    QStringList res;
+                      
+                          res = qscriptvalue_cast< 
+                            QStringList
+                          >(
+                        
+                            _q_function.call(__qtscript_self)
+                        
+                      )
+                    
+                    ;
+                    _q_function.setData(QScriptValue(engine, prev));
+
+                    //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::getAppProperties", engine);
+
+                    
+                            return res;
+                          
+            }
+        
+    
+    
       bool REcmaShellPropertyEditor::checkType(
                 RS::EntityType type, RS::EntityType filter
             ) {
@@ -1602,12 +1905,12 @@
         
     
     
-      void REcmaShellPropertyEditor::updateEditor(
-                RObject & object, bool doUpdateGui, RDocument * document
+      void REcmaShellPropertyEditor::makeReadOnly(
+                QWidget * control, bool on
             ) {
                 QScriptEngine* engine = __qtscript_self.engine();
-                //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::updateEditor", engine);
-                QScriptValue _q_function = __qtscript_self.property("updateEditor");
+                //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::makeReadOnly", engine);
+                QScriptValue _q_function = __qtscript_self.property("makeReadOnly");
 
 
 
@@ -1616,10 +1919,10 @@
                     QTSCRIPT_IS_FUNCTION_IN_CALL(_q_function)
                     
                     /* function might have more arguments than expected:
-                    || _q_function.property("length").toInt32()!=3*/
+                    || _q_function.property("length").toInt32()!=2*/
                     /*|| (__qtscript_self.propertyFlags("atEnd") & QScriptValue::QObjectMember)*/
                     ) {
-                    //QString cppSig = "RPropertyEditor::updateEditor";
+                    //QString cppSig = "RPropertyEditor::makeReadOnly";
                     
                         // re-enable recursion for calls from C++ into ECMAScript functions
                         // leave it marked as generated though if appropriate:
@@ -1628,14 +1931,14 @@
                         //if (cppSig!="RGraphicsViewQt::event") {
                             _q_function.setData(QScriptValue(engine, prev & 0xFFFF0000));
                         //}
-                        RPropertyEditor::updateEditor(
-                            object, doUpdateGui, document
+                        RPropertyEditor::makeReadOnly(
+                            control, on
                         );
 
                         // block recursion again:
                         _q_function.setData(QScriptValue(engine, prev));
 
-                        //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::updateEditor", engine);
+                        //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::makeReadOnly", engine);
 
                         
                             return;
@@ -1646,20 +1949,16 @@
                     quint32 prev = _q_function.data().toUInt32();
                     _q_function.setData(QScriptValue(engine, uint(prev | 0x0000B000)));
                     
-                        // temporary make protected function scriptable, only from the context of this function call:
-                        QScriptValue proto = engine->defaultPrototype(qMetaTypeId<RPropertyEditor*>());
-                        REcmaHelper::registerFunction(engine, &proto, updateEditor, "updateEditor");
-                        
                             _q_function.call(__qtscript_self,
                                 QScriptValueList()
                                 
 
 
 
-    // type: RObject &, copyable: false
+    // type: QWidget *, copyable: false
         << qScriptValueFromValue(engine, 
 
-        &object
+        control
         )
       
 
@@ -1668,16 +1967,7 @@
     // type: bool, copyable: true
         << qScriptValueFromValue(engine, 
 
-        doUpdateGui
-        )
-      
-
-
-
-    // type: RDocument *, copyable: false
-        << qScriptValueFromValue(engine, 
-
-        document
+        on
         )
       
                             )
@@ -1685,7 +1975,7 @@
                     ;
                     _q_function.setData(QScriptValue(engine, prev));
 
-                    //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::updateEditor", engine);
+                    //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::makeReadOnly", engine);
 
                     
             }
@@ -1765,7 +2055,7 @@
     
     
       void REcmaShellPropertyEditor::updateProperty(
-                const RPropertyTypeId & propertyTypeId, RObject & object, RDocument * document
+                const RPropertyTypeId & propertyTypeId, RObject & object, RDocument * document, bool showOnRequest
             ) {
                 QScriptEngine* engine = __qtscript_self.engine();
                 //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::updateProperty", engine);
@@ -1778,7 +2068,7 @@
                     QTSCRIPT_IS_FUNCTION_IN_CALL(_q_function)
                     
                     /* function might have more arguments than expected:
-                    || _q_function.property("length").toInt32()!=3*/
+                    || _q_function.property("length").toInt32()!=4*/
                     /*|| (__qtscript_self.propertyFlags("atEnd") & QScriptValue::QObjectMember)*/
                     ) {
                     //QString cppSig = "RPropertyEditor::updateProperty";
@@ -1791,7 +2081,7 @@
                             _q_function.setData(QScriptValue(engine, prev & 0xFFFF0000));
                         //}
                         RPropertyEditor::updateProperty(
-                            propertyTypeId, object, document
+                            propertyTypeId, object, document, showOnRequest
                         );
 
                         // block recursion again:
@@ -1844,6 +2134,15 @@
         document
         )
       
+
+
+
+    // type: bool, copyable: true
+        << qScriptValueFromValue(engine, 
+
+        showOnRequest
+        )
+      
                             )
                         
                     ;
@@ -1856,12 +2155,12 @@
         
     
     
-      void REcmaShellPropertyEditor::removeAllButThese(
-                const QMultiMap < QString , QString > & propertyTitles, bool customOnly
+      bool REcmaShellPropertyEditor::showCustomAppProperties(
+                RPropertyAttributes::Option opt
             ) {
                 QScriptEngine* engine = __qtscript_self.engine();
-                //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::removeAllButThese", engine);
-                QScriptValue _q_function = __qtscript_self.property("removeAllButThese");
+                //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::showCustomAppProperties", engine);
+                QScriptValue _q_function = __qtscript_self.property("showCustomAppProperties");
 
 
 
@@ -1870,10 +2169,10 @@
                     QTSCRIPT_IS_FUNCTION_IN_CALL(_q_function)
                     
                     /* function might have more arguments than expected:
-                    || _q_function.property("length").toInt32()!=2*/
+                    || _q_function.property("length").toInt32()!=1*/
                     /*|| (__qtscript_self.propertyFlags("atEnd") & QScriptValue::QObjectMember)*/
                     ) {
-                    //QString cppSig = "RPropertyEditor::removeAllButThese";
+                    //QString cppSig = "RPropertyEditor::showCustomAppProperties";
                     
                         // re-enable recursion for calls from C++ into ECMAScript functions
                         // leave it marked as generated though if appropriate:
@@ -1882,14 +2181,96 @@
                         //if (cppSig!="RGraphicsViewQt::event") {
                             _q_function.setData(QScriptValue(engine, prev & 0xFFFF0000));
                         //}
-                        RPropertyEditor::removeAllButThese(
-                            propertyTitles, customOnly
+                        bool ret =
+                        RPropertyEditor::showCustomAppProperties(
+                            opt
                         );
 
                         // block recursion again:
                         _q_function.setData(QScriptValue(engine, prev));
 
-                        //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::removeAllButThese", engine);
+                        //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::showCustomAppProperties", engine);
+
+                        
+                            return ret;
+                          
+                }
+                    // prevent recursion if script implementation calls base implementation
+                    // mark function as 'in call':
+                    quint32 prev = _q_function.data().toUInt32();
+                    _q_function.setData(QScriptValue(engine, uint(prev | 0x0000B000)));
+                    
+                        // temporary make protected function scriptable, only from the context of this function call:
+                        QScriptValue proto = engine->defaultPrototype(qMetaTypeId<RPropertyEditor*>());
+                        REcmaHelper::registerFunction(engine, &proto, showCustomAppProperties, "showCustomAppProperties");
+                        bool res;
+                      
+                          res = qscriptvalue_cast< 
+                            bool
+                          >(
+                        
+                            _q_function.call(__qtscript_self,
+                                QScriptValueList()
+                                
+
+
+
+    // type: RPropertyAttributes::Option, copyable: false
+        << qScriptValueFromValue(engine, 
+
+        opt
+        )
+      
+                            )
+                        
+                      )
+                    
+                    ;
+                    _q_function.setData(QScriptValue(engine, prev));
+
+                    //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::showCustomAppProperties", engine);
+
+                    
+                            return res;
+                          
+            }
+        
+    
+    
+      void REcmaShellPropertyEditor::computePropertyValue(
+                RProperty & property
+            ) {
+                QScriptEngine* engine = __qtscript_self.engine();
+                //REcmaHelper::shellFunctionStart("REcmaShellPropertyEditor::computePropertyValue", engine);
+                QScriptValue _q_function = __qtscript_self.property("computePropertyValue");
+
+
+
+                if (!_q_function.isFunction() || 
+                    QTSCRIPT_IS_GENERATED_FUNCTION(_q_function) ||
+                    QTSCRIPT_IS_FUNCTION_IN_CALL(_q_function)
+                    
+                    /* function might have more arguments than expected:
+                    || _q_function.property("length").toInt32()!=1*/
+                    /*|| (__qtscript_self.propertyFlags("atEnd") & QScriptValue::QObjectMember)*/
+                    ) {
+                    //QString cppSig = "RPropertyEditor::computePropertyValue";
+                    
+                        // re-enable recursion for calls from C++ into ECMAScript functions
+                        // leave it marked as generated though if appropriate:
+                        
+                        quint32 prev = _q_function.data().toUInt32();
+                        //if (cppSig!="RGraphicsViewQt::event") {
+                            _q_function.setData(QScriptValue(engine, prev & 0xFFFF0000));
+                        //}
+                        RPropertyEditor::computePropertyValue(
+                            property
+                        );
+
+                        // block recursion again:
+                        _q_function.setData(QScriptValue(engine, prev));
+
+                        //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::computePropertyValue", engine);
 
                         
                             return;
@@ -1902,7 +2283,7 @@
                     
                         // temporary make protected function scriptable, only from the context of this function call:
                         QScriptValue proto = engine->defaultPrototype(qMetaTypeId<RPropertyEditor*>());
-                        REcmaHelper::registerFunction(engine, &proto, removeAllButThese, "removeAllButThese");
+                        REcmaHelper::registerFunction(engine, &proto, computePropertyValue, "computePropertyValue");
                         
                             _q_function.call(__qtscript_self,
                                 QScriptValueList()
@@ -1910,19 +2291,10 @@
 
 
 
-    // type: QMultiMap < QString , QString > &, copyable: false
+    // type: RProperty &, copyable: false
         << qScriptValueFromValue(engine, 
 
-        propertyTitles
-        )
-      
-
-
-
-    // type: bool, copyable: true
-        << qScriptValueFromValue(engine, 
-
-        customOnly
+        &property
         )
       
                             )
@@ -1930,7 +2302,7 @@
                     ;
                     _q_function.setData(QScriptValue(engine, prev));
 
-                    //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::removeAllButThese", engine);
+                    //REcmaHelper::shellFunctionEnd("REcmaShellPropertyEditor::computePropertyValue", engine);
 
                     
             }
@@ -1944,154 +2316,6 @@
 
     // protected methods (only available for ECMA shell classes) (generated by xsl2xpp.xsl):
 	 QScriptValue
-        REcmaShellPropertyEditor::updateEditor
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaShellPropertyEditor::updateEditor", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaShellPropertyEditor::updateEditor";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // protected function: can only be called from ECMA shell:
-                    REcmaShellPropertyEditor* self = 
-                        getSelfShell("", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    2 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RObject */
-     && (
-            context->argument(1).isBool()
-        ) /* type: bool */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument is reference
-                    RObject*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RObject*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if( ap0 == NULL ){
-                           return REcmaHelper::throwError("RPropertyEditor: Argument 0 is not of type RObject*.",
-                               context);                    
-                    }
-                    RObject& a0 = *ap0;
-                
-                    // argument isStandardType
-                    bool
-                    a1 =
-                    (bool)
-                    
-                    context->argument( 1 ).
-                    toBool();
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'void'
-    
-               self->RPropertyEditor::updateEditor(a0
-        ,
-    a1);
-    } else
-
-
-        
-    
-    if( context->argumentCount() ==
-    3 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RObject */
-     && (
-            context->argument(1).isBool()
-        ) /* type: bool */
-     && (
-            context->argument(2).isVariant() || 
-            context->argument(2).isQObject() || 
-            context->argument(2).isNull()
-        ) /* type: RDocument * */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument is reference
-                    RObject*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RObject*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if( ap0 == NULL ){
-                           return REcmaHelper::throwError("RPropertyEditor: Argument 0 is not of type RObject*.",
-                               context);                    
-                    }
-                    RObject& a0 = *ap0;
-                
-                    // argument isStandardType
-                    bool
-                    a1 =
-                    (bool)
-                    
-                    context->argument( 1 ).
-                    toBool();
-                
-                    // argument is pointer
-                    RDocument * a2 = NULL;
-
-                    a2 = 
-                        REcmaHelper::scriptValueTo<RDocument >(
-                            context->argument(2)
-                        );
-                    
-                    if (a2==NULL && 
-                        !context->argument(2).isNull()) {
-                        return REcmaHelper::throwError("RPropertyEditor: Argument 2 is not of type RDocument *RDocument *.", context);                    
-                    }
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'void'
-    
-               self->RPropertyEditor::updateEditor(a0
-        ,
-    a1
-        ,
-    a2);
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RPropertyEditor.updateEditor().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaShellPropertyEditor::updateEditor", context, engine);
-            return result;
-        }
-         QScriptValue
         REcmaShellPropertyEditor::updateGui
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -2265,6 +2489,101 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RPropertyTypeId */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RObject */
+     && (
+            context->argument(2).isVariant() || 
+            context->argument(2).isQObject() || 
+            context->argument(2).isNull()
+        ) /* type: RDocument * */
+     && (
+            context->argument(3).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RPropertyTypeId*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RPropertyTypeId*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RPropertyEditor: Argument 0 is not of type RPropertyTypeId.",
+                               context);                    
+                    }
+                    RPropertyTypeId 
+                    a0 = 
+                    *ap0;
+                
+                    // argument is reference
+                    RObject*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RObject*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if( ap1 == NULL ){
+                           return REcmaHelper::throwError("RPropertyEditor: Argument 1 is not of type RObject*.",
+                               context);                    
+                    }
+                    RObject& a1 = *ap1;
+                
+                    // argument is pointer
+                    RDocument * a2 = NULL;
+
+                    a2 = 
+                        REcmaHelper::scriptValueTo<RDocument >(
+                            context->argument(2)
+                        );
+                    
+                    if (a2==NULL && 
+                        !context->argument(2).isNull()) {
+                        return REcmaHelper::throwError("RPropertyEditor: Argument 2 is not of type RDocument *RDocument *.", context);                    
+                    }
+                
+                    // argument isStandardType
+                    bool
+                    a3 =
+                    (bool)
+                    
+                    context->argument( 3 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->RPropertyEditor::updateProperty(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RPropertyEditor.updateProperty().",
                    context);
@@ -2273,12 +2592,12 @@
             return result;
         }
          QScriptValue
-        REcmaShellPropertyEditor::removeAllButThese
+        REcmaShellPropertyEditor::showCustomAppProperties
         (QScriptContext* context, QScriptEngine* engine) 
         
         {
-            //REcmaHelper::functionStart("REcmaShellPropertyEditor::removeAllButThese", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaShellPropertyEditor::removeAllButThese";
+            //REcmaHelper::functionStart("REcmaShellPropertyEditor::showCustomAppProperties", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShellPropertyEditor::showCustomAppProperties";
             //QCoreApplication::processEvents();
 
             QScriptValue result = engine->undefinedValue();
@@ -2299,92 +2618,102 @@
             context->argument(0).isVariant() || 
             context->argument(0).isQObject() || 
             context->argument(0).isNull()
-        ) /* type: QMultiMap < QString , QString > */
+        ) /* type: RPropertyAttributes::Option */
     
     ){
     // prepare arguments:
     
                     // argument is reference
-                    QMultiMap < QString , QString >*
+                    RPropertyAttributes::Option*
                     ap0 =
                     qscriptvalue_cast<
-                    QMultiMap < QString , QString >*
+                    RPropertyAttributes::Option*
                         >(
                         context->argument(
                         0
                         )
                     );
                     if( ap0 == NULL ){
-                           return REcmaHelper::throwError("RPropertyEditor: Argument 0 is not of type QMultiMap < QString , QString >*.",
+                           return REcmaHelper::throwError("RPropertyEditor: Argument 0 is not of type RPropertyAttributes::Option*.",
                                context);                    
                     }
-                    QMultiMap < QString , QString >& a0 = *ap0;
+                    RPropertyAttributes::Option& a0 = *ap0;
                 
     // end of arguments
 
     // call C++ function:
-    // return type 'void'
-    
-               self->RPropertyEditor::removeAllButThese(a0);
-    } else
-
-
+    // return type 'bool'
+    bool cppResult =
         
-    
-    if( context->argumentCount() ==
-    2 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: QMultiMap < QString , QString > */
-     && (
-            context->argument(1).isBool()
-        ) /* type: bool */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument is reference
-                    QMultiMap < QString , QString >*
-                    ap0 =
-                    qscriptvalue_cast<
-                    QMultiMap < QString , QString >*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if( ap0 == NULL ){
-                           return REcmaHelper::throwError("RPropertyEditor: Argument 0 is not of type QMultiMap < QString , QString >*.",
-                               context);                    
-                    }
-                    QMultiMap < QString , QString >& a0 = *ap0;
-                
-                    // argument isStandardType
-                    bool
-                    a1 =
-                    (bool)
-                    
-                    context->argument( 1 ).
-                    toBool();
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'void'
-    
-               self->RPropertyEditor::removeAllButThese(a0
-        ,
-    a1);
+               self->RPropertyEditor::showCustomAppProperties(a0);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
     } else
 
 
         
             {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RPropertyEditor.removeAllButThese().",
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPropertyEditor.showCustomAppProperties().",
                    context);
             }
-            //REcmaHelper::functionEnd("REcmaShellPropertyEditor::removeAllButThese", context, engine);
+            //REcmaHelper::functionEnd("REcmaShellPropertyEditor::showCustomAppProperties", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShellPropertyEditor::computePropertyValue
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShellPropertyEditor::computePropertyValue", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShellPropertyEditor::computePropertyValue";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RProperty */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    RProperty*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RProperty*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RPropertyEditor: Argument 0 is not of type RProperty*.",
+                               context);                    
+                    }
+                    RProperty& a0 = *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    RPropertyEditor::
+       computePropertyValue(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPropertyEditor.computePropertyValue().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShellPropertyEditor::computePropertyValue", context, engine);
             return result;
         }
         

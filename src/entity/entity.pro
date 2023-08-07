@@ -10,6 +10,12 @@ SOURCES = \
     RCircleEntity.cpp \
     RDimAlignedData.cpp \
     RDimAlignedEntity.cpp \
+    RDimAngular2LData.cpp \
+    RDimAngular2LEntity.cpp \
+    RDimAngular3PData.cpp \
+    RDimAngular3PEntity.cpp \
+    RDimArcLengthData.cpp \
+    RDimArcLengthEntity.cpp \
     RDimAngularData.cpp \
     RDimAngularEntity.cpp \
     RDimDiametricData.cpp \
@@ -24,6 +30,7 @@ SOURCES = \
     RDimRotatedEntity.cpp \
     RDimensionData.cpp \
     RDimensionEntity.cpp \
+    RDimStyleProxyBasic.cpp \
     REllipseData.cpp \
     REllipseEntity.cpp \
     RFaceData.cpp \
@@ -48,6 +55,8 @@ SOURCES = \
     RSplineEntity.cpp \
     RTextData.cpp \
     RTextEntity.cpp \
+    RToleranceData.cpp \
+    RToleranceEntity.cpp \
     RTraceData.cpp \
     RTraceEntity.cpp \
     RXLineData.cpp \
@@ -64,6 +73,12 @@ HEADERS = \
     RCircleEntity.h \
     RDimAlignedData.h \
     RDimAlignedEntity.h \
+    RDimAngular2LData.h \
+    RDimAngular2LEntity.h \
+    RDimAngular3PData.h \
+    RDimAngular3PEntity.h \
+    RDimArcLengthData.h \
+    RDimArcLengthEntity.h \
     RDimAngularData.h \
     RDimAngularEntity.h \
     RDimDiametricData.h \
@@ -78,6 +93,7 @@ HEADERS = \
     RDimRotatedEntity.h \
     RDimensionData.h \
     RDimensionEntity.h \
+    RDimStyleProxyBasic.h \
     REllipseData.h \
     REllipseEntity.h \
     RFaceData.h \
@@ -103,6 +119,8 @@ HEADERS = \
     RSplineEntity.h \
     RTextData.h \
     RTextEntity.h \
+    RToleranceData.h \
+    RToleranceEntity.h \
     RTraceData.h \
     RTraceEntity.h \
     RXLineData.h \

@@ -90,6 +90,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, getCustomPattern, "getCustomPattern");
             
+            REcmaHelper::registerFunction(&engine, proto, setCustomPattern, "setCustomPattern");
+            
             REcmaHelper::registerFunction(&engine, proto, cloneOnChange, "cloneOnChange");
             
             REcmaHelper::registerFunction(&engine, proto, getBoundingBox, "getBoundingBox");
@@ -140,6 +142,14 @@
             
             REcmaHelper::registerFunction(&engine, proto, setPatternName, "setPatternName");
             
+            REcmaHelper::registerFunction(&engine, proto, getTransparency, "getTransparency");
+            
+            REcmaHelper::registerFunction(&engine, proto, setTransparency, "setTransparency");
+            
+            REcmaHelper::registerFunction(&engine, proto, getLength, "getLength");
+            
+            REcmaHelper::registerFunction(&engine, proto, getArea, "getArea");
+            
             REcmaHelper::registerFunction(&engine, proto, clearCustomPattern, "clearCustomPattern");
             
             REcmaHelper::registerFunction(&engine, proto, newLoop, "newLoop");
@@ -147,6 +157,8 @@
             REcmaHelper::registerFunction(&engine, proto, cancelLoop, "cancelLoop");
             
             REcmaHelper::registerFunction(&engine, proto, addBoundary, "addBoundary");
+            
+            REcmaHelper::registerFunction(&engine, proto, addBoundaryShape, "addBoundaryShape");
             
             REcmaHelper::registerFunction(&engine, proto, getBoundaryPath, "getBoundaryPath");
             
@@ -164,9 +176,13 @@
             
             REcmaHelper::registerFunction(&engine, proto, getBoundaryAsPolylines, "getBoundaryAsPolylines");
             
+            REcmaHelper::registerFunction(&engine, proto, autoCloseLoops, "autoCloseLoops");
+            
             REcmaHelper::registerFunction(&engine, proto, getComplexity, "getComplexity");
             
             REcmaHelper::registerFunction(&engine, proto, setPattern, "setPattern");
+            
+            REcmaHelper::registerFunction(&engine, proto, getColor, "getColor");
             
         engine.setDefaultPrototype(
             qMetaTypeId<RHatchData*>(), *proto);
@@ -701,6 +717,73 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaHatchData::getCustomPattern", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaHatchData::setCustomPattern
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaHatchData::setCustomPattern", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaHatchData::setCustomPattern";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RHatchData* self = 
+                        getSelf("setCustomPattern", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RPattern */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RPattern*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RPattern*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RHatchData: Argument 0 is not of type RPattern.",
+                               context);                    
+                    }
+                    RPattern 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setCustomPattern(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.setCustomPattern().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaHatchData::setCustomPattern", context, engine);
             return result;
         }
          QScriptValue
@@ -1501,6 +1584,88 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: Qt::KeyboardModifiers */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RHatchData: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RHatchData: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+                    // argument isStandardType
+                    Qt::KeyboardModifiers
+                    a2 =
+                    (Qt::KeyboardModifiers)
+                    (int)
+                    context->argument( 2 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->moveReferencePoint(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.moveReferencePoint().",
                    context);
@@ -2269,6 +2434,94 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RBox */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(3).isArray()
+        ) /* type: QList < RObject::Id > * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RBox*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RBox*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RHatchData: Argument 0 is not of type RBox.",
+                               context);                    
+                    }
+                    RBox 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+                    // argument is pointer
+                    QList < RObject::Id > * a3 = NULL;
+
+                    a3 = 
+                        REcmaHelper::scriptValueTo<QList < RObject::Id > >(
+                            context->argument(3)
+                        );
+                    
+                    if (a3==NULL && 
+                        !context->argument(3).isNull()) {
+                        return REcmaHelper::throwError("RHatchData: Argument 3 is not of type QList < RObject::Id > *QList < RObject::Id > *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < QSharedPointer < RShape > >'
+    QList < QSharedPointer < RShape > > cppResult =
+        
+               self->getShapes(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: QList < QSharedPointer < RShape > >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.getShapes().",
                    context);
@@ -2746,6 +2999,58 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RHatchData: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setOriginPoint(a0
+        ,
+    a1);
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.setOriginPoint().",
                    context);
@@ -2855,6 +3160,208 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaHatchData::setPatternName", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaHatchData::getTransparency
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaHatchData::getTransparency", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaHatchData::getTransparency";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RHatchData* self = 
+                        getSelf("getTransparency", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        
+               self->getTransparency();
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.getTransparency().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaHatchData::getTransparency", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaHatchData::setTransparency
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaHatchData::setTransparency", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaHatchData::setTransparency";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RHatchData* self = 
+                        getSelf("setTransparency", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setTransparency(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.setTransparency().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaHatchData::setTransparency", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaHatchData::getLength
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaHatchData::getLength", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaHatchData::getLength";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RHatchData* self = 
+                        getSelf("getLength", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        
+               self->getLength();
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.getLength().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaHatchData::getLength", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaHatchData::getArea
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaHatchData::getArea", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaHatchData::getArea";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RHatchData* self = 
+                        getSelf("getArea", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        
+               self->getArea();
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.getArea().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaHatchData::getArea", context, engine);
             return result;
         }
          QScriptValue
@@ -3068,11 +3575,181 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QSharedPointer < RShape > */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is SharedPointer
+                    QSharedPointer < RShape > 
+                    a0;
+
+                    // argument might be a simple pointer:
+                     RShape * o0 = 
+                    qscriptvalue_cast < RShape * > (context->argument(0));
+
+                    if (o0!=NULL) {
+                        a0 =
+                        
+                          // always clone shape if we expect a shared pointer (might be a simple object on stack):
+                          QSharedPointer < RShape >(o0->clone());
+                        
+                    }
+                    else {
+                        // qscriptvalue_cast to QSharedPointer<BaseClass> does not work
+                        QSharedPointer < RShape >*
+                        p0;
+
+                        p0 =
+                        qscriptvalue_cast <QSharedPointer < RShape >* > (context->argument(0));
+
+                        if (p0==NULL) {
+                           return REcmaHelper::throwError("RHatchData: Argument 0 is not of type  RShape .", context);                    
+                        }
+
+                        a0 = *p0;
+
+                           //return REcmaHelper::throwError("RHatchData: Argument 0 is not of type  RShape .",
+                           //    context);                    
+                    }
+
+                    //QSharedPointer < RShape > 
+                    //a0 =
+                    //QSharedPointer < RShape >(o0->clone());
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->addBoundary(a0
+        ,
+    a1);
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.addBoundary().",
                    context);
             }
             //REcmaHelper::functionEnd("REcmaHatchData::addBoundary", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaHatchData::addBoundaryShape
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaHatchData::addBoundaryShape", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaHatchData::addBoundaryShape";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RHatchData* self = 
+                        getSelf("addBoundaryShape", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QSharedPointer < RShape > */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is SharedPointer
+                    QSharedPointer < RShape > 
+                    a0;
+
+                    // argument might be a simple pointer:
+                     RShape * o0 = 
+                    qscriptvalue_cast < RShape * > (context->argument(0));
+
+                    if (o0!=NULL) {
+                        a0 =
+                        
+                          // always clone shape if we expect a shared pointer (might be a simple object on stack):
+                          QSharedPointer < RShape >(o0->clone());
+                        
+                    }
+                    else {
+                        // qscriptvalue_cast to QSharedPointer<BaseClass> does not work
+                        QSharedPointer < RShape >*
+                        p0;
+
+                        p0 =
+                        qscriptvalue_cast <QSharedPointer < RShape >* > (context->argument(0));
+
+                        if (p0==NULL) {
+                           return REcmaHelper::throwError("RHatchData: Argument 0 is not of type  RShape .", context);                    
+                        }
+
+                        a0 = *p0;
+
+                           //return REcmaHelper::throwError("RHatchData: Argument 0 is not of type  RShape .",
+                           //    context);                    
+                    }
+
+                    //QSharedPointer < RShape > 
+                    //a0 =
+                    //QSharedPointer < RShape >(o0->clone());
+                
+                    // argument isStandardType
+                    int
+                    a1 =
+                    (int)
+                    
+                    context->argument( 1 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->addBoundaryShape(a0
+        ,
+    a1);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.addBoundaryShape().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaHatchData::addBoundaryShape", context, engine);
             return result;
         }
          QScriptValue
@@ -3556,6 +4233,27 @@
                 
     
     if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RPolyline >'
+    QList < RPolyline > cppResult =
+        
+               self->getBoundaryAsPolylines();
+        // return type: QList < RPolyline >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
     1 && (
             context->argument(0).isNumber()
         ) /* type: double */
@@ -3591,6 +4289,50 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaHatchData::getBoundaryAsPolylines", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaHatchData::autoCloseLoops
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaHatchData::autoCloseLoops", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaHatchData::autoCloseLoops";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RHatchData* self = 
+                        getSelf("autoCloseLoops", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->autoCloseLoops();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.autoCloseLoops().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaHatchData::autoCloseLoops", context, engine);
             return result;
         }
          QScriptValue
@@ -3674,7 +4416,7 @@
     ){
     // prepare arguments:
     
-                    // argument is reference
+                    // argument isCopyable and has default constructor and isSimpleClass 
                     RPattern*
                     ap0 =
                     qscriptvalue_cast<
@@ -3684,11 +4426,13 @@
                         0
                         )
                     );
-                    if( ap0 == NULL ){
-                           return REcmaHelper::throwError("RHatchData: Argument 0 is not of type RPattern*.",
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RHatchData: Argument 0 is not of type RPattern.",
                                context);                    
                     }
-                    RPattern& a0 = *ap0;
+                    RPattern 
+                    a0 = 
+                    *ap0;
                 
     // end of arguments
 
@@ -3705,6 +4449,177 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaHatchData::setPattern", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaHatchData::getColor
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaHatchData::getColor", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaHatchData::getColor";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RHatchData* self = 
+                        getSelf("getColor", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RColor'
+    RColor cppResult =
+        
+               self->getColor();
+        // return type: RColor
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RColor */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: QStack < REntity * > */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RColor*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RColor*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RHatchData: Argument 0 is not of type RColor.",
+                               context);                    
+                    }
+                    RColor 
+                    a0 = 
+                    *ap0;
+                
+                    // argument is reference
+                    QStack < REntity * >*
+                    ap1 =
+                    qscriptvalue_cast<
+                    QStack < REntity * >*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if( ap1 == NULL ){
+                           return REcmaHelper::throwError("RHatchData: Argument 1 is not of type QStack < REntity * >*.",
+                               context);                    
+                    }
+                    QStack < REntity * >& a1 = *ap1;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RColor'
+    RColor cppResult =
+        
+               self->getColor(a0
+        ,
+    a1);
+        // return type: RColor
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: QStack < REntity * > */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+                    // argument is reference
+                    QStack < REntity * >*
+                    ap1 =
+                    qscriptvalue_cast<
+                    QStack < REntity * >*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if( ap1 == NULL ){
+                           return REcmaHelper::throwError("RHatchData: Argument 1 is not of type QStack < REntity * >*.",
+                               context);                    
+                    }
+                    QStack < REntity * >& a1 = *ap1;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RColor'
+    RColor cppResult =
+        
+               self->getColor(a0
+        ,
+    a1);
+        // return type: RColor
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RHatchData.getColor().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaHatchData::getColor", context, engine);
             return result;
         }
          QScriptValue

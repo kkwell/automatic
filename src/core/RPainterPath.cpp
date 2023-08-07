@@ -62,14 +62,25 @@ RPainterPath::RPainterPath(const RPainterPath& other) :
     // detach original shapes:
     for (int i=0; i<other.originalShapes.length(); i++) {
         QSharedPointer<RShape> originalShape = other.originalShapes[i];
-        QSharedPointer<RLine> originalLine = originalShape.dynamicCast<RLine>();
-        QSharedPointer<RArc> originalArc = originalShape.dynamicCast<RArc>();
-        if (!originalLine.isNull()) {
-            originalShapes.append(QSharedPointer<RShape>(new RLine(*originalLine)));
-        }
-        if (!originalArc.isNull()) {
-            originalShapes.append(QSharedPointer<RShape>(new RArc(*originalArc)));
-        }
+        originalShapes.append(QSharedPointer<RShape>(originalShape->clone()));
+
+//        QSharedPointer<RLine> originalLine = originalShape.dynamicCast<RLine>();
+//        if (!originalLine.isNull()) {
+//            originalShapes.append(QSharedPointer<RShape>(new RLine(*originalLine)));
+//            continue;
+//        }
+
+//        QSharedPointer<RArc> originalArc = originalShape.dynamicCast<RArc>();
+//        if (!originalArc.isNull()) {
+//            originalShapes.append(QSharedPointer<RShape>(new RArc(*originalArc)));
+//            continue;
+//        }
+
+//        QSharedPointer<RPolyline> originalPl = originalShape.dynamicCast<RPolyline>();
+//        if (!originalPl.isNull()) {
+//            originalShapes.append(QSharedPointer<RShape>(new RPolyline(*originalPl)));
+//            continue;
+//        }
     }
 
     //RDebug::incCounter("RPainterPath");
@@ -98,22 +109,24 @@ void RPainterPath::addLine(const RLine& line) {
 void RPainterPath::addArc(const RArc& arc) {
     //moveToOrNop(arc.getStartPoint());
 
-    // more precise, but not desirable for SVG export:
-//    QList<RSpline> splines = RSpline::createSplinesFromArc(arc);
-//    for (int i=0; i<splines.length(); i++) {
-//        RSpline spline = splines[i];
-//        cubicTo(spline.getControlPointAt(1), spline.getControlPointAt(2), spline.getControlPointAt(3));
-//    }
+        // more precise, but not desirable for SVG export:
+        QList<RSpline> splines = RSpline::createSplinesFromArc(arc);
+        for (int i=0; i<splines.length(); i++) {
+            RSpline spline = splines[i];
+            cubicTo(spline.getControlPointAt(1), spline.getControlPointAt(2), spline.getControlPointAt(3));
+        }
 
-    // NOTE: very imprecise for short arcs with large radii:
-    RCircle c(arc.getCenter(), arc.getRadius());
-    RBox bb = c.getBoundingBox();
-    arcTo(bb.getMinimum().x,
-          bb.getMinimum().y,
-          bb.getSize().x,
-          bb.getSize().y,
-          -RMath::rad2deg(arc.getStartAngle()),
-          -RMath::rad2deg(arc.getSweep()));
+//        // NOTE: very imprecise for short arcs with large radii:
+//        // causes problems with arcs with large radii
+//        // in SVG exports (20180905):
+//        RCircle c(arc.getCenter(), arc.getRadius());
+//        RBox bb = c.getBoundingBox();
+//        arcTo(bb.getMinimum().x,
+//              bb.getMinimum().y,
+//              bb.getSize().x,
+//              bb.getSize().y,
+//              -RMath::rad2deg(arc.getStartAngle()),
+//              -RMath::rad2deg(arc.getSweep()));
 }
 
 void RPainterPath::addPolyline(const RPolyline& pl) {
@@ -145,7 +158,7 @@ void RPainterPath::addSpline(const RSpline& spline) {
 
     for (int i=0; i<list.count(); i++) {
         QList<RVector> cps = list[i].getControlPoints();
-        // very rare splines of degree >=4:
+        // very rare splines of degree >= 4:
         if ((cps.size()>=5 && degree==cps.size()-1)) {
             QList<QSharedPointer<RShape> > segments = spline.getExploded(16);
             for (int k=0; k<segments.length(); k++) {
@@ -235,6 +248,11 @@ QList<QSharedPointer<RShape> > RPainterPath::getShapes() const {
         }
 
         cursor = el;
+    }
+
+    QList<RVector> points = getPoints();
+    for (int i=0; i<points.length(); i++) {
+        ret.append(QSharedPointer<RPoint>(new RPoint(points[i])));
     }
 
     return ret;
@@ -403,6 +421,38 @@ void RPainterPath::setNoColorMode(bool on) {
 
 bool RPainterPath::getNoColorMode() const {
     return getMode(RPainterPath::NoColorMode);
+}
+
+void RPainterPath::setSimplePointDisplay(bool on) {
+    setMode(RPainterPath::SimplePointDisplay, on);
+}
+
+bool RPainterPath::getSimplePointDisplay() const {
+    return getMode(RPainterPath::SimplePointDisplay);
+}
+
+void RPainterPath::setPolylineGen(bool on) {
+    setMode(RPainterPath::PolylineGen, on);
+}
+
+bool RPainterPath::getPolylineGen() const {
+    return getMode(RPainterPath::PolylineGen);
+}
+
+void RPainterPath::setNoPattern(bool on) {
+    setMode(RPainterPath::NoPattern, on);
+}
+
+bool RPainterPath::getNoPattern() const {
+    return getMode(RPainterPath::NoPattern);
+}
+
+void RPainterPath::setScreenBasedLinetype(bool on) {
+    setMode(RPainterPath::ScreenBasedLinetype, on);
+}
+
+bool RPainterPath::getScreenBasedLinetype() const {
+    return getMode(RPainterPath::ScreenBasedLinetype);
 }
 
 void RPainterPath::setPixelWidth(bool on) {
@@ -755,6 +805,12 @@ void RPainterPath::addShape(QSharedPointer<RShape> shape) {
         addPath(pp);
         return;
     }
+
+    QSharedPointer<RPolyline> pl = shape.dynamicCast<RPolyline>();
+    if (!pl.isNull()) {
+        addPolyline(*pl);
+        return;
+    }
 }
 
 void RPainterPath::addOriginalShape(QSharedPointer<RShape> shape) {
@@ -763,4 +819,12 @@ void RPainterPath::addOriginalShape(QSharedPointer<RShape> shape) {
 
 bool RPainterPath::hasOriginalShapes() const {
     return !originalShapes.isEmpty();
+}
+
+int RPainterPath::countOriginalShapes() const {
+    return originalShapes.count();
+}
+
+QSharedPointer<RShape> RPainterPath::getOriginalShape(int i) const {
+    return originalShapes[i];
 }

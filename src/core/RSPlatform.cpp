@@ -20,6 +20,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QHostInfo>
+#include <QProcess>
+#include <QThread>
 #ifdef Q_OS_WIN
 #include <Windows.h>
 #else
@@ -27,8 +29,9 @@
 #endif
 
 #include "RGlobal.h"
+#include "RSettings.h"
 
-#if defined(Q_WS_X11)
+#if defined(Q_OS_LINUX)
 #include <X11/Xlib.h>
 /**
  * If things magically start not working with weird and unexpected
@@ -37,16 +40,16 @@
 #endif
 
 /**
- * \return Unique combination of system ID (linux, osx, win) and host name.
+ * \return Unique combination of system ID (linux, freebsd, netbsd, openbsd, solaris, osx, win) and host name.
  * E.g. "linux_vertigo". Used for test data that may differ on different machines.
  */
 QString RS::getHostId() {
     return QString("%1_%2")
             .arg(getSystemId())
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_NETBSD) || defined(Q_OS_OPENBSD) || defined(Q_OS_SOLARIS)
     .arg(getenv("HOSTNAME"));
 #elif defined(Q_OS_MAC)
-    // environment variable HOSTNAME not exported on OS X by default:
+    // environment variable HOSTNAME not exported on macOS by default:
     .arg(QHostInfo::localHostName());
 #elif defined(Q_OS_WIN)
     .arg(getenv("COMPUTERNAME"));
@@ -56,11 +59,19 @@ QString RS::getHostId() {
 }
 
 /**
- * \return Unique system ID ("linux", "osx", "win").
+ * \return Unique system ID ("linux", "freebsd", "netbsd", "openbsd", "solaris", "osx", "win").
  */
 QString RS::getSystemId() {
 #if defined(Q_OS_LINUX)
     return "linux";
+#elif defined(Q_OS_FREEBSD)
+    return "freebsd";
+#elif defined(Q_OS_NETBSD)
+    return "netbsd";
+#elif defined(Q_OS_OPENBSD)
+    return "openbsd";
+#elif defined(Q_OS_SOLARIS)
+    return "solaris";
 #elif defined(Q_OS_MAC)
     return "osx";
 #elif defined(Q_OS_WIN)
@@ -73,7 +84,7 @@ QString RS::getSystemId() {
 QString RS::getWindowManagerId() {
     static QString wm = "";
 
-#if defined(Q_WS_X11)
+#if defined(Q_OS_LINUX)
     Display *dpy;
     Window win;
 
@@ -97,11 +108,11 @@ QString RS::getWindowManagerId() {
 
     wm = "unknown";
 
-#if defined(Q_WS_MAC)
+#if defined(Q_OS_MAC)
     wm = "osx";
-#elif defined(Q_WS_WIN)
+#elif defined(Q_OS_WIN)
     wm = "win";
-#elif defined(Q_WS_X11)
+#elif defined(Q_OS_LINUX)
 
     dpy = NULL;
     data = NULL;
@@ -233,6 +244,13 @@ int RS::getCpuCores() {
 }
 
 /**
+ * \return Ideal thread count for multithreading.
+ */
+int RS::getIdealThreadCount() {
+    return QThread::idealThreadCount();
+}
+
+/**
  * \return x32 or x64, depending on the architecture the binary was built for.
  */
 QString RS::getBuildCpuArchitecture() {
@@ -251,4 +269,40 @@ QString RS::getBuildCpuArchitecture() {
     return "";
 #endif
 #endif
+}
+
+bool RS::showInFileManager(const QString& filePath) {
+    const QFileInfo fileInfo(filePath);
+
+    // Mac, Windows support folder or file.
+#ifdef Q_OS_WIN
+    // open Explorer:
+    // TODO: find out where Explorer is:
+    const QString explorer = RSettings::getStringValue("FileManager/ExplorerBinary", "C:\\Windows\\explorer.exe");
+    QStringList param;
+    if (!fileInfo.isDir()) {
+        param += QLatin1String("/select,");
+    }
+    param += QDir::toNativeSeparators(fileInfo.canonicalFilePath());
+    QProcess::startDetached(explorer, param);
+#elif defined(Q_OS_MAC)
+    // open Finder:
+    QStringList scriptArgs;
+    scriptArgs.append("-e");
+    scriptArgs.append(QString("tell application \"Finder\" to reveal POSIX file \"%1\"").arg(fileInfo.canonicalFilePath()));
+    QProcess::execute("/usr/bin/osascript", scriptArgs);
+
+    // raise Finder Window to the top:
+    scriptArgs.clear();
+    scriptArgs.append("-e");
+    scriptArgs.append("tell application \"Finder\" to activate");
+    QProcess::execute("/usr/bin/osascript", scriptArgs);
+#else
+    // start default file browser:
+    QProcess p;
+    QString cmd = QString("xdg-open %1").arg(fileInfo.canonicalPath());
+    p.startDetached(cmd);
+#endif
+
+    return true;
 }

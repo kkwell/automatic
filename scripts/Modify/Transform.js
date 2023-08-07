@@ -53,7 +53,7 @@ Transform.prototype.verifySelection = function() {
 };
 
 /**
- * Implemetation of getOperation for tools that operate on a selection and
+ * Implementation of getOperation for tools that operate on a selection and
  * do something with every entity in the selection (e.g. move, rotate, ...).
  * The callback function 'this.transform(entity, copy number)' is called for
  * every selected entity.
@@ -84,12 +84,12 @@ Transform.prototype.getOperation = function(preview, selectResult, cache) {
 
         this.clearCache();
 
-        var docTrans = new RDocument(new RMemoryStorage(), new RSpatialIndexNavel());
+        var docTrans = new RDocument(new RMemoryStorage(), new RSpatialIndexSimple());
         docTrans.copyVariablesFrom(doc);
         this.diTrans = new RDocumentInterface(docTrans);
         this.diTrans.setNotifyListeners(false);
 
-        // copy seletion to cache document:
+        // copy selection to cache document:
         var copyOp = new RCopyOperation(new RVector(0,0), doc);
         copyOp.setClear(false);
         this.diTrans.applyOperation(copyOp);
@@ -117,11 +117,16 @@ Transform.prototype.getOperation = function(preview, selectResult, cache) {
                 break;
             }
 
+//            if (i%1000===0) {
+//                qDebug("progress: %1%".arg(i/ids.length*100));
+//            }
+
             id = ids[i];
             entityP = document.queryEntity(id);
             if (isNull(entityP)) {
                 continue;
             }
+            //qDebug("%1 / %2".arg(i).arg(ids.length-1));
 
             // entity is valid as long as entityP is valid:
             //entity = entityP.data();
@@ -134,12 +139,20 @@ Transform.prototype.getOperation = function(preview, selectResult, cache) {
                 }
             }
 
+            var f = RAddObjectsOperation.NoFlags;
+            if (!this.useCurrentAttributes) {
+                f = RAddObjectsOperation.UseAttributes | RAddObjectsOperation.GeometryOnly;
+            }
+
             if (cache) {
                 op.deleteObject(entity);
-                this.transform(entity, k, op, preview, true);
+                this.transform(entity, k, op, preview, f | RAddObjectsOperation.ForceNew);
             }
             else {
-                this.transform(entity, k, op, preview, copies>0);
+                if (copies>0) {
+                    f = f | RAddObjectsOperation.ForceNew;
+                }
+                this.transform(entity, k, op, preview, f);
             }
         }
         op.endCycle();
@@ -165,7 +178,7 @@ Transform.prototype.getOperation = function(preview, selectResult, cache) {
 Transform.prototype.clearCache = function() {
     // clear cache:
     if (!isNull(this.diTrans)) {
-        this.diTrans.destroy();
+        destr(this.diTrans);
     }
 
     this.diTrans = undefined;

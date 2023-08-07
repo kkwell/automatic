@@ -38,10 +38,37 @@ DirectoryList.prototype.doInit = function(pageWidget, listWidgetName, fileDlgTit
 
     var btAdd = widgets["btAdd"];
     btAdd.clicked.connect(this, function() {
+        // getExistingDirectory is broken in KDE when it uses the native dialog.
+        /*
         var dir = QFileDialog.getExistingDirectory(this, fileDlgTitle);
         if (dir.length===0) {
             return;
         }
+        */
+
+        var fileDialog = new QFileDialog(pageWidget, fileDlgTitle, "", "");
+        fileDialog.setOption(QFileDialog.DontUseNativeDialog, getDontUseNativeDialog());
+
+        fileDialog.fileMode = QFileDialog.Directory;
+        fileDialog.setOption(QFileDialog.ShowDirsOnly, true);
+        fileDialog.setOption(QFileDialog.DontResolveSymlinks, true);
+        if (!isNull(QFileDialog.DontUseCustomDirectoryIcons)) {
+            fileDialog.setOption(QFileDialog.DontUseCustomDirectoryIcons, true);
+        }
+
+        if (!fileDialog.exec()) {
+            destr(fileDialog);
+            EAction.activateMainWindow();
+            return;
+        }
+
+        var files = fileDialog.selectedFiles();
+        if (files.length===0) {
+            destr(fileDialog);
+            EAction.activateMainWindow();
+            return;
+        }
+        var dir = files[0];
 
         var found = false;
         for ( var i = 0; i < listWidget.count; ++i) {
@@ -54,7 +81,7 @@ DirectoryList.prototype.doInit = function(pageWidget, listWidgetName, fileDlgTit
         if (!found) {
             listWidget.addItem(dir);
         } else {
-            var text = qsTr("The folder\n'%1'\nis already in the list.").arg(dir);
+            var text = qsTr("The folder\n\"%1\"\nis already in the list.").arg(dir);
             var appWin = EAction.getMainWindow();
             QMessageBox.information(appWin, qsTr("Folder not added"), text);
         }

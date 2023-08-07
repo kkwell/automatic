@@ -9,6 +9,8 @@
         
                 #include "RBox.h"
             
+                #include "RLine.h"
+            
                 #include "RPolyline.h"
             
             
@@ -140,7 +142,11 @@
             
             REcmaHelper::registerFunction(&engine, proto, getCenterPoints, "getCenterPoints");
             
+            REcmaHelper::registerFunction(&engine, proto, getArcReferencePoints, "getArcReferencePoints");
+            
             REcmaHelper::registerFunction(&engine, proto, getPointsWithDistanceToEnd, "getPointsWithDistanceToEnd");
+            
+            REcmaHelper::registerFunction(&engine, proto, getPointCloud, "getPointCloud");
             
             REcmaHelper::registerFunction(&engine, proto, getVectorTo, "getVectorTo");
             
@@ -2208,6 +2214,55 @@
             return result;
         }
          QScriptValue
+        REcmaSharedPointerArc::getArcReferencePoints
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerArc::getArcReferencePoints", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerArc::getArcReferencePoints";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RArc* self = 
+                        getSelf("getArcReferencePoints", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getArcReferencePoints();
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RArc.getArcReferencePoints().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerArc::getArcReferencePoints", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaSharedPointerArc::getPointsWithDistanceToEnd
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -2310,6 +2365,66 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerArc::getPointsWithDistanceToEnd", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerArc::getPointCloud
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerArc::getPointCloud", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerArc::getPointCloud";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RArc* self = 
+                        getSelf("getPointCloud", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getPointCloud(a0);
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RArc.getPointCloud().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerArc::getPointCloud", context, engine);
             return result;
         }
          QScriptValue
@@ -4191,6 +4306,58 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RArc: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->moveStartPoint(a0
+        ,
+    a1);
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RArc.moveStartPoint().",
                    context);
@@ -4254,6 +4421,58 @@
     // return type 'void'
     
                self->moveEndPoint(a0);
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RArc: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->moveEndPoint(a0
+        ,
+    a1);
     } else
 
 
@@ -5731,6 +5950,51 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    double
+                    a1 =
+                    (double)
+                    
+                    context->argument( 1 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RPolyline'
+    RPolyline cppResult =
+        
+               self->approximateWithLines(a0
+        ,
+    a1);
+        // return type: RPolyline
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RArc.approximateWithLines().",
                    context);
@@ -5783,6 +6047,51 @@
     RPolyline cppResult =
         
                self->approximateWithLinesTan(a0);
+        // return type: RPolyline
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    double
+                    a1 =
+                    (double)
+                    
+                    context->argument( 1 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RPolyline'
+    RPolyline cppResult =
+        
+               self->approximateWithLinesTan(a0
+        ,
+    a1);
         // return type: RPolyline
                 // not standard type nor reference
                 result = qScriptValueFromValue(engine, cppResult);
@@ -6069,7 +6378,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(

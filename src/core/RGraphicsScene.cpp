@@ -143,12 +143,12 @@ bool RGraphicsScene::isPreviewEmpty() {
  * of the scene. This is called if the scene changes fundamentally or when the
  * entities that are affected by an update are not known.
  */
-void RGraphicsScene::regenerate(bool undone) {
+void RGraphicsScene::regenerate(bool undone, bool invisible) {
     if (deleting) {
         return;
     }
 
-    exportEntities(false, undone);
+    exportEntities(false, undone, invisible);
     regenerateViews(true);
 }
 
@@ -169,7 +169,10 @@ void RGraphicsScene::regenerate(QSet<REntity::Id>& affectedEntities, bool update
  * exports the entities again. May be overridden for performance reasons.
  */
 void RGraphicsScene::updateSelectionStatus(QSet<REntity::Id>& affectedEntities, bool updateViews) {
+    // make sure selection status is updated, for example when switching off a layer:
+    setExportInvisible(true);
     exportEntities(affectedEntities, false);
+    setExportInvisible(false);
 
     QSet<REntity::Id>::iterator it;
     for (it=affectedEntities.begin(); it!=affectedEntities.end(); it++) {
@@ -294,6 +297,16 @@ void RGraphicsScene::handlePinchGestureEvent(QPinchGesture& gesture) {
     documentInterface.pinchGestureEvent(gesture);
 }
 
+int RGraphicsScene::countReferencePoints() const {
+    int ret = 0;
+    QMap<REntity::Id, QList<RRefPoint> >::const_iterator it;
+    for (it = referencePoints.begin(); it != referencePoints.end(); ++it) {
+        const QList<RRefPoint>& list = it.value();
+        ret+=list.length();
+    }
+    return ret;
+}
+
 /**
  * Adds the reference points of the entity that is currently being exported
  * to the internal \c referencePoints map.
@@ -309,26 +322,97 @@ void RGraphicsScene::exportReferencePoints() {
         return;
     }
 
-    // remove all previous reference points of this entity:
-    referencePoints.remove(entity->getId());
-
     if (entity->isUndone() || entity->isSelected()==false) {
+        // remove all previous reference points of this entity:
+        referencePoints.remove(entity->getId());
         return;
     }
 
+    QList<RRefPoint> oldRps = referencePoints.value(entity->getId());
+    //qDebug() << "oldRps:" << oldRps;
+
+    // remove all previous reference points of this entity:
+    referencePoints.remove(entity->getId());
+
+    //qDebug() << "exportReferencePoints: " << entity->getId();
+    //RDebug::printBacktrace();
+
     // get list of reference points:
-    QList<RRefPoint> ref = entity->getReferencePoints(getProjectionRenderingHint());
+    QList<RRefPoint> rps = entity->getReferencePoints(getProjectionRenderingHint());
+    //qDebug() << "rps:" << rps;
+
+    referencePoints.insert(entity->getId(), QList<RRefPoint>());
 
     // export reference points:
-    QList<RRefPoint>::iterator it;
-    for (it=ref.begin(); it!=ref.end(); ++it) {
-        referencePoints.insert(entity->getId(), *it);
+    for (int i=0; i<rps.length(); i++) {
+        RRefPoint rp = rps[i];
+        if (i<oldRps.length()) {
+            RRefPoint oldRp = oldRps[i];
+            if (RVector(oldRp).equalsFuzzy(RVector(rp))) {
+                // reuse old reference point (might be selected):
+                //qDebug() << "reuse old rp: " << oldRp;
+                referencePoints[entity->getId()].append(oldRp);
+                continue;
+            }
+            else {
+                if (oldRp.isSelected()) {
+                    rp.setSelected(true);
+                }
+            }
+        }
+
+        referencePoints[entity->getId()].append(rp);
     }
+}
+
+void RGraphicsScene::selectReferencePoints(const RBox& box, bool add) {
+    QMap<REntity::Id, QList<RRefPoint> >::iterator it;
+    for (it=referencePoints.begin(); it!=referencePoints.end(); ++it) {
+        QList<RRefPoint>& list = it.value();
+        for (int i=0; i<list.length(); i++) {
+            if (box.contains(list[i])) {
+                list[i].setSelected(true);
+            }
+            else if (!add) {
+                list[i].setSelected(false);
+            }
+        }
+
+    }
+
+//    QMultiMap<REntity::Id, RRefPoint>::iterator it;
+//    for (it=referencePoints.begin(); it!=referencePoints.end(); ++it) {
+//        if (box.contains(it.value())) {
+//            it.value().setSelected(true);
+//        }
+//        else if (!add) {
+//            it.value().setSelected(false);
+//        }
+//    }
+}
+
+bool RGraphicsScene::hasSelectedReferencePoints() const {
+    QMap<REntity::Id, QList<RRefPoint> >::const_iterator it;
+    for (it=referencePoints.constBegin(); it!=referencePoints.constEnd(); ++it) {
+        const QList<RRefPoint>& list = it.value();
+        for (int i=0; i<list.length(); i++) {
+            if (list[i].isSelected()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void RGraphicsScene::exportCurrentEntity(bool preview, bool forceSelected) {
     RExporter::exportCurrentEntity(preview, forceSelected);
-    exportReferencePoints();
+
+    if (document->countSelectedEntities()<RSettings::getMaxReferencePointEntities()) {
+        exportReferencePoints();
+    }
+    else {
+        referencePoints.clear();
+    }
 }
 
 void RGraphicsScene::unexportEntity(REntity::Id entityId) {
@@ -336,6 +420,10 @@ void RGraphicsScene::unexportEntity(REntity::Id entityId) {
     referencePoints.remove(entityId);
 }
 
+/**
+ * Highlights the reference point at the given position. This is typically
+ * used to highlight reference point when the mouse hovers over them.
+ */
 void RGraphicsScene::highlightReferencePoint(const RRefPoint& position) {
     highlightedReferencePoint = position;
 }

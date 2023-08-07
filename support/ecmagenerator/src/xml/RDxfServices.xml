@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns:rs="http://www.ribbonsoft.com">
+  <class_decl name="RDocument" />
   <class name="RDxfServices"
   xsi:noNamespaceSchemaLocation="../class.xsd" isCopyable="true"
   hasShell="false" sharedPointerSupport="false" isQObject="false"
@@ -18,6 +19,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     <method name="reset" cppName="reset" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
+    </method>
+    <method name="getSafeBlockName" cppName="getSafeBlockName"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QString" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString"
+        name="blockName" isConst="false" />
+      </variant>
     </method>
     <method name="fixBlockName" cppName="fixBlockName"
     specifier="public" isStatic="false" isVirtual="false"
@@ -192,17 +201,6 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
-    <method name="getCodec" cppName="getCodec" specifier="public"
-    isStatic="false" isVirtual="false" isScriptOverwritable="true">
-      <variant returnType="QTextCodec *" isPureVirtual="false" />
-    </method>
-    <method name="setCodec" cppName="setCodec" specifier="public"
-    isStatic="false" isVirtual="false" isScriptOverwritable="true">
-      <variant returnType="void" isPureVirtual="false">
-        <arg type="QTextCodec *" typeName="QTextCodec *"
-        name="codec" isConst="false" />
-      </variant>
-    </method>
     <method name="numberToColor24" cppName="numberToColor24"
     specifier="public" isStatic="true" isVirtual="false"
     isScriptOverwritable="true">
@@ -301,6 +299,32 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="void" isPureVirtual="false">
         <arg type="RLinetypePattern &amp;"
         typeName="RLinetypePattern" name="pattern"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="getFileQCADVersion" cppName="getFileQCADVersion"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="int" isPureVirtual="false">
+        <arg type="RDocument &amp;" typeName="RDocument" name="doc"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="initAci" cppName="initAci" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false" />
+    </method>
+    <method name="getAci" cppName="getAci" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="int" isPureVirtual="false">
+        <arg type="RColor &amp;" typeName="RColor" name="col"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="getColor" cppName="getColor" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RColor" isPureVirtual="false">
+        <arg type="int" typeName="int" name="index"
         isConst="false" />
       </variant>
     </method>

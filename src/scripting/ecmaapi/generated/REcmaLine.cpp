@@ -110,6 +110,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, getPointsWithDistanceToEnd, "getPointsWithDistanceToEnd");
             
+            REcmaHelper::registerFunction(&engine, proto, getPointCloud, "getPointCloud");
+            
             REcmaHelper::registerFunction(&engine, proto, getAngleAt, "getAngleAt");
             
             REcmaHelper::registerFunction(&engine, proto, getVectorTo, "getVectorTo");
@@ -131,6 +133,8 @@
             REcmaHelper::registerFunction(&engine, proto, setLength, "setLength");
             
             REcmaHelper::registerFunction(&engine, proto, setAngle, "setAngle");
+            
+            REcmaHelper::registerFunction(&engine, proto, isParallel, "isParallel");
             
             REcmaHelper::registerFunction(&engine, proto, isVertical, "isVertical");
             
@@ -1243,6 +1247,66 @@
             return result;
         }
          QScriptValue
+        REcmaLine::getPointCloud
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaLine::getPointCloud", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaLine::getPointCloud";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RLine* self = 
+                        getSelf("getPointCloud", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getPointCloud(a0);
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLine.getPointCloud().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaLine::getPointCloud", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaLine::getAngleAt
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -1973,6 +2037,46 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setLength(a0
+        ,
+    a1);
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RLine.setLength().",
                    context);
@@ -2033,6 +2137,78 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaLine::setAngle", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaLine::isParallel
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaLine::isParallel", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaLine::isParallel";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RLine* self = 
+                        getSelf("isParallel", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RLine */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RLine*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RLine*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RLine: Argument 0 is not of type RLine.",
+                               context);                    
+                    }
+                    RLine 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->isParallel(a0);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLine.isParallel().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaLine::isParallel", context, engine);
             return result;
         }
          QScriptValue
@@ -4100,7 +4276,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(

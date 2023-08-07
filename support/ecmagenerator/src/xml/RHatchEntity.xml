@@ -20,6 +20,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="getRtti" cppName="getRtti" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RS::EntityType" isPureVirtual="false" />
+    </method>
     <method name="getStaticPropertyTypeIds"
     cppName="getStaticPropertyTypeIds" specifier="public"
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
@@ -47,8 +51,16 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="RPattern" isPureVirtual="false" />
     </method>
-    <method name="setProperty" cppName="setProperty"
+    <method name="setCustomPattern" cppName="setCustomPattern"
     specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RPattern &amp;" typeName="RPattern" name="p"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="setProperty" cppName="setProperty"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
         <arg type="RPropertyTypeId" typeName="RPropertyTypeId"
@@ -85,7 +97,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       </variant>
     </method>
     <method name="getProperty" cppName="getProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="QPair &lt; QVariant , RPropertyAttributes &gt;"
       isPureVirtual="false">
@@ -95,6 +107,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="humanReadable"
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="noAttributes"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
@@ -210,6 +224,18 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="true" />
       </variant>
     </method>
+    <method name="getTransparency" cppName="getTransparency"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="int" isPureVirtual="false" />
+    </method>
+    <method name="setTransparency" cppName="setTransparency"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="int" typeName="int" name="t" isConst="false" />
+      </variant>
+    </method>
     <method name="clearCustomPattern" cppName="clearCustomPattern"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -230,6 +256,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="QList &lt; RPolyline &gt;"
       isPureVirtual="false">
         <arg type="double" typeName="double" name="segmentLength"
+        hasDefault="true" default="RDEFAULT_MIN1"
         isConst="false" />
       </variant>
     </method>
@@ -243,6 +270,9 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="segment"
         hasDefault="true" default="false" isConst="false" />
+        <arg type="QList &lt; RObject::Id &gt; *"
+        typeName="QList &lt; RObject::Id &gt; *" name="entityIds"
+        hasDefault="true" default="NULL" isConst="false" />
       </variant>
     </method>
     <method name="getExploded" cppName="getExploded"
@@ -250,6 +280,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="QList &lt; QSharedPointer &lt; RShape &gt; &gt;"
       isPureVirtual="false" />
+    </method>
+    <method name="setViewportContext" cppName="setViewportContext"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RViewportData &amp;" typeName="RViewportData"
+        name="origin" isConst="true" />
+      </variant>
     </method>
     <method name="print" cppName="print" specifier="protected"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
@@ -263,6 +301,8 @@ xmlns:rs="http://www.ribbonsoft.com">
     <property name="PropertyHandle" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyProtected" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyWorkingSet" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyType" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
@@ -284,6 +324,8 @@ xmlns:rs="http://www.ribbonsoft.com">
     isConst="false" isStatic="true" />
     <property name="PropertySolid" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
+    <property name="PropertyTransparency" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
     <property name="PropertyPatternName" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyEntityPattern" type="RPropertyTypeId"
@@ -301,6 +343,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     <property name="PropertyVertexNY" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyVertexNZ" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyLength" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyTotalLength" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyArea" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyTotalArea" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
   </class>
 </unit>

@@ -18,7 +18,7 @@
  */
 
 include("scripts/File/SvgImport/SvgImport.js");
-include("../BlockInsert.js");
+include("scripts/Block/BlockInsert.js");
 
 /**
  * \class InsertBlockItem
@@ -69,7 +69,7 @@ InsertBlockItem.prototype.beginEvent = function() {
     // part library item is loaded into this document:
     if (isNull(this.diItem)) {
         var ms = new RMemoryStorage();
-        var si = new RSpatialIndexNavel();
+        var si = createSpatialIndex();
         this.docItem = new RDocument(ms, si);
         this.diItem = new RDocumentInterface(this.docItem);
         this.diItem.setNotifyListeners(false);
@@ -125,7 +125,7 @@ InsertBlockItem.prototype.beginEvent = function() {
         while (isNull(this.blockName) || doc.hasBlock(this.blockName)) {
             this.blockName = 'block_' + c++;
         }
-        EAction.handleUserMessage(qsTr("Adjusted invalid block name to '%1'").arg(this.blockName));
+        EAction.handleUserMessage(qsTr("Adjusted invalid block name to \"%1\"").arg(this.blockName));
     }
 
     if (this.docItem.hasBlock(this.blockName)) {
@@ -141,6 +141,7 @@ InsertBlockItem.prototype.beginEvent = function() {
     var first = true;
     var optionsToolBar = EAction.getOptionsToolBar();
     var tagCombo = optionsToolBar.findChild("AttributeTag");
+    var tags = {};
     if (!isNull(tagCombo)) {
         var ids = this.docItem.queryAllEntities();
         for (i=0; i<ids.length; i++) {
@@ -159,7 +160,13 @@ InsertBlockItem.prototype.beginEvent = function() {
             var prompt = attDef.getPrompt();
             var defaultValue = attDef.getEscapedText();
 
+            if (tags[tag]===true) {
+                // tag already added:
+                continue;
+            }
+
             tagCombo.addItem(prompt, [tag, defaultValue]);
+            tags[tag] = true;
         }
     }
 
@@ -196,7 +203,7 @@ InsertBlockItem.prototype.setState = function(state) {
 
 InsertBlockItem.prototype.finishEvent = function() {
     if (!isNull(this.diItem)) {
-        this.diItem.destroy();
+        destr(this.diItem);
     }
     BlockInsert.prototype.finishEvent.call(this);
 };
@@ -221,6 +228,7 @@ InsertBlockItem.prototype.pickCoordinate = function(event, preview) {
                 var t = di.applyOperation(op);
                 prev = t.isPreview();
                 di.clearPreview();
+                di.setRelativeZero(this.offset);
                 di.repaintViews();
             }
 
@@ -297,20 +305,20 @@ InsertBlockItem.prototype.getOperation = function(preview) {
 };
 
 InsertBlockItem.prototype.slotScaleChanged = function(value) {
-    var scale = RMath.eval(value);
-    if (RMath.getError() === "") {
-        this.scale = scale;
-    } else {
+    if (isNumber(value)) {
+        this.scale = value;
+    }
+    else {
         this.scale = 1.0;
     }
     this.updatePreview(true);
 };
 
 InsertBlockItem.prototype.slotRotationChanged = function(value) {
-    var rotation = RMath.eval(value);
-    if (RMath.getError() === "") {
-        this.rotation = RMath.deg2rad(rotation);
-    } else {
+    if (isNumber(value)) {
+        this.rotation = value;
+    }
+    else {
         this.rotation = 0.0;
     }
     this.updatePreview(true);

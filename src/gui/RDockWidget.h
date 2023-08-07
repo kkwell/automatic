@@ -27,6 +27,8 @@
 
 #include "RFlowLayout.h"
 
+#define RDEFAULT_QT_WINDOWFLAGS Qt::WindowFlags()
+
 /**
  * \scriptable
  * \ingroup gui
@@ -36,8 +38,8 @@ class QCADGUI_EXPORT RDockWidget: public QDockWidget {
 Q_OBJECT
 
 public:
-    RDockWidget(const QString& title, QWidget* parent = NULL, Qt::WindowFlags flags = 0);
-    RDockWidget(QWidget* parent = NULL, Qt::WindowFlags flags = 0);
+    RDockWidget(const QString& title, QWidget* parent = NULL, Qt::WindowFlags flags = RDEFAULT_QT_WINDOWFLAGS);
+    RDockWidget(QWidget* parent = NULL, Qt::WindowFlags flags = RDEFAULT_QT_WINDOWFLAGS);
 
 signals:
     void shown();
@@ -47,7 +49,7 @@ protected:
     virtual void showEvent(QShowEvent* event);
     virtual void hideEvent(QHideEvent* event);
 #ifdef Q_OS_MAC
-#if QT_VERSION >= 0x050601 && QT_VERSION <= 0x050602
+#if (QT_VERSION >= 0x050601 && QT_VERSION <= 0x050602) || QT_VERSION >= 0x050F00
     virtual void closeEvent(QCloseEvent* event);
 #endif
 #endif
@@ -56,7 +58,7 @@ protected:
     virtual bool event(QEvent* e);
 
 private:
-    RFlowLayout* layout;
+    RFlowLayout* flowLayout;
 };
 
 Q_DECLARE_METATYPE(RDockWidget*)

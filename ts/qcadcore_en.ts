@@ -112,7 +112,7 @@
 <context>
     <name>RColor</name>
     <message>
-        <location filename="../src/core/RColor.cpp" line="+287"/>
+        <location filename="../src/core/RColor.cpp" line="+340"/>
         <source>By Layer</source>
         <translation>By Layer</translation>
     </message>
@@ -207,7 +207,7 @@
         <translation>White</translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+2"/>
         <source>Others...</source>
         <translation>Others...</translation>
     </message>
@@ -215,7 +215,7 @@
 <context>
     <name>RDocumentVariables</name>
     <message>
-        <location filename="../src/core/RDocumentVariables.cpp" line="+45"/>
+        <location filename="../src/core/RDocumentVariables.cpp" line="+48"/>
         <source>Current Layer ID</source>
         <translation>Current Layer ID</translation>
     </message>
@@ -239,8 +239,9 @@
     <name>REntity</name>
     <message>
         <location filename="../src/core/RBlock.cpp" line="+63"/>
-        <location filename="../src/core/RLayer.cpp" line="+90"/>
-        <location filename="../src/core/RLayout.cpp" line="+80"/>
+        <location filename="../src/core/RLayer.cpp" line="+93"/>
+        <location filename="../src/core/RLayerState.cpp" line="+46"/>
+        <location filename="../src/core/RLayout.cpp" line="+82"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
@@ -263,14 +264,14 @@
     </message>
     <message>
         <location line="-2"/>
-        <location filename="../src/core/RBlockReferenceEntity.cpp" line="+93"/>
+        <location filename="../src/core/RBlockReferenceEntity.cpp" line="+95"/>
         <location line="+3"/>
         <location filename="../src/core/RLayout.cpp" line="+2"/>
         <location line="+3"/>
         <location line="+3"/>
         <location line="+3"/>
         <location line="+3"/>
-        <location filename="../src/core/RTextBasedEntity.cpp" line="+72"/>
+        <location filename="../src/core/RTextBasedEntity.cpp" line="+75"/>
         <location filename="../src/core/RViewportEntity.cpp" line="+73"/>
         <location line="+8"/>
         <location line="+2"/>
@@ -314,7 +315,7 @@
         <translation>Layout</translation>
     </message>
     <message>
-        <location filename="../src/core/RBlockReferenceData.cpp" line="+627"/>
+        <location filename="../src/core/RBlockReferenceData.cpp" line="+856"/>
         <source>Circular (recursive) block referencing detected:</source>
         <translation>Circular (recursive) block referencing detected:</translation>
     </message>
@@ -324,9 +325,14 @@
         <translation>Block name:</translation>
     </message>
     <message>
-        <location filename="../src/core/RBlockReferenceEntity.cpp" line="-6"/>
+        <location filename="../src/core/REntity.cpp" line="+97"/>
         <source>Block</source>
         <translation>Block</translation>
+    </message>
+    <message>
+        <location filename="../src/core/RBlockReferenceEntity.cpp" line="-6"/>
+        <source>Referenced Block</source>
+        <translation>Referenced Block</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -372,18 +378,18 @@
         <translation>Row Spacing</translation>
     </message>
     <message>
-        <location filename="../src/core/REntity.cpp" line="+86"/>
-        <location filename="../src/core/RObject.cpp" line="+62"/>
+        <location line="+3"/>
+        <source>Attributes</source>
+        <translation>Attributes</translation>
+    </message>
+    <message>
+        <location filename="../src/core/REntity.cpp" line="-1"/>
+        <location filename="../src/core/RObject.cpp" line="+69"/>
         <source>Type</source>
         <translation>Type</translation>
     </message>
     <message>
-        <location line="+1"/>
-        <source>Block ID</source>
-        <translation>Block ID</translation>
-    </message>
-    <message>
-        <location line="+1"/>
+        <location line="+2"/>
         <source>Layer</source>
         <translation>Layer</translation>
     </message>
@@ -419,6 +425,11 @@
         <location line="+1"/>
         <source>Draw Order</source>
         <translation>Draw Order</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Parent Id</source>
+        <translation>Parent Id</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -549,7 +560,7 @@
     </message>
     <message>
         <location filename="../src/core/RObject.cpp" line="-1"/>
-        <location filename="../src/core/RPropertyTypeId.cpp" line="+108"/>
+        <location filename="../src/core/RPropertyTypeId.cpp" line="+161"/>
         <source>Custom</source>
         <translation>Custom</translation>
     </message>
@@ -562,6 +573,21 @@
         <location line="+1"/>
         <source>Protected</source>
         <translation>Protected</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Selected</source>
+        <translation>Selected</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Object Invisible</source>
+        <translation>Object invisible</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Working Set</source>
+        <translation>Working Set</translation>
     </message>
     <message>
         <location filename="../src/core/RTextBasedEntity.cpp" line="-3"/>
@@ -594,6 +620,11 @@
         <location line="+1"/>
         <source>Text Height</source>
         <translation>Text Height</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text Width</source>
+        <translation>Text Width</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -637,6 +668,16 @@
         <translation>Vertical</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>Backward</source>
+        <translation>Backward</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Upside Down</source>
+        <translation>Upside Down</translation>
+    </message>
+    <message>
         <location filename="../src/core/RViewportEntity.cpp" line="+2"/>
         <source>Rotation</source>
         <translation>Rotation</translation>
@@ -664,11 +705,131 @@
         <source>Overall</source>
         <translation>Overall</translation>
     </message>
+    <message>
+        <location filename="../src/core/RDimStyle.cpp" line="+71"/>
+        <source>Style</source>
+        <translation>Style</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Linear measurement factor</source>
+        <translation>Linear measurement factor</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text height</source>
+        <translation>Text height</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dimension line gap</source>
+        <translation>Dimension line gap</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow size</source>
+        <translation>Arrow size</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dimension line increment</source>
+        <translation>Dimension line increment</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Extension line extension</source>
+        <translation>Extension line extension</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Extension line offset</source>
+        <translation>Extension line offset</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text position vertical</source>
+        <translation>Text position vertical</translation>
+    </message>
+    <message>
+        <location line="-8"/>
+        <source>Overall scale</source>
+        <translation>Overall scale</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Text horizontal</source>
+        <translation>Text horizontal</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Tick size</source>
+        <translation>Tick size</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Linear format</source>
+        <translation>Linear format</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Decimal places</source>
+        <translation>Decimal places</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Decimal separator</source>
+        <translation>Decimal separator</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Zero suppression</source>
+        <translation>Zero suppression</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular format</source>
+        <translation>Angular format</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular decimal places</source>
+        <translation>Angular decimal places</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular zero suppression</source>
+        <translation>Angular zero suppression</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Architectur tick</source>
+        <translation>Architectur tick</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text color</source>
+        <translation>Text color</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block</source>
+        <translation>Arrow block</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block 1</source>
+        <translation>Arrow block 1</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block 2</source>
+        <translation>Arrow block 2</translation>
+    </message>
 </context>
 <context>
     <name>RGuiAction</name>
     <message>
-        <location filename="../src/core/RGuiAction.cpp" line="+184"/>
+        <location filename="../src/core/RGuiAction.cpp" line="+202"/>
         <source>Requires selection</source>
         <translation>Requires selection</translation>
     </message>
@@ -676,7 +837,7 @@
 <context>
     <name>RLinetype</name>
     <message>
-        <location filename="../src/core/RLinetype.cpp" line="+48"/>
+        <location filename="../src/core/RLinetype.cpp" line="+54"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
@@ -699,7 +860,7 @@
 <context>
     <name>RLinetypePattern</name>
     <message>
-        <location filename="../src/core/RLinetypePattern.cpp" line="+856"/>
+        <location filename="../src/core/RLinetypePattern.cpp" line="+912"/>
         <source>By Layer</source>
         <translation>By Layer</translation>
     </message>
@@ -881,6 +1042,11 @@
     </message>
     <message>
         <location line="+2"/>
+        <source>Water</source>
+        <translation>Water</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>Drainage</source>
         <translation>Drainage</translation>
     </message>
@@ -888,6 +1054,41 @@
         <location line="+1"/>
         <source>Drainage Reversed</source>
         <translation>Drainage Reversed</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Communication</source>
+        <translation>Communication</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Electric</source>
+        <translation>Electric</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Low Voltage</source>
+        <translation>Low Voltage</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>High Voltage</source>
+        <translation>High Voltage</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Overhead Power</source>
+        <translation>Overhead Power</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Foul</source>
+        <translation>Foul</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Foul Rising</source>
+        <translation>Foul Rising</translation>
     </message>
 </context>
 <context>

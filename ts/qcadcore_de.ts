@@ -108,15 +108,11 @@
         <source>Parsec</source>
         <translation>Parsec</translation>
     </message>
-    <message>
-        <source>Plu</source>
-        <translation type="obsolete">Plu</translation>
-    </message>
 </context>
 <context>
     <name>RColor</name>
     <message>
-        <location filename="../src/core/RColor.cpp" line="+287"/>
+        <location filename="../src/core/RColor.cpp" line="+340"/>
         <source>By Layer</source>
         <translation>Von Layer</translation>
     </message>
@@ -211,7 +207,7 @@
         <translation>Hellgrau</translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+3"/>
         <source>Others...</source>
         <translation>Andere...</translation>
     </message>
@@ -219,7 +215,7 @@
 <context>
     <name>RDocumentVariables</name>
     <message>
-        <location filename="../src/core/RDocumentVariables.cpp" line="+45"/>
+        <location filename="../src/core/RDocumentVariables.cpp" line="+48"/>
         <source>Current Layer ID</source>
         <translation>ID des aktuellen Layers</translation>
     </message>
@@ -242,24 +238,25 @@
 <context>
     <name>REntity</name>
     <message>
-        <location filename="../src/core/RBlockReferenceEntity.cpp" line="+92"/>
+        <location filename="../src/core/REntity.cpp" line="+97"/>
         <source>Block</source>
         <translation>Block</translation>
     </message>
     <message>
+        <location filename="../src/core/RBlockReferenceEntity.cpp" line="+94"/>
         <source>Referenced Block</source>
-        <translation type="obsolete">Referenzierter Block</translation>
+        <translation>Referenzierter Block</translation>
     </message>
     <message>
         <location filename="../src/core/RBlock.cpp" line="+66"/>
         <location filename="../src/core/RBlockReferenceEntity.cpp" line="+1"/>
         <location line="+3"/>
-        <location filename="../src/core/RLayout.cpp" line="+82"/>
+        <location filename="../src/core/RLayout.cpp" line="+84"/>
         <location line="+3"/>
         <location line="+3"/>
         <location line="+3"/>
         <location line="+3"/>
-        <location filename="../src/core/RTextBasedEntity.cpp" line="+72"/>
+        <location filename="../src/core/RTextBasedEntity.cpp" line="+75"/>
         <location filename="../src/core/RViewportEntity.cpp" line="+73"/>
         <location line="+8"/>
         <location line="+2"/>
@@ -358,24 +355,24 @@
         <translation>Reihenabstand</translation>
     </message>
     <message>
-        <location filename="../src/core/REntity.cpp" line="+86"/>
-        <location filename="../src/core/RObject.cpp" line="+62"/>
+        <location line="+3"/>
+        <source>Attributes</source>
+        <translation>Attribute</translation>
+    </message>
+    <message>
+        <location filename="../src/core/REntity.cpp" line="-1"/>
+        <location filename="../src/core/RObject.cpp" line="+69"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location line="+1"/>
-        <source>Block ID</source>
-        <translation>Block ID</translation>
-    </message>
-    <message>
-        <location line="+1"/>
+        <location line="+2"/>
         <source>Layer</source>
         <translation>Layer</translation>
     </message>
     <message>
         <location line="+1"/>
-        <location filename="../src/core/RLayer.cpp" line="+99"/>
+        <location filename="../src/core/RLayer.cpp" line="+102"/>
         <source>Linetype</source>
         <translation>Linientyp</translation>
     </message>
@@ -388,7 +385,7 @@
         <location line="+1"/>
         <location filename="../src/core/RLayer.cpp" line="+1"/>
         <source>Lineweight</source>
-        <translation>Linienstärke</translation>
+        <translation>Linienbreite</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -405,6 +402,11 @@
         <location line="+1"/>
         <source>Draw Order</source>
         <translation>Reihenfolge</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Parent Id</source>
+        <translation>Parent Id</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -440,7 +442,7 @@
     </message>
     <message>
         <location filename="../src/core/RObject.cpp" line="-1"/>
-        <location filename="../src/core/RPropertyTypeId.cpp" line="+108"/>
+        <location filename="../src/core/RPropertyTypeId.cpp" line="+161"/>
         <source>Custom</source>
         <translation>Benutzerdefiniert</translation>
     </message>
@@ -453,6 +455,21 @@
         <location line="+1"/>
         <source>Protected</source>
         <translation>Geschützt</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Selected</source>
+        <translation>Ausgewählt</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Object Invisible</source>
+        <translation>Objekt unsichtbar</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Working Set</source>
+        <translation>Arbeitsset</translation>
     </message>
     <message>
         <location filename="../src/core/REntity.cpp" line="+2"/>
@@ -508,6 +525,11 @@
     </message>
     <message>
         <location line="+1"/>
+        <source>Text Width</source>
+        <translation>Textbreite</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>Text Angle</source>
         <translation>Textwinkel</translation>
     </message>
@@ -548,6 +570,16 @@
         <translation>Vertikal</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>Backward</source>
+        <translation>Rückwärts</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Upside Down</source>
+        <translation>Auf dem Kopf</translation>
+    </message>
+    <message>
         <location filename="../src/core/RViewportEntity.cpp" line="+2"/>
         <source>Rotation</source>
         <translation>Rotation</translation>
@@ -578,6 +610,7 @@
     <message>
         <location filename="../src/core/RBlock.cpp" line="-6"/>
         <location filename="../src/core/RLayer.cpp" line="-8"/>
+        <location filename="../src/core/RLayerState.cpp" line="+46"/>
         <location filename="../src/core/RLayout.cpp" line="-24"/>
         <source>Name</source>
         <translation>Name</translation>
@@ -663,15 +696,7 @@
         <translation>Max Ausmass</translation>
     </message>
     <message>
-        <source>Plot Margins</source>
-        <translation type="obsolete">Plot Ränder</translation>
-    </message>
-    <message>
-        <source>Plot Paper Size</source>
-        <translation type="obsolete">Plot Papiergrösse</translation>
-    </message>
-    <message>
-        <location filename="../src/core/RBlockReferenceData.cpp" line="+627"/>
+        <location filename="../src/core/RBlockReferenceData.cpp" line="+856"/>
         <source>Circular (recursive) block referencing detected:</source>
         <translation>Circuläre (rekursive) Blockreferenzierung detektiert:</translation>
     </message>
@@ -680,144 +705,139 @@
         <source>Block name:</source>
         <translation>Blockname:</translation>
     </message>
+    <message>
+        <location filename="../src/core/RDimStyle.cpp" line="+71"/>
+        <source>Style</source>
+        <translation>Stil</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Linear measurement factor</source>
+        <translation>Linearfaktor</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text height</source>
+        <translation>Höhe des Textes</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dimension line gap</source>
+        <translation>Abstand zu Bemassungslinien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow size</source>
+        <translation>Pfeilgrösse</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dimension line increment</source>
+        <translation>Schrittweite der Masslinien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Extension line extension</source>
+        <translation>Verlängerung der Bemassungslinie</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Extension line offset</source>
+        <translation>Begrenzungslinien Abstand</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text position vertical</source>
+        <translation>Vertikale Textposition</translation>
+    </message>
+    <message>
+        <location line="-8"/>
+        <source>Overall scale</source>
+        <translation>Globale Skalierung</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Text horizontal</source>
+        <translation>Text horizontal</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Tick size</source>
+        <translation>Tick-Grösse</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Linear format</source>
+        <translation>Linearformat</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Decimal places</source>
+        <translation>Dezimalstellen</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Decimal separator</source>
+        <translation>Dezimaltrennzeichen</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Zero suppression</source>
+        <translation>Nullunterdrückung</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular format</source>
+        <translation>Winkelformat</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular decimal places</source>
+        <translation>Winkelnachkommastellen</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular zero suppression</source>
+        <translation>Unterdrückung von Nullen Winkelmass</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Architectur tick</source>
+        <translation>Architektur-Tick</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text color</source>
+        <translation>Textfarbe</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block</source>
+        <translation>Pfeilblock</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block 1</source>
+        <translation>Pfeilblock 1</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block 2</source>
+        <translation>Pfeilblock 2</translation>
+    </message>
 </context>
 <context>
     <name>RGuiAction</name>
     <message>
-        <location filename="../src/core/RGuiAction.cpp" line="+184"/>
+        <location filename="../src/core/RGuiAction.cpp" line="+202"/>
         <source>Requires selection</source>
         <translation>Benötigt Selektion</translation>
     </message>
 </context>
 <context>
-    <name>RImporter</name>
-    <message numerus="yes">
-        <source>Grounded %n recursive block reference(s) in blocks: %1</source>
-        <translation type="obsolete">
-            <numerusform>Eine Blockreferenz geerdet in Blöcken: %1</numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-</context>
-<context>
-    <name>RLayer</name>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Name</translation>
-    </message>
-    <message>
-        <source>Frozen</source>
-        <translation type="vanished">Versteckt</translation>
-    </message>
-    <message>
-        <source>Hidden</source>
-        <translation type="vanished">Verdeckt</translation>
-    </message>
-    <message>
-        <source>Locked</source>
-        <translation type="vanished">Gesperrt</translation>
-    </message>
-    <message>
-        <source>Color</source>
-        <translation type="vanished">Farbe</translation>
-    </message>
-    <message>
-        <source>Linetype</source>
-        <translation type="vanished">Linientyp</translation>
-    </message>
-    <message>
-        <source>Lineweight</source>
-        <translation type="vanished">Linienstärke</translation>
-    </message>
-</context>
-<context>
     <name>RLinetype</name>
     <message>
-        <source>By Layer</source>
-        <translation type="vanished">Von Layer</translation>
-    </message>
-    <message>
-        <source>By Block</source>
-        <translation type="vanished">Von Block</translation>
-    </message>
-    <message>
-        <source>Continuous</source>
-        <translation type="vanished">Durchgehend</translation>
-    </message>
-    <message>
-        <source>Dot</source>
-        <translation type="vanished">Gepunktet</translation>
-    </message>
-    <message>
-        <source>Dot (small)</source>
-        <translation type="vanished">Gepunktet (klein)</translation>
-    </message>
-    <message>
-        <source>Dot (large)</source>
-        <translation type="vanished">Gepunktet (gross)</translation>
-    </message>
-    <message>
-        <source>Dash</source>
-        <translation type="vanished">Gestrichelt</translation>
-    </message>
-    <message>
-        <source>Dash (small)</source>
-        <translation type="vanished">Gestrichelt (klein)</translation>
-    </message>
-    <message>
-        <source>Dash (large)</source>
-        <translation type="vanished">Gestrichelt (gross)</translation>
-    </message>
-    <message>
-        <source>Dash Dot</source>
-        <translation type="vanished">Strich Punkt</translation>
-    </message>
-    <message>
-        <source>Dash Dot (small)</source>
-        <translation type="vanished">Strich Punkt (klein)</translation>
-    </message>
-    <message>
-        <source>Dash Dot (large)</source>
-        <translation type="vanished">Strich Punkt (gross)</translation>
-    </message>
-    <message>
-        <source>Divide</source>
-        <translation type="vanished">Trennen</translation>
-    </message>
-    <message>
-        <source>Divide (small)</source>
-        <translation type="vanished">Trennung (klein)</translation>
-    </message>
-    <message>
-        <source>Divide (large)</source>
-        <translation type="vanished">Trennung (gross)</translation>
-    </message>
-    <message>
-        <source>Center</source>
-        <translation type="vanished">Zentrum</translation>
-    </message>
-    <message>
-        <source>Center (small)</source>
-        <translation type="vanished">Mittellinie (klein)</translation>
-    </message>
-    <message>
-        <source>Center (large)</source>
-        <translation type="vanished">Mittellinie (gross)</translation>
-    </message>
-    <message>
-        <source>Border</source>
-        <translation type="vanished">Rahmen</translation>
-    </message>
-    <message>
-        <source>Border (small)</source>
-        <translation type="vanished">Rahmen (klein)</translation>
-    </message>
-    <message>
-        <source>Border (large)</source>
-        <translation type="vanished">Rahmen (gross)</translation>
-    </message>
-    <message>
-        <location filename="../src/core/RLinetype.cpp" line="+48"/>
+        <location filename="../src/core/RLinetype.cpp" line="+54"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
@@ -840,7 +860,7 @@
 <context>
     <name>RLinetypePattern</name>
     <message>
-        <location filename="../src/core/RLinetypePattern.cpp" line="+856"/>
+        <location filename="../src/core/RLinetypePattern.cpp" line="+912"/>
         <source>By Layer</source>
         <translation>Von Layer</translation>
     </message>
@@ -862,19 +882,11 @@
         <translation>Rand</translation>
     </message>
     <message>
-        <source>Border (2x)</source>
-        <translation type="vanished">Rand (2x)</translation>
-    </message>
-    <message>
         <location line="+2"/>
         <location line="+1"/>
         <location line="+1"/>
         <source>Center</source>
         <translation>Mitte</translation>
-    </message>
-    <message>
-        <source>Center (2x)</source>
-        <translation type="vanished">Mitte (2x)</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -1030,6 +1042,11 @@
     </message>
     <message>
         <location line="+2"/>
+        <source>Water</source>
+        <translation>Wasser</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>Drainage</source>
         <translation>Entwässerung</translation>
     </message>
@@ -1039,8 +1056,39 @@
         <translation>Entwässerung umgekehrt</translation>
     </message>
     <message>
-        <source>Drainage Reverse</source>
-        <translation type="vanished">Entwässerung umgekehrt</translation>
+        <location line="+2"/>
+        <source>Communication</source>
+        <translation>Kommunikation</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Electric</source>
+        <translation>Elektrisch</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Low Voltage</source>
+        <translation>Niederspannung</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>High Voltage</source>
+        <translation>Hochspannung</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Overhead Power</source>
+        <translation>Strom Oberleitung</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Foul</source>
+        <translation>Verschmutzt</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Foul Rising</source>
+        <translation>Verschmutzt steigend</translation>
     </message>
 </context>
 <context>
@@ -1179,25 +1227,6 @@
         <location line="+1"/>
         <source>2.11mm</source>
         <translation>2.11mm</translation>
-    </message>
-</context>
-<context>
-    <name>RObject</name>
-    <message>
-        <source>Custom</source>
-        <translation type="vanished">Benutzerdefiniert</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation type="vanished">Typ</translation>
-    </message>
-    <message>
-        <source>Handle</source>
-        <translation type="vanished">Handle</translation>
-    </message>
-    <message>
-        <source>Protected</source>
-        <translation type="vanished">Geschützt</translation>
     </message>
 </context>
 </TS>

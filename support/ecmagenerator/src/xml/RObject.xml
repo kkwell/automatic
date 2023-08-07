@@ -16,6 +16,9 @@ xmlns:rs="http://www.ribbonsoft.com">
       <value name="NoFlags" />
       <value name="Undone" />
       <value name="Protect" />
+      <value name="Selected" />
+      <value name="Invisible" />
+      <value name="WorkingSet" />
     </enum>
     <constructor>
       <variant>
@@ -32,6 +35,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="getRtti" cppName="getRtti" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RS::EntityType" isPureVirtual="false" />
+    </method>
     <method name="getType" cppName="getType" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="RS::EntityType" isPureVirtual="false" />
@@ -39,6 +46,11 @@ xmlns:rs="http://www.ribbonsoft.com">
     <method name="clone" cppName="clone" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="RObject *" isPureVirtual="false" />
+    </method>
+    <method name="mustAlwaysClone" cppName="mustAlwaysClone"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
     </method>
     <method name="getDocument" cppName="getDocument"
     specifier="public" isStatic="false" isVirtual="false"
@@ -93,15 +105,60 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
+    <method name="isInvisible" cppName="isInvisible"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setInvisible" cppName="setInvisible"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="isSelected" cppName="isSelected"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setSelected" cppName="setSelected"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
     <method name="isUndone" cppName="isUndone" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="isWorkingSet" cppName="isWorkingSet"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setWorkingSet" cppName="setWorkingSet"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
     </method>
     <method name="getPropertyTypeIds" cppName="getPropertyTypeIds"
     specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="QSet &lt; RPropertyTypeId &gt;"
-      isPureVirtual="false" />
+      isPureVirtual="false">
+        <arg type="RPropertyAttributes::Option"
+        typeName="RPropertyAttributes::Option" name="option"
+        hasDefault="true"
+        default="RPropertyAttributes :: NoOptions"
+        isConst="false" />
+      </variant>
     </method>
     <method name="getCustomPropertyTypeIds"
     cppName="getCustomPropertyTypeIds" specifier="public"
@@ -120,6 +177,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="humanReadable"
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="noAttributes"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
@@ -143,11 +202,6 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="RPropertyTypeId" typeName="RPropertyTypeId"
         name="propertyTypeId" isConst="false" />
       </variant>
-    </method>
-    <method name="isSelectedForPropertyEditing"
-    cppName="isSelectedForPropertyEditing" specifier="public"
-    isStatic="false" isVirtual="true" isScriptOverwritable="true">
-      <variant returnType="bool" isPureVirtual="true" />
     </method>
     <method name="hasCustomProperties"
     cppName="hasCustomProperties" specifier="public"
@@ -310,6 +364,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="validate" cppName="validate" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
     <method name="print" cppName="print" specifier="protected"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
@@ -351,6 +409,12 @@ xmlns:rs="http://www.ribbonsoft.com">
     <property name="PropertyHandle" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyProtected" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyWorkingSet" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertySelected" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyInvisible" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
   </class>
 </unit>

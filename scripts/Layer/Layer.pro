@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 SUBDIRS = \
-    ts \
+    dir \
     AddLayer \
     DeselectLayer \
     EditLayer \
@@ -10,5 +10,6 @@ SUBDIRS = \
     SelectLayer \
     ShowActiveLayer \
     ShowAllLayers \
+    ToggleLayerLock \
     ToggleLayerVisibility \
     UnlockAllLayers

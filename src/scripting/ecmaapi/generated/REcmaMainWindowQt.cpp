@@ -33,6 +33,8 @@
             
                 #include "RNewDocumentListener.h"
             
+                #include "RPaletteListener.h"
+            
                 #include "RPenListener.h"
             
                 #include "RPreferencesListener.h"
@@ -245,6 +247,12 @@
             
             REcmaHelper::registerFunction(&engine, proto, notifyPenListeners, "notifyPenListeners");
             
+            REcmaHelper::registerFunction(&engine, proto, addPaletteListener, "addPaletteListener");
+            
+            REcmaHelper::registerFunction(&engine, proto, removePaletteListener, "removePaletteListener");
+            
+            REcmaHelper::registerFunction(&engine, proto, notifyPaletteListeners, "notifyPaletteListeners");
+            
             REcmaHelper::registerFunction(&engine, proto, ucsSetEvent, "ucsSetEvent");
             
             REcmaHelper::registerFunction(&engine, proto, eval, "eval");
@@ -286,6 +294,8 @@
             REcmaHelper::registerFunction(&engine, proto, postSelectionChangedEvent, "postSelectionChangedEvent");
             
             REcmaHelper::registerFunction(&engine, proto, postTransactionEvent, "postTransactionEvent");
+            
+            REcmaHelper::registerFunction(&engine, proto, postPropertyEvent, "postPropertyEvent");
             
             REcmaHelper::registerFunction(&engine, proto, postCloseEvent, "postCloseEvent");
             
@@ -336,6 +346,16 @@
             REcmaHelper::registerFunction(&engine, proto, currentTabChanged, "currentTabChanged");
             
             REcmaHelper::registerFunction(&engine, proto, subWindowActivated, "subWindowActivated");
+            
+            REcmaHelper::registerFunction(&engine, proto, updateGuiActions, "updateGuiActions");
+            
+            REcmaHelper::registerFunction(&engine, proto, initGuiActions, "initGuiActions");
+            
+            REcmaHelper::registerFunction(&engine, proto, updateScenes, "updateScenes");
+            
+            REcmaHelper::registerFunction(&engine, proto, notifyListenersSlot, "notifyListenersSlot");
+            
+            REcmaHelper::registerFunction(&engine, proto, suspendAndResume, "suspendAndResume");
             
         engine.setDefaultPrototype(
             qMetaTypeId<RMainWindowQt*>(), *proto);
@@ -4307,11 +4327,14 @@
                 
     
     if( context->argumentCount() ==
-    1 && (
+    2 && (
             context->argument(0).isVariant() || 
             context->argument(0).isQObject() || 
             context->argument(0).isNull()
         ) /* type: RDocumentInterface * */
+     && (
+            context->argument(1).isArray()
+        ) /* type: QList < RLayer::Id > */
     
     ){
     // prepare arguments:
@@ -4329,12 +4352,23 @@
                         return REcmaHelper::throwError("RMainWindow: Argument 0 is not of type RDocumentInterface *RDocumentInterface *.", context);                    
                     }
                 
+                    // argument isArray or QVariantMap
+                    QList < RLayer::Id >
+                    a1;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(1),
+                        a1
+                    );
+                
     // end of arguments
 
     // call C++ function:
     // return type 'void'
     
-               self->notifyLayerListeners(a0);
+               self->notifyLayerListeners(a0
+        ,
+    a1);
     } else
 
 
@@ -4369,11 +4403,14 @@
                 
     
     if( context->argumentCount() ==
-    1 && (
+    2 && (
             context->argument(0).isVariant() || 
             context->argument(0).isQObject() || 
             context->argument(0).isNull()
         ) /* type: RDocumentInterface * */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: RLayer::Id */
     
     ){
     // prepare arguments:
@@ -4391,12 +4428,22 @@
                         return REcmaHelper::throwError("RMainWindow: Argument 0 is not of type RDocumentInterface *RDocumentInterface *.", context);                    
                     }
                 
+                    // argument isStandardType
+                    RLayer::Id
+                    a1 =
+                    (RLayer::Id)
+                    (int)
+                    context->argument( 1 ).
+                    toNumber();
+                
     // end of arguments
 
     // call C++ function:
     // return type 'void'
     
-               self->notifyLayerListenersCurrentLayer(a0);
+               self->notifyLayerListenersCurrentLayer(a0
+        ,
+    a1);
     } else
 
 
@@ -5026,6 +5073,174 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaMainWindowQt::notifyPenListeners", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMainWindowQt::addPaletteListener
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMainWindowQt::addPaletteListener", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMainWindowQt::addPaletteListener";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RMainWindowQt* self = 
+                        getSelf("addPaletteListener", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RPaletteListener * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    RPaletteListener * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<RPaletteListener >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RMainWindow: Argument 0 is not of type RPaletteListener *RPaletteListener *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->addPaletteListener(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMainWindowQt.addPaletteListener().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMainWindowQt::addPaletteListener", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMainWindowQt::removePaletteListener
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMainWindowQt::removePaletteListener", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMainWindowQt::removePaletteListener";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RMainWindowQt* self = 
+                        getSelf("removePaletteListener", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RPaletteListener * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    RPaletteListener * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<RPaletteListener >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RMainWindow: Argument 0 is not of type RPaletteListener *RPaletteListener *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->removePaletteListener(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMainWindowQt.removePaletteListener().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMainWindowQt::removePaletteListener", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMainWindowQt::notifyPaletteListeners
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMainWindowQt::notifyPaletteListeners", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMainWindowQt::notifyPaletteListeners";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RMainWindowQt* self = 
+                        getSelf("notifyPaletteListeners", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->notifyPaletteListeners();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMainWindowQt.notifyPaletteListeners().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMainWindowQt::notifyPaletteListeners", context, engine);
             return result;
         }
          QScriptValue
@@ -6378,6 +6593,171 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaMainWindowQt::postTransactionEvent", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMainWindowQt::postPropertyEvent
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMainWindowQt::postPropertyEvent", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMainWindowQt::postPropertyEvent";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RMainWindowQt* self = 
+                        getSelf("postPropertyEvent", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RPropertyTypeId */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNumber() || 
+            context->argument(1).isString() || 
+            context->argument(1).isBool() || 
+            context->argument(1).isArray() || 
+            context->argument(1).isNull() || 
+            context->argument(1).isUndefined()
+        ) /* type: QVariant */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RPropertyTypeId*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RPropertyTypeId*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RMainWindowQt: Argument 0 is not of type RPropertyTypeId.",
+                               context);                    
+                    }
+                    RPropertyTypeId 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable or pointer
+                    QVariant
+                    a1 =
+                    qscriptvalue_cast<
+                    QVariant
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->postPropertyEvent(a0
+        ,
+    a1);
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RPropertyTypeId */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNumber() || 
+            context->argument(1).isString() || 
+            context->argument(1).isBool() || 
+            context->argument(1).isArray() || 
+            context->argument(1).isNull() || 
+            context->argument(1).isUndefined()
+        ) /* type: QVariant */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: RS::EntityType */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RPropertyTypeId*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RPropertyTypeId*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RMainWindowQt: Argument 0 is not of type RPropertyTypeId.",
+                               context);                    
+                    }
+                    RPropertyTypeId 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable or pointer
+                    QVariant
+                    a1 =
+                    qscriptvalue_cast<
+                    QVariant
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                
+                    // argument isStandardType
+                    RS::EntityType
+                    a2 =
+                    (RS::EntityType)
+                    (int)
+                    context->argument( 2 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->postPropertyEvent(a0
+        ,
+    a1
+        ,
+    a2);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMainWindowQt.postPropertyEvent().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMainWindowQt::postPropertyEvent", context, engine);
             return result;
         }
          QScriptValue
@@ -7739,6 +8119,314 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaMainWindowQt::subWindowActivated", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMainWindowQt::updateGuiActions
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMainWindowQt::updateGuiActions", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMainWindowQt::updateGuiActions";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RMainWindowQt* self = 
+                        getSelf("updateGuiActions", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->updateGuiActions();
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QMdiSubWindow * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    QMdiSubWindow * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<QMdiSubWindow >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RMainWindowQt: Argument 0 is not of type QMdiSubWindow *QMdiSubWindow *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->updateGuiActions(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMainWindowQt.updateGuiActions().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMainWindowQt::updateGuiActions", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMainWindowQt::initGuiActions
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMainWindowQt::initGuiActions", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMainWindowQt::initGuiActions";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RMainWindowQt* self = 
+                        getSelf("initGuiActions", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->initGuiActions();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMainWindowQt.initGuiActions().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMainWindowQt::initGuiActions", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMainWindowQt::updateScenes
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMainWindowQt::updateScenes", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMainWindowQt::updateScenes";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RMainWindowQt* self = 
+                        getSelf("updateScenes", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QMdiSubWindow * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    QMdiSubWindow * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<QMdiSubWindow >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RMainWindowQt: Argument 0 is not of type QMdiSubWindow *QMdiSubWindow *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->updateScenes(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMainWindowQt.updateScenes().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMainWindowQt::updateScenes", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMainWindowQt::notifyListenersSlot
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMainWindowQt::notifyListenersSlot", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMainWindowQt::notifyListenersSlot";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RMainWindowQt* self = 
+                        getSelf("notifyListenersSlot", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QMdiSubWindow * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    QMdiSubWindow * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<QMdiSubWindow >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RMainWindowQt: Argument 0 is not of type QMdiSubWindow *QMdiSubWindow *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->notifyListenersSlot(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMainWindowQt.notifyListenersSlot().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMainWindowQt::notifyListenersSlot", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMainWindowQt::suspendAndResume
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMainWindowQt::suspendAndResume", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMainWindowQt::suspendAndResume";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RMainWindowQt* self = 
+                        getSelf("suspendAndResume", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QMdiSubWindow * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    QMdiSubWindow * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<QMdiSubWindow >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RMainWindowQt: Argument 0 is not of type QMdiSubWindow *QMdiSubWindow *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->suspendAndResume(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMainWindowQt.suspendAndResume().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMainWindowQt::suspendAndResume", context, engine);
             return result;
         }
          QScriptValue REcmaMainWindowQt::toString

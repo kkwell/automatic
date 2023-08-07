@@ -77,27 +77,11 @@
 
     // methods:
     
-            REcmaHelper::registerFunction(&engine, proto, clone, "clone");
-            
-            REcmaHelper::registerFunction(&engine, proto, setProperty, "setProperty");
-            
-            REcmaHelper::registerFunction(&engine, proto, getProperty, "getProperty");
-            
             REcmaHelper::registerFunction(&engine, proto, getData, "getData");
-            
-            REcmaHelper::registerFunction(&engine, proto, setData, "setData");
-            
-            REcmaHelper::registerFunction(&engine, proto, setExtensionLine1Start, "setExtensionLine1Start");
-            
-            REcmaHelper::registerFunction(&engine, proto, getExtensionLine1Start, "getExtensionLine1Start");
             
             REcmaHelper::registerFunction(&engine, proto, setExtensionLine1End, "setExtensionLine1End");
             
             REcmaHelper::registerFunction(&engine, proto, getExtensionLine1End, "getExtensionLine1End");
-            
-            REcmaHelper::registerFunction(&engine, proto, setExtensionLine2Start, "setExtensionLine2Start");
-            
-            REcmaHelper::registerFunction(&engine, proto, getExtensionLine2Start, "getExtensionLine2Start");
             
             REcmaHelper::registerFunction(&engine, proto, setExtensionLine2End, "setExtensionLine2End");
             
@@ -106,6 +90,8 @@
             REcmaHelper::registerFunction(&engine, proto, setDimArcPosition, "setDimArcPosition");
             
             REcmaHelper::registerFunction(&engine, proto, getDimArcPosition, "getDimArcPosition");
+            
+            REcmaHelper::registerFunction(&engine, proto, getDimensionArc, "getDimensionArc");
             
         engine.setDefaultPrototype(
             qMetaTypeId<RDimAngularEntityPointer>(), *proto);
@@ -117,8 +103,6 @@
     // static methods:
     
             REcmaHelper::registerFunction(&engine, &ctor, init, "init");
-            
-            REcmaHelper::registerFunction(&engine, &ctor, getStaticPropertyTypeIds, "getStaticPropertyTypeIds");
             
 
     // static properties:
@@ -133,6 +117,10 @@
             
             ctor.setProperty("PropertyProtected",
                 qScriptValueFromValue(&engine, RDimAngularEntity::PropertyProtected),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyWorkingSet",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyWorkingSet),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
             ctor.setProperty("PropertyType",
@@ -199,20 +187,104 @@
                 qScriptValueFromValue(&engine, RDimAngularEntity::PropertyMeasuredValue),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
+            ctor.setProperty("PropertyDimscale",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimscale),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimtxt",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimtxt),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimgap",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimgap),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimasz",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimasz),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimexe",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimexe),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimexo",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimexo),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimtad",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimtad),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimtih",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimtih),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimtsz",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimtsz),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimdsep",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimdsep),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimaunit",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimaunit),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimadec",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimadec),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimazin",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimazin),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyArchTick",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyArchTick),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimclrt",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimclrt),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimBlockName",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyDimBlockName),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyAutoTextPos",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyAutoTextPos),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
             ctor.setProperty("PropertyFontName",
                 qScriptValueFromValue(&engine, RDimAngularEntity::PropertyFontName),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
-            ctor.setProperty("PropertyExtensionLine1StartX",
-                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyExtensionLine1StartX),
+            ctor.setProperty("PropertyArrow1Flipped",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyArrow1Flipped),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
-            ctor.setProperty("PropertyExtensionLine1StartY",
-                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyExtensionLine1StartY),
+            ctor.setProperty("PropertyArrow2Flipped",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyArrow2Flipped),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
-            ctor.setProperty("PropertyExtensionLine1StartZ",
-                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyExtensionLine1StartZ),
+            ctor.setProperty("PropertyExtLineFix",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyExtLineFix),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyExtLineFixLength",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyExtLineFixLength),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyCenterX",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyCenterX),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyCenterY",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyCenterY),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyCenterZ",
+                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyCenterZ),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
             ctor.setProperty("PropertyExtensionLine1EndX",
@@ -225,18 +297,6 @@
             
             ctor.setProperty("PropertyExtensionLine1EndZ",
                 qScriptValueFromValue(&engine, RDimAngularEntity::PropertyExtensionLine1EndZ),
-                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
-            
-            ctor.setProperty("PropertyExtensionLine2StartX",
-                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyExtensionLine2StartX),
-                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
-            
-            ctor.setProperty("PropertyExtensionLine2StartY",
-                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyExtensionLine2StartY),
-                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
-            
-            ctor.setProperty("PropertyExtensionLine2StartZ",
-                qScriptValueFromValue(&engine, RDimAngularEntity::PropertyExtensionLine2StartZ),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
             ctor.setProperty("PropertyExtensionLine2EndX",
@@ -282,114 +342,8 @@
      QScriptValue REcmaSharedPointerDimAngularEntity::createEcma(QScriptContext* context, QScriptEngine* engine) 
     
     {
-    if (context->thisObject().strictlyEquals(
-       engine->globalObject())) {
-       return REcmaHelper::throwError(
-       QString::fromLatin1("RDimAngularEntity(): Did you forget to construct with 'new'?"),
-           context);
-    }
-
-    QScriptValue result;
-        
-            // generate constructor variants:
-            
-    if( context->argumentCount() ==
-        2
-                && (
-                
-                        context->argument(
-                        0
-                        ).isVariant()
-                        ||
-                    
-                        context->argument(
-                        0
-                        ).isQObject()
-                        ||
-                    
-                        context->argument(
-                        0
-                        ).isNull()
-                ) /* type: RDocument * */
-            
-                && (
-                
-                        context->argument(
-                        1
-                        ).isVariant()
-                        ||
-                    
-                        context->argument(
-                        1
-                        ).isQObject()
-                        ||
-                    
-                        context->argument(
-                        1
-                        ).isNull()
-                ) /* type: RDimAngularData */
-            
-    ){
-    // prepare arguments:
-    
-                    // argument is pointer
-                    RDocument * a0 = NULL;
-
-                    a0 = 
-                        REcmaHelper::scriptValueTo<RDocument >(
-                            context->argument(0)
-                        );
-                    
-                    if (a0==NULL && 
-                        !context->argument(0).isNull()) {
-                        return REcmaHelper::throwError("RDimAngularEntity: Argument 0 is not of type RDocument *RDocument *.", context);                    
-                    }
-                
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RDimAngularData*
-                    ap1 =
-                    qscriptvalue_cast<
-                    RDimAngularData*
-                        >(
-                        context->argument(
-                        1
-                        )
-                    );
-                    if (ap1 == NULL) {
-                           return REcmaHelper::throwError("RDimAngularEntity: Argument 1 is not of type RDimAngularData.",
-                               context);                    
-                    }
-                    RDimAngularData 
-                    a1 = 
-                    *ap1;
-                
-    // end of arguments
-
-    // call C++ constructor:
-    
-            // non-copyable class:
-            RDimAngularEntity
-                    * cppResult =
-                    new
-                    RDimAngularEntity
-                    (
-                    a0
-        ,
-    a1
-                    );
-                
-                    // TODO: triggers: Warning: QScriptEngine::newVariant(): changing class of non-QScriptObject not supported:
-                    result = engine->newVariant(context->thisObject(), qVariantFromValue(cppResult));
-                
-    } else 
-
-    {
-       return REcmaHelper::throwError(
-       QString::fromLatin1("RDimAngularEntity(): no matching constructor found."),
-           context);
-    }
-    
-    return result;
+           return REcmaHelper::throwError("Abstract class RDimAngularEntity: Cannot be constructed.",
+               context); 
     }
     
 
@@ -487,524 +441,6 @@
             return result;
         }
          QScriptValue
-        REcmaSharedPointerDimAngularEntity::getStaticPropertyTypeIds
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaSharedPointerDimAngularEntity::getStaticPropertyTypeIds", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAngularEntity::getStaticPropertyTypeIds";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-    
-    if( context->argumentCount() ==
-    0
-    ){
-    // prepare arguments:
-    
-    // end of arguments
-
-    // call C++ function:
-    // return type 'QSet < RPropertyTypeId >'
-    QSet < RPropertyTypeId > cppResult =
-        RDimAngularEntity::
-       getStaticPropertyTypeIds();
-        // return type: QSet < RPropertyTypeId >
-                // QSet (convert to QVariantList):
-                result = REcmaHelper::setToScriptValue(engine, cppResult);
-
-                
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAngularEntity.getStaticPropertyTypeIds().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::getStaticPropertyTypeIds", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaSharedPointerDimAngularEntity::clone
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaSharedPointerDimAngularEntity::clone", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAngularEntity::clone";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RDimAngularEntity* self = 
-                        getSelf("clone", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    0
-    ){
-    // prepare arguments:
-    
-    // end of arguments
-
-    // call C++ function:
-    // return type 'RDimAngularEntity *'
-    RDimAngularEntity * cppResult =
-        
-               self->clone();
-        // return type: RDimAngularEntity *
-                // not standard type nor reference
-                result = qScriptValueFromValue(engine, cppResult);
-            
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAngularEntity.clone().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::clone", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaSharedPointerDimAngularEntity::setProperty
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaSharedPointerDimAngularEntity::setProperty", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAngularEntity::setProperty";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RDimAngularEntity* self = 
-                        getSelf("setProperty", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    2 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RPropertyTypeId */
-     && (
-            context->argument(1).isVariant() || 
-            context->argument(1).isQObject() || 
-            context->argument(1).isNumber() || 
-            context->argument(1).isString() || 
-            context->argument(1).isBool() || 
-            context->argument(1).isArray() || 
-            context->argument(1).isNull() || 
-            context->argument(1).isUndefined()
-        ) /* type: QVariant */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RPropertyTypeId*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RPropertyTypeId*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimAngularEntity: Argument 0 is not of type RPropertyTypeId.",
-                               context);                    
-                    }
-                    RPropertyTypeId 
-                    a0 = 
-                    *ap0;
-                
-                    // argument isCopyable or pointer
-                    QVariant
-                    a1 =
-                    qscriptvalue_cast<
-                    QVariant
-                        >(
-                        context->argument(
-                        1
-                        )
-                    );
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'bool'
-    bool cppResult =
-        
-               self->setProperty(a0
-        ,
-    a1);
-        // return type: bool
-                // standard Type
-                result = QScriptValue(cppResult);
-            
-    } else
-
-
-        
-    
-    if( context->argumentCount() ==
-    3 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RPropertyTypeId */
-     && (
-            context->argument(1).isVariant() || 
-            context->argument(1).isQObject() || 
-            context->argument(1).isNumber() || 
-            context->argument(1).isString() || 
-            context->argument(1).isBool() || 
-            context->argument(1).isArray() || 
-            context->argument(1).isNull() || 
-            context->argument(1).isUndefined()
-        ) /* type: QVariant */
-     && (
-            context->argument(2).isVariant() || 
-            context->argument(2).isQObject() || 
-            context->argument(2).isNull()
-        ) /* type: RTransaction * */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RPropertyTypeId*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RPropertyTypeId*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimAngularEntity: Argument 0 is not of type RPropertyTypeId.",
-                               context);                    
-                    }
-                    RPropertyTypeId 
-                    a0 = 
-                    *ap0;
-                
-                    // argument isCopyable or pointer
-                    QVariant
-                    a1 =
-                    qscriptvalue_cast<
-                    QVariant
-                        >(
-                        context->argument(
-                        1
-                        )
-                    );
-                
-                    // argument is pointer
-                    RTransaction * a2 = NULL;
-
-                    a2 = 
-                        REcmaHelper::scriptValueTo<RTransaction >(
-                            context->argument(2)
-                        );
-                    
-                    if (a2==NULL && 
-                        !context->argument(2).isNull()) {
-                        return REcmaHelper::throwError("RDimAngularEntity: Argument 2 is not of type RTransaction *RTransaction *.", context);                    
-                    }
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'bool'
-    bool cppResult =
-        
-               self->setProperty(a0
-        ,
-    a1
-        ,
-    a2);
-        // return type: bool
-                // standard Type
-                result = QScriptValue(cppResult);
-            
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAngularEntity.setProperty().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::setProperty", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaSharedPointerDimAngularEntity::getProperty
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaSharedPointerDimAngularEntity::getProperty", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAngularEntity::getProperty";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RDimAngularEntity* self = 
-                        getSelf("getProperty", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    1 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RPropertyTypeId */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RPropertyTypeId*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RPropertyTypeId*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimAngularEntity: Argument 0 is not of type RPropertyTypeId.",
-                               context);                    
-                    }
-                    RPropertyTypeId 
-                    a0 = 
-                    *ap0;
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'QPair < QVariant , RPropertyAttributes >'
-    QPair < QVariant , RPropertyAttributes > cppResult =
-        
-               self->getProperty(a0);
-        // return type: QPair < QVariant , RPropertyAttributes >
-                // Pair of ...:
-                //result = REcmaHelper::pairToScriptValue(engine, cppResult);
-                QVariantList vl;
-                QVariant v;
-                
-                    // first type of pair is variant:
-                    if (QString(cppResult.first.typeName())=="RLineweight::Lineweight") {
-                        v.setValue((int)cppResult.first.value<RLineweight::Lineweight>());
-                    }
-                    else {
-                        v.setValue(cppResult.first);
-                    }
-                  
-
-                vl.append(v);
-                v.setValue(cppResult.second);
-                vl.append(v);
-                result = qScriptValueFromValue(engine, vl);
-            
-    } else
-
-
-        
-    
-    if( context->argumentCount() ==
-    2 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RPropertyTypeId */
-     && (
-            context->argument(1).isBool()
-        ) /* type: bool */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RPropertyTypeId*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RPropertyTypeId*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimAngularEntity: Argument 0 is not of type RPropertyTypeId.",
-                               context);                    
-                    }
-                    RPropertyTypeId 
-                    a0 = 
-                    *ap0;
-                
-                    // argument isStandardType
-                    bool
-                    a1 =
-                    (bool)
-                    
-                    context->argument( 1 ).
-                    toBool();
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'QPair < QVariant , RPropertyAttributes >'
-    QPair < QVariant , RPropertyAttributes > cppResult =
-        
-               self->getProperty(a0
-        ,
-    a1);
-        // return type: QPair < QVariant , RPropertyAttributes >
-                // Pair of ...:
-                //result = REcmaHelper::pairToScriptValue(engine, cppResult);
-                QVariantList vl;
-                QVariant v;
-                
-                    // first type of pair is variant:
-                    if (QString(cppResult.first.typeName())=="RLineweight::Lineweight") {
-                        v.setValue((int)cppResult.first.value<RLineweight::Lineweight>());
-                    }
-                    else {
-                        v.setValue(cppResult.first);
-                    }
-                  
-
-                vl.append(v);
-                v.setValue(cppResult.second);
-                vl.append(v);
-                result = qScriptValueFromValue(engine, vl);
-            
-    } else
-
-
-        
-    
-    if( context->argumentCount() ==
-    3 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RPropertyTypeId */
-     && (
-            context->argument(1).isBool()
-        ) /* type: bool */
-     && (
-            context->argument(2).isBool()
-        ) /* type: bool */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RPropertyTypeId*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RPropertyTypeId*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimAngularEntity: Argument 0 is not of type RPropertyTypeId.",
-                               context);                    
-                    }
-                    RPropertyTypeId 
-                    a0 = 
-                    *ap0;
-                
-                    // argument isStandardType
-                    bool
-                    a1 =
-                    (bool)
-                    
-                    context->argument( 1 ).
-                    toBool();
-                
-                    // argument isStandardType
-                    bool
-                    a2 =
-                    (bool)
-                    
-                    context->argument( 2 ).
-                    toBool();
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'QPair < QVariant , RPropertyAttributes >'
-    QPair < QVariant , RPropertyAttributes > cppResult =
-        
-               self->getProperty(a0
-        ,
-    a1
-        ,
-    a2);
-        // return type: QPair < QVariant , RPropertyAttributes >
-                // Pair of ...:
-                //result = REcmaHelper::pairToScriptValue(engine, cppResult);
-                QVariantList vl;
-                QVariant v;
-                
-                    // first type of pair is variant:
-                    if (QString(cppResult.first.typeName())=="RLineweight::Lineweight") {
-                        v.setValue((int)cppResult.first.value<RLineweight::Lineweight>());
-                    }
-                    else {
-                        v.setValue(cppResult.first);
-                    }
-                  
-
-                vl.append(v);
-                v.setValue(cppResult.second);
-                vl.append(v);
-                result = qScriptValueFromValue(engine, vl);
-            
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAngularEntity.getProperty().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::getProperty", context, engine);
-            return result;
-        }
-         QScriptValue
         REcmaSharedPointerDimAngularEntity::getData
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -1074,189 +510,6 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::getData", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaSharedPointerDimAngularEntity::setData
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaSharedPointerDimAngularEntity::setData", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAngularEntity::setData";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RDimAngularEntity* self = 
-                        getSelf("setData", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    1 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RDimAngularData */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RDimAngularData*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RDimAngularData*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimAngularEntity: Argument 0 is not of type RDimAngularData.",
-                               context);                    
-                    }
-                    RDimAngularData 
-                    a0 = 
-                    *ap0;
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'void'
-    
-               self->setData(a0);
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAngularEntity.setData().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::setData", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaSharedPointerDimAngularEntity::setExtensionLine1Start
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaSharedPointerDimAngularEntity::setExtensionLine1Start", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAngularEntity::setExtensionLine1Start";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RDimAngularEntity* self = 
-                        getSelf("setExtensionLine1Start", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    1 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RVector */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RVector*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RVector*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimAngularEntity: Argument 0 is not of type RVector.",
-                               context);                    
-                    }
-                    RVector 
-                    a0 = 
-                    *ap0;
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'void'
-    
-               self->setExtensionLine1Start(a0);
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAngularEntity.setExtensionLine1Start().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::setExtensionLine1Start", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaSharedPointerDimAngularEntity::getExtensionLine1Start
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaSharedPointerDimAngularEntity::getExtensionLine1Start", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAngularEntity::getExtensionLine1Start";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RDimAngularEntity* self = 
-                        getSelf("getExtensionLine1Start", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    0
-    ){
-    // prepare arguments:
-    
-    // end of arguments
-
-    // call C++ function:
-    // return type 'RVector'
-    RVector cppResult =
-        
-               self->getExtensionLine1Start();
-        // return type: RVector
-                // not standard type nor reference
-                result = qScriptValueFromValue(engine, cppResult);
-            
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAngularEntity.getExtensionLine1Start().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::getExtensionLine1Start", context, engine);
             return result;
         }
          QScriptValue
@@ -1373,122 +626,6 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::getExtensionLine1End", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaSharedPointerDimAngularEntity::setExtensionLine2Start
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaSharedPointerDimAngularEntity::setExtensionLine2Start", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAngularEntity::setExtensionLine2Start";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RDimAngularEntity* self = 
-                        getSelf("setExtensionLine2Start", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    1 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RVector */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RVector*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RVector*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimAngularEntity: Argument 0 is not of type RVector.",
-                               context);                    
-                    }
-                    RVector 
-                    a0 = 
-                    *ap0;
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'void'
-    
-               self->setExtensionLine2Start(a0);
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAngularEntity.setExtensionLine2Start().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::setExtensionLine2Start", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaSharedPointerDimAngularEntity::getExtensionLine2Start
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaSharedPointerDimAngularEntity::getExtensionLine2Start", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAngularEntity::getExtensionLine2Start";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RDimAngularEntity* self = 
-                        getSelf("getExtensionLine2Start", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    0
-    ){
-    // prepare arguments:
-    
-    // end of arguments
-
-    // call C++ function:
-    // return type 'RVector'
-    RVector cppResult =
-        
-               self->getExtensionLine2Start();
-        // return type: RVector
-                // not standard type nor reference
-                result = qScriptValueFromValue(engine, cppResult);
-            
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAngularEntity.getExtensionLine2Start().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::getExtensionLine2Start", context, engine);
             return result;
         }
          QScriptValue
@@ -1721,6 +858,55 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::getDimArcPosition", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerDimAngularEntity::getDimensionArc
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerDimAngularEntity::getDimensionArc", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAngularEntity::getDimensionArc";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDimAngularEntity* self = 
+                        getSelf("getDimensionArc", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RArc'
+    RArc cppResult =
+        
+               self->getDimensionArc();
+        // return type: RArc
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAngularEntity.getDimensionArc().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerDimAngularEntity::getDimensionArc", context, engine);
             return result;
         }
          QScriptValue REcmaSharedPointerDimAngularEntity::toString

@@ -25,6 +25,7 @@ RPropertyTypeId RLayer::PropertyCustom;
 RPropertyTypeId RLayer::PropertyType;
 RPropertyTypeId RLayer::PropertyHandle;
 RPropertyTypeId RLayer::PropertyProtected;
+RPropertyTypeId RLayer::PropertySelected;
 
 RPropertyTypeId RLayer::PropertyName;
 RPropertyTypeId RLayer::PropertyOff;
@@ -61,6 +62,7 @@ RLayer::RLayer(RDocument* document, const QString& name,
     setCollapsed(false);
     setPlottable(true);
     setSnappable(true);
+    setSelected(false);
 
     RDebug::incCounter("RLayer");
 }
@@ -82,22 +84,23 @@ RLayer::~RLayer() {
 }
 
 void RLayer::init() {
-    RLayer::PropertyCustom.generateId(typeid(RLayer), RObject::PropertyCustom);
-    RLayer::PropertyType.generateId(typeid(RLayer), RObject::PropertyType);
-    RLayer::PropertyHandle.generateId(typeid(RLayer), RObject::PropertyHandle);
-    RLayer::PropertyProtected.generateId(typeid(RLayer), RObject::PropertyProtected);
+    RLayer::PropertyCustom.generateId(RLayer::getRtti(), RObject::PropertyCustom);
+    RLayer::PropertyType.generateId(RLayer::getRtti(), RObject::PropertyType);
+    RLayer::PropertyHandle.generateId(RLayer::getRtti(), RObject::PropertyHandle);
+    RLayer::PropertyProtected.generateId(RLayer::getRtti(), RObject::PropertyProtected);
+    RLayer::PropertySelected.generateId(RLayer::getRtti(), RObject::PropertySelected);
 
-    RLayer::PropertyName.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Name"));
-    RLayer::PropertyOff.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Off"));
-    RLayer::PropertyFrozen.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Frozen"));
-    RLayer::PropertyLocked.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Locked"));
-    RLayer::PropertyCollapsed.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Collapsed"));
-    RLayer::PropertyPlottable.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Plottable"));
-    RLayer::PropertySnappable.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Snappable"));
-    RLayer::PropertyOffIsFreeze.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Off is Freeze"));
-    RLayer::PropertyColor.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Color"));
-    RLayer::PropertyLinetype.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Linetype"));
-    RLayer::PropertyLineweight.generateId(typeid(RLayer), "", QT_TRANSLATE_NOOP("REntity", "Lineweight"));
+    RLayer::PropertyName.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Name"));
+    RLayer::PropertyOff.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Off"));
+    RLayer::PropertyFrozen.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Frozen"));
+    RLayer::PropertyLocked.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Locked"));
+    RLayer::PropertyCollapsed.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Collapsed"));
+    RLayer::PropertyPlottable.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Plottable"));
+    RLayer::PropertySnappable.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Snappable"));
+    RLayer::PropertyOffIsFreeze.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Off is Freeze"));
+    RLayer::PropertyColor.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Color"));
+    RLayer::PropertyLinetype.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Linetype"));
+    RLayer::PropertyLineweight.generateId(RLayer::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Lineweight"));
 }
 
 RLayer* RLayer::clone() const {
@@ -119,9 +122,9 @@ RLayer::Id RLayer::getParentLayerId() const {
 }
 
 void RLayer::setName(const QString& n) {
-    if (name == "0") {
-        return;
-    }
+//    if (name == "0") {
+//        return;
+//    }
     name = n.trimmed();
 }
 
@@ -175,7 +178,7 @@ bool RLayer::setProperty(RPropertyTypeId propertyTypeId, const QVariant& value, 
     return ret;
 }
 
-QPair<QVariant, RPropertyAttributes> RLayer::getProperty(RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes) {
+QPair<QVariant, RPropertyAttributes> RLayer::getProperty(RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes, bool showOnRequest) {
     if (propertyTypeId == PropertyName) {
         return qMakePair(QVariant(name), RPropertyAttributes());
     }
@@ -189,7 +192,7 @@ QPair<QVariant, RPropertyAttributes> RLayer::getProperty(RPropertyTypeId& proper
         return qMakePair(QVariant(isLocked()), RPropertyAttributes());
     }
     if (propertyTypeId == PropertyCollapsed) {
-        return qMakePair(QVariant(isCollapsed()), RPropertyAttributes(RPropertyAttributes::Invisible));
+        return qMakePair(QVariant(isCollapsed()), RPropertyAttributes());
     }
     if (propertyTypeId == PropertyPlottable) {
         return qMakePair(QVariant(isPlottable()), RPropertyAttributes());
@@ -198,7 +201,7 @@ QPair<QVariant, RPropertyAttributes> RLayer::getProperty(RPropertyTypeId& proper
         return qMakePair(QVariant(isSnappable()), RPropertyAttributes());
     }
     if (propertyTypeId == PropertyOffIsFreeze) {
-        return qMakePair(QVariant(isOffIsFreeze()), RPropertyAttributes());
+        return qMakePair(QVariant(isOffIsFreeze()), RPropertyAttributes(RPropertyAttributes::Invisible));
     }
     if (propertyTypeId == PropertyColor) {
         QVariant v;
@@ -235,25 +238,19 @@ QPair<QVariant, RPropertyAttributes> RLayer::getProperty(RPropertyTypeId& proper
     }
 
     //return qMakePair(QVariant(), RPropertyAttributes());
-    return RObject::getProperty(propertyTypeId, humanReadable, noAttributes);
+    return RObject::getProperty(propertyTypeId, humanReadable, noAttributes, showOnRequest);
 }
-
-bool RLayer::isSelectedForPropertyEditing() {
-    return false;
-}
-
 
 /**
  * Stream operator for QDebug
  */
-QDebug operator<<(QDebug dbg, const RLayer& l) {
+void RLayer::print(QDebug dbg) const {
+    dbg.nospace() << "RLayer(";
+    RObject::print(dbg);
     dbg.nospace()
-       << "RLayer("
-       << (RObject&) l
-       << ", name: " << l.getName()
-       << ", color: " << l.getColor()
-       << ", lineweight: " << l.getLineweight()
-       << ", linetype: " << l.getLinetypeId()
-       << ")";
-    return dbg.space();
+        << ", name: " << getName()
+        << ", color: " << getColor()
+        << ", lineweight: " << getLineweight()
+        << ", linetype: " << getLinetypeId()
+        << ")";
 }

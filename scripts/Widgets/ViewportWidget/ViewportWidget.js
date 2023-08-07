@@ -17,6 +17,7 @@
  * along with QCAD.
  */
 
+include("scripts/library.js");
 include("scripts/sprintf.js");
 
 if (exists("scripts/Navigation/DefaultNavigation/DefaultNavigation.js")) {
@@ -107,18 +108,20 @@ ViewportWidget.initMdiChild = function(mdiChild, uiFileName) {
 };
 
 ViewportWidget.prototype.initEventHandler = function() {
+    var self = this;
+
     this.eventHandler = new EventHandler(this, this.documentInterface);
     if (isOfType(this.graphicsView, RGraphicsViewQt)) {
-        this.graphicsView.drop.connect(this.eventHandler, "drop");
-        this.graphicsView.dragEnter.connect(this.eventHandler, "dragEnter");
-        this.graphicsView.viewportChanged.connect(this.eventHandler, "viewportChanged");
-        this.graphicsView.updateSnapInfo.connect(this.eventHandler, "updateSnapInfo");
-        this.graphicsView.updateTextLabel.connect(this.eventHandler, "updateTextLabel");
+        this.graphicsView.drop.connect(function(e) { self.eventHandler.drop(e); });
+        this.graphicsView.dragEnter.connect(function(e) { self.eventHandler.dragEnter(e); });
+        this.graphicsView.viewportChanged.connect(function() { self.eventHandler.viewportChanged(); });
+        this.graphicsView.updateSnapInfo.connect(function(painter, snap, restriction) { self.eventHandler.updateSnapInfo(painter, snap, restriction); });
+        this.graphicsView.updateTextLabel.connect(function(painter, textLabel) { self.eventHandler.updateTextLabel(painter, textLabel); });
     }
 
     if (!isNull(this.hsb)) {
-        this.hsb.valueChanged.connect(this.eventHandler, "horizontalScrolled");
-        this.vsb.valueChanged.connect(this.eventHandler, "verticalScrolled");
+        this.hsb.valueChanged.connect(function(value) { self.eventHandler.horizontalScrolled(value); } );
+        this.vsb.valueChanged.connect(function(value) { self.eventHandler.verticalScrolled(value); } );
     }
 };
 
@@ -133,23 +136,40 @@ ViewportWidget.prototype.init = function(uiFile, graphicsSceneClass) {
     var chs = this.vpWidget.children();
     for (var i = 0; i < chs.length; ++i) {
         var ch = chs[i];
-        ch.destroy();
+        if (isNull(ch)) {
+            continue;
+        }
+
+        if (RSettings.getQtVersion()>=0x060000) {
+            if (ch.isOfObjectType(RJSType.QLayout_Type) || ch.isOfObjectType(RJSType.QWidget_Type)) {
+                destr(ch);
+            }
+        }
+        else {
+            destr(ch);
+        }
     }
 
     if (isNull(uiFile)) {
         uiFile = "scripts/Widgets/ViewportWidget/ViewportWidgetQt.ui";
     }
 
-    // use ViewportWidgetQt.ui or
+    // use ViewportWidgetQt.ui or given UI file:
     var vpw = WidgetFactory.createWidget("", uiFile, this.vpWidget);
 
     var layout = new QVBoxLayout();
-    layout.addWidget(vpw, 0, Qt.AlignTop | Qt.AlignLeft);
+    if (RSettings.isQt(6)) {
+        layout.addWidget(vpw);
+    }
+    else {
+        layout.addWidget(vpw, 0, Qt.AlignTop | Qt.AlignLeft);
+    }
+
     layout.setStretch(0, 1);
     layout.setContentsMargins(0,0,0,0);
     if (!isNull(this.vpWidget.layout())) {
         // destroy existing layout manager
-        this.vpWidget.layout().destroy();
+        destr(this.vpWidget.layout());
     }
     this.vpWidget.setLayout(layout);
     // clear style sheet
@@ -166,6 +186,15 @@ ViewportWidget.prototype.init = function(uiFile, graphicsSceneClass) {
     }
 
     this.graphicsView.setAntialiasing(RSettings.getBoolValue("GraphicsView/Antialiasing", false));
+
+    // enable multithreaded graphics view:
+    //if (RSettings.getBoolValue("GraphicsView/Multithreading", true)) {
+    var numThreads = RSettings.getIntValue("GraphicsView/Threads", Math.min(RS.getIdealThreadCount(), 6));
+    if (numThreads!==1) {
+        this.graphicsView.setNumThreads(numThreads);
+        //EAction.handleUserMessage(qsTr("Threads:") + " " + numThreads);
+    }
+    //}
 
     // create custom graphics scene (e.g. OpenGL, ...):
     var scene = undefined;
@@ -189,10 +218,16 @@ ViewportWidget.prototype.init = function(uiFile, graphicsSceneClass) {
         this.graphicsView.setNavigationAction(navigationAction);
     }
 
-    var grid = new ROrthoGrid(this.graphicsView.getRGraphicsView());
+    var grid = new ROrthoGrid(getRGraphicsView(this.graphicsView));
+
     this.graphicsView.setGrid(grid);
 
-    this.graphicsView.setFocus();
+    if (RSettings.isQt(6)) {
+        this.graphicsView.setFocus(Qt.OtherFocusReason);
+    }
+    else {
+        this.graphicsView.setFocus();
+    }
 
     this.hsb = this.vpWidget.findChild("HorizontalScrollBar");
     if (!isNull(this.hsb)) {
@@ -213,23 +248,29 @@ ViewportWidget.prototype.init = function(uiFile, graphicsSceneClass) {
         }
     }
 
+    var hruler = this.vpWidget.findChild("HorizontalRuler");
+    var vruler = this.vpWidget.findChild("VerticalRuler");
+
+    // moved to RRulerQt:
+    //var appWin = RMainWindowQt.getMainWindow();
+    //appWin.addPaletteListener(hruler);
+    //appWin.addPaletteListener(vruler);
+
     if (RSettings.getBoolValue("GraphicsView/ShowRulers", true)) {
-        this.hruler = this.vpWidget.findChild("HorizontalRuler");
+        this.hruler = hruler;
         if (!isNull(this.hruler)) {
             this.hruler.setGraphicsView(this.graphicsView);
             this.documentInterface.addCoordinateListener(this.hruler);
         }
-        this.vruler = this.vpWidget.findChild("VerticalRuler");
+        this.vruler = vruler;
         if (!isNull(this.vruler)) {
             this.vruler.setGraphicsView(this.graphicsView);
             this.documentInterface.addCoordinateListener(this.vruler);
         }
     } else {
-        var hruler = this.vpWidget.findChild("HorizontalRuler");
         if (!isNull(hruler)) {
             hruler.hide();
         }
-        var vruler = this.vpWidget.findChild("VerticalRuler");
         if (!isNull(vruler)) {
             vruler.hide();
         }
@@ -298,13 +339,28 @@ EventHandler.prototype.drop = function(event) {
 
     var action;
     if (urls[0].isLocalFile()) {
-        var file = urls[0].toLocalFile();
-        EAction.handleUserMessage(qsTr("Importing file: ") + file);
-        if (new QFileInfo(file).isFile()) {
+        var filePath = urls[0].toLocalFile();
+        var fi = new QFileInfo(filePath);
+        if (fi.suffix().toLowerCase()==="cxf") {
+            //openFiles(urls[0]);
+            //event.acceptProposedAction();
+            //event.ignore();
+            EAction.handleUserWarning(qsTr("Cannot import file into existing drawing:") + " " + filePath);
+            return;
+        }
+
+        EAction.handleUserMessage(qsTr("Importing file:") + " " + filePath);
+        if (fi.isFile()) {
             include("scripts/Block/InsertScriptItem/InsertScriptItem.js");
-            if (InsertScriptItem.isScriptFile(file)) {
+            include("scripts/Draw/Image/Image.js");
+
+            if (InsertScriptItem.isScriptFile(filePath)) {
                 action = RGuiAction.getByScriptFile("scripts/Block/InsertScriptItem/InsertScriptItem.js");
-            } else {
+            }
+            else if (Image.isSupportedBitmapFile(filePath)) {
+                action = RGuiAction.getByScriptFile("scripts/Draw/Image/Image.js");
+            }
+            else {
                 action = RGuiAction.getByScriptFile("scripts/Block/InsertBlockItem/InsertBlockItem.js");
             }
         }
@@ -321,5 +377,6 @@ EventHandler.prototype.drop = function(event) {
 
     action.setData(urls[0]);
     action.slotTrigger();
+    event.acceptProposedAction();
     event.accept();
 };

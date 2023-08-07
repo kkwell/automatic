@@ -146,6 +146,11 @@ Circle2TP.prototype.pickEntity = function(event, preview) {
     var shape = undefined;
 
     if (this.state!==Circle2TP.State.ChoosingSolution) {
+        if (!this.isEntitySnappable(entity)) {
+            // entity not on a snappable layer:
+            return;
+        }
+
         if (isNull(entity)) {
             return;
         }
@@ -238,7 +243,7 @@ Circle2TP.prototype.pickCoordinate = function(event, preview) {
                 }
                 // multiple solutions:
                 else {
-                    op.destroy();
+                    destr(op);
                     this.setState(Circle2TP.State.ChoosingSolution);
                 }
             }
@@ -282,7 +287,21 @@ Circle2TP.prototype.getShapes = function(preview) {
 
     if (isNull(this.candidates)) {
         var shape3 = new RPoint(this.pos3);
-        this.candidates = Apollonius.getSolutions(this.shape1.data(), this.shape2.data(), shape3);
+        var s1 = this.shape1;
+        if (isFunction(this.shape1.data)) {
+            s1 = this.shape1.data();
+        }
+        else {
+            s1 = this.shape1;
+        }
+        var s2 = this.shape2;
+        if (isFunction(this.shape2.data)) {
+            s2 = this.shape2.data();
+        }
+        else {
+            s2 = this.shape2;
+        }
+        this.candidates = Apollonius.getSolutions(s1, s2, shape3);
 
         // filter out lines:
         this.candidates = ShapeAlgorithms.getCircleShapes(this.candidates);

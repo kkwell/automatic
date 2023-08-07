@@ -17,14 +17,16 @@
  * along with QCAD.
  */
 #include <QtGui>
-#include <QDesktopWidget>
+//#include <QDesktopWidget>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMenu>
 #include <QMdiArea>
 #include <QStatusBar>
 #include <QTabBar>
 #include <QToolBar>
 #include <QToolButton>
+#include <QIconDragEvent>
 
 #include <RSingleApplication.h>
 
@@ -137,6 +139,11 @@ void RMainWindowQt::postSelectionChangedEvent() {
 
 void RMainWindowQt::postTransactionEvent(RTransaction& t, bool onlyChanges, RS::EntityType entityTypeFilter) {
     RTransactionEvent* event = new RTransactionEvent(t, onlyChanges, entityTypeFilter);
+    QCoreApplication::postEvent(this, event);
+}
+
+void RMainWindowQt::postPropertyEvent(RPropertyTypeId propertyTypeId, const QVariant& value, RS::EntityType entityTypeFilter) {
+    RPropertyEvent* event = new RPropertyEvent(propertyTypeId, value, entityTypeFilter);
     QCoreApplication::postEvent(this, event);
 }
 
@@ -270,12 +277,12 @@ void RMainWindowQt::updateScenes(QMdiSubWindow* mdiChild) {
 
 void RMainWindowQt::closeEvent(QCloseEvent* e) {
 
-    // workaround for Qt 5.6.1, 5.6.2 bug:
+    // Part 2 of workaround for Qt 5.6.1, 5.6.2, 5.15.0 bug:
     // dock widget closes before close dialog is shown
     // dock widget state not persistent between sessions
     // dock widget closes if user cancels close dialog
 #ifdef Q_OS_MAC
-#if QT_VERSION >= 0x050601 && QT_VERSION <= 0x050602
+#if (QT_VERSION >= 0x050601 && QT_VERSION <= 0x050602) || QT_VERSION >= 0x050F00
     // restore dock widgets that were already closed by the same event due to
     // a Qt bug:
     QString eventAddr = QString("0x%1").arg((qlonglong)e, 0, 16);
@@ -290,6 +297,7 @@ void RMainWindowQt::closeEvent(QCloseEvent* e) {
             }
         }
     }
+    setProperty("ClosedDocks", QStringList());
 #endif
 #endif
 
@@ -299,28 +307,59 @@ void RMainWindowQt::closeEvent(QCloseEvent* e) {
     }
 
     if (mdiArea->subWindowList().isEmpty()) {
+        RSettings::setValue("OpenFile/OpenFiles", QStringList());
+        RSettings::setValue("OpenFile/ActiveFile", QString());
+        writeSettings();
+
         e->accept();
         return;
     }
 
+    QStringList openFiles;
+    QString activeFile;
+
+    QMdiSubWindow* activeWindow = mdiArea->activeSubWindow();
+
     QList<QMdiSubWindow*> mdiChildren = mdiArea->subWindowList();
     for (int i=0; i<mdiChildren.size(); ++i) {
         QMdiSubWindow* mdiChild = mdiChildren.at(i);
+        bool active = mdiChild==activeWindow;
         mdiArea->setActiveSubWindow(mdiChild);
         mdiChild->showMaximized();
+
+        QString fileName;
+        RMdiChildQt* rMdiChild = dynamic_cast<RMdiChildQt*>(mdiChild);
+        if (rMdiChild!=NULL) {
+            RDocument* doc = rMdiChild->getDocument();
+            if (doc!=NULL) {
+                fileName = doc->getFileName();
+            }
+        }
 
         QCloseEvent closeEvent;
         QApplication::sendEvent(mdiChild, &closeEvent);
 
         if (!closeEvent.isAccepted()) {
             e->ignore();
+            // closing of app canceled:
             return;
+        }
+
+        if (!fileName.isEmpty()) {
+            openFiles.append(fileName);
+            if (active) {
+                activeFile = fileName;
+            }
         }
 
         delete mdiChild;
     }
 
     e->accept();
+
+    RSettings::setValue("OpenFile/OpenFiles", openFiles);
+    RSettings::setValue("OpenFile/ActiveFile", activeFile);
+
     writeSettings();
 
     QApplication::quit();
@@ -369,6 +408,16 @@ void RMainWindowQt::enable() {
     disableCounter--;
     if (disableCounter==0) {
         setEnabled(true);
+
+#ifdef Q_OS_MAC
+#if QT_VERSION == 0x050B00 || QT_VERSION == 0x050B01
+        // workaround for Qt 5.10.0-5.11.1 bug
+        // only small portion of app win is redrawn when enabled
+        // redraw can only be forced with a resize
+        resize(width(), height()+1);
+        resize(width(), height()-1);
+#endif
+#endif
     }
 }
 
@@ -486,16 +535,17 @@ void RMainWindowQt::setGraphicsViewCursor(const QCursor& cursor) {
         if (list.at(i)==NULL) {
             continue;
         }
-        RMdiChildQt* mdiOther = dynamic_cast<RMdiChildQt*>(list.at(i));
-        if (mdiOther==NULL) {
+        RMdiChildQt* mdi = dynamic_cast<RMdiChildQt*>(list.at(i));
+        if (mdi==NULL) {
             continue;
         }
-        RDocumentInterface* diOther = mdiOther->getDocumentInterface();
-        if (diOther==NULL) {
+        RDocumentInterface* di = mdi->getDocumentInterface();
+        if (di==NULL) {
             continue;
         }
 
-        diOther->setCursor(cursor, false);
+        // false here prevents recursion:
+        di->setCursor(cursor, false);
     }
 }
 
@@ -532,8 +582,8 @@ bool RMainWindowQt::readSettings() {
 
     // get total available width on all screens:
     int totalWidth = 0;
-    for (int i=0; i<QApplication::desktop()->screenCount(); i++) {
-        totalWidth+=QApplication::desktop()->availableGeometry(i).width();
+    for (int i=0; i<RS::getScreenCount(); i++) {
+        totalWidth+=RS::getAvailableGeometry(i).width();
     }
 
     // sanity check for x:
@@ -587,6 +637,21 @@ bool RMainWindowQt::event(QEvent* e) {
         return false;
     }
 
+    // TODO: never triggered on macOS when dragging title bar icon
+//    QIconDragEvent* ide = dynamic_cast<QIconDragEvent*>(e);
+//    if (ide!=NULL) {
+//        qDebug() << "QIconDragEvent";
+//        ide->accept();
+//        return true;
+//    }
+
+    if (e->type()==QEvent::PaletteChange) {
+        RSettings::resetCache();
+        RGuiAction::updateIcons();
+        notifyPaletteListeners();
+        update();
+    }
+
     if (e->type()==QEvent::KeyPress) {
         QKeyEvent* ke = dynamic_cast<QKeyEvent*>(e);
         if (ke!=NULL) {
@@ -604,8 +669,10 @@ bool RMainWindowQt::event(QEvent* e) {
 
                         emit enterPressed();
                     }
+
+                    // enter pressed in toolbar but NOT in a line edit:
                     QWidget* parent = w->parentWidget();
-                    if (dynamic_cast<QToolBar*>(parent)!=NULL) {
+                    if (dynamic_cast<QToolBar*>(parent)!=NULL && dynamic_cast<QLineEdit*>(w)==NULL) {
                         emit enterPressed();
                     }
                 }
@@ -657,6 +724,15 @@ bool RMainWindowQt::event(QEvent* e) {
         RTransaction t = te->getTransaction();
         notifyTransactionListeners(getDocument(), &t);
         return true;
+    }
+
+    RPropertyEvent* pe = dynamic_cast<RPropertyEvent*>(e);
+    if (pe!=NULL) {
+        RDocumentInterface* documentInterface = getDocumentInterface();
+        if (documentInterface!=NULL) {
+            // called when user changed a property in the property editor
+            documentInterface->propertyChangeEvent(*pe);
+        }
     }
 
     RCloseCurrentEvent* cce = dynamic_cast<RCloseCurrentEvent*>(e);

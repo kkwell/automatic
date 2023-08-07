@@ -45,6 +45,7 @@ class RGraphicsView;
 class RKeyListener;
 class RLayerListener;
 class RNewDocumentListener;
+class RPaletteListener;
 class RPenListener;
 class RPropertyListener;
 class RPreferencesListener;
@@ -112,10 +113,10 @@ public:
     ) = 0;
     virtual void postCloseEvent() = 0;
     //virtual void postPropertyEvent() = 0;
-//    virtual void postPropertyEvent(RPropertyTypeId propertyTypeId,
-//        const QVariant& value,
-//        RS::EntityType entityTypeFilter = RS::EntityAll
-//    ) = 0;
+    virtual void postPropertyEvent(RPropertyTypeId propertyTypeId,
+        const QVariant& value,
+        RS::EntityType entityTypeFilter = RS::EntityAll
+    ) = 0;
 
     void addPropertyListener(RPropertyListener* l);
     void removePropertyListener(RPropertyListener* l);
@@ -182,8 +183,8 @@ public:
 
     void addLayerListener(RLayerListener* l);
     void removeLayerListener(RLayerListener* l);
-    void notifyLayerListeners(RDocumentInterface* documentInterface);
-    void notifyLayerListenersCurrentLayer(RDocumentInterface* documentInterface);
+    void notifyLayerListeners(RDocumentInterface* documentInterface, QList<RLayer::Id>& layerIds);
+    void notifyLayerListenersCurrentLayer(RDocumentInterface* documentInterface, RLayer::Id previousLayerId);
 
     void addBlockListener(RBlockListener* l);
     void removeBlockListener(RBlockListener* l);
@@ -197,6 +198,10 @@ public:
     void addPenListener(RPenListener* l);
     void removePenListener(RPenListener* l);
     void notifyPenListeners(RDocumentInterface* documentInterface);
+
+    void addPaletteListener(RPaletteListener* l);
+    void removePaletteListener(RPaletteListener* l);
+    void notifyPaletteListeners();
 
     void ucsSetEvent(const QString& ucsName);
 
@@ -303,6 +308,7 @@ protected:
     QList<RBlockListener*> blockListeners;
     QList<RViewListener*> viewListeners;
     QList<RPenListener*> penListeners;
+    QList<RPaletteListener*> paletteListeners;
     QList<REntityExportListener*> entityExportListeners;
     QList<RExportListener*> exportListeners;
     QList<RImportListener*> importListeners;

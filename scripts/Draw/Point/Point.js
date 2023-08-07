@@ -23,7 +23,7 @@
  *
  * \brief This module contains ECMAScript implementations of various point drawing tools.
  */
-include("../Draw.js");
+include("scripts/Draw/Draw.js");
 
 /**
  * \class Point
@@ -73,7 +73,7 @@ Point.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(true);
         action.setIcon(Point.includeBasePath + "/Point.svg");
-        action.setStatusTip(qsTr("Show point tools"));
+        //action.setStatusTip(qsTr("Show point tools"));
         action.setDefaultShortcut(new QKeySequence("w,p"));
         action.setNoState();
         action.setDefaultCommands(["pointmenu"]);

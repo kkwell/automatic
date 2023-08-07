@@ -7,6 +7,8 @@
 
         // forwards declarations mapped to includes
         
+                #include "RLine.h"
+            
             
         // includes for base ecma wrapper classes
         
@@ -97,6 +99,8 @@
                 getSetWeights),
                 QScriptValue::PropertyGetter
                 
+                    | QScriptValue::PropertySetter
+                
             );          
             
             proto->setProperty("fitPoints", engine.newFunction(
@@ -118,6 +122,8 @@
 
     // methods:
     
+            REcmaHelper::registerFunction(&engine, proto, operator_assign, "operator_assign");
+            
             REcmaHelper::registerFunction(&engine, proto, getShapeType, "getShapeType");
             
             REcmaHelper::registerFunction(&engine, proto, clone, "clone");
@@ -162,6 +168,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, removeFitPointAt, "removeFitPointAt");
             
+            REcmaHelper::registerFunction(&engine, proto, removeFirstFitPoint, "removeFirstFitPoint");
+            
             REcmaHelper::registerFunction(&engine, proto, removeLastFitPoint, "removeLastFitPoint");
             
             REcmaHelper::registerFunction(&engine, proto, setFitPoints, "setFitPoints");
@@ -183,6 +191,8 @@
             REcmaHelper::registerFunction(&engine, proto, appendKnot, "appendKnot");
             
             REcmaHelper::registerFunction(&engine, proto, getWeights, "getWeights");
+            
+            REcmaHelper::registerFunction(&engine, proto, setWeights, "setWeights");
             
             REcmaHelper::registerFunction(&engine, proto, setDegree, "setDegree");
             
@@ -250,6 +260,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, getPointsWithDistanceToEnd, "getPointsWithDistanceToEnd");
             
+            REcmaHelper::registerFunction(&engine, proto, getPointCloud, "getPointCloud");
+            
             REcmaHelper::registerFunction(&engine, proto, getVectorTo, "getVectorTo");
             
             REcmaHelper::registerFunction(&engine, proto, isOnShape, "isOnShape");
@@ -267,6 +279,8 @@
             REcmaHelper::registerFunction(&engine, proto, flipVertical, "flipVertical");
             
             REcmaHelper::registerFunction(&engine, proto, reverse, "reverse");
+            
+            REcmaHelper::registerFunction(&engine, proto, stretch, "stretch");
             
             REcmaHelper::registerFunction(&engine, proto, getTransformed, "getTransformed");
             
@@ -393,6 +407,61 @@
     } else 
 
     if( context->argumentCount() ==
+        1
+                && (
+                
+                        context->argument(
+                        0
+                        ).isVariant()
+                        ||
+                    
+                        context->argument(
+                        0
+                        ).isQObject()
+                        ||
+                    
+                        context->argument(
+                        0
+                        ).isNull()
+                ) /* type: RSpline */
+            
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RSpline*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RSpline*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RSpline: Argument 0 is not of type RSpline.",
+                               context);                    
+                    }
+                    RSpline 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ constructor:
+    
+            // copyable class:
+            RSpline
+                    cppResult(
+                    a0
+                    );
+                
+            result = engine->newVariant(
+            context->thisObject(), qVariantFromValue(cppResult));
+        
+    } else 
+
+    if( context->argumentCount() ==
         2
                 && (
                 
@@ -411,7 +480,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -517,7 +586,7 @@
         
             if(context->argumentCount() == 1){
                 
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -568,6 +637,20 @@
         if (self==NULL) {
             return REcmaHelper::throwError("self is NULL", context);
         }
+        
+            if(context->argumentCount() == 1){
+                
+                    // argument isArray or QVariantMap
+                    QList < double >
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                self->setWeights(a0);
+            }
         QList < double >
         cppResult = self->
         getWeights();
@@ -591,7 +674,7 @@
         
             if(context->argumentCount() == 1){
                 
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -650,6 +733,79 @@
 
     // public methods:
      QScriptValue
+        REcmaSharedPointerSpline::operator_assign
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerSpline::operator =", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerSpline::operator =";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RSpline* self = 
+                        getSelf("operator =", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RSpline */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RSpline*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RSpline*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RSpline: Argument 0 is not of type RSpline.",
+                               context);                    
+                    }
+                    RSpline 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RSpline &'
+    RSpline & cppResult =
+        
+               self->operator =(a0);
+        // return type: RSpline &
+                // reference
+                result = engine->newVariant(
+                QVariant::fromValue(&cppResult));
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSpline.operator_assign().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerSpline::operator =", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaSharedPointerSpline::getShapeType
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -1398,7 +1554,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -1498,7 +1654,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -2052,6 +2208,50 @@
             return result;
         }
          QScriptValue
+        REcmaSharedPointerSpline::removeFirstFitPoint
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerSpline::removeFirstFitPoint", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerSpline::removeFirstFitPoint";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RSpline* self = 
+                        getSelf("removeFirstFitPoint", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->removeFirstFitPoint();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSpline.removeFirstFitPoint().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerSpline::removeFirstFitPoint", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaSharedPointerSpline::removeLastFitPoint
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -2125,7 +2325,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -2486,7 +2686,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < double >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -2614,6 +2814,62 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerSpline::getWeights", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerSpline::setWeights
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerSpline::setWeights", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerSpline::setWeights";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RSpline* self = 
+                        getSelf("setWeights", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isArray()
+        ) /* type: QList < double > */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QList < double >
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setWeights(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSpline.setWeights().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerSpline::setWeights", context, engine);
             return result;
         }
          QScriptValue
@@ -4530,6 +4786,66 @@
             return result;
         }
          QScriptValue
+        REcmaSharedPointerSpline::getPointCloud
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerSpline::getPointCloud", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerSpline::getPointCloud";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RSpline* self = 
+                        getSelf("getPointCloud", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getPointCloud(a0);
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSpline.getPointCloud().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerSpline::getPointCloud", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaSharedPointerSpline::getVectorTo
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -5477,6 +5793,103 @@
             return result;
         }
          QScriptValue
+        REcmaSharedPointerSpline::stretch
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerSpline::stretch", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerSpline::stretch";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RSpline* self = 
+                        getSelf("stretch", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RPolyline */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RPolyline*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RPolyline*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RSpline: Argument 0 is not of type RPolyline.",
+                               context);                    
+                    }
+                    RPolyline 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RSpline: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->stretch(a0
+        ,
+    a1);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RSpline.stretch().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerSpline::stretch", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaSharedPointerSpline::getTransformed
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -6255,7 +6668,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6316,7 +6729,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < double >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6452,6 +6865,51 @@
     RPolyline cppResult =
         
                self->approximateWithArcs(a0);
+        // return type: RPolyline
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    double
+                    a1 =
+                    (double)
+                    
+                    context->argument( 1 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RPolyline'
+    RPolyline cppResult =
+        
+               self->approximateWithArcs(a0
+        ,
+    a1);
         // return type: RPolyline
                 // not standard type nor reference
                 result = qScriptValueFromValue(engine, cppResult);
@@ -7179,7 +7637,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -7481,7 +7939,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -7595,6 +8053,38 @@
     QList < RVector > cppResult =
         
                self->getSelfIntersectionPoints();
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getSelfIntersectionPoints(a0);
         // return type: QList < RVector >
                 // List of ...:
                 result = REcmaHelper::listToScriptValue(engine, cppResult);

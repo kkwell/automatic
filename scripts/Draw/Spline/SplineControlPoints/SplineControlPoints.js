@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Spline.js");
+include("scripts/Draw/Spline/Spline.js");
 
 /**
  * \class SplineControlPoints
@@ -70,7 +70,7 @@ SplineControlPoints.prototype.setState = function(state) {
         this.setCommandPrompt(trNextPoint);
         this.setLeftMouseTip(trNextPoint);
         if (this.spline.isValid()) {
-            this.setRightMouseTip(qsTr("Done"));
+            this.setRightMouseTip(EAction.trDone);
         }
         else {
             this.setRightMouseTip(EAction.trCancel);
@@ -158,7 +158,7 @@ SplineControlPoints.prototype.getOperation = function(preview) {
     );
 
     if (!e.isValid()) {
-        e.destroy();
+        destr(e);
         return undefined;
     }
 

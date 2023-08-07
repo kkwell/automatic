@@ -17,7 +17,8 @@
  * along with QCAD.
  */
 
-include("../Help.js");
+include("scripts/WidgetFactory.js");
+include("scripts/Help/Help.js");
 
 function CheckForUpdates(guiAction) {
     Help.call(this, guiAction);
@@ -42,8 +43,13 @@ CheckForUpdates.getBaseName = function() {
 
 CheckForUpdates.getUrl = function() {
     // compile update info URL:
-    var url = "http://www.qcad.org/qcad/version/" + CheckForUpdates.getBaseName() + ".html";
-    return url;
+    if (RSettings.isQt(6)) {
+        // TODO: use https:
+        return "http://www.qcad.org/qcad/version/" + CheckForUpdates.getBaseName() + ".html";
+    }
+    else {
+        return "https://www.qcad.org/qcad/version/" + CheckForUpdates.getBaseName() + ".html";
+    }
 };
 
 CheckForUpdates.prototype.beginEvent = function() {
@@ -56,7 +62,7 @@ CheckForUpdates.prototype.beginEvent = function() {
     var appWin = EAction.getMainWindow();
     var dialog = WidgetFactory.createDialog(CheckForUpdates.includeBasePath, "CheckForUpdatesDialog.ui", appWin);
     var textBrowser = dialog.findChild("TextBrowser");
-    WidgetFactory.initTextBrowser(textBrowser, this, "openUrl");
+    WidgetFactory.initTextBrowser(textBrowser, QDesktopServices.openUrl);
 
     // load version info from qcad.org:
     textBrowser.setHtml("<p>" + qsTr("Checking for Updates...") + "</p>");
@@ -80,10 +86,6 @@ CheckForUpdates.prototype.beginEvent = function() {
     dialog.exec();
 
     WidgetFactory.saveState(dialog);
-    dialog.destroy();
+    destr(dialog);
     EAction.activateMainWindow();
-};
-
-CheckForUpdates.prototype.openUrl = function(url) {
-    QDesktopServices.openUrl(url);
 };

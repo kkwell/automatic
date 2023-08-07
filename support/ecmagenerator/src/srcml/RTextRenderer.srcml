@@ -24,6 +24,7 @@
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"core_global.h"</cpp:file></cpp:include>
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QTextLayout&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QMutex&gt;</cpp:file></cpp:include>
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RDocument.h"</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"REntityData.h"</cpp:file></cpp:include>
@@ -83,12 +84,21 @@
         <return>return <expr><name>richText</name></expr>;</return>
     }</block></function>
 
+    <function><type><name>static</name> <name>void</name></type> <name>lockForDrawing</name><parameter_list>()</parameter_list> <block>{
+        <expr_stmt><expr><name>m</name>.<call><name>lock</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+    }</block></function>
+
+    <function><type><name>static</name> <name>void</name></type> <name>unlockForDrawing</name><parameter_list>()</parameter_list> <block>{
+        <expr_stmt><expr><name>m</name>.<call><name>unlock</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+    }</block></function>
+
 </public><private>private:
     <function_decl><type><name>QList<argument_list>&lt;<argument><name>RPainterPath</name></argument>&gt;</argument_list></name></type> <name>getPainterPathsForBlock</name><parameter_list>(
         <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>blockText</name></decl></param>,
         <param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name><name>QTextLayout</name>::<name>FormatRange</name></name></argument>&gt;</argument_list></name>&amp;</type> <name>formats</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>horizontalAdvance</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>horizontalAdvanceNoSpacing</name></decl></param>,
+        <param><decl><type><name>double</name>&amp;</type> <name>horizontalAdvanceNoTrailingSpace</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>ascent</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>descent</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>usedHeight</name></decl></param>)</parameter_list>;</function_decl>
@@ -98,6 +108,7 @@
         <param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name><name>QTextLayout</name>::<name>FormatRange</name></name></argument>&gt;</argument_list></name>&amp;</type> <name>formats</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>horizontalAdvance</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>horizontalAdvanceNoSpacing</name></decl></param>,
+        <param><decl><type><name>double</name>&amp;</type> <name>horizontalAdvanceNoTrailingSpace</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>ascent</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>descent</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>usedHeight</name></decl></param>)</parameter_list>;</function_decl>
@@ -107,6 +118,7 @@
         <param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name><name>QTextLayout</name>::<name>FormatRange</name></name></argument>&gt;</argument_list></name>&amp;</type> <name>formats</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>horizontalAdvance</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>horizontalAdvanceNoSpacing</name></decl></param>,
+        <param><decl><type><name>double</name>&amp;</type> <name>horizontalAdvanceNoTrailingSpace</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>ascent</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>descent</name></decl></param>,
         <param><decl><type><name>double</name>&amp;</type> <name>usedHeight</name></decl></param>)</parameter_list>;</function_decl>
@@ -190,6 +202,19 @@
         <return>return <expr><name>false</name></expr>;</return>
     }</block></function>
 
+    <function><type><name>void</name></type> <name>setBlockUnderline</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list> <block>{
+        <if>if <condition>(<expr>!<name>blockUnderline</name>.<call><name>isEmpty</name><argument_list>()</argument_list></call></expr>)</condition><then> <block>{
+            <expr_stmt><expr><name>blockUnderline</name>.<call><name>top</name><argument_list>()</argument_list></call> = <name>on</name></expr>;</expr_stmt>
+        }</block></then></if>
+    }</block></function>
+
+    <function><type><name>bool</name></type> <name>getBlockUnderline</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <if>if <condition>(<expr>!<name>blockUnderline</name>.<call><name>isEmpty</name><argument_list>()</argument_list></call></expr>)</condition><then> <block>{
+            <return>return <expr><name>blockUnderline</name>.<call><name>top</name><argument_list>()</argument_list></call></expr>;</return>
+        }</block></then></if>
+        <return>return <expr><name>false</name></expr>;</return>
+    }</block></function>
+
     <function><type><name>void</name></type> <name>setBlockHeight</name><parameter_list>(<param><decl><type><name>double</name></type> <name>h</name></decl></param>)</parameter_list> <block>{
         <if>if <condition>(<expr>!<name>blockHeight</name>.<call><name>isEmpty</name><argument_list>()</argument_list></call></expr>)</condition><then> <block>{
             <expr_stmt><expr><name>blockHeight</name>.<call><name>top</name><argument_list>()</argument_list></call> = <name>h</name></expr>;</expr_stmt>
@@ -217,54 +242,116 @@
     }</block></function>
 
 </private><public>public:
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxLineFeed</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAlignmentLeft</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAlignmentCenter</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAlignmentRight</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxXAlignmentLeft</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxXAlignmentCenter</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxXAlignmentRight</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxParagraphFeed</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxXFeed</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxHeightChange</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxLineFeedStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxLineFeed</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAlignmentLeftStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxAlignmentLeft</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAlignmentCenterStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxAlignmentCenter</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAlignmentRightStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxAlignmentRight</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxXAlignmentLeftStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxXAlignmentLeft</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxXAlignmentCenterStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxXAlignmentCenter</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxXAlignmentRightStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxXAlignmentRight</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxXSpaceMTextStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxXSpaceMText</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxTabMMStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxTabMM</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxTabINStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxTabIN</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxParagraphFeedStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxParagraphFeed</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxXFeedStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxXFeed</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxHeightChangeStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxHeightChange</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxUnderlineChangeStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxUnderlineChange</name></decl>;</decl_stmt>
     <comment type="line">//static QString rxRelativeHeightChange;</comment>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxStackedText</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxColorChangeIndex</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxColorChangeCustom</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxNonBreakingSpace</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxOverlineOn</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxOverlineOff</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxUnderlineOn</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxUnderlineOff</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxStrikethroughOn</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxStrikethroughOff</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxWidthChange</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxObliqueAngleChange</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxTrackChange</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAlignmentChange</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxFontChangeCad</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxFontChangeTtf</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxBeginBlock</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxEndBlock</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxBackslash</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxCurlyOpen</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxCurlyClose</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxDegree</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>escDegree</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxPlusMinus</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>escPlusMinus</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxDiameter</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>escDiameter</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxUnderlined</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxUnicode</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxStackedTextStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxStackedText</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxColorChangeIndexStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxColorChangeIndex</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxColorChangeCustomStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxColorChangeCustom</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxNonBreakingSpaceStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxNonBreakingSpace</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxOverlineOnStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxOverlineOn</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxOverlineOffStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxOverlineOff</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxUnderlineOnStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxUnderlineOn</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxUnderlineOffStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxUnderlineOff</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxStrikethroughOnStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxStrikethroughOn</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxStrikethroughOffStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxStrikethroughOff</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxWidthChangeStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxWidthChange</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxObliqueAngleChangeStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxObliqueAngleChange</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxTrackChangeStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxTrackChange</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAlignmentChangeStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxAlignmentChange</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxFontChangeCadStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxFontChangeCad</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxFontChangeTtfStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxFontChangeTtf</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxBeginBlockStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxBeginBlock</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxEndBlockStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxEndBlock</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxBackslashStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxBackslash</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxCurlyOpenStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxCurlyOpen</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxCurlyCloseStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxCurlyClose</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxDegreeStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxDegree</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>escDegreeStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>escDegree</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxPlusMinusStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxPlusMinus</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>escPlusMinusStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>escPlusMinus</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxDiameterStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxDiameter</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>escDiameterStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>escDiameter</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxUnderlineStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxUnderline</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>escUnderlineStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>escUnderline</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxNoOpStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxNoOp</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxNoOpEndStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxNoOpEnd</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>escNoOpStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>escNoOp</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxUnicodeStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxUnicode</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxOptionalBreakStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxOptionalBreak</name></decl>;</decl_stmt>
 
-    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAll</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAllStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QString</name></type> <name>rxAllBreakStr</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxAll</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>QRegularExpression</name></type> <name>rxAllBreak</name></decl>;</decl_stmt>
 
     <decl_stmt><decl><type><name>static</name> <name>QChar</name></type> <name>chDegree</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>static</name> <name>QChar</name></type> <name>chPlusMinus</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>static</name> <name>QChar</name></type> <name>chDiameter</name></decl>;</decl_stmt>
 
 </public><private>private:
+    <decl_stmt><decl><type><name>static</name> <name>QMutex</name></type> <name>m</name></decl>;</decl_stmt>
+
     <decl_stmt><decl><type><name>const</name> <name>RTextBasedData</name>&amp;</type> <name>textData</name></decl>;</decl_stmt>
 
     <decl_stmt><decl><type><name>Target</name></type> <name>target</name></decl>;</decl_stmt>
@@ -291,6 +378,7 @@
     <decl_stmt><decl><type><name>QStack<argument_list>&lt;<argument><name>QString</name></argument>&gt;</argument_list></name></type> <name>blockFontFile</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>QStack<argument_list>&lt;<argument><name>bool</name></argument>&gt;</argument_list></name></type> <name>blockBold</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>QStack<argument_list>&lt;<argument><name>bool</name></argument>&gt;</argument_list></name></type> <name>blockItalic</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>QStack<argument_list>&lt;<argument><name>bool</name></argument>&gt;</argument_list></name></type> <name>blockUnderline</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>QStack<argument_list>&lt;<argument><name>QStringList</name></argument>&gt;</argument_list></name></type> <name>openTags</name></decl>;</decl_stmt>
 </private>}</block>;</class>
 

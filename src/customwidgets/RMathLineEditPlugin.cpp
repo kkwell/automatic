@@ -75,9 +75,9 @@ QString RMathLineEditPlugin::domXml() const {
         "   <property name=\"integer\" stdset=\"0\">\n"
         "     <bool>false</bool>\n"
         "   </property>\n"
-        "   <property name=\"defaultUnit\">\n"
-        "     <number>0</number>\n"
-        "   </property>\n"
+        //"   <property name=\"defaultUnit\">\n"
+        //"     <number>0</number>\n"
+        //"   </property>\n"
         " </widget>\n"
         "</ui>\n";
 }

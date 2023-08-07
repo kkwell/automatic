@@ -64,6 +64,9 @@
         postInitPlugins
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        initTranslations
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         countPlugins
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -74,6 +77,12 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         hasPlugin
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        checkPluginLicenses
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        checkPluginLicense
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

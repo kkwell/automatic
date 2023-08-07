@@ -55,6 +55,9 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getStaticPropertyTypeIds
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -71,6 +74,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         exportEntity
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        scaleNonUniform
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getData

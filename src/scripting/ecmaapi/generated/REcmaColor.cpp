@@ -118,9 +118,17 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, getList, "getList");
             
+            REcmaHelper::registerFunction(&engine, &ctor, getNameList, "getNameList");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getColorList, "getColorList");
+            
             REcmaHelper::registerFunction(&engine, &ctor, getIcon, "getIcon");
             
             REcmaHelper::registerFunction(&engine, &ctor, getHighlighted, "getHighlighted");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getFaded, "getFaded");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, reinit, "reinit");
             
 
     // static properties:
@@ -1129,6 +1137,148 @@
             return result;
         }
          QScriptValue
+        REcmaColor::getNameList
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaColor::getNameList", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaColor::getNameList";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QStringList'
+    QStringList cppResult =
+        RColor::
+       getNameList();
+        // return type: QStringList
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QStringList'
+    QStringList cppResult =
+        RColor::
+       getNameList(a0);
+        // return type: QStringList
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RColor.getNameList().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaColor::getNameList", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaColor::getColorList
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaColor::getColorList", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaColor::getColorList";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RColor >'
+    QList < RColor > cppResult =
+        RColor::
+       getColorList();
+        // return type: QList < RColor >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RColor >'
+    QList < RColor > cppResult =
+        RColor::
+       getColorList(a0);
+        // return type: QList < RColor >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RColor.getColorList().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaColor::getColorList", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaColor::getIcon
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -1831,6 +1981,171 @@
             return result;
         }
          QScriptValue
+        REcmaColor::getFaded
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaColor::getFaded", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaColor::getFaded";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RColor */
+     && (
+            context->argument(1).isVariant()
+        ) /* type: QColor */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RColor*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RColor*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RColor: Argument 0 is not of type RColor.",
+                               context);                    
+                    }
+                    RColor 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    QColor*
+                    ap1 =
+                    qscriptvalue_cast<
+                    QColor*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RColor: Argument 1 is not of type QColor.",
+                               context);                    
+                    }
+                    QColor 
+                    a1 = 
+                    *ap1;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RColor'
+    RColor cppResult =
+        RColor::
+       getFaded(a0
+        ,
+    a1);
+        // return type: RColor
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RColor */
+     && (
+            context->argument(1).isVariant()
+        ) /* type: QColor */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RColor*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RColor*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RColor: Argument 0 is not of type RColor.",
+                               context);                    
+                    }
+                    RColor 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    QColor*
+                    ap1 =
+                    qscriptvalue_cast<
+                    QColor*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RColor: Argument 1 is not of type QColor.",
+                               context);                    
+                    }
+                    QColor 
+                    a1 = 
+                    *ap1;
+                
+                    // argument isStandardType
+                    double
+                    a2 =
+                    (double)
+                    
+                    context->argument( 2 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RColor'
+    RColor cppResult =
+        RColor::
+       getFaded(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: RColor
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RColor.getFaded().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaColor::getFaded", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaColor::equals
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -2044,6 +2359,40 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaColor::operator<", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaColor::reinit
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaColor::reinit", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaColor::reinit";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    RColor::
+       reinit();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RColor.reinit().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaColor::reinit", context, engine);
             return result;
         }
          QScriptValue REcmaColor::toString

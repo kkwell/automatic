@@ -41,6 +41,14 @@ public:
     QWidget*  widget();
 
     QScriptValue __qtscript_self;
+
+#ifdef Q_OS_MACOS
+    mutable int cacheMinimumSizeOri;
+    mutable QSize cacheMinimumSize;
+
+    mutable int cacheSizeHintOri;
+    mutable QSize cacheSizeHint;
+#endif
 };
 
 #endif // QTSCRIPTSHELL_QSTACKEDLAYOUT_H

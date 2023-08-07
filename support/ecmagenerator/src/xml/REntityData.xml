@@ -58,6 +58,21 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="segment"
         hasDefault="true" default="false" isConst="false" />
+        <arg type="QList &lt; RObject::Id &gt; *"
+        typeName="QList &lt; RObject::Id &gt; *" name="entityIds"
+        hasDefault="true" default="NULL" isConst="false" />
+      </variant>
+    </method>
+    <method name="getClosestSubEntityId"
+    cppName="getClosestSubEntityId" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RObject::Id" isPureVirtual="false">
+        <arg type="RVector &amp;" typeName="RVector" name="pos"
+        isConst="true" />
+        <arg type="double" typeName="double" name="range"
+        isConst="false" />
+        <arg type="bool" typeName="bool" name="ignoreComplex"
+        isConst="false" />
       </variant>
     </method>
     <method name="getClosestShape" cppName="getClosestShape"
@@ -71,6 +86,9 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="RNANDOUBLE" isConst="false" />
         <arg type="bool" typeName="bool" name="ignoreComplex"
         hasDefault="true" default="false" isConst="false" />
+        <arg type="RObject::Id *" typeName="RObject::Id *"
+        name="subEntityId" hasDefault="true" default="NULL"
+        isConst="false" />
       </variant>
     </method>
     <method name="castToShape" cppName="castToShape"
@@ -84,6 +102,16 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="RBox" isPureVirtual="false">
         <arg type="bool" typeName="bool" name="ignoreEmpty"
         hasDefault="true" default="false" isConst="false" />
+      </variant>
+    </method>
+    <method name="copyAttributesFrom" cppName="copyAttributesFrom"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="REntityData &amp;" typeName="REntityData"
+        name="entityData" isConst="true" />
+        <arg type="bool" typeName="bool" name="copyBlockId"
+        hasDefault="true" default="true" isConst="false" />
       </variant>
     </method>
     <method name="to2D" cppName="to2D" specifier="public"
@@ -139,6 +167,19 @@ xmlns:rs="http://www.ribbonsoft.com">
     <method name="setSelected" cppName="setSelected"
     specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="isSelectedWorkingSet"
+    cppName="isSelectedWorkingSet" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setSelectedWorkingSet"
+    cppName="setSelectedWorkingSet" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
         <arg type="bool" typeName="bool" name="on"
         isConst="false" />
@@ -304,6 +345,13 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="RColor" isPureVirtual="false" />
       <variant returnType="RColor" isPureVirtual="false">
+        <arg type="RColor &amp;" typeName="RColor"
+        name="unresolvedColor" isConst="true" />
+        <arg type="QStack &lt; REntity * &gt; &amp;"
+        typeName="QStack &lt; REntity * &gt;" name="blockRefStack"
+        isConst="true" />
+      </variant>
+      <variant returnType="RColor" isPureVirtual="false">
         <arg type="bool" typeName="bool" name="resolve"
         isConst="false" />
         <arg type="QStack &lt; REntity * &gt; &amp;"
@@ -324,6 +372,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="RS::ProjectionRenderingHint"
         typeName="RS::ProjectionRenderingHint" name="hint"
         hasDefault="true" default="RS :: RenderTop"
+        isConst="false" />
+        <arg type="QList &lt; RObject::Id &gt; *"
+        typeName="QList &lt; RObject::Id &gt; *"
+        name="subEntityIds" hasDefault="true" default="NULL"
         isConst="false" />
       </variant>
     </method>
@@ -350,6 +402,10 @@ xmlns:rs="http://www.ribbonsoft.com">
       isPureVirtual="false">
         <arg type="RBox &amp;" typeName="RBox" name="queryBox"
         hasDefault="true" default="RDEFAULT_RBOX" isConst="true" />
+        <arg type="QList &lt; RObject::Id &gt; *"
+        typeName="QList &lt; RObject::Id &gt; *"
+        name="subEntityIds" hasDefault="true" default="NULL"
+        isConst="false" />
       </variant>
     </method>
     <method name="getMiddlePoints" cppName="getMiddlePoints"
@@ -359,11 +415,28 @@ xmlns:rs="http://www.ribbonsoft.com">
       isPureVirtual="false">
         <arg type="RBox &amp;" typeName="RBox" name="queryBox"
         hasDefault="true" default="RDEFAULT_RBOX" isConst="true" />
+        <arg type="QList &lt; RObject::Id &gt; *"
+        typeName="QList &lt; RObject::Id &gt; *"
+        name="subEntityIds" hasDefault="true" default="NULL"
+        isConst="false" />
       </variant>
     </method>
     <method name="getCenterPoints" cppName="getCenterPoints"
     specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
+      <variant returnType="QList &lt; RVector &gt;"
+      isPureVirtual="false">
+        <arg type="RBox &amp;" typeName="RBox" name="queryBox"
+        hasDefault="true" default="RDEFAULT_RBOX" isConst="true" />
+        <arg type="QList &lt; RObject::Id &gt; *"
+        typeName="QList &lt; RObject::Id &gt; *"
+        name="subEntityIds" hasDefault="true" default="NULL"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="getArcReferencePoints"
+    cppName="getArcReferencePoints" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="QList &lt; RVector &gt;"
       isPureVirtual="false">
         <arg type="RBox &amp;" typeName="RBox" name="queryBox"
@@ -382,6 +455,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
         <arg type="RBox &amp;" typeName="RBox" name="queryBox"
         hasDefault="true" default="RDEFAULT_RBOX" isConst="true" />
+        <arg type="QList &lt; RObject::Id &gt; *"
+        typeName="QList &lt; RObject::Id &gt; *"
+        name="subEntityIds" hasDefault="true" default="NULL"
+        isConst="false" />
       </variant>
     </method>
     <method name="getClosestPointOnEntity"
@@ -394,6 +471,9 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="RNANDOUBLE" isConst="false" />
         <arg type="bool" typeName="bool" name="limited"
         hasDefault="true" default="true" isConst="false" />
+        <arg type="RObject::Id *" typeName="RObject::Id *"
+        name="subEntityId" hasDefault="true" default="NULL"
+        isConst="false" />
       </variant>
     </method>
     <method name="getIntersectionPoints"
@@ -411,6 +491,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="RDEFAULT_RBOX" isConst="true" />
         <arg type="bool" typeName="bool" name="ignoreComplex"
         hasDefault="true" default="true" isConst="false" />
+        <arg type="QList &lt; QPair &lt; RObject::Id , RObject::Id &gt; &gt; *"
+        typeName="QList &lt; QPair &lt; RObject::Id , RObject::Id &gt; &gt; *"
+        name="entityIds" hasDefault="true" default="NULL"
+        isConst="false" />
       </variant>
       <variant returnType="QList &lt; RVector &gt;"
       isPureVirtual="false">
@@ -480,6 +564,14 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="true" />
       </variant>
     </method>
+    <method name="clickReferencePoint"
+    cppName="clickReferencePoint" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="RVector &amp;" typeName="RVector"
+        name="referencePoint" isConst="true" />
+      </variant>
+    </method>
     <method name="moveReferencePoint" cppName="moveReferencePoint"
     specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
@@ -488,6 +580,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         name="referencePoint" isConst="true" />
         <arg type="RVector &amp;" typeName="RVector"
         name="targetPoint" isConst="true" />
+        <arg type="Qt::KeyboardModifiers"
+        typeName="Qt::KeyboardModifiers" name="modifiers"
+        hasDefault="true" default="Qt :: NoModifier"
+        isConst="false" />
       </variant>
     </method>
     <method name="move" cppName="move" specifier="public"

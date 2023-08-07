@@ -110,7 +110,11 @@
             
             REcmaHelper::registerFunction(&engine, proto, getUVector, "getUVector");
             
+            REcmaHelper::registerFunction(&engine, proto, setUVector, "setUVector");
+            
             REcmaHelper::registerFunction(&engine, proto, getVVector, "getVVector");
+            
+            REcmaHelper::registerFunction(&engine, proto, setVVector, "setVVector");
             
             REcmaHelper::registerFunction(&engine, proto, setWidth, "setWidth");
             
@@ -126,15 +130,33 @@
             
             REcmaHelper::registerFunction(&engine, proto, getBrightness, "getBrightness");
             
+            REcmaHelper::registerFunction(&engine, proto, setBrightness, "setBrightness");
+            
             REcmaHelper::registerFunction(&engine, proto, getContrast, "getContrast");
+            
+            REcmaHelper::registerFunction(&engine, proto, setContrast, "setContrast");
             
             REcmaHelper::registerFunction(&engine, proto, getFade, "getFade");
             
+            REcmaHelper::registerFunction(&engine, proto, setFade, "setFade");
+            
             REcmaHelper::registerFunction(&engine, proto, getImage, "getImage");
+            
+            REcmaHelper::registerFunction(&engine, proto, getFullFilePath, "getFullFilePath");
             
             REcmaHelper::registerFunction(&engine, proto, load, "load");
             
             REcmaHelper::registerFunction(&engine, proto, reload, "reload");
+            
+            REcmaHelper::registerFunction(&engine, proto, getScaleVector, "getScaleVector");
+            
+            REcmaHelper::registerFunction(&engine, proto, mapToImage, "mapToImage");
+            
+            REcmaHelper::registerFunction(&engine, proto, mapFromImage, "mapFromImage");
+            
+            REcmaHelper::registerFunction(&engine, proto, getCornersPx, "getCornersPx");
+            
+            REcmaHelper::registerFunction(&engine, proto, getCorners, "getCorners");
             
             REcmaHelper::registerFunction(&engine, proto, getEdges, "getEdges");
             
@@ -1373,6 +1395,88 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: Qt::KeyboardModifiers */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RImageData: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RImageData: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+                    // argument isStandardType
+                    Qt::KeyboardModifiers
+                    a2 =
+                    (Qt::KeyboardModifiers)
+                    (int)
+                    context->argument( 2 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->moveReferencePoint(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.moveReferencePoint().",
                    context);
@@ -2044,6 +2148,94 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RBox */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(3).isArray()
+        ) /* type: QList < RObject::Id > * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RBox*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RBox*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RImageData: Argument 0 is not of type RBox.",
+                               context);                    
+                    }
+                    RBox 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+                    // argument is pointer
+                    QList < RObject::Id > * a3 = NULL;
+
+                    a3 = 
+                        REcmaHelper::scriptValueTo<QList < RObject::Id > >(
+                            context->argument(3)
+                        );
+                    
+                    if (a3==NULL && 
+                        !context->argument(3).isNull()) {
+                        return REcmaHelper::throwError("RImageData: Argument 3 is not of type QList < RObject::Id > *QList < RObject::Id > *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < QSharedPointer < RShape > >'
+    QList < QSharedPointer < RShape > > cppResult =
+        
+               self->getShapes(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: QList < QSharedPointer < RShape > >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.getShapes().",
                    context);
@@ -2425,6 +2617,73 @@
             return result;
         }
          QScriptValue
+        REcmaImageData::setUVector
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::setUVector", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::setUVector";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("setUVector", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RImageData: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setUVector(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.setUVector().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::setUVector", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaImageData::getVVector
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -2471,6 +2730,73 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaImageData::getVVector", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaImageData::setVVector
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::setVVector", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::setVVector";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("setVVector", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RImageData: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setVVector(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.setVVector().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::setVVector", context, engine);
             return result;
         }
          QScriptValue
@@ -2909,6 +3235,61 @@
             return result;
         }
          QScriptValue
+        REcmaImageData::setBrightness
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::setBrightness", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::setBrightness";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("setBrightness", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setBrightness(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.setBrightness().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::setBrightness", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaImageData::getContrast
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -2955,6 +3336,61 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaImageData::getContrast", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaImageData::setContrast
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::setContrast", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::setContrast";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("setContrast", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setContrast(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.setContrast().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::setContrast", context, engine);
             return result;
         }
          QScriptValue
@@ -3007,6 +3443,61 @@
             return result;
         }
          QScriptValue
+        REcmaImageData::setFade
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::setFade", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::setFade";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("setFade", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setFade(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.setFade().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::setFade", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaImageData::getImage
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -3053,6 +3544,55 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaImageData::getImage", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaImageData::getFullFilePath
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::getFullFilePath", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::getFullFilePath";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("getFullFilePath", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        
+               self->getFullFilePath();
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.getFullFilePath().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::getFullFilePath", context, engine);
             return result;
         }
          QScriptValue
@@ -3141,6 +3681,297 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaImageData::reload", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaImageData::getScaleVector
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::getScaleVector", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::getScaleVector";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("getScaleVector", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        
+               self->getScaleVector();
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.getScaleVector().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::getScaleVector", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaImageData::mapToImage
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::mapToImage", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::mapToImage";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("mapToImage", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RImageData: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        
+               self->mapToImage(a0);
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.mapToImage().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::mapToImage", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaImageData::mapFromImage
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::mapFromImage", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::mapFromImage";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("mapFromImage", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RImageData: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        
+               self->mapFromImage(a0);
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.mapFromImage().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::mapFromImage", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaImageData::getCornersPx
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::getCornersPx", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::getCornersPx";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("getCornersPx", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getCornersPx();
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.getCornersPx().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::getCornersPx", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaImageData::getCorners
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaImageData::getCorners", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaImageData::getCorners";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RImageData* self = 
+                        getSelf("getCorners", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getCorners();
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RImageData.getCorners().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaImageData::getCorners", context, engine);
             return result;
         }
          QScriptValue

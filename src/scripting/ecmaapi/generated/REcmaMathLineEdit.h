@@ -54,6 +54,12 @@
         setAngle
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        isScale
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setScale
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         isInteger
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -79,6 +85,12 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setToolTip
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getNormalTextColor
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setTextColor
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         slotTextChanged

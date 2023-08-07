@@ -17,9 +17,9 @@
  * along with QCAD.
  */
 
-include("EAction.js");
-include("Select/Select.js");
-include("Widgets/CadToolBar/CadToolBar.js");
+include("scripts/EAction.js");
+include("scripts/Select/Select.js");
+include("scripts/Widgets/CadToolBar/CadToolBar.js");
 
 /**
  * \class DefaultAction
@@ -60,6 +60,8 @@ DefaultAction.prototype.beginEvent = function() {
     this.setState(DefaultAction.State.Neutral);
     this.blockRefId = RObject.INVALID_ID;
     this.entityInBlockId = RObject.INVALID_ID;
+
+    this.optOutRelativeZeroResume = true;
 };
 
 DefaultAction.prototype.setState = function(state) {
@@ -80,6 +82,7 @@ DefaultAction.prototype.setState = function(state) {
         this.setArrowCursor();
     }
 
+    var tr;
     switch (this.state) {
     case DefaultAction.State.Neutral:
         this.d1Model = RVector.invalid;
@@ -99,21 +102,23 @@ DefaultAction.prototype.setState = function(state) {
         this.d2Screen = RVector.invalid;
         break;
     case DefaultAction.State.SettingCorner2:
-        this.setLeftMouseTip(qsTr("Set second corner"));
+        tr = qsTr("Second corner");
+        this.setLeftMouseTip(tr);
+        this.setCommandPrompt(tr);
         this.setRightMouseTip("");
         break;
     case DefaultAction.State.MovingReference:
     case DefaultAction.State.SettingReference:
-        this.setLeftMouseTip(
-                qsTr("Specify target point of reference point")
-        );
+        tr = qsTr("Target point of reference point");
+        this.setLeftMouseTip(tr);
+        this.setCommandPrompt(tr);
         this.setRightMouseTip("");
         break;
     case DefaultAction.State.MovingEntity:
     case DefaultAction.State.SettingEntity:
-        this.setLeftMouseTip(
-                qsTr("Specify target point of selection")
-        );
+        tr = qsTr("Target point of selection");
+        this.setLeftMouseTip(tr);
+        this.setCommandPrompt(tr);
         this.setRightMouseTip("");
         break;
     case DefaultAction.State.MovingEntityInBlock:
@@ -130,6 +135,8 @@ DefaultAction.prototype.suspendEvent = function() {
     if (!isNull(this.getGuiAction())) {
         this.getGuiAction().setChecked(false);
     }
+
+    EAction.prototype.suspendEvent.call(this);
 };
 
 DefaultAction.prototype.resumeEvent = function() {
@@ -137,10 +144,17 @@ DefaultAction.prototype.resumeEvent = function() {
 };
 
 DefaultAction.prototype.mouseMoveEvent = function(event) {
-    // we're in the middle of panning: don't do anything:
-    if (event.buttons().valueOf() === Qt.MidButton.valueOf() ||
+    // we're in the middle of panning:
+    // do nothing:
+    if (event.buttons().valueOf() === RS.MiddleButton ||
         (event.buttons().valueOf() === Qt.LeftButton.valueOf() &&
          event.modifiers().valueOf() === Qt.ControlModifier.valueOf())) {
+        return;
+    }
+
+    // we're in the middle of choosing something from a context menu:
+    // do nothing:
+    if (this.waitingForContextMenu) {
         return;
     }
 
@@ -159,13 +173,18 @@ DefaultAction.prototype.mouseMoveEvent = function(event) {
         if (referencePoint.isValid()) {
             this.highlightReferencePoint(referencePoint);
         } else {
-            range = view.mapDistanceFromView(this.pickRangePixels);
-            var strictRange = view.mapDistanceFromView(10);
-            RMouseEvent.setOriginalMousePos(event.globalPos());
-            entityId = this.di.getClosestEntity(event.getModelPosition(), range, strictRange, false);
-            RMouseEvent.resetOriginalMousePos();
-            if (entityId !== RObject.INVALID_ID && this.document.isEntityEditable(entityId)) {
-                this.highlightEntity(entityId);
+            if (RSettings.getBoolValue("GraphicsView/HighlightEntity", true)===true) {
+
+                entityId = EAction.getEntityIdUnderCursor(this.getDocumentInterface(), event, undefined, true);
+
+//                range = view.mapDistanceFromView(this.pickRangePixels);
+//                var strictRange = view.mapDistanceFromView(10);
+//                RMouseEvent.setOriginalMousePos(event.globalPos());
+//                entityId = this.di.getClosestEntity(event.getModelPosition(), range, strictRange, false);
+//                RMouseEvent.resetOriginalMousePos();
+                if (entityId !== RObject.INVALID_ID && this.document.isEntityEditable(entityId)) {
+                    this.highlightEntity(entityId);
+                }
             }
         }
         break;
@@ -178,7 +197,8 @@ DefaultAction.prototype.mouseMoveEvent = function(event) {
             // if the dragging started on top of a reference point,
             // start moving the reference point:
             referencePoint = view.getClosestReferencePoint(this.d1Screen, this.minPickRangePixels);
-            if (referencePoint.isValid() && !referencePoint.isIgnore() && !RSettings.getIgnoreAllReferencePoints()) {
+            if (referencePoint.isValid() && !referencePoint.isIgnore() && !RSettings.getIgnoreAllReferencePoints() &&
+                !referencePoint.isArrow()) {
                 this.d1Model = referencePoint;
                 this.di.setRelativeZero(this.d1Model);
                 this.setState(DefaultAction.State.MovingReference);
@@ -274,28 +294,54 @@ DefaultAction.prototype.mouseMoveEvent = function(event) {
 };
 
 DefaultAction.prototype.mouseReleaseEvent = function(event) {
-    var persistentSelection = RSettings.getBoolValue("GraphicsView/PersistentSelection", false);
-    var view, range, strictRange, entityId;
+    if (this.waitingForContextMenu) {
+        return;
+    }
 
-    var shiftPressed = (event.modifiers() & Qt.ShiftModifier) > 0 || (event.modifiers() & Qt.ControlModifier) > 0 || persistentSelection===true;
+    var appWin = EAction.getMainWindow();
+
+    var persistentSelection = RSettings.getBoolValue("GraphicsView/PersistentSelection", false);
+    var entityId;
+
+    var shiftPressed = isShiftPressed(event);
+    var controlPressed = isControlPressed(event);
+    var addToSelection = this.getAddToSelection(shiftPressed) || controlPressed || persistentSelection===true;
 
     if (event.button() === Qt.LeftButton) {
         switch (this.state) {
         case DefaultAction.State.Dragging:
+
+            // handle clicks on reference points:
+            this.d2Model = event.getModelPosition();
+            this.d2Screen = event.getScreenPosition();
+            var view = event.getGraphicsView();
+            if (this.d1Screen.equalsFuzzy(this.d2Screen, 10)) {
+                // mouse press and release at same position (click):
+                var referencePoint = view.getClosestReferencePoint(this.d1Screen, this.minPickRangePixels);
+                if (referencePoint.isValid() && !referencePoint.isIgnore() && !RSettings.getIgnoreAllReferencePoints()) {
+                    this.d1Model = referencePoint;
+                    var op = new RClickReferencePointOperation(this.d1Model);
+                    this.di.applyOperation(op);
+                    this.setState(DefaultAction.State.Neutral);
+                    return;
+                }
+            }
+
             // find selectable entity under cursor:
             entityId = this.getEntityId(event, false, true);
 
             //qDebug("entityId: ", entityId);
+            //if (entityId!==RObject.INVALID_ID) qDebug("  parentId: ", this.document.queryEntityDirect(entityId).getParentId());
 
             if (entityId !== -1) {
-                if (shiftPressed && this.document.isSelected(entityId)) {
+                if (addToSelection && (this.document.isSelected(entityId) || this.document.isSelectedWorkingSet(entityId))) {
                     this.deselectEntity(entityId);
                 }
                 else {
-                    this.selectEntity(entityId, shiftPressed);
+                    this.selectEntity(entityId, addToSelection);
                 }
             } else {
-                if (!shiftPressed) {
+                if (!addToSelection) {
                     if (persistentSelection===false) {
                         this.di.clearSelection();
                     }
@@ -310,17 +356,9 @@ DefaultAction.prototype.mouseReleaseEvent = function(event) {
             this.di.clearPreview();
             this.d2Model = event.getModelPosition();
 
-            if ((event.modifiers().valueOf() == Qt.ShiftModifier.valueOf()) ||
-                (event.modifiers().valueOf() == Qt.ControlModifier.valueOf()) ||
-                persistentSelection===true) {
+            // select entities:
+            this.di.selectBoxXY(new RBox(this.d1Model, this.d2Model), addToSelection);
 
-                // add all entities in window to the selection:
-                this.di.selectBoxXY(new RBox(this.d1Model, this.d2Model), true);
-            } else {
-                // select entities in window only:
-                this.di.selectBoxXY(new RBox(this.d1Model, this.d2Model), false);
-            }
-            // event.setConsumed(true);
             this.setState(DefaultAction.State.Neutral);
             break;
 
@@ -343,7 +381,6 @@ DefaultAction.prototype.mouseReleaseEvent = function(event) {
         }
 
         else if (this.state===DefaultAction.State.Neutral) {
-            var appWin = EAction.getMainWindow();
             var rightClickRange = RSettings.getIntValue("GraphicsView/RightClickRange", 10);
             entityId = EAction.getEntityIdUnderCursor(this.di, event, rightClickRange, true);
 
@@ -361,7 +398,7 @@ DefaultAction.prototype.mouseReleaseEvent = function(event) {
 
                 // use right-click on entity to select entity:
                 else if (rightClickToDeselect) {
-                    this.selectEntity(entityId, shiftPressed);
+                    this.selectEntity(entityId, addToSelection);
                     handled = true;
                 }
             }
@@ -379,7 +416,8 @@ DefaultAction.prototype.mouseReleaseEvent = function(event) {
         }
 
         if (!handled) {
-            if (CadToolBar.back()===true) {
+            var cadToolBar = appWin.findChild("CadToolBar");
+            if (cadToolBar.back()===true) {
                 handled = true;
             }
         }
@@ -408,15 +446,17 @@ DefaultAction.prototype.mousePressEvent = function(event) {
 };
 
 DefaultAction.prototype.mouseDoubleClickEvent = function(event) {
-    if (event.button() == Qt.LeftButton && this.state===DefaultAction.State.Neutral) {
+    if (event.button() == Qt.LeftButton && (this.state===DefaultAction.State.Neutral || this.state===DefaultAction.State.Dragging)) {
+        if (this.state===DefaultAction.State.Dragging) {
+            // cancel dragging (double-click):
+            this.setState(DefaultAction.State.Neutral);
+        }
         var view = event.getGraphicsView();
         var range = view.mapDistanceFromView(this.pickRangePixels);
         var strictRange = view.mapDistanceFromView(10);
         var entityId = this.di.getClosestEntity(event.getModelPosition(), range, strictRange, false);
         if (entityId===RObject.INVALID_ID) {
-            if (this.document.getCurrentViewportId()!==RObject.INVALID_ID) {
-                this.di.unsetCurrentViewport();
-            }
+            this.emptySpaceDoubleClicked();
             return;
         }
 
@@ -425,17 +465,31 @@ DefaultAction.prototype.mouseDoubleClickEvent = function(event) {
     EAction.prototype.mouseDoubleClickEvent.call(this, event);
 };
 
+DefaultAction.prototype.emptySpaceDoubleClicked = function() {
+    if (this.document.getCurrentViewportId()!==RObject.INVALID_ID) {
+        this.di.unsetCurrentViewport();
+    }
+};
+
 DefaultAction.prototype.escapeEvent = function(event) {
     this.di.clearPreview();
     this.di.repaintViews();
-    CadToolBar.back();
+    var appWin = EAction.getMainWindow();
+    var cadToolBar = appWin.findChild("CadToolBar");
+    cadToolBar.back();
     this.setState(DefaultAction.State.Neutral);
+};
+
+DefaultAction.prototype.coordinateEvent = function(event) {
+    // required to make sure invalid coordinate event goes through (needed for drag and drop):
+    this.pickCoordinate(event, false);
 };
 
 DefaultAction.prototype.pickCoordinate = function(event, preview) {
     var op;
 
-    var shiftPressed = (event.getModifiers() & Qt.ShiftModifier) > 0;
+    var shiftPressed = isShiftPressed(event);
+    var addToSelection = this.getAddToSelection(shiftPressed);
     var doc = this.getDocument();
 
     switch (this.state) {
@@ -464,7 +518,9 @@ DefaultAction.prototype.pickCoordinate = function(event, preview) {
 
         if (preview) {
             this.d2Model = d2;
-            op = new RMoveReferencePointOperation(this.d1Model, this.d2Model);
+            op = new RMoveReferencePointOperation(this.d1Model, this.d2Model, event.getModifiers());
+            var scene = this.di.getGraphicsSceneWithFocus();
+            op.setGraphicsScene(scene);
             this.di.previewOperation(op);
         }
         else {
@@ -473,7 +529,9 @@ DefaultAction.prototype.pickCoordinate = function(event, preview) {
             }
             else {
                 this.d2Model = d2;
-                op = new RMoveReferencePointOperation(this.d1Model, this.d2Model);
+                op = new RMoveReferencePointOperation(this.d1Model, this.d2Model, event.getModifiers());
+                var scene = this.di.getGraphicsSceneWithFocus();
+                op.setGraphicsScene(scene);
                 op.setText(qsTr("Move Reference Point"));
                 this.di.applyOperation(op);
                 this.di.clearPreview();
@@ -649,7 +707,7 @@ DefaultAction.prototype.entityDoubleClicked = function(entityId, event) {
             // block editing with double click might be disabled for this entity:
             if (entity.getCustomBoolProperty("QCAD", "DoubleClickEditBlock", true)===true) {
                 include("scripts/Block/Block.js");
-                EAction.handleUserMessage(qsTr("Editing block '%1'<br>Choose <i>Block > Return to Main Drawing</i> when done").arg(entity.getReferencedBlockName()), false);
+                EAction.handleUserMessage(qsTr("Editing block \"%1\"<br>Choose <i>Block > Return to Main Drawing</i> when done").arg(entity.getReferencedBlockName()), false);
                 Block.editBlock(this.di, entity.getReferencedBlockName());
             }
         }
@@ -668,8 +726,14 @@ DefaultAction.prototype.entityDoubleClicked = function(entityId, event) {
 
         if (RSettings.getBoolValue("GraphicsView/DoubleClickSelectContour", true)===true) {
             include("scripts/Select/SelectContour/SelectContour.js");
-            var matchingEntityIds = SelectContour.getConnectedEntities(this.document, entityId, 0.001);
-            var add = (event.modifiers().valueOf() === Qt.ShiftModifier.valueOf());
+            var tol = RSettings.getDoubleValue("GraphicsView/DoubleClickSelectContourTolerance", 0.001);
+            var layerId = RObject.INVALID_ID;
+            if (isAltPressed(event)) {
+                // Alt: restrict to same layer:
+                layerId = entity.getLayerId();
+            }
+            var matchingEntityIds = SelectContour.getConnectedEntities(this.document, entityId, tol, layerId);
+            var add = isShiftPressed(event);
             if (entity.isSelected()) {
                 this.di.selectEntities(matchingEntityIds, add);
             }
@@ -684,3 +748,12 @@ DefaultAction.prototype.entityDoubleClicked = function(entityId, event) {
 //        this.di.setCurrentViewport(entity.data());
 //    }
 };
+
+/**
+ * \return True to add to selection (by default this is when shiftPressed is true).
+ * May be reimplemented to allow other ways to add to selection (e.g. user interface button, etc.)
+ */
+DefaultAction.prototype.getAddToSelection = function(shiftPressed) {
+    return shiftPressed;
+};
+

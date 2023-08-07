@@ -17,6 +17,7 @@
  * along with QCAD.
  */
 #include <QPen>
+#include <QElapsedTimer>
 
 #include "RArc.h"
 #include "RCircle.h"
@@ -40,6 +41,7 @@ RHatchData::RHatchData() :
     scaleFactor(1.0),
     angle(0.0),
     patternName("SOLID"),
+    transparency(255),
     dirty(true), gotDraft(false), gotPixelSizeHint(0.0) {
 }
 
@@ -67,6 +69,7 @@ RHatchData::RHatchData(bool solid, double scaleFactor, double angle, const QStri
     scaleFactor(scaleFactor),
     angle(angle),
     patternName(patternName),
+    transparency(255),
     dirty(true), gotDraft(false) {
 }
 
@@ -76,6 +79,7 @@ RHatchData& RHatchData::operator =(const RHatchData& other) {
     solid = other.solid;
     scaleFactor = other.scaleFactor;
     angle = other.angle;
+    transparency = other.transparency;
     patternName = other.patternName;
     originPoint = other.originPoint;
     other.getPainterPaths(false);
@@ -125,7 +129,7 @@ RHatchData& RHatchData::operator =(const RHatchData& other) {
         }
     }
 
-    dirty = false;
+    dirty = other.dirty;
     return *this;
 }
 
@@ -268,7 +272,9 @@ QList<RRefPoint> RHatchData::getReferencePoints(RS::ProjectionRenderingHint hint
     return ret;
 }
 
-bool RHatchData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint) {
+bool RHatchData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers) {
+    Q_UNUSED(modifiers)
+
     bool ret = false;
 
     for (int i=0; i<boundary.size(); ++i) {
@@ -451,9 +457,10 @@ bool RHatchData::stretch(const RPolyline& area, const RVector& offset) {
     return ret;
 }
 
-QList<QSharedPointer<RShape> > RHatchData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment) const {
+QList<QSharedPointer<RShape> > RHatchData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment, QList<RObject::Id>* entityIds) const {
     Q_UNUSED(queryBox)
     Q_UNUSED(segment)
+    Q_UNUSED(entityIds)
 
     QList<QSharedPointer<RShape> > ret;
 
@@ -484,6 +491,81 @@ QList<QSharedPointer<RShape> > RHatchData::getExploded() const {
     return getShapes();
 }
 
+double RHatchData::getLength() const {
+    double ret = 0.0;
+//    QList<QSharedPointer<RShape> > shapes = getShapes();
+
+//    for (int i=0; i<shapes.length(); i++) {
+//        ret += shapes[i]->getLength();
+//    }
+
+//    return ret;
+
+    QList<RPolyline> pls = getBoundaryAsPolylines();
+
+    for (int i=0; i<pls.length(); i++) {
+        ret += pls[i].getLength();
+    }
+    return ret;
+}
+
+double RHatchData::getArea() const {
+    QList<RPolyline> pls = getBoundaryAsPolylines();
+
+    double ret = 0.0;
+    for (int i=0; i<pls.length(); i++) {
+        RPolyline pl = pls[i];
+
+        // check if polyline is inside odd number of other polylines (-)
+        // or even number of other polylines (+) of this hatch:
+        int counter = 0;
+        for (int k=0; k<pls.length(); k++) {
+            // don't check against polyline self:
+            if (i==k) {
+                continue;
+            }
+            RPolyline other = pls[k];
+
+            // define contains as 'must contain every vertex':
+            bool contains = true;
+            if (!other.getBoundingBox().contains(pl.getBoundingBox())) {
+                // bounding box of other does not contain polyline:
+                contains = false;
+            }
+            else {
+                RVector pInside = pl.getPointInside();
+                if (!pInside.isValid()) {
+                    pInside = pl.getStartPoint();
+                }
+                if (!other.contains(pInside, true, 1.0e-3)) {
+                    // point inside polyline is not inside other:
+                    contains = false;
+                }
+            }
+
+            if (contains) {
+                counter++;
+            }
+        }
+
+        if (counter%2==0) {
+            // island:
+            ret += pl.getArea();
+        }
+        else {
+            // hole:
+            ret -= pl.getArea();
+        }
+    }
+
+    return ret;
+}
+
+void RHatchData::clearCustomPattern() {
+    pattern.clear();
+    update();
+}
+
 void RHatchData::newLoop() {
     QList<QSharedPointer<RShape> > loop;
     boundary.append(loop);
@@ -495,7 +577,12 @@ void RHatchData::cancelLoop() {
     update();
 }
 
-void RHatchData::addBoundary(QSharedPointer<RShape> shape) {
+/**
+ * Add a boundary shape to the current loop.
+ * \param addAutoLoops True: create new loop if boundary does not connect.
+ * Otherwise add line segment on the fly (DXF/DWG import).
+ */
+void RHatchData::addBoundary(QSharedPointer<RShape> shape, bool addAutoLoops) {
     if (boundary.size()==0) {
         qWarning() << "RHatchData::addBoundary: no loops found";
         return;
@@ -516,7 +603,7 @@ void RHatchData::addBoundary(QSharedPointer<RShape> shape) {
         }
     }
     else {
-        // if the current loop is not empty, check if entity connects:
+        // if the current loop is not empty, check if shape connects:
         if (!boundary.last().isEmpty()) {
             QSharedPointer<RShape> prev = boundary.last().last();
             QSharedPointer<RShape> next = shape;
@@ -524,9 +611,31 @@ void RHatchData::addBoundary(QSharedPointer<RShape> shape) {
                 RVector ep = prev->getEndPoint();
                 RVector sp = next->getStartPoint();
 
+                // gap of more than 0.001:
+                // new loop:
                 if (!ep.equalsFuzzy(sp, 0.001)) {
-                    // inserting loop on the fly:
-                    newLoop();
+                    if (addAutoLoops) {
+                        // inserting loop on the fly:
+                        newLoop();
+                    }
+                    else {
+                        // inserting line segment on the fly to closest match point,
+                        // reverse shape if necessary:
+                        if (ep.getDistanceTo(sp) < ep.getDistanceTo(next->getEndPoint())) {
+                            boundary.last().append(QSharedPointer<RLine>(new RLine(ep, sp)));
+                        }
+                        else {
+                            boundary.last().append(QSharedPointer<RLine>(new RLine(ep, next->getEndPoint())));
+                            shape->reverse();
+                        }
+                    }
+                }
+
+                // gap of more than 0.0001:
+                else if (!ep.equalsFuzzy(sp, 0.0001)) {
+                    // enforce tolerance accepted by DXF/DWG format:
+                    // insert bridge element on the fly:
+                    boundary.last().append(QSharedPointer<RLine>(new RLine(ep, sp)));
                 }
             }
             else {
@@ -539,6 +648,10 @@ void RHatchData::addBoundary(QSharedPointer<RShape> shape) {
 //        QSharedPointer<RArc> arc = shape.dynamicCast<RArc>();
 //        if (!arc.isNull() && fabs(arc->getSweep())<RMath::deg2rad(2)) {
 //            boundary.last().append(QSharedPointer<RShape>(new RLine(arc->getStartPoint(), arc->getEndPoint())));
+//        }
+//        QSharedPointer<RArc> arc = shape.dynamicCast<RArc>();
+//        if (!arc.isNull() && fabs(arc->getSweep())>M_PI*2-RS::AngleTolerance) {
+//            boundary.last().append(QSharedPointer<RShape>(new RCircle(arc->getCenter(), arc->getRadius())));
 //        }
 //        else {
             boundary.last().append(shape);
@@ -592,6 +705,9 @@ QList<RPainterPath> RHatchData::getPainterPaths(bool draft, double pixelSizeHint
 
     //RDebug::startTimer();
 
+    //qDebug() << "regenerating hatch";
+    //RDebug::startTimer();
+
     // get pattern:
     const RPattern* p = NULL;
     bool customPattern = false;
@@ -640,7 +756,7 @@ QList<RPainterPath> RHatchData::getPainterPaths(bool draft, double pixelSizeHint
     QList<RLine> boundaryEdges = boundaryBox.getLines2d();
     QList<RVector> boundaryCorners = boundaryBox.getCorners2d();
 
-    QTime timer;
+    QElapsedTimer timer;
     timer.start();
     int timeOut = -1;
 
@@ -793,7 +909,8 @@ QList<RPainterPath> RHatchData::getPainterPaths(bool draft, double pixelSizeHint
             QList<RLine> segments = getSegments(unclippedLine);
 
             RPainterPathExporter ppExporter;
-            ppExporter.setExportZeroLinesAsPoints(false);
+            //ppExporter.setExportZeroLinesAsPoints(false);
+            ppExporter.setExportZeroLinesAsPoints(true);
             // ignore zero lines if
             // line was split up into segments
             ppExporter.setIgnoreZeroLines(!hasDots);
@@ -815,6 +932,7 @@ QList<RPainterPath> RHatchData::getPainterPaths(bool draft, double pixelSizeHint
                     }
                     ppExporter.exportLine(segments[si], offset);
                     RPainterPath path = ppExporter.getPainterPath();
+                    path.setSimplePointDisplay(true);
 
                     if (!path.isEmpty()) {
                         //clippedPattern.addPath(path);
@@ -824,7 +942,7 @@ QList<RPainterPath> RHatchData::getPainterPaths(bool draft, double pixelSizeHint
                 }
             }
 
-            if (timer.elapsed()>500) {
+            //if (timer.elapsed()>500) {
                 if (timeOut==-1) {
                     timeOut = RSettings::getIntValue("GraphicsView/MaxHatchTime", 2000);
                 }
@@ -835,12 +953,15 @@ QList<RPainterPath> RHatchData::getPainterPaths(bool draft, double pixelSizeHint
                     gotDraft = draft;
                     return painterPaths;
                 }
-            }
+            //}
         }
     }
 
     dirty = false;
     gotDraft = draft;
+
+    //RDebug::stopTimer("regen hatch");
+    //RDebug::printBacktrace();
 
     return painterPaths;
 }
@@ -1066,6 +1187,7 @@ RPainterPath RHatchData::getBoundaryPath(double pixelSizeHint) const {
             qWarning() << "RHatchData::getBoundaryPath: loop not closed: "
                        << "end (" << cursor <<  ") does not connect to "
                        << "start (" << loopStartPoint << ")";
+            //boundaryPath.lineTo(loopStartPoint);
             return RPainterPath();
         }
     }
@@ -1189,6 +1311,7 @@ void RHatchData::update() const {
 }
 
 bool RHatchData::order() {
+    update();
     return RShape::order(boundary);
 }
 

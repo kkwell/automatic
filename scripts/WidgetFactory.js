@@ -17,8 +17,8 @@
  * along with QCAD.
  */
 
-include("library.js");
-include("map.js");
+include("scripts/library.js");
+include("scripts/map.js");
 
 function WidgetFactory() {
 }
@@ -72,20 +72,34 @@ WidgetFactory.createWidget = function(basePath, uiFile, parent) {
         parent = RMainWindowQt.getMainWindow();
     }
 
-    var fileInfo = new QFileInfo(uiFile);
-    if (!fileInfo.exists() && !fileInfo.isAbsolute()) {
-        if (basePath.length>0) {
-            uiFile = basePath + "/" + uiFile;
+    var candidates;
+    if (!new QFileInfo(uiFile).isAbsolute()) {
+        candidates = [
+            uiFile,
+            basePath + "/" + uiFile
+        ];
+        if (!uiFile.startsWith(":")) {
+            candidates.push(":" + uiFile);
         }
+        if (!basePath.startsWith(":")) {
+            candidates.push(":" + basePath + "/" + uiFile);
+        }
+    }
+    else {
+        candidates = [
+            uiFile
+        ];
+    }
 
-        fileInfo = new QFileInfo(uiFile);
-        if (!fileInfo.exists()) {
-            uiFile = ":" + uiFile;
-            fileInfo = new QFileInfo(uiFile);
+    for (var i=0; i<candidates.length; i++) {
+        var candidate = candidates[i];
+        var fileInfo = new QFileInfo(candidate);
+        if (fileInfo.exists()) {
+            uiFile = candidate;
         }
     }
 
-    //fileInfo = new QFileInfo(uiFile);
+    var fileInfo = new QFileInfo(uiFile);
     if (!fileInfo.exists()) {
         qWarning("WidgetFactory: File %1 does not exist".arg(uiFile));
         return undefined;
@@ -104,7 +118,7 @@ WidgetFactory.createWidget = function(basePath, uiFile, parent) {
 
     var formWidget = loader.load(buf, parent);
     buf.close();
-    loader.destroy();
+    destr(loader);
 
     if (isNull(formWidget)) {
         qDebug("WidgetFactory.createWidget: widget is NULL");
@@ -126,8 +140,12 @@ WidgetFactory.createWidget = function(basePath, uiFile, parent) {
 WidgetFactory.createDialog = function(basePath, uiFile, parent) {
     var dialog = WidgetFactory.createWidget(basePath, uiFile, parent);
 
+    var flags = dialog.windowFlags();
+    flags = makeQtWindowFlags(flags & ~(Qt.WindowContextHelpButtonHint));
+    dialog.setWindowFlags(flags);
+
     // a global function might be defined to do additional
-    // initilization for all dialogs (e.g. for testing purposes):
+    // initialization for all dialogs (e.g. for testing purposes):
     if (typeof(initDialog)!=="undefined") {
         for (var i=0; i<initDialog.length; i++) {
             initDialog[i](dialog);
@@ -147,21 +165,21 @@ WidgetFactory.getKey = function(group, obj) {
     }
 
     var g = group;
-    if (typeof(obj["SettingsGroup"])!="undefined") {
-        g = obj["SettingsGroup"];
+    if (typeof(obj.property("SettingsGroup"))!="undefined") {
+        g = obj.property("SettingsGroup");
     }
     var key = [g, obj.objectName];
 
     // correct key:
-    if (obj.toString() === "QRadioButton" || obj.toString() === "QToolButton") {
+    if (isOfType(obj, QRadioButton) || isOfType(obj, QToolButton)) {
         // correct to button group name:
-        if (isFunction(obj.group) && obj.group()) {
+        if (isFunction(obj.group) && !isNull(obj.group())) {
             key = [g, obj.group().objectName];
         }
         else {
             var parent = obj.parent();
             // correct to group box (parent) name:
-            if (parent && parent.toString()=="QGroupBox") {
+            if (parent && isOfType(parent, QGroupBox)) {
                 key = [g, parent.objectName];
             }
         }
@@ -178,6 +196,31 @@ WidgetFactory.getKeyString = function(group, obj) {
     else {
         return keyTuple[0] + "/" + keyTuple[1];
     }
+};
+
+WidgetFactory.saveSize = function(widget) {
+    if (!widget) {
+        return;
+    }
+    var name = widget.objectName;
+    if (name.length===0) {
+        return;
+    }
+    RSettings.setValue(name + "/Width", widget.width);
+    RSettings.setValue(name + "/Height", widget.height);
+};
+
+WidgetFactory.restoreSize = function(widget) {
+    if (!widget) {
+        return;
+    }
+    var name = widget.objectName;
+    if (name.length===0) {
+        return;
+    }
+    var w = RSettings.getIntValue(name + "/Width", widget.width);
+    var h = RSettings.getIntValue(name + "/Height", widget.height);
+    widget.resize(w, h);
 };
 
 /**
@@ -210,8 +253,9 @@ WidgetFactory.saveState = function(widget, group, document, map) {
     for (var i = 0; i < children.length; ++i) {
         var c = children[i];
 
-        if (!c || isDeleted(c) || c.toString()==="QVariantAnimation" ||
-                c.toString()==="QWidgetAction" || c.objectName==="" ||
+
+        if (!c || isDeleted(c) || c.toString().startsWith("QVariantAnimation") ||
+                c.toString().startsWith("QWidgetAction") || c.objectName==="" ||
                 c.objectName==="Icon" || c.objectName==="qt_toolbar_ext_button") {
             continue;
         }
@@ -224,12 +268,12 @@ WidgetFactory.saveState = function(widget, group, document, map) {
 
         // ignore widgets that have been saved elsewhere (e.g. plugins might
         // save widgets contents by themselves in savePreferences):
-        if (typeof(c["Saved"]) != "undefined" && c["Saved"]===true) {
+        if (typeof(c.property("Saved")) != "undefined" && c.property("Saved")===true) {
             continue;
         }
 
         // skip children from other groups in this widget (for options toolbar):
-        if (typeof(c["SettingsGroup"]) != "undefined" && c["SettingsGroup"] != group) {
+        if (typeof(c.property("SettingsGroup")) != "undefined" && c.property("SettingsGroup") != group) {
             if (isNull(map)) {
                 continue;
             }
@@ -246,6 +290,9 @@ WidgetFactory.saveState = function(widget, group, document, map) {
         else if (isOfType(c, RMathLineEdit)) {
             //value = [c.text, c.getDefaultUnit()];
             value = c.text;
+        }
+        else if (isOfType(c, RMathComboBox)) {
+            value = c.currentText;
         }
         else if (isOfType(c, QCheckBox)) {
             value = c.checked;
@@ -270,12 +317,12 @@ WidgetFactory.saveState = function(widget, group, document, map) {
         else if (isOfType(c, QComboBox) || isOfType(c, QFontComboBox)) {
             var forceSaveText = false;
             var forceSaveIndex = false;
-            if (typeof(c["ForceSaveText"]) != "undefined"
-                    && c["ForceSaveText"] === true) {
+            if (typeof(c.property("ForceSaveText")) != "undefined"
+                    && c.property("ForceSaveText") === true) {
                 forceSaveText = true;
             }
-            if (typeof(c["ForceSaveIndex"]) != "undefined"
-                    && c["ForceSaveIndex"] === true) {
+            if (typeof(c.property("ForceSaveIndex")) != "undefined"
+                    && c.property("ForceSaveIndex") === true) {
                 forceSaveIndex = true;
             }
             if (forceSaveIndex == true) {
@@ -297,6 +344,9 @@ WidgetFactory.saveState = function(widget, group, document, map) {
             value = c.getLinetypePattern();
         }
         else if (isOfType(c, QSpinBox) || isOfType(c, QDoubleSpinBox)) {
+            value = c.value;
+        }
+        else if (isOfType(c, QSlider)) {
             value = c.value;
         }
         else if (isOfType(c, QListWidget)) {
@@ -327,8 +377,8 @@ WidgetFactory.saveState = function(widget, group, document, map) {
                 }
             }
         }
-        else if (c.toString().startsWith("RFontChooserWidget")) {
-            value = c.getFont();
+        else if (isOfType(c, RFontChooserWidget)) {
+            value = c.getChosenFont();
         }
 
         if (isNull(value)) {
@@ -337,30 +387,36 @@ WidgetFactory.saveState = function(widget, group, document, map) {
         }
 
         // save property
-        if (typeof(c["SaveProperty"]) != "undefined") {
-            var prop = c["SaveProperty"];
+        if (typeof(c.property("SaveProperty")) != "undefined") {
+            var prop = c.property("SaveProperty");
             RSettings.setValue(key + "." + prop, c[prop]);
         }
 
         // widgets with dynamic property "RequiresRestart" trigger a
         // restart application warning after changing preferences:
-        if (typeof(c["RequiresRestart"]) != "undefined"
-            && c["RequiresRestart"] === true) {
+        if (typeof(c.property("RequiresRestart")) != "undefined"
+            && c.property("RequiresRestart") === true) {
             WidgetFactory.requiresRestart = true;
         }
 
         // widgets can be ignored by setting the dynamic property
         // "SaveContents" = false
         var saveContents = true;
-        if (typeof(c["SaveContents"]) != "undefined"
-                && c["SaveContents"] === false) {
+        if (typeof(c.property("SaveContents")) != "undefined"
+                && c.property("SaveContents") === false) {
             saveContents = false;
         }
 
         if (saveContents) {
             if (document) {
                 if (isObject(document)) {
-                    // save key / value pair to object:
+                    // make sure value of custom property is string, not QColor or RColor:
+                    // ensures that it can be stored in DXF/DWG and displayed in property editor:
+                    if (isOfType(value, QColor) || isOfType(value, RColor)) {
+                        value = value.name();
+                    }
+
+                    // save key / value pair to object (e.g. layout block):
                     document.setCustomProperty("QCAD", key, value);
                 }
                 else {
@@ -412,7 +468,7 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
     }
 
     // Qt5: QWebView has no scriptable children method:
-    if (!isFunction(widget["children"])) {
+    if (!isFunction(widget.children)) {
         return;
     }
 
@@ -421,7 +477,7 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
         var c = children[i];
         
         if (!c || isDeleted(c)) {
-            break;
+            continue;
         }
 
         // ignore widgets without name:
@@ -441,8 +497,7 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
 
         // skip children from other groups in this widget (for options toolbar):
         // but not if used from a test [map != undefined]
-        if (isNull(map) && typeof (c["SettingsGroup"]) != "undefined"
-                && c["SettingsGroup"] !== group) {
+        if (isNull(map) && typeof (c.property("SettingsGroup")) != "undefined" && c.property("SettingsGroup") !== group) {
             continue;
         }
 
@@ -453,7 +508,7 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
 
         // handle widgets which have their own reset method
         var hasOwnReset = false;
-        if (typeof(c["hasOwnReset"]) != "undefined" && c["hasOwnReset"] == true) {
+        if (typeof(c.property("hasOwnReset")) != "undefined" && c.property("hasOwnReset") == true) {
             hasOwnReset = true;
         }
         if (reset && hasOwnReset) {
@@ -464,13 +519,12 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
         }
         
         var key = WidgetFactory.getKeyString(group, c);
-        var value;
-        if (reset && !isNull(c.defaultValue) && (typeof(c["SettingsGroup"])=="undefined" ||
-                c["SettingsGroup"]===group)) {
-            value = c.defaultValue;
+        var value = undefined;
+        if (reset && !isNull(c.property("defaultValue")) && (typeof(c.property("SettingsGroup"))=="undefined" || c.property("SettingsGroup")===group)) {
+            value = c.property("defaultValue");
         } else {
             if (!isNull(map)) {
-                value = map.get(key);                
+                value = map.get(key);
             } else {
                 if (!isNull(document)) {
                     if (isObject(document)) {
@@ -498,14 +552,13 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
         // don't restore widgets that have been restored elsewhere (e.g. script
         // add-ons might load widgets contents by themselves in initPreferences):
         // [but always restore widgets if used from a test (map != undefined)]
-        if (isNull(map) && !reset && typeof (c["Loaded"]) != "undefined"
-                && c["Loaded"] === true) {
+        if (isNull(map) && !reset && c.property("Loaded")===true) {
             value = undefined;
         }
 
         // restore property
-        if (typeof(c["SaveProperty"]) != "undefined") {
-            var prop = c["SaveProperty"];
+        if (typeof(c.property("SaveProperty")) != "undefined") {
+            var prop = c.property("SaveProperty");
             var val = RSettings.getValue(key + "." + prop);
             if (!isNull(val)) {
                 c[prop] = val;
@@ -519,40 +572,38 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
 //        qDebug("restoring: ", c.objectName);
 //        qDebug("  value: ", value);
 
-        if (isOfType(c, QLineEdit)) {
-            WidgetFactory.connect(c.textChanged, signalReceiver, c.objectName);
-            c.textChanged.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            if (isNull(c.defaultValue)) {
-                c.setProperty("defaultValue", c.text);
-            }
-            if (!isNull(value)) {
-                c.text = value;
-            }
-            continue;
-        }
         if (isOfType(c, QPlainTextEdit)) {
-            WidgetFactory.connect(c.textChanged, signalReceiver, c.objectName);
-            c.textChanged.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            if (isNull(c.defaultValue)) {
+            if (!reset) {
+                WidgetFactory.connect(c.textChanged, signalReceiver, c.objectName);
+                WidgetFactory.connect(c.textChanged, WidgetFactory.topLevelWidget, "Setting");
+            }
+            if (isNull(c.property("defaultValue"))) {
                 c.setProperty("defaultValue", c.toPlainText());
             }
             if (!isNull(value)) {
                 c.setPlainText(value);
             }
             continue;
-        }        
+        }
         if (isOfType(c, RMathLineEdit)) {
-            WidgetFactory.connect(c.valueChanged, signalReceiver, c.objectName);
-            c.valueChanged.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            if (isNull(c.defaultValue)) {
+            if (!reset) {
+                WidgetFactory.connect(c.valueChanged, signalReceiver, c.objectName);
+                WidgetFactory.connect(c.valueChanged, WidgetFactory.topLevelWidget, "Setting");
+            }
+            if (isNull(c.property("defaultValue"))) {
                 //c.defaultValue = [c.text, c.getDefaultUnit()];
-                c.defaultValue = c.text;
+                c.setProperty("defaultValue", c.text);
                 c.slotTextChanged(c.text);
             }
             if (!isNull(value)) {
                 // deprecated: value and default unit:
                 if (isArray(value) && value.length===2) {
-                    c.text = value[0];
+                    if (isNull(value[0])) {
+                        c.text = "";
+                    }
+                    else {
+                        c.text = value[0].toString();
+                    }
                 }
                 else {
                     if (isString(value)) {
@@ -565,33 +616,75 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
             }
             continue;
         }
+        if (isOfType(c, RMathComboBox)) {
+            if (!reset) {
+                WidgetFactory.connect(c.valueChanged, signalReceiver, c.objectName);
+                WidgetFactory.connect(c.valueChanged, WidgetFactory.topLevelWidget, "Setting");
+            }
+            if (isNull(c.property("defaultValue"))) {
+                //c.defaultValue = [c.text, c.getDefaultUnit()];
+                c.setProperty("defaultValue", c.currentText);
+                c.slotTextChanged(c.currentText);
+            }
+            if (!isNull(value)) {
+                if (isString(value)) {
+                    c.currentText = value;
+                }
+                else {
+                    c.currentText = "%1".arg(value);
+                }
+            }
+            continue;
+        }
+        if (isOfType(c, QLineEdit)) {
+            if (!reset) {
+                WidgetFactory.connect(c.textChanged, signalReceiver, c.objectName);
+                WidgetFactory.connect(c.textChanged, WidgetFactory.topLevelWidget, "Setting");
+            }
+
+            if (isNull(c.property("defaultValue"))) {
+                c.setProperty("defaultValue", c.text);
+            }
+            if (!isNull(value)) {
+                c.text = value.toString();
+            }
+            continue;
+        }
         if (isOfType(c, QToolButton) || isOfType(c, QPushButton)) {
 
-            if (!c.group() && !c.autoExclusive) {
+            if (isNull(c.group()) && !c.autoExclusive) {
                 if (c.checkable) {
-                    WidgetFactory.connect(c.toggled, signalReceiver, c.objectName);
-                    c.toggled.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-                    if (isNull(c.defaultValue)) {
-                        c.defaultValue = c.checked;
+                    if (!reset) {
+                        WidgetFactory.connect(c.toggled, signalReceiver, c.objectName);
+                        WidgetFactory.connect(c.toggled, WidgetFactory.topLevelWidget, "Setting");
+                    }
+                    if (isNull(c.property("defaultValue"))) {
+                        c.setProperty("defaultValue", c.checked);
                     }
                     if (!isNull(value)) {
                         c.checked = (value === true || value === "true");
                     }
                 }
                 else {
-                    WidgetFactory.connect(c.clicked, signalReceiver, c.objectName, false);
+                    if (!reset) {
+                        WidgetFactory.connect(c.clicked, signalReceiver, c.objectName, false);
+                    }
                 }
             }
             else {
-                WidgetFactory.connect(c.toggled, signalReceiver, c.objectName);
+                if (!reset) {
+                    WidgetFactory.connect(c.toggled, signalReceiver, c.objectName);
+                }
             }
             continue;
         }
         if (isOfType(c, QCheckBox)) {
-            WidgetFactory.connect(c.toggled, signalReceiver, c.objectName);
-            c.stateChanged.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            if (isNull(c.defaultValue)) {
-                c.defaultValue = c.checked;
+            if (!reset) {
+                WidgetFactory.connect(c.toggled, signalReceiver, c.objectName);
+                WidgetFactory.connect(c.stateChanged, WidgetFactory.topLevelWidget, "Setting");
+            }
+            if (isNull(c.property("defaultValue"))) {
+                c.setProperty("defaultValue", c.checked);
                 if (!isNull(signalReceiver)) {
                     f = signalReceiver["slot"+c.objectName+"Changed"];
                     if (isFunction(f)) {
@@ -607,9 +700,9 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
         if (isOfType(c, QRadioButton)) {
             if (!c.group() && !c.autoExclusive) {
                 WidgetFactory.connect(c.toggled, signalReceiver, c.objectName);
-                c.toggled.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-                if (isNull(c.defaultValue)) {
-                    c.defaultValue = c.checked;
+                WidgetFactory.connect(c.toggled, WidgetFactory.topLevelWidget, "Setting");
+                if (isNull(c.property("defaultValue"))) {
+                    c.setProperty("defaultValue", c.checked);
                 }
                 if (!isNull(value)) {
                     c.checked = (value === true || value == "true");
@@ -617,17 +710,25 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
             }
             else {
                 WidgetFactory.connect(c.toggled, signalReceiver, c.objectName);
-                c.toggled.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-                c.checked = (c.objectName == value);
+                WidgetFactory.connect(c.toggled, WidgetFactory.topLevelWidget, "Setting");
+                if (value==="true") {
+                    c.checked = true;
+                }
+                else {
+                    c.checked = (c.objectName == value);
+                }
             }
             continue;
         }
         if (isOfType(c, QButtonGroup)) {
-            WidgetFactory.connect(c["buttonClicked(QAbstractButton*)"], signalReceiver, c.objectName);
-            if (isNull(c.defaultValue)) {
+            if (!reset) {
+                WidgetFactory.connect(c["buttonClicked(QAbstractButton*)"], signalReceiver, c.objectName);
+                WidgetFactory.connect(c["buttonClicked(QAbstractButton*)"], WidgetFactory.topLevelWidget, "Setting");
+            }
+            if (isNull(c.property("defaultValue"))) {
                 var button = c.checkedButton();
-                if (button) {
-                    c.defaultValue = button.objectName;
+                if (!isNull(button) && !isNull(button.objectName)) {
+                    c.setProperty("defaultValue", button.objectName);
                     if (!isNull(signalReceiver)) {
                         f = signalReceiver["slot"+c.objectName+"Changed"];
                         if (isFunction(f)) {
@@ -653,10 +754,12 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
             }
         }
         if (isOfType(c, QComboBox) && c.editable) {
-            WidgetFactory.connect(c.editTextChanged, signalReceiver, c.objectName);
-            c.editTextChanged.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            if (isNull(c.defaultValue)) {
-                c.defaultValue = c.currentText;
+            if (!reset) {
+                WidgetFactory.connect(c.editTextChanged, signalReceiver, c.objectName);
+                WidgetFactory.connect(c.editTextChanged, WidgetFactory.topLevelWidget, "Setting");
+            }
+            if (isNull(c.property("defaultValue"))) {
+                c.setProperty("defaultValue", c.currentText);
                 if (!isNull(signalReceiver)) {
                     f = signalReceiver["slot" + c.objectName + "Changed"];
                     if (isFunction(f)) {
@@ -675,17 +778,21 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
             continue;
         }
         if ((isOfType(c, QComboBox) && !c.editable) || isOfType(c, QFontComboBox)) {
-            WidgetFactory.connect(c['currentIndexChanged(int)'], signalReceiver, c.objectName);
-            c["currentIndexChanged(int)"].connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
+            if (!reset) {
+                WidgetFactory.connect(c['currentIndexChanged(int)'], signalReceiver, c.objectName);
+                WidgetFactory.connect(c['currentIndexChanged(int)'], WidgetFactory.topLevelWidget, "Setting");
+            }
             hasData = false;
-            if (c.itemData(c.currentIndex)!=undefined) {
+            if (c.itemData(c.currentIndex)!=undefined || (c.count>0 && c.itemData(0)!=undefined)) {
                 hasData = true;
             }
-            if (isNull(c.defaultValue)) {
+            if (isNull(c.property("defaultValue"))) {
                 if (hasData) {
-                    c.defaultValue = c.itemData(c.currentIndex);
+                    if (c.currentIndex>=0 && c.currentIndex<c.count) {
+                        c.setProperty("defaultValue", c.itemData(c.currentIndex));
+                    }
                 } else {
-                    c.defaultValue = c.currentText;
+                    c.setProperty("defaultValue", c.currentText);
                 }
                 if (signalReceiver!=undefined) {
                     f = signalReceiver["slot" + c.objectName + "Changed"];
@@ -696,22 +803,25 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
             }
             var forceSaveText = false;
             var forceSaveIndex = false;
-            if (typeof(c["ForceSaveText"]) != "undefined"
-                    && c["ForceSaveText"] == true) {
+            if (typeof(c.property("ForceSaveText")) != "undefined"
+                    && c.property("ForceSaveText") == true) {
                 forceSaveText = true;
             }
-            if (typeof(c["ForceSaveIndex"]) != "undefined"
-                    && c["ForceSaveIndex"] == true) {
+            if (typeof(c.property("ForceSaveIndex")) != "undefined"
+                    && c.property("ForceSaveIndex") == true) {
                 forceSaveIndex = true;
             }
             if (!isNull(value)) {
+                index = -1;
                 if (forceSaveIndex == true) {
-                    index = value;
+                    index = parseInt(value);
                 }
                 else if (forceSaveText == false && hasData) {
                     index = c.findData(value);
                 } else {
-                    index = c.findText(value);
+                    if (isString(value)) {
+                        index = c.findText(value);
+                    }
                 }
                 if (index !== -1) {
                     c.currentIndex = index;
@@ -721,10 +831,12 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
             continue;
         }
         if (isOfType(c, RColorCombo)) {
-            WidgetFactory.connect(c.editTextChanged, signalReceiver, c.objectName);
-            c["currentIndexChanged(int)"].connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            if (isNull(c.defaultValue)) {
-                c.defaultValue = c.getColor();
+            if (!reset) {
+                WidgetFactory.connect(c.editTextChanged, signalReceiver, c.objectName);
+                WidgetFactory.connect(c["currentIndexChanged(int)"], WidgetFactory.topLevelWidget, "Setting");
+            }
+            if (isNull(c.property("defaultValue"))) {
+                c.setProperty("defaultValue", c.getColor());
             }
             if (!isNull(value)) {
                 // color name given:
@@ -745,10 +857,12 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
             continue;
         }
         if (isOfType(c, RLineweightCombo)) {
-            WidgetFactory.connect(c.editTextChanged, signalReceiver, c.objectName);
-            c["currentIndexChanged(int)"].connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            if (isNull(c.defaultValue)) {
-                c.defaultValue = c.getLineweight();
+            if (!reset) {
+                WidgetFactory.connect(c.editTextChanged, signalReceiver, c.objectName);
+                WidgetFactory.connect(c["currentIndexChanged(int)"], WidgetFactory.topLevelWidget, "Setting");
+            }
+            if (isNull(c.property("defaultValue"))) {
+                c.setProperty("defaultValue", c.getLineweight());
             }
             if (!isNull(value)) {
                 if (isString(value)) {
@@ -759,10 +873,12 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
             continue;
         }
         if (isOfType(c, RLinetypeCombo)) {
-            WidgetFactory.connect(c.editTextChanged, signalReceiver, c.objectName);
-            c["currentIndexChanged(int)"].connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            if (isNull(c.defaultValue)) {
-                c.defaultValue = c.getLinetypePattern();
+            if (!reset) {
+                WidgetFactory.connect(c.editTextChanged, signalReceiver, c.objectName);
+                WidgetFactory.connect(c["currentIndexChanged(int)"], WidgetFactory.topLevelWidget, "Setting");
+            }
+            if (isNull(c.property("defaultValue"))) {
+                c.setProperty("defaultValue", c.getLinetypePattern());
             }
             if (!isNull(value)) {
                 c.setLinetypePattern(value);
@@ -770,17 +886,42 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
             continue;
         }
         if (isOfType(c, QSpinBox) || isOfType(c, QDoubleSpinBox)) {
-            if (isOfType(c, QSpinBox)) {
+            if (!reset) {
+                if (isOfType(c, QSpinBox)) {
+                    WidgetFactory.connect(c["valueChanged(int)"], signalReceiver, c.objectName);
+                    WidgetFactory.connect(c["valueChanged(int)"], WidgetFactory.topLevelWidget, "Setting");
+                }
+                else {
+                    WidgetFactory.connect(c["valueChanged(double)"], signalReceiver, c.objectName);
+                    WidgetFactory.connect(c["valueChanged(double)"], WidgetFactory.topLevelWidget, "Setting");
+                }
+            }
+            if (isNull(c.property("defaultValue"))) {
+                c.setProperty("defaultValue", c.value);
+                if (signalReceiver!=undefined) {
+                    f = signalReceiver["slot" + c.objectName + "Changed"];
+                    if (isFunction(f)) {
+                        f.call(signalReceiver, c.value);
+                    }
+                }
+            }
+            if (!isNull(value)) {
+                if (isOfType(c, QSpinBox)) {
+                    c.value = parseInt(value);
+                }
+                else {
+                    c.value = parseFloat(value);
+                }
+            }
+            continue;
+        }
+        if (isOfType(c, QSlider)) {
+            if (!reset) {
                 WidgetFactory.connect(c["valueChanged(int)"], signalReceiver, c.objectName);
-                c["valueChanged(int)"].connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
+                WidgetFactory.connect(c["valueChanged(int)"], WidgetFactory.topLevelWidget, "Setting");
             }
-            else {
-                WidgetFactory.connect(c["valueChanged(double)"], signalReceiver, c.objectName);
-                c["valueChanged(double)"].connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            }
-
-            if (isNull(c.defaultValue)) {
-                c.defaultValue = c.value;
+            if (isNull(c.property("defaultValue"))) {
+                c.setProperty("defaultValue", c.value);
                 if (signalReceiver!=undefined) {
                     f = signalReceiver["slot" + c.objectName + "Changed"];
                     if (isFunction(f)) {
@@ -798,25 +939,25 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
             // if the list contents should not be saved to
             // the configuration file or document:
             var saveContents = true;
-            if (typeof(c["SaveContents"]) != "undefined"
-                    && c["SaveContents"] == false) {
+            if (typeof(c.property("SaveContents")) != "undefined"
+                    && c.property("SaveContents") == false) {
                 saveContents = false;
             }
 
             if (saveContents) {
-                if (isNull(c.defaultValue)) {
+                if (isNull(c.property("defaultValue"))) {
                     var items = [];
                     for (j = 0; j < c.count; ++j) {
                         items.push(c.item(j).text());
                     }
-                    c.defaultValue = items;
+                    c.setProperty("defaultValue", items);
                 }
                 if (!isNull(value)) {
                     c.addItems(value);
                 }
             } else {
-                if (isNull(c.defaultValue) && !isNull(c.currentItem())) {
-                    c.defaultValue = c.currentItem().data(Qt.UserRole);
+                if (isNull(c.property("defaultValue")) && !isNull(c.currentItem())) {
+                    c.setProperty("defaultValue", c.currentItem().data(Qt.UserRole));
                 }
                 if (!isNull(value)) {
                     for (j=0; j<c.count; ++j) {
@@ -861,17 +1002,21 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
                 }
             }
 
-            WidgetFactory.connect(c.itemChanged, signalReceiver, c.objectName);
-            c.itemSelectionChanged.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            c.model().rowsInserted.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");            
+            if (!reset) {
+                WidgetFactory.connect(c.itemChanged, signalReceiver, c.objectName);
+                c.itemSelectionChanged.connect(WidgetFactory.topLevelWidget, WidgetFactory.topLevelWidget.slotSettingChanged);
+                c.model().rowsInserted.connect(WidgetFactory.topLevelWidget, WidgetFactory.topLevelWidget.slotSettingChanged);
+            }
             
             continue;
         }
         if (isOfType(c, RFontChooserWidget)) {
-            WidgetFactory.connect(c.valueChanged, signalReceiver, c.objectName);
-            c.valueChanged.connect(WidgetFactory.topLevelWidget, "slotSettingChanged");
-            if (isNull(c.defaultValue)) {
-                c.defaultValue = c.getFont();
+            if (!reset) {
+                WidgetFactory.connect(c.valueChanged, signalReceiver, c.objectName);
+                c.valueChanged.connect(WidgetFactory.topLevelWidget, WidgetFactory.topLevelWidget.slotSettingChanged);
+            }
+            if (isNull(c.property("defaultValue"))) {
+                c.setProperty("defaultValue", c.getChosenFont());
             }
             if (!isNull(value)) {
                 if (isString(value)) {
@@ -880,7 +1025,7 @@ WidgetFactory.restoreState = function(widget, group, signalReceiver, reset, docu
                     value = fnt;
                 }
 
-                c.setFont(value);
+                c.setChosenFont(value);
             }
             continue;
         }
@@ -904,7 +1049,8 @@ WidgetFactory.processChildren = function(c) {
         isOfType(c, QComboBox) ||
         isOfType(c, QFontComboBox) ||
         isOfType(c, QPlainTextEdit) ||
-        isOfType(c, RMathLineEdit)) {
+        isOfType(c, RMathLineEdit) ||
+        isOfType(c, RMathComboBox)) {
 
         return false;
     }
@@ -921,6 +1067,7 @@ WidgetFactory.connect = function(sig, signalReceiver, objectName, isValue) {
     }
 
     // connect signal to given function:
+    // obsolete?
     if (isFunction(signalReceiver)) {
         sig.connect(signalReceiver);
         return;
@@ -937,7 +1084,12 @@ WidgetFactory.connect = function(sig, signalReceiver, objectName, isValue) {
 
     //if (eval("signalReceiver." + slot) != undefined) {
     if (!isNull(signalReceiver[slot])) {
-        sig.connect(signalReceiver, slot);
+        if (RSettings.getQtVersion() >= 0x060000) {
+            sig.connect(signalReceiver, signalReceiver[slot]);
+        }
+        else {
+            sig.connect(signalReceiver, slot);
+        }
     }
 };
 
@@ -953,10 +1105,14 @@ WidgetFactory.moveChildren = function(sourceWidget, targetWidget, settingsGroup)
 
     // move child widgets of UI file based widget directly to
     // options toolbar. rendering of tool buttons greatly depends
-    // on this (especially on Mac OS X):
+    // on this (especially on macOS):
     var children = sourceWidget.children();
     for(var i=0;i<children.length;++i) {
-        var w=children[i];
+        var w = children[i];
+        if (isNull(w)) {
+            continue;
+        }
+
         w.setProperty("SettingsGroup", settingsGroup);
 
         // add separator:
@@ -986,10 +1142,14 @@ WidgetFactory.moveChildren = function(sourceWidget, targetWidget, settingsGroup)
                 }
             }
             // add line edit or math edit with maximum width:
-            if (isOfType(w, QLineEdit) || isOfType(w, RMathLineEdit)) {
+            if (isOfType(w, QLineEdit) || isOfType(w, RMathLineEdit) || isOfType(w, RMathComboBox)) {
                 if (w.maximumWidth>=1024) {
                     w.maximumWidth = 75;
                 }
+            }
+
+            if (isOfType(w, RMathLineEdit) || isOfType(w, RMathComboBox)) {
+                WidgetFactory.initLineEditInfoTools(w);
             }
 
             a = targetWidget.addWidget(w);
@@ -1008,11 +1168,7 @@ WidgetFactory.moveChildren = function(sourceWidget, targetWidget, settingsGroup)
 };
 
 WidgetFactory.adjustIcons = function(includeBasePath, widget) {
-    if (!RSettings.hasDarkGuiBackground()) {
-        return;
-    }
-
-    if (!isFunction(widget.children)) {
+    if (isNull(widget) || !isFunction(widget.children)) {
         return;
     }
 
@@ -1020,18 +1176,20 @@ WidgetFactory.adjustIcons = function(includeBasePath, widget) {
     for(var i=0;i<children.length;++i) {
         var w=children[i];
 
-        // adjust icon for dark themes:
+        // adjust icon for theme / dark mode:
         if (isOfType(w, QToolButton)) {
-            var iconFile = includeBasePath + "/" + w.objectName + "-inverse.svg";
-            if (new QFileInfo(iconFile).exists()) {
+            var iconFile = autoIconPath(includeBasePath + "/" + w.objectName + ".svg");
+            if (!isNull(iconFile)) {
                 w.icon = new QIcon(iconFile);
             }
         }
         else {
             WidgetFactory.adjustIcons(includeBasePath, w);
         }
-
     }
+};
+
+WidgetFactory.initLineEditInfoTools = function(mathLineEdit) {
 };
 
 /**
@@ -1051,24 +1209,38 @@ WidgetFactory.initLineEdit = function(lineEdit, dimension) {
 
         // TODO: split into submenus (math, greek, ...):
         var symbols = [
-                ["\u00F8", qsTr("Diameter")],
-                ["\u2312", qsTr("Arc")],
-                ["\u00B0", qsTr("Degree")],
-                ["\u00B1", qsTr("Plus/Minus")],
-                ["\u2248", qsTr("Almost equal to")],
-                ["\u2243", qsTr("Asymptotically equal to")],
-                ["\u03C0", qsTr("Pi")],
-                ["\u221A", qsTr("Square root")],
-                ["\u03A6", qsTr("Phi")],
-                ["\u0278", qsTr("phi")],
-                ["\u03C6", qsTr("Alt phi")],
-                ["\u2126", qsTr("Ohm")],
-                ["\u03C9", qsTr("omega")],
-                ["\u00D7", qsTr("Multiplication")],
-                ["\u00F7", qsTr("Division")],
-                ["\u25FB", qsTr("Square")],
-                ["\u0394", qsTr("Delta")],
-                ["\\SA^B;", qsTr("Stacked text"), "\\\\SA^B;"]
+                    [0x00B0, qsTr("Degrees")],
+                    [0x00B1, qsTr("Plus/Minus")],
+                    [0x00F8, qsTr("Diameter")],
+                    [0x00F7, qsTr("Division")],
+                    [0x2248, qsTr("Almost Equal")],
+                    [0x2220, qsTr("Angle")],
+                    [0x2312, qsTr("Arc")],
+                    [0x2243, qsTr("Asymptotically Equal")],
+                    //[0xE100, qsTr("Boundary Line")],
+                    [0x2104, qsTr("Center Line")],
+                    [0x0394, qsTr("Delta")],
+                    [0x0278, qsTr("Electrical Phase")],
+                    //[0xE101, qsTr("Flow Line")],
+                    [0x2261, qsTr("Identity")],
+                    //[0xE200, qsTr("Initial Length")],
+                    //[0xE102, qsTr("Monument Line")],
+                    [0x00D7, qsTr("Multiplication")],
+                    [0x2260, qsTr("Not Equal")],
+                    [0x2126, qsTr("Ohm")],
+                    [0x03A9, qsTr("Omega")],
+                    [0x03C9, qsTr("omega")],
+                    [0x03A6, qsTr("Phi")],
+                    [0x0278, qsTr("phi")],
+                    [0x03C6, qsTr("Alt phi")],
+                    [0x03C0, qsTr("Pi")],
+                    [0x214A, qsTr("Property Line")],
+                    [0x2082, qsTr("Subscript 2")],
+                    [0x221A, qsTr("Square Root")],
+                    [0x25FB, qsTr("Square")],
+                    [0x00B2, qsTr("Squared")],
+                    [0x00B3, qsTr("Cubed")],
+                    ["\\SA^B;", qsTr("Stacked text"), "\\\\SA^B;"]
         ];
 
         if (dimension===true) {
@@ -1084,14 +1256,28 @@ WidgetFactory.initLineEdit = function(lineEdit, dimension) {
                 continue;
             }
 
-            var symbolSelf = symbol[0];
+            var symbolCode = symbol[0];
+            var symbolCodeStr;
+            var symbolSelf;
+            if (isNumber(symbolCode)) {
+                symbolCodeStr = symbolCode.toString(16);
+                while (symbolCodeStr.length<4) {
+                    symbolCodeStr = "0" + symbolCodeStr;
+                }
+                symbolCodeStr = ", \\U+" + symbolCodeStr;
+                symbolSelf = String.fromCharCode(symbolCode);
+            }
+            else {
+                symbolCodeStr = "";
+                symbolSelf = symbolCode;
+            }
             var symbolText = symbol[1];
-            var insertion = symbol[0];
+            var insertion = String.fromCharCode(symbol[0]);
             if (symbol.length===3) {
                 insertion = symbol[2];
             }
 
-            var action = subMenu.addAction(symbolSelf + "\t(" + symbolText + ")");
+            var action = subMenu.addAction(symbolSelf + "\t(" + symbolText + symbolCodeStr + ")");
             eval("action.triggered.connect(function() { lineEdit.setFocus(Qt.OtherFocusReason); lineEdit.insert(\"" + insertion + "\"); });");
         }
 
@@ -1102,14 +1288,14 @@ WidgetFactory.initLineEdit = function(lineEdit, dimension) {
         menu.insertMenu(separatorAction, subMenu);
         menu.exec(QCursor.pos());
         if (!isDeleted(menu)) {
-            menu.destroy();
+            destr(menu);
         }
     });
 };
 
-WidgetFactory.initTextBrowser = function(textBrowser, linkHandler, slot) {
+WidgetFactory.initTextBrowser = function(textBrowser, slot) {
     textBrowser.openLinks = false;
-    textBrowser.anchorClicked.connect(linkHandler, slot);
+    textBrowser.anchorClicked.connect(slot);
 };
 
 //WidgetFactory.initWebView = function(webView, linkHandler, slot) {
@@ -1132,19 +1318,41 @@ WidgetFactory.initTextBrowser = function(textBrowser, linkHandler, slot) {
 //    }
 //};
 
-WidgetFactory.initLayerCombo = function(comboBox, doc) {
+WidgetFactory.initLayerCombo = function(comboBox, doc, clear) {
+    var i;
+
     if (isNull(doc)) {
         return;
     }
+    if (isNull(clear)) {
+        clear = true;
+    }
 
-    comboBox.clear();
-    comboBox.iconSize = new QSize(32, 16);
+    var existingLayerNames = [];
+    if (clear) {
+        comboBox.clear();
+    }
+    else {
+        for (i=0; i<comboBox.count; i++) {
+            var t = comboBox.itemText(i);
+            existingLayerNames.push(t);
+        }
+    }
+
+    comboBox.iconSize = new QSize(16, 10);
     var names = doc.getLayerNames();
+    //names = RS.sortAlphanumerical(names);
     names.sort(Array.alphaNumericalSorter);
-    for (var i=0; i<names.length; i++) {
+    for (i=0; i<names.length; i++) {
         var name = names[i];
         var layer = doc.queryLayer(name);
-        var icon = RColor.getIcon(layer.getColor());
+
+        if (existingLayerNames.containsIgnoreCase(layer.getName())) {
+            // don't overwrite existing layers:
+            continue;
+        }
+
+        var icon = RColor.getIcon(layer.getColor(), new QSize(comboBox.iconSize.width(),10));
         comboBox.addItem(icon, layer.getName());
     }
 };
@@ -1160,6 +1368,7 @@ WidgetFactory.initBlockCombo = function(comboBox, doc, showSpaces) {
     comboBox.clear();
     var names = doc.getBlockNames();
     names.sort(Array.alphaNumericalSorter);
+    //names = RS.sortAlphanumerical(names);
     for (var i=0; i<names.length; i++) {
         var name = names[i];
         if (showSpaces || !name.startsWith("*")) {
@@ -1203,6 +1412,109 @@ WidgetFactory.initVAlignCombo = function(comboBox) {
     comboBox.addItem(qsTr("Bottom"), RS.VAlignBottom);
 };
 
+WidgetFactory.initDimlunitCombo = function(comboBox) {
+    comboBox.clear();
+    comboBox.addItem(qsTr("Scientific"), RS.Scientific);
+    comboBox.addItem(qsTr("Decimal"), RS.Decimal);
+    comboBox.addItem(qsTr("Engineering"), RS.Engineering);
+    comboBox.addItem(qsTr("Architectural"), RS.ArchitecturalStacked);
+    comboBox.addItem(qsTr("Fractional"), RS.FractionalStacked);
+};
+
+WidgetFactory.initDimtadCombo = function(comboBox) {
+    comboBox.clear();
+    comboBox.addItem(qsTr("Centered"), 0);
+    comboBox.addItem(qsTr("Above"), 1);
+};
+
+WidgetFactory.initDimdsepCombo = function(comboBox) {
+    comboBox.clear();
+    comboBox.addItem(".", '.');
+    comboBox.addItem(",", ',');
+};
+
+WidgetFactory.initDimzinCombo = function(comboBox) {
+    comboBox.clear();
+    //comboBox.addItem(qsTr("Suppress 0'0\" (unsupported)"), 0);
+    comboBox.addItem(qsTr("Show trailing zeroes"), 0);
+    comboBox.addItem(qsTr("Include 0'0\"") + " " + qsTr("(unsupported)"), 1);
+    comboBox.addItem(qsTr("Include 0', suppress 0\"") + " " + qsTr("(unsupported)"), 2);
+    comboBox.addItem(qsTr("Include 0\", suppress 0'") + " " + qsTr("(unsupported)"), 3);
+    comboBox.addItem(qsTr("Suppress leading zeroes") + " " + qsTr("(unsupported)"), 4);
+    comboBox.addItem(qsTr("Suppress trailing zeroes"), 8);
+    comboBox.addItem(qsTr("Suppress leading / trailing zeroes") + " " + qsTr("(unsupported)"), 12);
+
+//    comboBox.addItem(qsTr("Suppress 0'0\""), 0);
+//    comboBox.addItem(qsTr("Include 0'0\""), 1);
+//    comboBox.addItem(qsTr("Include 0', suppress 0\""), 2);
+//    comboBox.addItem(qsTr("Include 0\", suppress 0'"), 3);
+};
+
+WidgetFactory.initDimdecCombo = function(comboBox) {
+    comboBox.clear();
+    comboBox.addItem("0", 0);
+    comboBox.addItem("1", 1);
+    comboBox.addItem("2", 2);
+    comboBox.addItem("3", 3);
+    comboBox.addItem("4", 4);
+    comboBox.addItem("5", 5);
+    comboBox.addItem("6", 6);
+    comboBox.addItem("7", 7);
+    comboBox.addItem("8", 8);
+
+};
+WidgetFactory.initDimaunitCombo = function(comboBox) {
+    comboBox.clear();
+    comboBox.addItem(qsTr("Decimal Degrees"), RS.DegreesDecimal);
+    comboBox.addItem(qsTr("Deg/min/sec"), RS.DegreesMinutesSeconds);
+    comboBox.addItem(qsTr("Gradians"), RS.Gradians);
+    comboBox.addItem(qsTr("Radians"), RS.Radians);
+    comboBox.addItem(qsTr("Surveyor's units"), RS.Surveyors);
+};
+
+WidgetFactory.initDimazinCombo = function(comboBox) {
+    comboBox.clear();
+    comboBox.addItem(qsTr("Show trailing zeroes"), 0);
+    comboBox.addItem(qsTr("Suppress leading zeroes") + " " + qsTr("(unsupported)"), 1);
+    comboBox.addItem(qsTr("Suppress trailing zeroes"), 2);
+    comboBox.addItem(qsTr("Suppress leading / trailing zeroes") + " " + qsTr("(unsupported)"), 3);
+};
+
+WidgetFactory.initDimadecCombo = function(comboBox) {
+    comboBox.clear();
+    comboBox.addItem("0", 0);
+    comboBox.addItem("1", 1);
+    comboBox.addItem("2", 2);
+    comboBox.addItem("3", 3);
+    comboBox.addItem("4", 4);
+    comboBox.addItem("5", 5);
+    comboBox.addItem("6", 6);
+    comboBox.addItem("7", 7);
+    comboBox.addItem("8", 8);
+};
+
+
+WidgetFactory.initOrientationCombo = function(comboBox) {
+    comboBox.clear();
+
+    if (RSettings.isQt(5)) {
+        comboBox.addItem("↻ " + qsTr("Clockwise"), RS.CW);
+        comboBox.addItem("↺ " + qsTr("Counterclockwise"), RS.CCW);
+    }
+    else {
+        comboBox.addItem(qsTr("Clockwise"), RS.CW);
+        comboBox.addItem(qsTr("Counterclockwise"), RS.CCW);
+    }
+};
+
+WidgetFactory.initArcSymbolTypeCombo = function(comboBox) {
+    comboBox.clear();
+
+    comboBox.addItem(qsTr("Preceding"), 0);
+    comboBox.addItem(qsTr("Above"), 1);
+    comboBox.addItem(qsTr("None"), 2);
+};
+
 WidgetFactory.installComboBoxEventFilter = function(widget) {
     if (isNull(widget)) {
         return;
@@ -1226,7 +1538,9 @@ WidgetFactory.installComboBoxEventFilter = function(widget) {
             isOfType(c, RLineweightCombo) ||
             isOfType(c, RLinetypeCombo)) {
 
-            c.installEventFilter(new REventFilter(QEvent.Wheel.valueOf(), true));
+            if (isFunction(c.installEventFilter)) {
+                c.installEventFilter(new REventFilter(QEvent.Wheel.valueOf(), true));
+            }
             c.focusPolicy = Qt.ClickFocus;
             continue;
         }

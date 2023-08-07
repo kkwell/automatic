@@ -51,6 +51,7 @@ public:
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertySelected;
 
     static RPropertyTypeId PropertyName;
     static RPropertyTypeId PropertyOff;
@@ -67,6 +68,7 @@ public:
 
 public:
     enum LayerFlag {
+        // these complement the RObject flags
         Off = 0x010,              //!< layer is off
         Frozen = 0x020,           //!< layer is frozen
         Locked = 0x040,           //!< layer is locked
@@ -75,7 +77,7 @@ public:
         Snappable = 0x200,        //!< snap disabled for this layer
         OffIsFreeze = 0x400       //!< off means freeze for this layer
     };
-    Q_DECLARE_FLAGS(Flags, LayerFlag)
+    Q_DECLARE_FLAGS(LayerFlags, LayerFlag)
 
 public:
     RLayer();
@@ -90,6 +92,10 @@ public:
     virtual ~RLayer();
 
     static void init();
+
+    static RS::EntityType getRtti() {
+        return RS::ObjectLayer;
+    }
 
     virtual RS::EntityType getType() const {
         return RS::ObjectLayer;
@@ -193,11 +199,9 @@ public:
 
     virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
     virtual bool setProperty(RPropertyTypeId propertyTypeId,
             const QVariant& value, RTransaction* transaction=NULL);
-
-    virtual bool isSelectedForPropertyEditing();
 
     bool hasChildLayers() const {
         const RDocument* doc = getDocument();
@@ -301,17 +305,17 @@ public:
         return layerProxy;
     }
 
+    virtual void print(QDebug dbg) const;
+
 private:
     QString name;
-    Flags flags;
+    LayerFlags flags;
     RColor color;
     RLinetype::Id linetypeId;
     RLineweight::Lineweight lineweight;
 
     static RLayerProxy* layerProxy;
 };
-
-QCADCORE_EXPORT QDebug operator<<(QDebug dbg, const RLayer& l);
 
 Q_DECLARE_METATYPE(QSharedPointer<RLayer>)
 Q_DECLARE_METATYPE(QSharedPointer<RLayer>*)

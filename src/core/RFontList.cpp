@@ -19,6 +19,7 @@
 
 #include <QFontDatabase>
 
+#include "RS.h"
 #include "RFontList.h"
 #include "RSettings.h"
 
@@ -122,6 +123,6 @@ QStringList RFontList::getNames() {
     return ret;
 }
 
-RFont* RFontList::get(const QString& resName) {
-    return res.get(resName);
+RFont* RFontList::get(const QString& resName, bool substitute) {
+    return res.get(resName, substitute);
 }

@@ -25,8 +25,9 @@
 #include <QList>
 #include <QSharedPointer>
 
-#include "RVector.h"
 #include "RMath.h"
+#include "RShapeProxy.h"
+#include "RVector.h"
 
 class RArc;
 class RBox;
@@ -41,6 +42,25 @@ class RTriangle;
 #ifndef RDEFAULT_TOLERANCE_1E_MIN4
 #define RDEFAULT_TOLERANCE_1E_MIN4 1.0e-4
 #endif
+
+class RShapeTransformation {
+public:
+    virtual ~RShapeTransformation() {}
+    virtual RVector transform(const RVector& v) = 0;
+};
+
+class RShapeTransformationScale : public RShapeTransformation {
+public:
+    RShapeTransformationScale(const RVector& factors, const RVector& center) : factors(factors), center(center) {}
+    virtual ~RShapeTransformationScale() {}
+
+    virtual RVector transform(const RVector& v) {
+        return v.getScaled(factors, center);
+    }
+
+    RVector factors;
+    RVector center;
+};
 
 /**
  * Interface for geometrical shape classes.
@@ -70,6 +90,10 @@ public:
     }
 
     virtual ~RShape() {
+    }
+
+    virtual bool isValid() const {
+        return true;
     }
 
     virtual RShape::Type getShapeType() const {
@@ -109,6 +133,10 @@ public:
     }
 
     virtual RShape* clone() const = 0;
+
+    virtual QSharedPointer<RShape> cloneToSharedPointer() const {
+        return QSharedPointer<RShape>(clone());
+    }
 
     /**
      * Reimplement and return true if this shape relies on interpolation
@@ -161,6 +189,7 @@ public:
             bool limited = true, double strictRange = RMAXDOUBLE) const = 0;
 
     virtual double getDistanceTo(const RVector& point, bool limited = true, double strictRange = RMAXDOUBLE) const;
+    virtual double getMaxDistanceTo(const QList<RVector>& points, bool limited = true, double strictRange = RMAXDOUBLE) const;
     virtual bool isOnShape(const RVector& point,
                            bool limited = true,
                            double tolerance = RDEFAULT_TOLERANCE_1E_MIN4) const;
@@ -185,21 +214,32 @@ public:
     virtual QList<RVector> getCenterPoints() const = 0;
 
     /**
+     * \return The reference point(s) of this shape.
+     */
+    virtual QList<RVector> getArcReferencePoints() const {
+        return QList<RVector>();
+    }
+
+    virtual RVector getPointOnShape() const;
+
+    virtual QList<RVector> getPointCloud(double segmentLength) const = 0;
+
+    /**
      * \return All points on this shape with the given distance to an endpoint.
      */
     virtual QList<RVector> getPointsWithDistanceToEnd(
         double distance, int from = RS::FromAny) const = 0;
 
-    virtual RVector getPointWithDistanceToStart(double distance) {
-        QList<RVector> res = getPointsWithDistanceToEnd(distance, RS::FromStart);
+    virtual RVector getPointWithDistanceToStart(double distance) const {
+        QList<RVector> res = getPointsWithDistanceToEnd(distance, RS::FromStart|RS::AlongPolyline);
         if (res.isEmpty()) {
             return RVector::invalid;
         }
         return res[0];
     }
 
-    virtual RVector getPointWithDistanceToEnd(double distance) {
-        QList<RVector> res = getPointsWithDistanceToEnd(distance, RS::FromEnd);
+    virtual RVector getPointWithDistanceToEnd(double distance) const {
+        QList<RVector> res = getPointsWithDistanceToEnd(distance, RS::FromEnd|RS::AlongPolyline);
         if (res.isEmpty()) {
             return RVector::invalid;
         }
@@ -220,6 +260,7 @@ public:
     }
 
     virtual RVector getPointAtPercent(double p) const;
+    virtual double getAngleAtPercent(double p) const;
 
     virtual bool intersectsWith(const RShape& other, 
         bool limited = true) const;
@@ -227,7 +268,8 @@ public:
     QList<RVector> getIntersectionPoints(const RShape& other,
             bool limited = true, bool same = false, bool force = false) const;
 
-    virtual QList<RVector> getSelfIntersectionPoints() const {
+    virtual QList<RVector> getSelfIntersectionPoints(double tolerance=RS::PointTolerance) const {
+        Q_UNUSED(tolerance)
         return QList<RVector>();
     }
 
@@ -334,11 +376,11 @@ public:
     static QList<RVector> getIntersectionPoints(const RShape& shape1,
             const RShape& shape2, bool limited = true, bool same = false, bool force = false);
 
-    virtual bool move(const RVector& offset)=0;
-    virtual bool rotate(double rotation, const RVector& center = RDEFAULT_RVECTOR)=0;
+    virtual bool move(const RVector& offset) = 0;
+    virtual bool rotate(double rotation, const RVector& center = RDEFAULT_RVECTOR) = 0;
     virtual bool scale(double scaleFactor, const RVector& center = RVector());
-    virtual bool scale(const RVector& scaleFactors, const RVector& center = RVector())=0;
-    virtual bool mirror(const RLine& axis)=0;
+    virtual bool scale(const RVector& scaleFactors, const RVector& center = RVector()) = 0;
+    virtual bool mirror(const RLine& axis) = 0;
     virtual bool flipHorizontal();
     virtual bool flipVertical();
     virtual bool stretch(const RBox& area, const RVector& offset);
@@ -346,6 +388,7 @@ public:
 
     virtual QSharedPointer<RShape> getTransformed(const QTransform& transform) const = 0;
 
+    static QList<QSharedPointer<RShape> > getOrderedShapes(const QList<QSharedPointer<RShape> >& shapes);
     static bool order(QList<QList<QSharedPointer<RShape> > >& boundary);
 
     static QList<RVector> getIntersectionPointsLL(const RLine& line1,
@@ -414,7 +457,7 @@ public:
             const RExplodable& explodable2, bool limited);
 
     static QList<RVector> getIntersectionPointsSS(const RSpline& spline1,
-            const RSpline& spline2, bool limited = true, bool same = false);
+            const RSpline& spline2, bool limited = true, bool same = false, double tolerance=RS::PointTolerance);
 
     static QList<RVector> getIntersectionPointsXX(const RExplodable& explodable1,
             const RExplodable& explodable2, bool limited = true, bool same = false);
@@ -435,11 +478,32 @@ public:
             const RShape& limitingShape, const RVector& limitingClickPos,
             bool trimBoth, bool samePolyline);
 
+    static QList<QSharedPointer<RShape> > roundCorners(const QList<QSharedPointer<RShape> >& shapes, double radius);
+
+    static QList<QSharedPointer<RShape> > roundShapes(
+            const QSharedPointer<RShape> shape1, const RVector& clickPos1,
+            const QSharedPointer<RShape> shape2, const RVector& clickPos2,
+            bool trim, bool samePolyline, double radius, const RVector& pos);
+
+    static QSharedPointer<RShape> xLineToRay(QSharedPointer<RShape> shape);
+    static QSharedPointer<RShape> rayToLine(QSharedPointer<RShape> shape);
+
+    static QSharedPointer<RShape> scaleArc(const RShape& shape, const RVector& scaleFactors, const RVector& center = RDEFAULT_RVECTOR) {
+        RShapeTransformationScale t(scaleFactors, center);
+        return transformArc(shape, t);
+    }
+
+    /**
+     * \nonscriptable
+     */
+    static QSharedPointer<RShape> transformArc(const RShape& shape, RShapeTransformation& transformation);
+    static QSharedPointer<RShape> ellipseToArcCircleEllipse(const REllipse& ellipse);
+
     static int getErrorCode() {
         return errorCode;
     }
 
-    void dump();
+    void dump() const;
 
     /**
      * \nonscriptable
@@ -447,6 +511,27 @@ public:
     friend QDebug operator<<(QDebug dbg, const RShape& s) {
         s.print(dbg);
         return dbg;
+    }
+
+    static bool hasProxy() {
+        return shapeProxy!=NULL;
+    }
+
+    /**
+     * \nonscriptable
+     */
+    static void setShapeProxy(RShapeProxy* p) {
+        if (shapeProxy!=NULL) {
+            delete shapeProxy;
+        }
+        shapeProxy = p;
+    }
+
+    /**
+     * \nonscriptable
+     */
+    static RShapeProxy* getShapeProxy() {
+        return shapeProxy;
     }
 
 private:
@@ -460,6 +545,9 @@ private:
 protected:
     virtual void print(QDebug dbg) const;
     static int errorCode;
+
+private:
+    static RShapeProxy* shapeProxy;
 };
 
 Q_DECLARE_METATYPE(RShape*)

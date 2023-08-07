@@ -86,6 +86,10 @@
     
             REcmaHelper::registerFunction(&engine, proto, getType, "getType");
             
+            REcmaHelper::registerFunction(&engine, proto, setFlag, "setFlag");
+            
+            REcmaHelper::registerFunction(&engine, proto, getFlag, "getFlag");
+            
             REcmaHelper::registerFunction(&engine, proto, isValid, "isValid");
             
             REcmaHelper::registerFunction(&engine, proto, isSane, "isSane");
@@ -178,6 +182,14 @@
             
             REcmaHelper::registerFunction(&engine, proto, isSimple, "isSimple");
             
+            REcmaHelper::registerFunction(&engine, proto, setBackward, "setBackward");
+            
+            REcmaHelper::registerFunction(&engine, proto, isBackward, "isBackward");
+            
+            REcmaHelper::registerFunction(&engine, proto, setUpsideDown, "setUpsideDown");
+            
+            REcmaHelper::registerFunction(&engine, proto, isUpsideDown, "isUpsideDown");
+            
             REcmaHelper::registerFunction(&engine, proto, setDimensionLabel, "setDimensionLabel");
             
             REcmaHelper::registerFunction(&engine, proto, isDimensionLabel, "isDimensionLabel");
@@ -232,6 +244,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, getSimpleTextBlocks, "getSimpleTextBlocks");
             
+            REcmaHelper::registerFunction(&engine, proto, to2D, "to2D");
+            
         engine.setDefaultPrototype(
             qMetaTypeId<RTextBasedDataPointer>(), *proto);
       
@@ -241,6 +255,8 @@
     
     // static methods:
     
+            REcmaHelper::registerFunction(&engine, &ctor, getRtti, "getRtti");
+            
             REcmaHelper::registerFunction(&engine, &ctor, escapeUnicode, "escapeUnicode");
             
             REcmaHelper::registerFunction(&engine, &ctor, hasProxy, "hasProxy");
@@ -256,8 +272,55 @@
     // enum values:
     
 
+    ctor.setProperty("NoFlags",
+    QScriptValue(RTextBasedData::NoFlags),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Bold",
+    QScriptValue(RTextBasedData::Bold),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Italic",
+    QScriptValue(RTextBasedData::Italic),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Simple",
+    QScriptValue(RTextBasedData::Simple),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("DimensionLabel",
+    QScriptValue(RTextBasedData::DimensionLabel),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Highlighted",
+    QScriptValue(RTextBasedData::Highlighted),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Backward",
+    QScriptValue(RTextBasedData::Backward),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("UpsideDown",
+    QScriptValue(RTextBasedData::UpsideDown),
+    QScriptValue::ReadOnly);
+
+
     // enum conversions:
     
+    qScriptRegisterMetaType<RTextBasedData::TextFlag>(
+        &engine,
+        toScriptValueEnumTextFlag,
+        fromScriptValueEnumTextFlag,
+        ctor.property(QString::fromLatin1("prototype"))
+    );
+
         
     // init class:
     engine.globalObject().setProperty("RTextBasedDataPointer",
@@ -727,6 +790,45 @@
 
     // public methods:
      QScriptValue
+        REcmaSharedPointerTextBasedData::getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerTextBasedData::getRtti", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerTextBasedData::getRtti";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RS::EntityType'
+    RS::EntityType cppResult =
+        RTextBasedData::
+       getRtti();
+        // return type: RS::EntityType
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTextBasedData.getRtti().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerTextBasedData::getRtti", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaSharedPointerTextBasedData::getType
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -773,6 +875,191 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerTextBasedData::getType", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerTextBasedData::setFlag
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerTextBasedData::setFlag", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerTextBasedData::setFlag";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTextBasedData* self = 
+                        getSelf("setFlag", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RTextBasedData::TextFlag */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    RTextBasedData::TextFlag*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RTextBasedData::TextFlag*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RTextBasedData: Argument 0 is not of type RTextBasedData::TextFlag*.",
+                               context);                    
+                    }
+                    RTextBasedData::TextFlag& a0 = *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setFlag(a0);
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RTextBasedData::TextFlag */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    RTextBasedData::TextFlag*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RTextBasedData::TextFlag*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RTextBasedData: Argument 0 is not of type RTextBasedData::TextFlag*.",
+                               context);                    
+                    }
+                    RTextBasedData::TextFlag& a0 = *ap0;
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setFlag(a0
+        ,
+    a1);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTextBasedData.setFlag().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerTextBasedData::setFlag", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerTextBasedData::getFlag
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerTextBasedData::getFlag", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerTextBasedData::getFlag";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTextBasedData* self = 
+                        getSelf("getFlag", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RTextBasedData::TextFlag */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    RTextBasedData::TextFlag*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RTextBasedData::TextFlag*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RTextBasedData: Argument 0 is not of type RTextBasedData::TextFlag*.",
+                               context);                    
+                    }
+                    RTextBasedData::TextFlag& a0 = *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->getFlag(a0);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTextBasedData.getFlag().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerTextBasedData::getFlag", context, engine);
             return result;
         }
          QScriptValue
@@ -3814,6 +4101,214 @@
             return result;
         }
          QScriptValue
+        REcmaSharedPointerTextBasedData::setBackward
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerTextBasedData::setBackward", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerTextBasedData::setBackward";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTextBasedData* self = 
+                        getSelf("setBackward", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setBackward(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTextBasedData.setBackward().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerTextBasedData::setBackward", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerTextBasedData::isBackward
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerTextBasedData::isBackward", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerTextBasedData::isBackward";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTextBasedData* self = 
+                        getSelf("isBackward", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->isBackward();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTextBasedData.isBackward().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerTextBasedData::isBackward", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerTextBasedData::setUpsideDown
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerTextBasedData::setUpsideDown", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerTextBasedData::setUpsideDown";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTextBasedData* self = 
+                        getSelf("setUpsideDown", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setUpsideDown(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTextBasedData.setUpsideDown().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerTextBasedData::setUpsideDown", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerTextBasedData::isUpsideDown
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerTextBasedData::isUpsideDown", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerTextBasedData::isUpsideDown";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTextBasedData* self = 
+                        getSelf("isUpsideDown", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->isUpsideDown();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTextBasedData.isUpsideDown().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerTextBasedData::isUpsideDown", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaSharedPointerTextBasedData::setDimensionLabel
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -4239,6 +4734,88 @@
                self->moveReferencePoint(a0
         ,
     a1);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: Qt::KeyboardModifiers */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RTextBasedData: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RTextBasedData: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+                    // argument isStandardType
+                    Qt::KeyboardModifiers
+                    a2 =
+                    (Qt::KeyboardModifiers)
+                    (int)
+                    context->argument( 2 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->moveReferencePoint(a0
+        ,
+    a1
+        ,
+    a2);
         // return type: bool
                 // standard Type
                 result = QScriptValue(cppResult);
@@ -5496,6 +6073,94 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RBox */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(3).isArray()
+        ) /* type: QList < RObject::Id > * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RBox*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RBox*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RTextBasedData: Argument 0 is not of type RBox.",
+                               context);                    
+                    }
+                    RBox 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+                    // argument is pointer
+                    QList < RObject::Id > * a3 = NULL;
+
+                    a3 = 
+                        REcmaHelper::scriptValueTo<QList < RObject::Id > >(
+                            context->argument(3)
+                        );
+                    
+                    if (a3==NULL && 
+                        !context->argument(3).isNull()) {
+                        return REcmaHelper::throwError("RTextBasedData: Argument 3 is not of type QList < RObject::Id > *QList < RObject::Id > *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < QSharedPointer < RShape > >'
+    QList < QSharedPointer < RShape > > cppResult =
+        
+               self->getShapes(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: QList < QSharedPointer < RShape > >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RTextBasedData.getShapes().",
                    context);
@@ -6144,6 +6809,99 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QTextDocument */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RColor */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(3).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    QTextDocument*
+                    ap0 =
+                    qscriptvalue_cast<
+                    QTextDocument*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RTextBasedData: Argument 0 is not of type QTextDocument*.",
+                               context);                    
+                    }
+                    QTextDocument& a0 = *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RColor*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RColor*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RTextBasedData: Argument 1 is not of type RColor.",
+                               context);                    
+                    }
+                    RColor 
+                    a1 = 
+                    *ap1;
+                
+                    // argument isStandardType
+                    double
+                    a2 =
+                    (double)
+                    
+                    context->argument( 2 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    bool
+                    a3 =
+                    (bool)
+                    
+                    context->argument( 3 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        RTextBasedData::
+       toEscapedText(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RTextBasedData.toEscapedText().",
                    context);
@@ -6292,6 +7050,50 @@
             //REcmaHelper::functionEnd("REcmaSharedPointerTextBasedData::toRichText", context, engine);
             return result;
         }
+         QScriptValue
+        REcmaSharedPointerTextBasedData::to2D
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerTextBasedData::to2D", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerTextBasedData::to2D";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTextBasedData* self = 
+                        getSelf("to2D", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->to2D();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTextBasedData.to2D().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerTextBasedData::to2D", context, engine);
+            return result;
+        }
          QScriptValue REcmaSharedPointerTextBasedData::toString
     (QScriptContext *context, QScriptEngine *engine)
     
@@ -6406,4 +7208,14 @@
     }
     return qScriptValueFromValue(engine, self->isNull());
     }
+     QScriptValue REcmaSharedPointerTextBasedData::toScriptValueEnumTextFlag(QScriptEngine* engine, const RTextBasedData::TextFlag& value)
     
+        {
+            return QScriptValue(engine, (int)value);
+        }
+         void REcmaSharedPointerTextBasedData::fromScriptValueEnumTextFlag(const QScriptValue& value, RTextBasedData::TextFlag& out)
+    
+        {
+            out = qvariant_cast<RTextBasedData::TextFlag>(value.toVariant());
+        }
+        

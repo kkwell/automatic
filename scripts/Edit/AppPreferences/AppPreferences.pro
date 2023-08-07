@@ -6,8 +6,8 @@ SUBDIRS = \
     LanguagePreferences \
     LayerCompatibility \
     ScriptingPreferences \
-    StartupPreferences \
     TextPreferences \
     ThemePreferences \
     ToolBarPreferences \
-    ts
+    UiPreferences \
+    dir

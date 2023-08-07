@@ -23,7 +23,6 @@
 RShapesExporter::RShapesExporter(RExporter& exporter, const QList<QSharedPointer<RShape> >& shapes, double offset) :
     RExporter(exporter.getDocument()), exporter(exporter), shapes(shapes) {
 
-
     //setScreenBasedLinetypes(exporter.getScreenBasedLinetypes());
     double length = 0.0;
 
@@ -39,6 +38,7 @@ RShapesExporter::RShapesExporter(RExporter& exporter, const QList<QSharedPointer
         proxy->init();
     }
     // export straight line with angle 0 and length of polyline / spline:
+    // this is mapped to the polyline / spline by this exporter:
     exportLine(line, offset);
     if (proxy) {
         proxy->uninit();
@@ -46,7 +46,7 @@ RShapesExporter::RShapesExporter(RExporter& exporter, const QList<QSharedPointer
 }
 
 /**
- * Exports the given line segment.
+ * Exports the given line segment, mapped to the shapes that are being exported.
  *
  * \param line Line segment, mapped to the straight, horizontal line starting at 0/0).
  * \param angle Always 0.0.
@@ -139,6 +139,7 @@ void RShapesExporter::exportShapesBetween(int i1, const RVector& p1, int i2, con
         if (i!=i1 && i!=i2) {
             // whole shape is between points:
             exporter.exportShapeSegment(shapes[i], angle);
+            continue;
         }
 
         QSharedPointer<RShape> shape = QSharedPointer<RShape>(shapes[i]->clone());

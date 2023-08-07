@@ -9,6 +9,8 @@
         
                 #include "RArc.h"
             
+                #include "RLine.h"
+            
                 #include "RShape.h"
             
                 #include "RSpline.h"
@@ -178,6 +180,22 @@
             
             REcmaHelper::registerFunction(&engine, proto, getNoColorMode, "getNoColorMode");
             
+            REcmaHelper::registerFunction(&engine, proto, setSimplePointDisplay, "setSimplePointDisplay");
+            
+            REcmaHelper::registerFunction(&engine, proto, getSimplePointDisplay, "getSimplePointDisplay");
+            
+            REcmaHelper::registerFunction(&engine, proto, setPolylineGen, "setPolylineGen");
+            
+            REcmaHelper::registerFunction(&engine, proto, getPolylineGen, "getPolylineGen");
+            
+            REcmaHelper::registerFunction(&engine, proto, setNoPattern, "setNoPattern");
+            
+            REcmaHelper::registerFunction(&engine, proto, getNoPattern, "getNoPattern");
+            
+            REcmaHelper::registerFunction(&engine, proto, setScreenBasedLinetype, "setScreenBasedLinetype");
+            
+            REcmaHelper::registerFunction(&engine, proto, getScreenBasedLinetype, "getScreenBasedLinetype");
+            
             REcmaHelper::registerFunction(&engine, proto, setPixelWidth, "setPixelWidth");
             
             REcmaHelper::registerFunction(&engine, proto, getPixelWidth, "getPixelWidth");
@@ -223,6 +241,10 @@
             REcmaHelper::registerFunction(&engine, proto, addOriginalShape, "addOriginalShape");
             
             REcmaHelper::registerFunction(&engine, proto, hasOriginalShapes, "hasOriginalShapes");
+            
+            REcmaHelper::registerFunction(&engine, proto, countOriginalShapes, "countOriginalShapes");
+            
+            REcmaHelper::registerFunction(&engine, proto, getOriginalShape, "getOriginalShape");
             
         engine.setDefaultPrototype(
             qMetaTypeId<RPainterPath*>(), *proto);
@@ -317,6 +339,26 @@
 
     ctor.setProperty("NoColorMode",
     QScriptValue(RPainterPath::NoColorMode),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("SimplePointDisplay",
+    QScriptValue(RPainterPath::SimplePointDisplay),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("PolylineGen",
+    QScriptValue(RPainterPath::PolylineGen),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("NoPattern",
+    QScriptValue(RPainterPath::NoPattern),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("ScreenBasedLinetype",
+    QScriptValue(RPainterPath::ScreenBasedLinetype),
     QScriptValue::ReadOnly);
 
 
@@ -4040,6 +4082,422 @@
             return result;
         }
          QScriptValue
+        REcmaPainterPath::setSimplePointDisplay
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPainterPath::setSimplePointDisplay", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPainterPath::setSimplePointDisplay";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPainterPath* self = 
+                        getSelf("setSimplePointDisplay", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setSimplePointDisplay(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPainterPath.setSimplePointDisplay().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPainterPath::setSimplePointDisplay", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPainterPath::getSimplePointDisplay
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPainterPath::getSimplePointDisplay", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPainterPath::getSimplePointDisplay";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPainterPath* self = 
+                        getSelf("getSimplePointDisplay", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->getSimplePointDisplay();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPainterPath.getSimplePointDisplay().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPainterPath::getSimplePointDisplay", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPainterPath::setPolylineGen
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPainterPath::setPolylineGen", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPainterPath::setPolylineGen";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPainterPath* self = 
+                        getSelf("setPolylineGen", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setPolylineGen(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPainterPath.setPolylineGen().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPainterPath::setPolylineGen", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPainterPath::getPolylineGen
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPainterPath::getPolylineGen", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPainterPath::getPolylineGen";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPainterPath* self = 
+                        getSelf("getPolylineGen", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->getPolylineGen();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPainterPath.getPolylineGen().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPainterPath::getPolylineGen", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPainterPath::setNoPattern
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPainterPath::setNoPattern", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPainterPath::setNoPattern";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPainterPath* self = 
+                        getSelf("setNoPattern", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setNoPattern(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPainterPath.setNoPattern().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPainterPath::setNoPattern", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPainterPath::getNoPattern
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPainterPath::getNoPattern", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPainterPath::getNoPattern";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPainterPath* self = 
+                        getSelf("getNoPattern", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->getNoPattern();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPainterPath.getNoPattern().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPainterPath::getNoPattern", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPainterPath::setScreenBasedLinetype
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPainterPath::setScreenBasedLinetype", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPainterPath::setScreenBasedLinetype";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPainterPath* self = 
+                        getSelf("setScreenBasedLinetype", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setScreenBasedLinetype(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPainterPath.setScreenBasedLinetype().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPainterPath::setScreenBasedLinetype", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPainterPath::getScreenBasedLinetype
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPainterPath::getScreenBasedLinetype", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPainterPath::getScreenBasedLinetype";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPainterPath* self = 
+                        getSelf("getScreenBasedLinetype", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->getScreenBasedLinetype();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPainterPath.getScreenBasedLinetype().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPainterPath::getScreenBasedLinetype", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaPainterPath::setPixelWidth
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -4569,7 +5027,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5399,6 +5857,115 @@
             return result;
         }
          QScriptValue
+        REcmaPainterPath::countOriginalShapes
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPainterPath::countOriginalShapes", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPainterPath::countOriginalShapes";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPainterPath* self = 
+                        getSelf("countOriginalShapes", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        
+               self->countOriginalShapes();
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPainterPath.countOriginalShapes().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPainterPath::countOriginalShapes", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPainterPath::getOriginalShape
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPainterPath::getOriginalShape", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPainterPath::getOriginalShape";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPainterPath* self = 
+                        getSelf("getOriginalShape", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QSharedPointer < RShape >'
+    QSharedPointer < RShape > cppResult =
+        
+               self->getOriginalShape(a0);
+        // return type: QSharedPointer < RShape >
+                // Shared pointer to shape, cast to best match:
+                result = REcmaHelper::toScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPainterPath.getOriginalShape().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPainterPath::getOriginalShape", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaPainterPath::rotateList
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -5421,7 +5988,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RPainterPath >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5482,7 +6049,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RPainterPath >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5554,7 +6121,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RPainterPath >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5620,7 +6187,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RPainterPath >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5671,7 +6238,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RPainterPath >
                     a0;
                     REcmaHelper::fromScriptValue(

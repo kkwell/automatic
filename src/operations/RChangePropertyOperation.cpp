@@ -47,11 +47,12 @@ RTransaction RChangePropertyOperation::apply(RDocument& document, bool preview) 
     // always allow property changes (e.g. move entity to hidden layer)
     transaction.setAllowInvisible(true);
     transaction.setGroup(transactionGroup);
+    transaction.setTypes(transactionTypes);
 
     QVariant val = value;
 
     // optimization: change layer ID instead of changing layer name:
-    if (propertyTypeId==REntity::PropertyLayer && value.type() == QVariant::String) {
+    if (propertyTypeId==REntity::PropertyLayer && RS::getMetaType(value) == RS::String) {
         val = QVariant(document.getLayerId(value.toString()));
     }
 

@@ -17,10 +17,10 @@
  * along with QCAD.
  */
 #include <QtCore>
-#include <QWheelEvent>
 #include <QDragMoveEvent>
-#include <QScrollBar>
 #include <QPainter>
+#include <QScrollBar>
+#include <QWheelEvent>
 
 #include "RDebug.h"
 #include "RDocument.h"
@@ -48,7 +48,8 @@ RGraphicsViewQt::RGraphicsViewQt(QWidget* parent, bool showFocus)
       RGraphicsViewImage(),
       showFocus(showFocus),
       focusFrameWidget(NULL),
-      gesturesEnabled(true) {
+      gesturesEnabled(true),
+      gotMouseButtonPress(false) {
 
     setFocusPolicy(Qt::WheelFocus);
     setMouseTracking(true);
@@ -95,16 +96,10 @@ void RGraphicsViewQt::viewportChangeEvent() {
  * \see invalidate
  */
 void RGraphicsViewQt::paintEvent(QPaintEvent* e) {
-    // enable timer for performance monitoring:
-    //RDebug::startTimer();
     RDocumentInterface* di = getDocumentInterface();
     if (di!=NULL && di->isSuspended()) {
         QPainter wPainter(this);
-        //wPainter.drawImage(0, 0, graphicsBuffer);
-        wPainter.drawImage(getRect(), graphicsBuffer);
-        //QPixmap pm;
-        //pm.convertFromImage(graphicsBuffer);
-        //wPainter.drawPixmap(this->rect(), pm);
+        wPainter.drawImage(getRect(), graphicsBufferWithPreview);
         wPainter.end();
         return;
     }
@@ -121,8 +116,6 @@ void RGraphicsViewQt::paintEvent(QPaintEvent* e) {
         //wPainter.drawPixmap(this->rect(), pm);
         wPainter.end();
     }
-
-    //RDebug::stopTimer("paintEvent");
 }
 
 /**
@@ -139,8 +132,8 @@ bool RGraphicsViewQt::event(QEvent* e) {
         return gestureEvent(static_cast<QGestureEvent*>(e));
     }
 
-#if QT_VERSION == 0x050A00
-    // workaround for Qt 5.10 bug QTBUG-65559:
+#if QT_VERSION >= 0x050A00 && QT_VERSION <= 0x050C00
+    // workaround for Qt 5.10.0-5.12.0 bug QTBUG-65559 with Wacom tablets:
     // TabletMove events are triggered instead of mouseMoveEvents if pen does NOT
     // hover over tablet when application is started:
     // convert to mouseMoveEvents here:
@@ -179,8 +172,12 @@ void RGraphicsViewQt::tabletEvent(QTabletEvent* event) {
     if (event == NULL || scene==NULL) {
         return;
     }
+
+#if QT_VERSION < 0x050C00
+    // Qt 5.12, 5.13 crashes:
     RTabletEvent e(*event, *scene, *this);
     RGraphicsView::handleTabletEvent(e);
+#endif
 
     // needed for some types of Wacom tablets under Windows:
     event->ignore();
@@ -247,6 +244,7 @@ void RGraphicsViewQt::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void RGraphicsViewQt::mousePressEvent(QMouseEvent* event) {
+    gotMouseButtonPress = true;
     if (event==NULL || scene==NULL) {
         return;
     }
@@ -272,6 +270,18 @@ void RGraphicsViewQt::mouseReleaseEvent(QMouseEvent* event) {
     static int ignoreTimeThreshold = RSettings::getIntValue("GraphicsView/IgnoreTimeThreshold", 150);
     static int ignoreDeltaThreshold = RSettings::getIntValue("GraphicsView/IgnoreDeltaThreshold", 100);
 
+    if (gotMouseButtonPress) {
+        // everything OK, got press, followed by release
+    }
+    else {
+        // Qt/Wacom bug workaround for omitted mouse press events:
+        // got release but no press (Qt / Wacom bug), simulate press:
+        if (event->button()==RS::MiddleButton) {
+            mousePressEvent(event);
+        }
+    }
+    gotMouseButtonPress = false;
+
     if (event==NULL || scene==NULL) {
         return;
     }
@@ -288,7 +298,7 @@ void RGraphicsViewQt::mouseReleaseEvent(QMouseEvent* event) {
 
     RMouseEvent e(*event, *scene, *this, getDevicePixelRatio());
 
-    // if mouse press and mouse release happend within a short time span and the
+    // if mouse press and mouse release happened within a short time span and the
     // mouse movement was small, use the mouse press location
     // otherwise use mouse release location to define point:
     if (mouseClickTimer.elapsed()<ignoreTimeThreshold &&

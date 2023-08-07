@@ -31,10 +31,11 @@
 
 #include "RPolyline.h"
 
+class RLine;
+
 #ifndef R_NO_OPENNURBS
 #include "opennurbs/opennurbs.h"
 #endif
-
 
 #ifndef RDEFAULT_MIN1
 #define RDEFAULT_MIN1 -1
@@ -55,8 +56,11 @@
 class QCADCORE_EXPORT RSpline: public RShape, public RExplodable {
 public:
     RSpline();
+    RSpline(const RSpline& other);
     RSpline(const QList<RVector>& controlPoints, int degree);
-    virtual ~RSpline();
+    //virtual ~RSpline();
+
+    RSpline& operator =(const RSpline& other);
 
     virtual RShape::Type getShapeType() const {
         return Spline;
@@ -102,6 +106,7 @@ public:
     void insertFitPointAt(const RVector& point);
     void insertFitPointAt(double t, const RVector& point);
     void removeFitPointAt(const RVector& point);
+    void removeFirstFitPoint();
     void removeLastFitPoint();
     void setFitPoints(const QList<RVector>& points);
     QList<RVector> getFitPoints() const;
@@ -114,6 +119,7 @@ public:
     void setKnotVector(const QList<double>& knots);
     void appendKnot(double k);
     QList<double> getWeights() const;
+    void setWeights(QList<double>& w);
 
     void setDegree(int d);
     int getDegree() const;
@@ -163,6 +169,7 @@ public:
     virtual QList<RVector> getCenterPoints() const;
     virtual QList<RVector> getPointsWithDistanceToEnd(
         double distance, int from = RS::FromAny) const;
+    virtual QList<RVector> getPointCloud(double segmentLength) const;
 
     virtual RVector getVectorTo(const RVector& point,
             bool limited = true, double strictRange = RMAXDOUBLE) const;
@@ -177,6 +184,7 @@ public:
     virtual bool flipHorizontal();
     virtual bool flipVertical();
     virtual bool reverse();
+    virtual bool stretch(const RPolyline& area, const RVector& offset);
 
     QSharedPointer<RShape> getTransformed(const QTransform& transform) const;
 
@@ -195,7 +203,7 @@ public:
     QList<RSpline> splitAtParams(const QList<double>& params) const;
 
     RPolyline toPolyline(int segments) const;
-    RPolyline approximateWithArcs(double tolerance) const;
+    RPolyline approximateWithArcs(double tolerance, double radiusLimit=RDEFAULT_MIN1) const;
 
     virtual QList<QSharedPointer<RShape> > getExploded(int segments = RDEFAULT_MIN1) const;
     QList<QSharedPointer<RShape> > getExplodedBezier(int segments) const;
@@ -203,7 +211,7 @@ public:
 
     QList<RSpline> getBezierSegments(const RBox& queryBox = RDEFAULT_RBOX) const;
 
-    bool isValid() const;
+    virtual bool isValid() const;
     double getTDelta() const;
     double getTMin() const;
     double getTMax() const;
@@ -225,7 +233,7 @@ public:
         return dirty;
     }
 
-    QList<RVector> getSelfIntersectionPoints() const;
+    QList<RVector> getSelfIntersectionPoints(double tolerance=RS::PointTolerance) const;
 
     static bool hasProxy() {
         return splineProxy!=NULL;
@@ -248,12 +256,24 @@ public:
         return splineProxy;
     }
 
+#if QT_VERSION >= 0x060000
+    /**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */
+    RSpline copy() const {
+        return *this;
+    }
+#endif
+
 protected:
     void appendToExploded(const RLine& line) const;
     //void appendToExploded(QList<QSharedPointer<RShape> >& list) const;
     void invalidate() const;
     void updateInternal() const;
     void updateBoundingBox() const;
+
+    virtual void print(QDebug dbg) const;
 
 public:
     // members are mutable, so the spline can update itself from fit points
@@ -271,6 +291,7 @@ public:
 
     /**
      * \getter{getWeights}
+     * \setter{setWeights}
      */
     mutable QList<double> weights;
 
@@ -304,15 +325,14 @@ public:
     mutable bool dirty;
     mutable bool updateInProgress;
 
-protected:
-    virtual void print(QDebug dbg) const;
-
 private:
 #ifndef R_NO_OPENNURBS
     mutable ON_NurbsCurve curve;
 #endif
     mutable RBox boundingBox;
     mutable QList<QSharedPointer<RShape> > exploded;
+    // cached length:
+    mutable double length;
 
     static RSplineProxy* splineProxy;
 };

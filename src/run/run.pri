@@ -114,12 +114,14 @@ else {
         }
 
         greaterThan(QT_MAJOR_VERSION, 4) {
-            system(cp "$$[QT_INSTALL_PLUGINS]/platforms/libqxcb.so" "$${DESTDIR}/../platforms")
-            system(cp "$$[QT_INSTALL_PLUGINS]/platforms/libqoffscreen.so" "$${DESTDIR}/../platforms")
-            system(cp "$$[QT_INSTALL_PLUGINS]/platforms/libqminimal.so" "$${DESTDIR}/../platforms")
-            system(cp "$$[QT_INSTALL_PLUGINS]/platforms/libqlinuxfb.so" "$${DESTDIR}/../platforms")
+            #system(cp "$$[QT_INSTALL_PLUGINS]/platforms/libqxcb.so" "$${DESTDIR}/../platforms")
+            #system(cp "$$[QT_INSTALL_PLUGINS]/platforms/libqoffscreen.so" "$${DESTDIR}/../platforms")
+            #system(cp "$$[QT_INSTALL_PLUGINS]/platforms/libqminimal.so" "$${DESTDIR}/../platforms")
+            #system(cp "$$[QT_INSTALL_PLUGINS]/platforms/libqlinuxfb.so" "$${DESTDIR}/../platforms")
+            system(cp "$$[QT_INSTALL_PLUGINS]/platforms/libq*.so" "$${DESTDIR}/../platforms")
             system(cp "$$[QT_INSTALL_PLUGINS]/platforminputcontexts/*.so" "$${DESTDIR}/../platforminputcontexts")
             system(cp "$$[QT_INSTALL_PLUGINS]/xcbglintegrations/*.so" "$${DESTDIR}/../xcbglintegrations")
+            system(cp -r "$$[QT_INSTALL_PLUGINS]/wayland-*" "$${DESTDIR}/../")
         }
     }
 
@@ -134,6 +136,7 @@ else {
                 imageformats\\qtiff.dll \
                 imageformats\\qwbmp.dll \
                 sqldrivers\\qsqlite.dll \
+                sqldrivers\\qsqlodbc.dll \\
                 printsupport\\windowsprintersupport.dll
         }
 
@@ -178,6 +181,7 @@ else {
         greaterThan(QT_MAJOR_VERSION, 4) {
             system(copy "$${QT_INSTALL_BINS_WIN}\\*.dll" "$${DESTDIR_WIN}")
             system(copy "$${QT_INSTALL_PLUGINS_WIN}\\platforms\\*.dll" "$${DESTDIR_WIN}\\..\\platforms")
+            system(copy "$${QT_INSTALL_PLUGINS_WIN}\\styles\\*.dll" "$${DESTDIR_WIN}\\..\\styles")
         }
         else {
             system(copy "$${QT_INSTALL_LIBS_WIN}\\*.dll" "$${DESTDIR_WIN}")

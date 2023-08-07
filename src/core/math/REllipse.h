@@ -49,6 +49,8 @@ public:
              bool reversed);
     virtual ~REllipse();
 
+    static REllipse createInscribed(const RVector& p1, const RVector& p2, const RVector& p3, const RVector& p4);
+
     virtual RShape::Type getShapeType() const {
         return Ellipse;
     }
@@ -61,7 +63,7 @@ public:
         return true;
     }
 
-    bool isValid();
+    virtual bool isValid() const;
 
     virtual void setZ(double z);
 
@@ -76,6 +78,7 @@ public:
     virtual QList<RVector> getCenterPoints() const;
     virtual QList<RVector> getPointsWithDistanceToEnd(
         double distance, int from = RS::FromAny) const;
+    virtual QList<RVector> getPointCloud(double segmentLength) const;
 
     virtual RVector getVectorTo(const RVector& point,
             bool limited = true, double strictRange = RMAXDOUBLE) const;
@@ -205,6 +208,16 @@ public:
     static REllipseProxy* getEllipseProxy() {
         return ellipseProxy;
     }
+
+#if QT_VERSION >= 0x060000
+    /**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */
+    REllipse copy() const {
+        return *this;
+    }
+#endif
 
 protected:
     virtual void print(QDebug dbg) const;

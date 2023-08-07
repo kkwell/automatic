@@ -335,7 +335,7 @@ ScMirrored.prototype.beginEvent = function() {
 //    this.mirrorWidget.resize(this.w,this.h);
 //    this.mirrorWidget.move(this.x,this.y);
     this.mirrorWidget.focusPolicy = Qt.NoFocus;
-    var flags = new Qt.WindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool);
+    var flags = makeQtWindowFlags(Qt.FramelessWindowHint, Qt.WindowStaysOnTopHint, Qt.Tool);
     this.mirrorWidget.setWindowFlags(flags);
     this.mirrorWidget.setAttribute(Qt.WA_MacNoShadow);
     this.mirrorWidget.setAttribute(Qt.WA_DeleteOnClose);
@@ -592,9 +592,9 @@ ScMirrored.createPixmap = function(file, w, h) {
     pixmap.fill(new QColor(0,0,0,0));
     var p = new QPainter();
     p.begin(pixmap);
-    var r = new QSvgRenderer();
-    r.load(file);
-    r.render(p);
+    //var r = new QSvgRenderer();
+    //r.load(file);
+    //r.render(p);
     p.end();
     return pixmap;
 }

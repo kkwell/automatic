@@ -63,9 +63,21 @@
             
             REcmaHelper::registerFunction(&engine, proto, getLineSpacingFactor, "getLineSpacingFactor");
             
+            REcmaHelper::registerFunction(&engine, proto, getAuxLinePositions, "getAuxLinePositions");
+            
+            REcmaHelper::registerFunction(&engine, proto, getAuxLinePositionsString, "getAuxLinePositionsString");
+            
             REcmaHelper::registerFunction(&engine, proto, load, "load");
             
             REcmaHelper::registerFunction(&engine, proto, isLoaded, "isLoaded");
+            
+            REcmaHelper::registerFunction(&engine, proto, getGlyphNames, "getGlyphNames");
+            
+            REcmaHelper::registerFunction(&engine, proto, getGlyph, "getGlyph");
+            
+            REcmaHelper::registerFunction(&engine, proto, getShapeNames, "getShapeNames");
+            
+            REcmaHelper::registerFunction(&engine, proto, getShape, "getShape");
             
         engine.setDefaultPrototype(
             qMetaTypeId<RFont*>(), *proto);
@@ -598,6 +610,104 @@
             return result;
         }
          QScriptValue
+        REcmaFont::getAuxLinePositions
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaFont::getAuxLinePositions", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaFont::getAuxLinePositions";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RFont* self = 
+                        getSelf("getAuxLinePositions", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < double >'
+    QList < double > cppResult =
+        
+               self->getAuxLinePositions();
+        // return type: QList < double >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RFont.getAuxLinePositions().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaFont::getAuxLinePositions", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaFont::getAuxLinePositionsString
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaFont::getAuxLinePositionsString", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaFont::getAuxLinePositionsString";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RFont* self = 
+                        getSelf("getAuxLinePositionsString", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        
+               self->getAuxLinePositionsString();
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RFont.getAuxLinePositionsString().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaFont::getAuxLinePositionsString", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaFont::load
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -693,6 +803,269 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaFont::isLoaded", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaFont::getGlyphNames
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaFont::getGlyphNames", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaFont::getGlyphNames";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RFont* self = 
+                        getSelf("getGlyphNames", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < QChar >'
+    QList < QChar > cppResult =
+        
+               self->getGlyphNames();
+        // return type: QList < QChar >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RFont.getGlyphNames().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaFont::getGlyphNames", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaFont::getGlyph
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaFont::getGlyph", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaFont::getGlyph";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RFont* self = 
+                        getSelf("getGlyph", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QChar */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QChar
+                    a0 =
+                    (QChar)
+                    
+                    context->argument( 0 ).
+                    toString().at(0);
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RPainterPath'
+    RPainterPath cppResult =
+        
+               self->getGlyph(a0);
+        // return type: RPainterPath
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isString()
+        ) /* type: QChar */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QChar
+                    a0 =
+                    (QChar)
+                    
+                    context->argument( 0 ).
+                    toString().at(0);
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RPainterPath'
+    RPainterPath cppResult =
+        
+               self->getGlyph(a0
+        ,
+    a1);
+        // return type: RPainterPath
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RFont.getGlyph().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaFont::getGlyph", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaFont::getShapeNames
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaFont::getShapeNames", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaFont::getShapeNames";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RFont* self = 
+                        getSelf("getShapeNames", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < QString >'
+    QList < QString > cppResult =
+        
+               self->getShapeNames();
+        // return type: QList < QString >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RFont.getShapeNames().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaFont::getShapeNames", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaFont::getShape
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaFont::getShape", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaFont::getShape";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RFont* self = 
+                        getSelf("getShape", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RPainterPath'
+    RPainterPath cppResult =
+        
+               self->getShape(a0);
+        // return type: RPainterPath
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RFont.getShape().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaFont::getShape", context, engine);
             return result;
         }
          QScriptValue REcmaFont::toString

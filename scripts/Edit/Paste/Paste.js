@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Edit.js");
+include("scripts/Edit/Edit.js");
 
 /**
  * \class Paste
@@ -108,6 +108,7 @@ Paste.prototype.pickCoordinate = function(event, preview) {
             if (!isNull(op)) {
                 this.di.applyOperation(op);
                 this.di.clearPreview();
+                this.di.setRelativeZero(this.offset);
                 this.di.repaintViews();
                 this.postInsertion();
             }
@@ -120,6 +121,12 @@ Paste.prototype.pickCoordinate = function(event, preview) {
  * counter, preprocess the inserted document, etc.
  */
 Paste.prototype.postInsertion = function() {
+};
+
+/**
+ * Called to perform additional initialization of the RPasteOperation.
+ */
+Paste.prototype.initOperation = function(op) {
 };
 
 Paste.prototype.getOperation = function(preview) {
@@ -137,6 +144,7 @@ Paste.prototype.getOperation = function(preview) {
     op.setToCurrentLayer(this.toCurrentLayer);
     op.setOverwriteLayers(this.overwriteLayers);
     op.setOverwriteBlocks(this.overwriteBlocks);
+    this.initOperation(op);
     var unitFactor = RUnit.convert(1.0, this.sourceDocument.getUnit(), this.getDocument().getUnit());
     this.boundary = op.getBoundary(unitFactor);
     return op;
@@ -151,22 +159,12 @@ Paste.prototype.getAuxPreview = function() {
 };
 
 Paste.prototype.slotScaleChanged = function(value) {
-    var scale = RMath.eval(value);
-    if (RMath.getError()==="") {
-        this.scale = scale;
-    } else {
-        this.scale = 1;
-    }
+    this.scale = value;
     this.updatePreview(true);
 };
 
 Paste.prototype.slotRotationChanged = function(value) {
-    var rotation = RMath.eval(value);
-    if (RMath.getError()==="") {
-        this.rotation = RMath.deg2rad(rotation);
-    } else {
-        this.rotation = 0;
-    }
+    this.rotation = value;
     this.updatePreview(true);
 };
 

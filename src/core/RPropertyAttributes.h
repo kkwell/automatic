@@ -30,7 +30,6 @@
 
 #include "RDebug.h"
 #include "RMath.h"
-#include "RPropertyTypeId.h"
 
 /**
  * Structure to transfer attributes about property types.
@@ -68,9 +67,18 @@ public:
         KnownVariable = 0x20000,         //!< Property is a known DXF variable
         NumericallySorted = 0x40000,     //!< Sort choices for this property numerically
         Percentage = 0x80000 | Integer,  //!< Property is a percentage (0...100), implies Integer
-        Sum = 0x100000 | ReadOnly | Redundant,  //!< Sum up this property when multiple entities are selected (area, lenght),
+        Sum = 0x100000 | ReadOnly | Redundant,  //!< Sum up this property when multiple entities are selected (area, length),
                                          //!< implies ReadOnly and Redundant
-        Undeletable = 0x200000           //!< Property is undeletable (custom properties only)
+        Undeletable = 0x200000,          //!< Property is undeletable (custom properties only)
+        OnRequest = 0x400000,            //!< Property shown on request (slow to compute)
+        Location = 0x800000,             //!< Property affected when transforming
+        RefPoint = 0x1000000,            //!< Property affected when moving reference point
+        Geometry = Location | RefPoint,  //!< Property affected when changing geometry (Location | RefPoint)
+        Scale = 0x2000000,               //!< Property is scale (1:2, 5"=1", ...)
+        Area = 0x4000000,                //!< Property is area (relevant for formatting of value)
+        UnitLess = 0x8000000,            //!< Property has no unit (linetype scale, draw order, ...)
+        DimStyleOverride = 0x10000000,   //!< Property is advanced dimension style override (can be hidden)
+        CustomApp001 = 0x20000000        //!< Property attribute for custom application
     };
     Q_DECLARE_FLAGS(Options, Option)
 
@@ -205,12 +213,28 @@ public:
         setOption(Sum, sum);
     }
 
+    bool isOnRequest() const {
+        return options.testFlag(OnRequest);
+    }
+
+    void setOnRequest(bool onRequest) {
+        setOption(OnRequest, onRequest);
+    }
+
     bool isLabel() const {
         return options.testFlag(Label);
     }
 
+    bool isCustom() const {
+        return options.testFlag(Custom);
+    }
+
     bool isDimensionLabel() const {
         return options.testFlag(DimensionLabel);
+    }
+
+    void setInteger(bool i) {
+        setOption(Integer, i);
     }
 
     bool isInteger() const {
@@ -237,12 +261,40 @@ public:
         setOption(NumericallySorted, on);
     }
 
-    RPropertyTypeId getPropertyTypeId() const {
-        return propertyTypeId;
+    bool isScaleType() const {
+        return options.testFlag(Scale);
     }
 
-    void setPropertyTypeId(RPropertyTypeId pid) {
-        propertyTypeId = pid;
+    void setScaleType(bool v) {
+        setOption(Scale, v);
+    }
+
+    bool isAreaType() const {
+        return options.testFlag(Area);
+    }
+
+    void setAreaType(bool v) {
+        setOption(Area, v);
+    }
+
+    bool isUnitLess() const {
+        return options.testFlag(UnitLess);
+    }
+
+    void setUnitLess(bool v) {
+        setOption(UnitLess, v);
+    }
+
+    bool isPercentage() const {
+        return options.testFlag(Percentage);
+    }
+
+    bool isCustomApp001() const {
+        return options.testFlag(CustomApp001);
+    }
+
+    void setCustomApp001(bool v) {
+        setOption(CustomApp001, v);
     }
 
     QString getLabel() const {
@@ -269,9 +321,6 @@ public:
         if (choices != other.choices) {
             return false;
         }
-        if (propertyTypeId != other.propertyTypeId) {
-            return false;
-        }
 
         return true;
     }
@@ -285,7 +334,6 @@ private:
     RPropertyAttributes::Options options;
     QSet<QString> choices;
     QString label;
-    RPropertyTypeId propertyTypeId;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(RPropertyAttributes::Options)

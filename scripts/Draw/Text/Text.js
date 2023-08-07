@@ -24,7 +24,7 @@
  * \brief This module contains the ECMAScript implementation of the text
  * drawing tool.
  */
-include("../Draw.js");
+include("scripts/Draw/Draw.js");
 include("scripts/WidgetFactory.js");
 include("TextDialog/TextDialog.js");
 
@@ -58,6 +58,10 @@ Text.prototype.beginEvent = function() {
 
     var dialog = new TextDialog(this.mode);
     this.textData = dialog.show();
+    if (RSettings.getQtVersion() >= 0x060000) {
+        delete dialog;
+    }
+
     if (isNull(this.textData)) {
         this.terminate();
         return;
@@ -85,7 +89,9 @@ Text.prototype.setState = function(state) {
     this.getDocumentInterface().setClickMode(RAction.PickCoordinate);
 
     var appWin = RMainWindowQt.getMainWindow();
-    this.setLeftMouseTip(qsTr("Position"));
+    var tr = qsTr("Position");
+    this.setLeftMouseTip(tr);
+    this.setCommandPrompt(tr);
     this.setRightMouseTip(EAction.trCancel);
     EAction.showSnapTools();
 };

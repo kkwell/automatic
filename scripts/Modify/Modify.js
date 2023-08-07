@@ -24,7 +24,7 @@
  * \brief This module contains ECMAScript implementations of various
  * modification tools.
  */
-include("../EAction.js");
+include("scripts/EAction.js");
 
 /**
  * \class Modify
@@ -101,7 +101,7 @@ Modify.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(true);
         action.setIcon(Modify.includeBasePath + "/Modify.svg");
-        action.setStatusTip(qsTr("Show modification tools"));
+        //action.setStatusTip(qsTr("Show modification tools"));
         action.setDefaultShortcut(new QKeySequence("w,m"));
         action.setNoState();
         action.setDefaultCommands(["modifymenu"]);

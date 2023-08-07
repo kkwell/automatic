@@ -70,10 +70,28 @@
         getLineSpacingFactor
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getAuxLinePositions
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getAuxLinePositionsString
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         load
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         isLoaded
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getGlyphNames
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getGlyph
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getShapeNames
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getShape
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

@@ -57,11 +57,11 @@ class DL_CreationInterface;
 class DL_WriterA;
 
 
-#define DL_VERSION "3.17.0.0"
+#define DL_VERSION "3.26.4.0"
 
 #define DL_VERSION_MAJOR    3
-#define DL_VERSION_MINOR    17
-#define DL_VERSION_REV      0
+#define DL_VERSION_MINOR    26
+#define DL_VERSION_REV      4
 #define DL_VERSION_BUILD    0
 
 #define DL_UNKNOWN               0
@@ -294,9 +294,9 @@ public:
                            const DL_DimensionData& data,
                            const DL_DimDiametricData& edata,
                            const DL_Attributes& attrib);
-    void writeDimAngular(DL_WriterA& dw,
+    void writeDimAngular2L(DL_WriterA& dw,
                          const DL_DimensionData& data,
-                         const DL_DimAngularData& edata,
+                         const DL_DimAngular2LData& edata,
                          const DL_Attributes& attrib);
     void writeDimAngular3P(DL_WriterA& dw,
                            const DL_DimensionData& data,
@@ -350,9 +350,10 @@ public:
     void writeStyle(DL_WriterA& dw, const DL_StyleData& style);
     void writeView(DL_WriterA& dw);
     void writeUcs(DL_WriterA& dw);
-    void writeDimStyle(DL_WriterA& dw, 
+    void writeDimStyle(DL_WriterA& dw,
                        double dimasz, double dimexe, double dimexo,
-                       double dimgap, double dimtxt);
+                       double dimgap, double dimtxt,
+                       int dimtad = 1, bool dimtih = false);
     void writeBlockRecord(DL_WriterA& dw);
     void writeBlockRecord(DL_WriterA& dw, const std::string& name);
     void writeObjects(DL_WriterA& dw, const std::string& appDictionaryName = "");

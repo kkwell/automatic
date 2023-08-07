@@ -23,23 +23,30 @@ include("scripts/View/View.js");
 function WindowZoom(guiAction) {
     View.call(this, guiAction);
 
+    this.view = undefined;
+
     this.v1 = RVector.invalid;
     this.v2 = RVector.invalid;
     this.s1 = RVector.invalid;
     this.s2 = RVector.invalid;
 
-    var bitmap, mask
-    if (RSettings.getDevicePixelRatio()===2 && RS.getSystemId()!=="osx") {
-        bitmap = new QBitmap(WindowZoom.includeBasePath + "/WindowZoomCursor@2x.png", "PNG");
-        mask = new QBitmap(WindowZoom.includeBasePath + "/WindowZoomCursorMask@2x.png", "PNG");
-        //bitmap.setDevicePixelRatio(2);
-        //mask.setDevicePixelRatio(2);
-        this.cursor = new QCursor(bitmap, mask, 24, 24);
+    if (RSettings.getBoolValue("GraphicsView/SystemCursors", false)===true) {
+        this.cursor = new QCursor(Qt.CrossCursor);
     }
     else {
-        bitmap = new QBitmap(WindowZoom.includeBasePath + "/WindowZoomCursor.png", "PNG");
-        mask = new QBitmap(WindowZoom.includeBasePath + "/WindowZoomCursorMask.png", "PNG");
-        this.cursor = new QCursor(bitmap, mask, 12, 12);
+        var bitmap, mask;
+        if (RSettings.getDevicePixelRatio()===2 && RS.getSystemId()!=="osx") {
+            bitmap = new QBitmap(WindowZoom.includeBasePath + "/WindowZoomCursor@2x.png", "PNG");
+            mask = new QBitmap(WindowZoom.includeBasePath + "/WindowZoomCursorMask@2x.png", "PNG");
+            this.cursor = new QCursor(bitmap, mask, 24, 24);
+        }
+        else {
+            bitmap = new QBitmap(WindowZoom.includeBasePath + "/WindowZoomCursor.png", "PNG");
+            mask = new QBitmap(WindowZoom.includeBasePath + "/WindowZoomCursorMask.png", "PNG");
+            this.cursor = new QCursor(bitmap, mask, 12, 12);
+        }
+        var appWin = EAction.getMainWindow();
+        appWin.setProperty("MouseCursor", "WindowZoomCursor");
     }
 }
 
@@ -49,6 +56,15 @@ WindowZoom.includeBasePath = includeBasePath;
 WindowZoom.State = {
     SettingCorner1 : 0,
     SettingCorner2 : 1
+};
+
+WindowZoom.viewEquals = function(v1, v2) {
+    if (RSettings.getQtVersion() >= 0x060000) {
+        return v1.getAddress() == v2.getAddress();
+    }
+    else {
+        return v1 == v2;
+    }
 };
 
 WindowZoom.prototype.beginEvent = function() {
@@ -76,7 +92,7 @@ WindowZoom.prototype.mousePressEvent = function(event) {
 };
 
 WindowZoom.prototype.mouseReleaseEvent = function(event) {
-    if (this.view != event.getGraphicsView()) {
+    if (!WindowZoom.viewEquals(this.view, event.getGraphicsView())) {
         return;
     }
     if (event.button() == Qt.LeftButton) {
@@ -99,7 +115,7 @@ WindowZoom.prototype.mouseReleaseEvent = function(event) {
 
 WindowZoom.prototype.mouseMoveEvent = function(event) {
     if (this.state == WindowZoom.State.SettingCorner2 && this.v1.isValid()) {
-        if (this.view == event.getGraphicsView()) {
+        if (WindowZoom.viewEquals(this.view, event.getGraphicsView())) {
             this.v2 = event.getModelPosition();
         }
         this.getDocumentInterface().addZoomBoxToPreview(
@@ -111,4 +127,3 @@ WindowZoom.prototype.finishEvent = function(event) {
     View.prototype.finishEvent.call(this);
     this.setCursor(new QCursor(Qt.ArrowCursor));
 };
-

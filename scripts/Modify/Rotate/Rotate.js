@@ -32,12 +32,20 @@ function Rotate(guiAction) {
     this.targetPoint = undefined;
     this.angle = undefined;
     this.angleByMouse = false;
-    this.useDialog = true;
+
+    this.useDialog = RSettings.getBoolValue("Rotate/UseDialog", true);
+
+    if (!this.useDialog) {
+        this.setUiOptions("Rotate.ui");
+    }
 }
 
 Rotate.prototype = new Transform();
-
 Rotate.includeBasePath = includeBasePath;
+
+Rotate.getPreferencesCategory = function() {
+    return [qsTr("Modify"), qsTr("Rotate")];
+};
 
 Rotate.State = {
     SettingCenterPoint : 0,
@@ -66,7 +74,6 @@ Rotate.prototype.setState = function(state) {
     case Rotate.State.SettingCenterPoint:
         this.referencePoint = undefined;
         this.targetPoint = undefined;
-        this.angle = undefined;
         var trCenterPoint = qsTr("Center point");
         this.setCommandPrompt(trCenterPoint);
         this.setLeftMouseTip(trCenterPoint);
@@ -114,12 +121,16 @@ Rotate.prototype.escapeEvent = function() {
 
 Rotate.prototype.pickCoordinate = function(event, preview) {
     var di = this.getDocumentInterface();
+    var op;
 
     switch (this.state) {
     case Rotate.State.SettingCenterPoint:
-        if (!preview) {
-            this.centerPoint = event.getModelPosition();
+        this.centerPoint = event.getModelPosition();
 
+        if (preview) {
+            this.updatePreview();
+        }
+        else {
             if (this.useDialog) {
                 this.setState(-1);
                 if (!this.showDialog()) {
@@ -137,7 +148,7 @@ Rotate.prototype.pickCoordinate = function(event, preview) {
 
             // angle defined in dialog:
             else {
-                var op = this.getOperation(false);
+                op = this.getOperation(false);
                 if (!isNull(op)) {
                     di.applyOperation(op);
                     di.setRelativeZero(this.centerPoint);
@@ -165,7 +176,7 @@ Rotate.prototype.pickCoordinate = function(event, preview) {
             this.updatePreview();
         }
         else {
-            var op = this.getOperation(false);
+            op = this.getOperation(false);
             if (!isNull(op)) {
                 di.applyOperation(op);
                 di.setRelativeZero(this.targetPoint);
@@ -186,7 +197,7 @@ Rotate.prototype.showDialog = function() {
     var dialog = WidgetFactory.createDialog(Rotate.includeBasePath, "RotateDialog.ui");
     WidgetFactory.restoreState(dialog);
     if (!dialog.exec()) {
-        dialog.destroy();
+        destr(dialog);
         EAction.activateMainWindow();
         return false;
     }
@@ -215,7 +226,7 @@ Rotate.prototype.showDialog = function() {
 
     WidgetFactory.saveState(dialog);
 
-    dialog.destroy();
+    destr(dialog);
     EAction.activateMainWindow();
     return true;
 }
@@ -245,9 +256,9 @@ Rotate.prototype.getOperation = function(preview) {
 /**
  * Callback function for Transform.getOperation.
  */
-Rotate.prototype.transform = function(entity, k, op, preview, forceNew) {
+Rotate.prototype.transform = function(entity, k, op, preview, flags) {
     entity.rotate(this.angle * k, this.centerPoint);
-    op.addObject(entity, this.useCurrentAttributes, forceNew);
+    op.addObject(entity, flags);
 }
 
 Rotate.prototype.getAuxPreview = function() {
@@ -272,3 +283,10 @@ Rotate.prototype.getAuxPreview = function() {
     return ret;
 };
 
+Rotate.prototype.slotAngleChanged = function(v) {
+    this.angle = v;
+};
+
+Rotate.prototype.slotAngleByMouseChanged = function(v) {
+    this.angleByMouse = v;
+};

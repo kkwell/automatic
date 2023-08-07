@@ -1,8 +1,9 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-    ts \
+    dir \
     ExDumpPolyline \
+    ExPostNewAction \
     ExRegisterFileExporter \
     ExRegisterFileImporter \
     ExXmlImport \

@@ -14,7 +14,7 @@
             
         // includes for base ecma wrapper classes
         
-                  #include "REcmaSharedPointerDimensionEntity.h"
+                  #include "REcmaSharedPointerDimLinearEntity.h"
                  void REcmaSharedPointerDimAlignedEntity::initEcma(QScriptEngine& engine, QScriptValue* proto 
     
     ) 
@@ -29,10 +29,10 @@
     }
 
     
-        // primary base class RDimensionEntity:
+        // primary base class RDimLinearEntity:
         
             proto->setPrototype(engine.defaultPrototype(
-            qMetaTypeId<RDimensionEntityPointer>()));
+            qMetaTypeId<RDimLinearEntityPointer>()));
           
         /*
         
@@ -54,6 +54,9 @@
     // destroy:
     REcmaHelper::registerFunction(&engine, proto, destroy, "destroy");
     
+        // conversion for base class RDimLinearEntity
+        REcmaHelper::registerFunction(&engine, proto, getRDimLinearEntity, "getRDimLinearEntity");
+        
         // conversion for base class RDimensionEntity
         REcmaHelper::registerFunction(&engine, proto, getRDimensionEntity, "getRDimensionEntity");
         
@@ -95,6 +98,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, getExtensionPoint2, "getExtensionPoint2");
             
+            REcmaHelper::registerFunction(&engine, proto, getAngle, "getAngle");
+            
         engine.setDefaultPrototype(
             qMetaTypeId<RDimAlignedEntityPointer>(), *proto);
       
@@ -105,6 +110,8 @@
     // static methods:
     
             REcmaHelper::registerFunction(&engine, &ctor, init, "init");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getRtti, "getRtti");
             
             REcmaHelper::registerFunction(&engine, &ctor, getStaticPropertyTypeIds, "getStaticPropertyTypeIds");
             
@@ -121,6 +128,10 @@
             
             ctor.setProperty("PropertyProtected",
                 qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyProtected),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyWorkingSet",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyWorkingSet),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
             ctor.setProperty("PropertyType",
@@ -187,12 +198,68 @@
                 qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyMeasuredValue),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
-            ctor.setProperty("PropertyLinearFactor",
-                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyLinearFactor),
+            ctor.setProperty("PropertyDimscale",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimscale),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
-            ctor.setProperty("PropertyDimScale",
-                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimScale),
+            ctor.setProperty("PropertyDimlfac",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimlfac),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimtxt",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimtxt),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimgap",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimgap),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimasz",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimasz),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimexe",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimexe),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimexo",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimexo),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimtad",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimtad),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimtih",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimtih),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimtsz",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimtsz),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimlunit",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimlunit),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimdec",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimdec),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimdsep",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimdsep),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimzin",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimzin),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyArchTick",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyArchTick),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyDimclrt",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyDimclrt),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
             ctor.setProperty("PropertyDimBlockName",
@@ -205,6 +272,22 @@
             
             ctor.setProperty("PropertyFontName",
                 qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyFontName),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyArrow1Flipped",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyArrow1Flipped),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyArrow2Flipped",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyArrow2Flipped),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyExtLineFix",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyExtLineFix),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyExtLineFixLength",
+                qScriptValueFromValue(&engine, RDimAlignedEntity::PropertyExtLineFixLength),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
             ctor.setProperty("PropertyDimensionLinePosX",
@@ -374,7 +457,16 @@
     
 
     // conversion functions for base classes:
-     QScriptValue REcmaSharedPointerDimAlignedEntity::getRDimensionEntity(QScriptContext *context,
+     QScriptValue REcmaSharedPointerDimAlignedEntity::getRDimLinearEntity(QScriptContext *context,
+            QScriptEngine *engine)
+        
+            {
+                RDimLinearEntity* cppResult =
+                    qscriptvalue_cast<RDimAlignedEntity*> (context->thisObject());
+                QScriptValue result = qScriptValueFromValue(engine, cppResult);
+                return result;
+            }
+             QScriptValue REcmaSharedPointerDimAlignedEntity::getRDimensionEntity(QScriptContext *context,
             QScriptEngine *engine)
         
             {
@@ -417,6 +509,8 @@
     {
         QStringList list;
         
+        list.append("RDimLinearEntity");
+    
         list.append("RDimensionEntity");
     
         list.append("REntity");
@@ -464,6 +558,45 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerDimAlignedEntity::init", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerDimAlignedEntity::getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerDimAlignedEntity::getRtti", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAlignedEntity::getRtti";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RS::EntityType'
+    RS::EntityType cppResult =
+        RDimAlignedEntity::
+       getRtti();
+        // return type: RS::EntityType
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAlignedEntity.getRtti().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerDimAlignedEntity::getRtti", context, engine);
             return result;
         }
          QScriptValue
@@ -977,6 +1110,105 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RPropertyTypeId */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(3).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RPropertyTypeId*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RPropertyTypeId*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RDimAlignedEntity: Argument 0 is not of type RPropertyTypeId.",
+                               context);                    
+                    }
+                    RPropertyTypeId 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a3 =
+                    (bool)
+                    
+                    context->argument( 3 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QPair < QVariant , RPropertyAttributes >'
+    QPair < QVariant , RPropertyAttributes > cppResult =
+        
+               self->getProperty(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: QPair < QVariant , RPropertyAttributes >
+                // Pair of ...:
+                //result = REcmaHelper::pairToScriptValue(engine, cppResult);
+                QVariantList vl;
+                QVariant v;
+                
+                    // first type of pair is variant:
+                    if (QString(cppResult.first.typeName())=="RLineweight::Lineweight") {
+                        v.setValue((int)cppResult.first.value<RLineweight::Lineweight>());
+                    }
+                    else {
+                        v.setValue(cppResult.first);
+                    }
+                  
+
+                vl.append(v);
+                v.setValue(cppResult.second);
+                vl.append(v);
+                result = qScriptValueFromValue(engine, vl);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RDimAlignedEntity.getProperty().",
                    context);
@@ -1353,6 +1585,55 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerDimAlignedEntity::getExtensionPoint2", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerDimAlignedEntity::getAngle
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerDimAlignedEntity::getAngle", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerDimAlignedEntity::getAngle";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDimAlignedEntity* self = 
+                        getSelf("getAngle", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        
+               self->getAngle();
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDimAlignedEntity.getAngle().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerDimAlignedEntity::getAngle", context, engine);
             return result;
         }
          QScriptValue REcmaSharedPointerDimAlignedEntity::toString

@@ -23,10 +23,48 @@
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"core_global.h"</cpp:file></cpp:include>
 
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QApplication&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QDebug&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QEasingCurve&gt;</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QPair&gt;</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QString&gt;</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QStringList&gt;</cpp:file></cpp:include>
+<comment type="line">//#include &lt;QTextCodec&gt;</comment>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QVariant&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QMetaType&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QTextCharFormat&gt;</cpp:file></cpp:include>
+
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QScreen&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QPageLayout&gt;</cpp:file></cpp:include>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QPrinter&gt;</cpp:file></cpp:include>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+
+<comment type="line">// Qt &lt; 5.10</comment>
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &lt; 0x050A00</expr></cpp:if>
+<cpp:ifdef>#  <cpp:directive>ifdef</cpp:directive> <name>ssize_t</name></cpp:ifdef>
+<cpp:define>#    <cpp:directive>define</cpp:directive> <name>qsizetype</name> <name>ssize_t</name></cpp:define>
+<cpp:else>#  <cpp:directive>else</cpp:directive></cpp:else>
+<cpp:define>#    <cpp:directive>define</cpp:directive> <name>qsizetype</name> <name>int</name></cpp:define>
+<cpp:endif>#  <cpp:directive>endif</cpp:directive></cpp:endif>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x050000</expr></cpp:if>
+<cpp:include>#  <cpp:directive>include</cpp:directive> <cpp:file>&lt;QRegularExpression&gt;</cpp:file></cpp:include>
+<cpp:include>#  <cpp:directive>include</cpp:directive> <cpp:file>&lt;QGuiApplication&gt;</cpp:file></cpp:include>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+<cpp:include>#  <cpp:directive>include</cpp:directive> <cpp:file>&lt;QRegExp&gt;</cpp:file></cpp:include>
+<cpp:ifndef>#  <cpp:directive>ifndef</cpp:directive> <name>QRegularExpression</name></cpp:ifndef>
+<cpp:define>#    <cpp:directive>define</cpp:directive> <name>QRegularExpression</name> <name>QRegExp</name></cpp:define>
+<cpp:endif>#  <cpp:directive>endif</cpp:directive></cpp:endif>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+<cpp:ifndef>#  <cpp:directive>ifndef</cpp:directive> <name>qSort</name></cpp:ifndef>
+<cpp:define>#    <cpp:directive>define</cpp:directive> <name>qSort</name> <name>std</name>::sort</cpp:define>
+<cpp:endif>#  <cpp:directive>endif</cpp:directive></cpp:endif>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
 
 <class_decl>class <name>RVector</name>;</class_decl>
 <class_decl>class <name>RPropertyAttributes</name>;</class_decl>
@@ -45,6 +83,64 @@
 <cpp:define>#  <cpp:directive>define</cpp:directive> <name>ROS_POSIX</name></cpp:define>
 <cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
 
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_LINEAR</name> <name>QEasingCurve</name>::Linear</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INQUAD</name> <name>QEasingCurve</name>::InQuad</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTQUAD</name> <name>QEasingCurve</name>::OutQuad</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INOUTQUAD</name> <name>QEasingCurve</name>::InOutQuad</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTINQUAD</name> <name>QEasingCurve</name>::OutInQuad</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INCUBIC</name> <name>QEasingCurve</name>::InCubic</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTCUBIC</name> <name>QEasingCurve</name>::OutCubic</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INOUTCUBIC</name> <name>QEasingCurve</name>::InOutCubic</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTINCUBIC</name> <name>QEasingCurve</name>::OutInCubic</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INQUART</name> <name>QEasingCurve</name>::InQuart</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTQUART</name> <name>QEasingCurve</name>::OutQuart</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INOUTQUART</name> <name>QEasingCurve</name>::InOutQuart</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTINQUART</name> <name>QEasingCurve</name>::OutInQuart</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INQUINT</name> <name>QEasingCurve</name>::InQuint</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTQUINT</name> <name>QEasingCurve</name>::OutQuint</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INOUTQUINT</name> <name>QEasingCurve</name>::InOutQuint</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTINQUINT</name> <name>QEasingCurve</name>::OutInQuint</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INSINE</name> <name>QEasingCurve</name>::InSine</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTSINE</name> <name>QEasingCurve</name>::OutSine</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INOUTSINE</name> <name>QEasingCurve</name>::InOutSine</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTINSINE</name> <name>QEasingCurve</name>::OutInSine</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INEXPO</name> <name>QEasingCurve</name>::InExpo</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTEXPO</name> <name>QEasingCurve</name>::OutExpo</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INOUTEXPO</name> <name>QEasingCurve</name>::InOutExpo</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTINEXPO</name> <name>QEasingCurve</name>::OutInExpo</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INCIRC</name> <name>QEasingCurve</name>::InCirc</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTCIRC</name> <name>QEasingCurve</name>::OutCirc</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INOUTCIRC</name> <name>QEasingCurve</name>::InOutCirc</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTINCIRC</name> <name>QEasingCurve</name>::OutInCirc</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INELASTIC</name> <name>QEasingCurve</name>::InElastic</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTELASTIC</name> <name>QEasingCurve</name>::OutElastic</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INOUTELASTIC</name> <name>QEasingCurve</name>::InOutElastic</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTINELASTIC</name> <name>QEasingCurve</name>::OutInElastic</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INBACK</name> <name>QEasingCurve</name>::InBack</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTBACK</name> <name>QEasingCurve</name>::OutBack</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INOUTBACK</name> <name>QEasingCurve</name>::InOutBack</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTINBACK</name> <name>QEasingCurve</name>::OutInBack</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INBOUNCE</name> <name>QEasingCurve</name>::InBounce</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTBOUNCE</name> <name>QEasingCurve</name>::OutBounce</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_INOUTBOUNCE</name> <name>QEasingCurve</name>::InOutBounce</cpp:define>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>REASING_OUTINBOUNCE</name> <name>QEasingCurve</name>::OutInBounce</cpp:define>
+<comment type="line">//#define REASING_INCURVE QEasingCurve::InCurve</comment>
+<comment type="line">//#define REASING_OUTCURVE QEasingCurve::OutCurve</comment>
+<comment type="line">//#define REASING_SINECURVE QEasingCurve::SineCurve</comment>
+<comment type="line">//#define REASING_COSINECURVE QEasingCurve::CosineCurve</comment>
+<comment type="line">//#define REASING_BEZIERSPLINE QEasingCurve::BezierSpline</comment>
+<comment type="line">//#define REASING_TCBSPLINE QEasingCurve::TCBSpline</comment>
+
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &lt; 0x050000</expr></cpp:if>
+<class>class <name>QRegularExpressionMatch</name> <block>{<private type="default">
+</private>}</block>;</class>
+<comment type="block">/*
+#  ifndef QRegularExpressionMatch
+#    define QRegularExpressionMatch int
+#  endif
+*/</comment>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+
 <comment type="block">/**
  * Class namespace for various global enums.
  *
@@ -58,6 +154,66 @@
  */</comment>
 <class>class <macro><name>QCADCORE_EXPORT</name></macro> <name>RS</name> <block>{<private type="default">
 </private><public>public:
+
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+    <comment type="line">// handled as include to avoid inclusion in Qt 4-5 ECMAScript API:</comment>
+    <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RSMetaType.h"</cpp:file></cpp:include>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+    <enum>enum <name>MetaType</name> <block>{
+        <expr><name>Bool</name> = <name><name>QVariant</name>::<name>Bool</name></name></expr>,
+        <expr><name>Char</name> = <name><name>QVariant</name>::<name>Char</name></name></expr>,
+        <expr><name>Double</name> = <name><name>QVariant</name>::<name>Double</name></name></expr>,
+        <expr><name>Int</name> = <name><name>QVariant</name>::<name>Int</name></name></expr>,
+        <expr><name>UnknownType</name> = <name><name>QVariant</name>::<name>Invalid</name></name></expr>,
+        <expr><name>LongLong</name> = <name><name>QVariant</name>::<name>LongLong</name></name></expr>,
+        <expr><name>BitArray</name> = <name><name>QVariant</name>::<name>BitArray</name></name></expr>,
+        <expr><name>Bitmap</name> = <name><name>QVariant</name>::<name>Bitmap</name></name></expr>,
+        <expr><name>Brush</name> = <name><name>QVariant</name>::<name>Brush</name></name></expr>,
+        <expr><name>ByteArray</name> = <name><name>QVariant</name>::<name>ByteArray</name></name></expr>,
+        <expr><name>Color</name> = <name><name>QVariant</name>::<name>Color</name></name></expr>,
+        <expr><name>Cursor</name> = <name><name>QVariant</name>::<name>Cursor</name></name></expr>,
+        <expr><name>Date</name> = <name><name>QVariant</name>::<name>Date</name></name></expr>,
+        <expr><name>DateTime</name> = <name><name>QVariant</name>::<name>DateTime</name></name></expr>,
+        <expr><name>EasingCurve</name> = <name><name>QVariant</name>::<name>EasingCurve</name></name></expr>,
+        <expr><name>Font</name> = <name><name>QVariant</name>::<name>Font</name></name></expr>,
+        <expr><name>Hash</name> = <name><name>QVariant</name>::<name>Hash</name></name></expr>,
+        <expr><name>Icon</name> = <name><name>QVariant</name>::<name>Icon</name></name></expr>,
+        <expr><name>Image</name> = <name><name>QVariant</name>::<name>Image</name></name></expr>,
+        <expr><name>KeySequence</name> = <name><name>QVariant</name>::<name>KeySequence</name></name></expr>,
+        <expr><name>Line</name> = <name><name>QVariant</name>::<name>Line</name></name></expr>,
+        <expr><name>LineF</name> = <name><name>QVariant</name>::<name>LineF</name></name></expr>,
+        <expr><name>List</name> = <name><name>QVariant</name>::<name>List</name></name></expr>,
+        <expr><name>Locale</name> = <name><name>QVariant</name>::<name>Locale</name></name></expr>,
+        <expr><name>Map</name> = <name><name>QVariant</name>::<name>Map</name></name></expr>,
+        <expr><name>Matrix4x4</name> = <name><name>QVariant</name>::<name>Matrix4x4</name></name></expr>,
+        <expr><name>Palette</name> = <name><name>QVariant</name>::<name>Palette</name></name></expr>,
+        <expr><name>Pen</name> = <name><name>QVariant</name>::<name>Pen</name></name></expr>,
+        <expr><name>Pixmap</name> = <name><name>QVariant</name>::<name>Pixmap</name></name></expr>,
+        <expr><name>Point</name> = <name><name>QVariant</name>::<name>Point</name></name></expr>,
+        <expr><name>PointF</name> = <name><name>QVariant</name>::<name>PointF</name></name></expr>,
+        <expr><name>Polygon</name> = <name><name>QVariant</name>::<name>Polygon</name></name></expr>,
+        <expr><name>Rect</name> = <name><name>QVariant</name>::<name>Rect</name></name></expr>,
+        <expr><name>RectF</name> = <name><name>QVariant</name>::<name>RectF</name></name></expr>,
+        <expr><name>Region</name> = <name><name>QVariant</name>::<name>Region</name></name></expr>,
+        <expr><name>Size</name> = <name><name>QVariant</name>::<name>Size</name></name></expr>,
+        <expr><name>SizeF</name> = <name><name>QVariant</name>::<name>SizeF</name></name></expr>,
+        <expr><name>SizePolicy</name> = <name><name>QVariant</name>::<name>SizePolicy</name></name></expr>,
+        <expr><name>String</name> = <name><name>QVariant</name>::<name>String</name></name></expr>,
+        <expr><name>StringList</name> = <name><name>QVariant</name>::<name>StringList</name></name></expr>,
+        <expr><name>TextFormat</name> = <name><name>QVariant</name>::<name>TextFormat</name></name></expr>,
+        <expr><name>TextLength</name> = <name><name>QVariant</name>::<name>TextLength</name></name></expr>,
+        <expr><name>Time</name> = <name><name>QVariant</name>::<name>Time</name></name></expr>,
+        <expr><name>Transform</name> = <name><name>QVariant</name>::<name>Transform</name></name></expr>,
+        <expr><name>Url</name> = <name><name>QVariant</name>::<name>Url</name></name></expr>,
+        <expr><name>Vector2D</name> = <name><name>QVariant</name>::<name>Vector2D</name></name></expr>,
+        <expr><name>Vector3D</name> = <name><name>QVariant</name>::<name>Vector3D</name></name></expr>,
+        <expr><name>Vector4D</name> = <name><name>QVariant</name>::<name>Vector4D</name></name></expr>,
+        <expr><name>Quaternion</name> = <name><name>QVariant</name>::<name>Quaternion</name></name></expr>,
+        <expr><name>UInt</name> = <name><name>QVariant</name>::<name>UInt</name></name></expr>,
+        <expr><name>ULongLong</name> = <name><name>QVariant</name>::<name>ULongLong</name></name></expr>,
+        <expr><name>UserType</name> = <name><name>QVariant</name>::<name>UserType</name></name></expr>
+    }</block>;</enum>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
 
     <comment type="block">/**
      * Message type for debugging and displaying user messages.
@@ -78,16 +234,19 @@
         <expr><name>ObjectAll</name></expr>,
         <expr><name>ObjectUnknown</name></expr>,      <comment type="block">/**&lt; Unknown object */</comment>
 
-        <expr><name>ObjectBlock</name></expr>,
-        <expr><name>ObjectLayer</name></expr>,
         <expr><name>ObjectLinetype</name></expr>,
-        <expr><name>ObjectView</name></expr>,
+        <expr><name>ObjectLayer</name></expr>,
+        <expr><name>ObjectBlock</name></expr>,
         <expr><name>ObjectLayout</name></expr>,
+        <expr><name>ObjectLayerState</name></expr>,
+        <expr><name>ObjectView</name></expr>,
         <expr><name>ObjectUcs</name></expr>,
         <expr><name>ObjectDocumentVariable</name></expr>,
+        <expr><name>ObjectDimStyle</name></expr>,
 
         <expr><name>EntityAll</name></expr>,          <comment type="block">/**&lt; All entities (for filters) */</comment>
         <expr><name>EntityUnknown</name></expr>,      <comment type="block">/**&lt; Unknown entity */</comment>
+
         <expr><name>EntityAttribute</name></expr>,    <comment type="block">/**&lt; Block attribute */</comment>
         <expr><name>EntityAttributeDefinition</name></expr>,     <comment type="block">/**&lt; Block attribute definition */</comment>
         <expr><name>EntityBlockRef</name></expr>,     <comment type="block">/**&lt; Block reference */</comment>
@@ -113,12 +272,17 @@
         <expr><name>EntityDimRadial</name></expr>,    <comment type="block">/**&lt; Radial Dimension */</comment>
         <expr><name>EntityDimDiametric</name></expr>, <comment type="block">/**&lt; Diametric Dimension */</comment>
         <expr><name>EntityDimAngular</name></expr>,   <comment type="block">/**&lt; Angular Dimension */</comment>
+        <expr><name>EntityDimAngular2L</name></expr>, <comment type="block">/**&lt; Angular Dimension from 2 lines */</comment>
+        <expr><name>EntityDimAngular3P</name></expr>, <comment type="block">/**&lt; Angular Dimension from 3 points */</comment>
+        <expr><name>EntityDimArcLength</name></expr>, <comment type="block">/**&lt; Arc Length Dimension */</comment>
         <expr><name>EntityDimOrdinate</name></expr>,  <comment type="block">/**&lt; Ordinate Dimension */</comment>
         <expr><name>EntityHatch</name></expr>,        <comment type="block">/**&lt; Hatch */</comment>
         <expr><name>EntityImage</name></expr>,        <comment type="block">/**&lt; Image */</comment>
         <expr><name>EntityLeader</name></expr>,       <comment type="block">/**&lt; Leader */</comment>
         <expr><name>EntitySpline</name></expr>,       <comment type="block">/**&lt; Spline */</comment>
         <expr><name>EntityViewport</name></expr>,     <comment type="block">/**&lt; Viewport */</comment>
+        <expr><name>EntityTolerance</name></expr>,    <comment type="block">/**&lt; Tolerance */</comment>
+
         <expr><name>EntityUser</name></expr>          <comment type="block">/**&lt; User defined entity. Use this to identify
                                  entities that are added in a separate library
                                  and resort to C++ RTTI for RTTI. */</comment>
@@ -137,7 +301,16 @@
     }</block>;</enum>
 
     <comment type="block">/**
-     * Side used for side of a point relativ to an entity
+     * Orthogonal mode, used for snap restrictions.
+     */</comment>
+    <enum>enum <name>OrthoMode</name> <block>{
+        <expr><name>OrthoVertical</name></expr>,
+        <expr><name>OrthoHorizonal</name></expr>,
+        <expr><name>Orthogonal</name></expr>
+    }</block>;</enum>
+
+    <comment type="block">/**
+     * Side used for side of a point relative to an entity
      * (right hand or left hand side)
      */</comment>
     <enum>enum <name>Side</name> <block>{
@@ -209,6 +382,7 @@
      * Projection type for isometric projections.
      */</comment>
     <enum>enum <name>IsoProjectionType</name> <block>{
+        <expr><name>NoProjection</name> =  0x00000000</expr>,      <comment type="line">//!&lt; No projection (2d x/y)</comment>
         <expr><name>Top</name> =           0x00000001</expr>,      <comment type="line">//!&lt; Top projection (x/y)</comment>
         <expr><name>Bottom</name> =        0x00000002</expr>,      <comment type="line">//!&lt; Bottom projection (x/y)</comment>
         <expr><name>Left</name> =          0x00000004</expr>,      <comment type="line">//!&lt; Front left projection (x/z)</comment>
@@ -338,7 +512,7 @@
         <expr><name>CHAMFERA</name></expr>,
         <expr><name>CHAMFERB</name></expr>,
         <expr><name>CHAMFERC</name></expr>,
-        <expr><name>CHAMFERD</name></expr>,
+        <expr><name>CHAMFERD</name></expr>,  <comment type="line">// 10</comment>
         <expr><name>CLAYER</name></expr>,
         <expr><name>CMLJUST</name></expr>,
         <expr><name>CMLSCALE</name></expr>,
@@ -349,7 +523,7 @@
         <expr><name>DIMALTF</name></expr>,
         <expr><name>DIMALTRND</name></expr>,
         <expr><name>DIMALTTD</name></expr>,
-        <expr><name>DIMALTTZ</name></expr>,
+        <expr><name>DIMALTTZ</name></expr>,  <comment type="line">// 20</comment>
         <expr><name>DIMALTU</name></expr>,
         <expr><name>DIMALTZ</name></expr>,
         <expr><name>DIMAPOST</name></expr>,
@@ -361,7 +535,7 @@
         <expr><name>DIMAZIN</name></expr>,
         <expr><name>DIMBLK</name></expr>,
         <expr><name>DIMBLK1</name></expr>,
-        <expr><name>DIMBLK2</name></expr>,
+        <expr><name>DIMBLK2</name></expr>,  <comment type="line">// 30</comment>
         <expr><name>DIMCEN</name></expr>,
         <expr><name>DIMCLRD</name></expr>,
         <expr><name>DIMCLRE</name></expr>,
@@ -373,7 +547,7 @@
         <comment type="block">/** Decimal separator in dimensions */</comment>
         <expr><name>DIMDSEP</name></expr>,
         <expr><name>DIMEXE</name></expr>,
-        <expr><name>DIMEXO</name></expr>,
+        <expr><name>DIMEXO</name></expr>,  <comment type="line">// 40</comment>
         <expr><name>DIMFRAC</name></expr>,
         <comment type="block">/** Distance between dimension text and dimension lines, negative for box */</comment>
         <expr><name>DIMGAP</name></expr>,
@@ -386,7 +560,7 @@
         <expr><name>DIMLUNIT</name></expr>,
         <expr><name>DIMLWD</name></expr>,
         <expr><name>DIMLWE</name></expr>,
-        <expr><name>DIMPOST</name></expr>,
+        <expr><name>DIMPOST</name></expr>,  <comment type="line">// 50</comment>
         <expr><name>DIMRND</name></expr>,
         <expr><name>DIMSAH</name></expr>,
         <expr><name>DIMSCALE</name></expr>,
@@ -397,7 +571,7 @@
         <expr><name>DIMSOXD</name></expr>,
         <comment type="block">/** Vertical position of dimension label */</comment>
         <expr><name>DIMTAD</name></expr>,
-        <expr><name>DIMTDEC</name></expr>,
+        <expr><name>DIMTDEC</name></expr>,  <comment type="line">// 60</comment>
         <expr><name>DIMTFAC</name></expr>,
         <expr><name>DIMTIH</name></expr>,
         <expr><name>DIMTIX</name></expr>,
@@ -408,7 +582,7 @@
         <expr><name>DIMTOLJ</name></expr>,
         <expr><name>DIMTP</name></expr>,
         <comment type="block">/** Archtick size or 0 for arrows */</comment>
-        <expr><name>DIMTSZ</name></expr>,
+        <expr><name>DIMTSZ</name></expr>,  <comment type="line">// 70</comment>
         <expr><name>DIMTVP</name></expr>,
         <expr><name>DIMTXSTY</name></expr>,
         <comment type="block">/** Dimension text size */</comment>
@@ -420,7 +594,7 @@
         <expr><name>DISPSILH</name></expr>,
         <expr><name>DWGCODEPAGE</name></expr>,
         <expr><name>DRAWORDERCTL</name></expr>,
-        <expr><name>ELEVATION</name></expr>,
+        <expr><name>ELEVATION</name></expr>,  <comment type="line">// 80</comment>
         <expr><name>EXTMAX</name></expr>,
         <expr><name>EXTMIN</name></expr>,
         <expr><name>FACETRES</name></expr>,
@@ -499,7 +673,16 @@
         <expr><name>VISRETAIN</name></expr>,
         <expr><name>WORLDVIEW</name></expr>,
         <expr><name>MaxKnownVariable</name> = <name>WORLDVIEW</name></expr>,
-        <expr><name>INVALID</name> = -1</expr>
+        <comment type="line">//QCADARCHTICK,</comment>
+        <expr><name>INVALID</name> = -1</expr>,
+    }</block>;</enum>
+
+    <enum>enum <name>KnownVariableType</name> <block>{
+        <expr><name>VarTypeBool</name> = 1</expr>,
+        <expr><name>VarTypeInt</name> = 2</expr>,
+        <expr><name>VarTypeDouble</name> = 3</expr>,
+        <expr><name>VarTypeColor</name> = 4</expr>,
+        <expr><name>VarTypeUnknown</name> = -1</expr>
     }</block>;</enum>
 
     <enum>enum <name>BooleanOperation</name> <block>{
@@ -538,16 +721,70 @@
         <expr><name>EndOpenSingle</name></expr>
     }</block>;</enum>
 
+    <enum>enum <name>Easing</name> <block>{
+        <expr><name>Linear</name> = <name>REASING_LINEAR</name></expr>,
+        <expr><name>InQuad</name> = <name>REASING_INQUAD</name></expr>,
+        <expr><name>OutQuad</name> = <name>REASING_OUTQUAD</name></expr>,
+        <expr><name>InOutQuad</name> = <name>REASING_INOUTQUAD</name></expr>,
+        <expr><name>OutInQuad</name> = <name>REASING_OUTINQUAD</name></expr>,
+        <expr><name>InCubic</name> = <name>REASING_INCUBIC</name></expr>,
+        <expr><name>OutCubic</name> = <name>REASING_OUTCUBIC</name></expr>,
+        <expr><name>InOutCubic</name> = <name>REASING_INOUTCUBIC</name></expr>,
+        <expr><name>OutInCubic</name> = <name>REASING_OUTINCUBIC</name></expr>,
+        <expr><name>InQuart</name> = <name>REASING_INQUART</name></expr>,
+        <expr><name>OutQuart</name> = <name>REASING_OUTQUART</name></expr>,
+        <expr><name>InOutQuart</name> = <name>REASING_INOUTQUART</name></expr>,
+        <expr><name>OutInQuart</name> = <name>REASING_OUTINQUART</name></expr>,
+        <expr><name>InQuint</name> = <name>REASING_INQUINT</name></expr>,
+        <expr><name>OutQuint</name> = <name>REASING_OUTQUINT</name></expr>,
+        <expr><name>InOutQuint</name> = <name>REASING_INOUTQUINT</name></expr>,
+        <expr><name>OutInQuint</name> = <name>REASING_OUTINQUINT</name></expr>,
+        <expr><name>InSine</name> = <name>REASING_INSINE</name></expr>,
+        <expr><name>OutSine</name> = <name>REASING_OUTSINE</name></expr>,
+        <expr><name>InOutSine</name> = <name>REASING_INOUTSINE</name></expr>,
+        <expr><name>OutInSine</name> = <name>REASING_OUTINSINE</name></expr>,
+        <expr><name>InExpo</name> = <name>REASING_INEXPO</name></expr>,
+        <expr><name>OutExpo</name> = <name>REASING_OUTEXPO</name></expr>,
+        <expr><name>InOutExpo</name> = <name>REASING_INOUTEXPO</name></expr>,
+        <expr><name>OutInExpo</name> = <name>REASING_OUTINEXPO</name></expr>,
+        <expr><name>InCirc</name> = <name>REASING_INCIRC</name></expr>,
+        <expr><name>OutCirc</name> = <name>REASING_OUTCIRC</name></expr>,
+        <expr><name>InOutCirc</name> = <name>REASING_INOUTCIRC</name></expr>,
+        <expr><name>OutInCirc</name> = <name>REASING_OUTINCIRC</name></expr>,
+        <expr><name>InElastic</name> = <name>REASING_INELASTIC</name></expr>,
+        <expr><name>OutElastic</name> = <name>REASING_OUTELASTIC</name></expr>,
+        <expr><name>InOutElastic</name> = <name>REASING_INOUTELASTIC</name></expr>,
+        <expr><name>OutInElastic</name> = <name>REASING_OUTINELASTIC</name></expr>,
+        <expr><name>InBack</name> = <name>REASING_INBACK</name></expr>,
+        <expr><name>OutBack</name> = <name>REASING_OUTBACK</name></expr>,
+        <expr><name>InOutBack</name> = <name>REASING_INOUTBACK</name></expr>,
+        <expr><name>OutInBack</name> = <name>REASING_OUTINBACK</name></expr>,
+        <expr><name>InBounce</name> = <name>REASING_INBOUNCE</name></expr>,
+        <expr><name>OutBounce</name> = <name>REASING_OUTBOUNCE</name></expr>,
+        <expr><name>InOutBounce</name> = <name>REASING_INOUTBOUNCE</name></expr>,
+        <expr><name>OutInBounce</name> = <name>REASING_OUTINBOUNCE</name></expr>,
+        <comment type="line">//InCurve = REASING_INCURVE,</comment>
+        <comment type="line">//OutCurve = REASING_OUTCURVE,</comment>
+        <comment type="line">//SineCurve = REASING_SINECURVE,</comment>
+        <comment type="line">//CosineCurve = REASING_COSINECURVE,</comment>
+        <comment type="line">//BezierSpline = REASING_BEZIERSPLINE,</comment>
+        <comment type="line">//TCBSpline = REASING_TCBSPLINE</comment>
+    }</block>;</enum>
+
 </public><public>public:
-    <function_decl><type><name>static</name> <name>bool</name></type> <name>compare</name><parameter_list>(<param><decl><type><name>const</name> <name>QVariant</name>&amp;</type> <name>v1</name></decl></param>, <param><decl><type><name>const</name> <name>QVariant</name>&amp;</type> <name>v2</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>static</name> <name>bool</name></type> <name>compare</name><parameter_list>(<param><decl><type><name>const</name> <name>QVariant</name>&amp;</type> <name>v1</name></decl></param>, <param><decl><type><name>const</name> <name>QVariant</name>&amp;</type> <name>v2</name></decl></param>, <param><decl><type><name>bool</name></type> <name>noTolerance</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>static</name> <name>bool</name></type> <name>compare</name><parameter_list>(<param><decl><type><name>const</name> <name>QPair<argument_list>&lt;<argument><name>QVariant</name></argument>, <argument><name>RPropertyAttributes</name></argument>&gt;</argument_list></name>&amp;</type> <name>p1</name></decl></param>,
-                        <param><decl><type><name>const</name> <name>QPair<argument_list>&lt;<argument><name>QVariant</name></argument>, <argument><name>RPropertyAttributes</name></argument>&gt;</argument_list></name>&amp;</type> <name>p2</name></decl></param>)</parameter_list>;</function_decl>
+                        <param><decl><type><name>const</name> <name>QPair<argument_list>&lt;<argument><name>QVariant</name></argument>, <argument><name>RPropertyAttributes</name></argument>&gt;</argument_list></name>&amp;</type> <name>p2</name></decl></param>,
+                        <param><decl><type><name>bool</name></type> <name>noTolerance</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>static</name> <name>int</name></type> <name>getCpuCores</name><parameter_list>()</parameter_list>;</function_decl>
+    <function_decl><type><name>static</name> <name>int</name></type> <name>getIdealThreadCount</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>static</name> <name>QString</name></type> <name>getBuildCpuArchitecture</name><parameter_list>()</parameter_list>;</function_decl>
 
     <function_decl><type><name>static</name> <name>QString</name></type> <name>getHostId</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>static</name> <name>QString</name></type> <name>getSystemId</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>static</name> <name>QString</name></type> <name>getWindowManagerId</name><parameter_list>()</parameter_list>;</function_decl>
+
+    <function_decl><type><name>static</name> <name>bool</name></type> <name>showInFileManager</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>filePaths</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>static</name> <name>QStringList</name></type> <name>getDirectoryList</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>subDirectory</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>static</name> <name>QStringList</name></type> <name>getFileList</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>subDirectory</name></decl></param>,
@@ -574,11 +811,128 @@
         <return>return <expr><call><name>T</name><argument_list>()</argument_list></call></expr>;</return>
     }</block></function></template>
 
+    <function_decl><type><name>static</name> <name>QStringList</name></type> <name>sortAlphanumerical</name><parameter_list>(<param><decl><type><name>const</name> <name>QStringList</name>&amp;</type> <name>list</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>static</name> <name>QStringList</name></type> <name>compareChunkify</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>s</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>static</name> <name>int</name></type> <name>compareAlphanumerical</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>s1</name></decl></param>, <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>s2</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>static</name> <name>bool</name></type> <name>lessThanAlphanumerical</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>s1</name></decl></param>, <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>s2</name></decl></param>)</parameter_list>;</function_decl>
+
+    <comment type="line">// workaround for Qt 6 deprecating QList::toSet / QSet::toList:</comment>
+    <template>template<parameter_list>&lt;<param><type>class</type> <name>T</name></param>&gt;</parameter_list>
+    <function><type><name>static</name> <name>QList<argument_list>&lt;<argument><name>T</name></argument>&gt;</argument_list></name></type> <name>unique</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>T</name></argument>&gt;</argument_list></name>&amp;</type> <name>list</name></decl></param>)</parameter_list> <block>{
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+        <return>return <expr><call><name><name>RS</name>::<name>toList<argument_list>&lt;<argument><name>T</name></argument>&gt;</argument_list></name></name><argument_list>(<argument><expr><call><name><name>RS</name>::<name>toSet<argument_list>&lt;<argument><name>T</name></argument>&gt;</argument_list></name></name><argument_list>(<argument><expr><name>list</name></expr></argument>)</argument_list></call></expr></argument>)</argument_list></call></expr>;</return>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+        <return>return <expr><name>list</name>.<call><name>toSet</name><argument_list>()</argument_list></call>.<call><name>toList</name><argument_list>()</argument_list></call></expr>;</return>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+    }</block></function></template>
+
+    <comment type="line">// workaround for Qt 6 deprecating QList::toSet:</comment>
+    <template>template<parameter_list>&lt;<param><type>class</type> <name>T</name></param>&gt;</parameter_list>
+    <function><type><name>static</name> <name>QSet<argument_list>&lt;<argument><name>T</name></argument>&gt;</argument_list></name></type> <name>toSet</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>T</name></argument>&gt;</argument_list></name>&amp;</type> <name>list</name></decl></param>)</parameter_list> <block>{
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+        <return>return <expr><call><name>QSet<argument_list>&lt;<argument><name>T</name></argument>&gt;</argument_list></name><argument_list>(<argument><expr><name>list</name>.<call><name>begin</name><argument_list>()</argument_list></call></expr></argument>, <argument><expr><name>list</name>.<call><name>end</name><argument_list>()</argument_list></call></expr></argument>)</argument_list></call></expr>;</return>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+        <return>return <expr><name>list</name>.<call><name>toSet</name><argument_list>()</argument_list></call></expr>;</return>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+    }</block></function></template>
+
+    <comment type="line">// workaround for Qt 6 deprecating QSet::toList:</comment>
+    <template>template<parameter_list>&lt;<param><type>class</type> <name>T</name></param>&gt;</parameter_list>
+    <function><type><name>static</name> <name>QList<argument_list>&lt;<argument><name>T</name></argument>&gt;</argument_list></name></type> <name>toList</name><parameter_list>(<param><decl><type><name>const</name> <name>QSet<argument_list>&lt;<argument><name>T</name></argument>&gt;</argument_list></name>&amp;</type> <name>set</name></decl></param>)</parameter_list> <block>{
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+        <return>return <expr><call><name>QList<argument_list>&lt;<argument><name>T</name></argument>&gt;</argument_list></name><argument_list>(<argument><expr><name>set</name>.<call><name>begin</name><argument_list>()</argument_list></call></expr></argument>, <argument><expr><name>set</name>.<call><name>end</name><argument_list>()</argument_list></call></expr></argument>)</argument_list></call></expr>;</return>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+        <return>return <expr><name>set</name>.<call><name>toList</name><argument_list>()</argument_list></call></expr>;</return>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+    }</block></function></template>
+
+    <function><type><name>static</name> <name>QString</name></type> <name>getFontFamily</name><parameter_list>(<param><decl><type><name>const</name> <name>QTextCharFormat</name>&amp;</type> <name>format</name></decl></param>)</parameter_list> <block>{
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+        <comment type="line">// note: QTextCharFormat::fontFamily is deprecated and broken in Qt 6:</comment>
+        <decl_stmt><decl><type><name>QVariant</name></type> <name>v</name> =<init> <expr><name>format</name>.<call><name>fontFamilies</name><argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+        <if>if <condition>(<expr><name>v</name>.<call><name>isValid</name><argument_list>()</argument_list></call></expr>)</condition><then> <block>{
+            <decl_stmt><decl><type><name>QStringList</name></type> <name>l</name> =<init> <expr><name>v</name>.<call><name>toStringList</name><argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+            <if>if <condition>(<expr>!<name>l</name>.<call><name>isEmpty</name><argument_list>()</argument_list></call></expr>)</condition><then> <block>{
+                <return>return <expr><name>l</name>.<call><name>first</name><argument_list>()</argument_list></call></expr>;</return>
+            }</block></then></if>
+        }</block></then></if>
+        <return>return <expr>""</expr>;</return>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+        <return>return <expr><name>format</name>.<call><name>fontFamily</name><argument_list>()</argument_list></call></expr>;</return>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+    }</block></function>
+
+    <function_decl><type><name>static</name> <name>int</name></type> <name>getPageSizeId</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>name</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>static</name> <name>QSizeF</name></type> <name>getPageSize</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>name</name></decl></param>)</parameter_list>;</function_decl>
+
+    <comment type="line">// workarounds for Qt 6 QRegExp changes:</comment>
+    <comment type="block">/**
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>static</name> <name>bool</name></type> <name>exactMatch</name><parameter_list>(<param><decl><type><name>const</name> <name>QRegularExpression</name>&amp;</type> <name>rx</name></decl></param>, <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>string</name></decl></param>)</parameter_list>;</function_decl>
+    <comment type="block">/**
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>static</name> <name>bool</name></type> <name>exactMatch</name><parameter_list>(<param><decl><type><name>const</name> <name>QRegularExpression</name>&amp;</type> <name>rx</name></decl></param>, <param><decl><type><name>QRegularExpressionMatch</name>&amp;</type> <name>match</name></decl></param>, <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>string</name></decl></param>)</parameter_list>;</function_decl>
+    <comment type="block">/**
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>static</name> <name>bool</name></type> <name>exactMatch</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>rxStr</name></decl></param>, <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>string</name></decl></param>)</parameter_list>;</function_decl>
+    <comment type="block">/**
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>static</name> <name>int</name></type> <name>indexIn</name><parameter_list>(<param><decl><type><name>const</name> <name>QRegularExpression</name>&amp;</type> <name>rx</name></decl></param>, <param><decl><type><name>QRegularExpressionMatch</name>&amp;</type> <name>match</name></decl></param>, <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>string</name></decl></param>, <param><decl><type><name>int</name></type> <name>from</name> =<init> <expr>0</expr></init></decl></param>)</parameter_list>;</function_decl>
+    <comment type="block">/**
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>static</name> <name>QString</name></type> <name>captured</name><parameter_list>(<param><decl><type><name>const</name> <name>QRegularExpression</name>&amp;</type> <name>rx</name></decl></param>, <param><decl><type><name>const</name> <name>QRegularExpressionMatch</name>&amp;</type> <name>match</name></decl></param>, <param><decl><type><name>int</name></type> <name>nth</name> =<init> <expr>0</expr></init></decl></param>)</parameter_list>;</function_decl>
+    <comment type="block">/**
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>static</name> <name>int</name></type> <name>matchedLength</name><parameter_list>(<param><decl><type><name>const</name> <name>QRegularExpression</name>&amp;</type> <name>rx</name></decl></param>, <param><decl><type><name>const</name> <name>QRegularExpressionMatch</name>&amp;</type> <name>match</name></decl></param>)</parameter_list>;</function_decl>
+    <comment type="block">/**
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>static</name> <name>QRegularExpression</name></type> <name>createRegEpCI</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>str</name></decl></param>, <param><decl><type><name>bool</name></type> <name>regExp2</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
+
+    <function_decl><type><name>static</name> <name>void</name></type> <name>setUtf8Codec</name><parameter_list>(<param><decl><type><name>QTextStream</name>&amp;</type> <name>ts</name></decl></param>)</parameter_list>;</function_decl>
+
+    <function_decl><type><name>static</name> <name>QString</name></type> <name>escape</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>plain</name></decl></param>)</parameter_list>;</function_decl>
+
+    <function_decl><type><name>static</name> <name>int</name></type> <name>getScreenCount</name><parameter_list>()</parameter_list>;</function_decl>
+
+    <function_decl><type><name>static</name> <name>QSize</name></type> <name>getAvailableGeometry</name><parameter_list>(<param><decl><type><name>int</name></type> <name>screen</name></decl></param>)</parameter_list>;</function_decl>
+
+    <comment type="block">/**
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>static</name> <name>QString</name></type> <name>convert</name><parameter_list>(<param><decl><type><name>const</name> <name>QByteArray</name>&amp;</type> <name>str</name></decl></param>, <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>codecName</name></decl></param>)</parameter_list>;</function_decl>
+
+    <function><type><name>static</name> <name>int</name></type> <name>getMetaType</name><parameter_list>(<param><decl><type><name>const</name> <name>QVariant</name>&amp;</type> <name>v</name></decl></param>)</parameter_list> <block>{
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+        <return>return <expr><name>v</name>.<call><name>metaType</name><argument_list>()</argument_list></call>.<call><name>id</name><argument_list>()</argument_list></call></expr>;</return>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+        <return>return <expr><name>v</name>.<call><name>type</name><argument_list>()</argument_list></call></expr>;</return>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+    }</block></function>
+
     <decl_stmt><decl><type><name>static</name> <name>const</name> <name>double</name></type> <name>PointTolerance</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>static</name> <name>const</name> <name>double</name></type> <name>AngleTolerance</name></decl>;</decl_stmt>
+
+    <decl_stmt><decl><type><name>static</name> <name>const</name> <name><name>Qt</name>::<name>MouseButton</name></name></type> <name>MiddleButton</name></decl>;</decl_stmt>
+
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+    <decl_stmt><decl><type><name>static</name> <name>const</name> <name><name>QPageLayout</name>::<name>Orientation</name></name></type> <name>Portrait</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>const</name> <name><name>QPageLayout</name>::<name>Orientation</name></name></type> <name>Landscape</name></decl>;</decl_stmt>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+    <decl_stmt><decl><type><name>static</name> <name>const</name> <name><name>QPrinter</name>::<name>Orientation</name></name></type> <name>Portrait</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>static</name> <name>const</name> <name><name>QPrinter</name>::<name>Orientation</name></name></type> <name>Landscape</name></decl>;</decl_stmt>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
 </public>}</block>;</class>
 
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS*</argument>)</argument_list></macro>
+<macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::MetaType</argument>)</argument_list></macro>
+<macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::MetaType*</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::AngleFormat</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::AngleFormat*</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::AngleUnit</argument>)</argument_list></macro>
@@ -590,8 +944,12 @@
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::HAlign*</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::IsoProjectionType</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::IsoProjectionType*</argument>)</argument_list></macro>
+<macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::OrthoMode</argument>)</argument_list></macro>
+<macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::OrthoMode*</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::KnownVariable</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::KnownVariable*</argument>)</argument_list></macro>
+<macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::KnownVariableType</argument>)</argument_list></macro>
+<macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::KnownVariableType*</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::LinearFormat</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::LinearFormat*</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::MessageType</argument>)</argument_list></macro>
@@ -613,6 +971,8 @@
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::Orientation</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::JoinType</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::EndType</argument>)</argument_list></macro>
+<macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::Easing</argument>)</argument_list></macro>
+<macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RS::Easing*</argument>)</argument_list></macro>
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>QList&lt;RS::EntityType&gt;</argument>)</argument_list></macro>
 
 <cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>

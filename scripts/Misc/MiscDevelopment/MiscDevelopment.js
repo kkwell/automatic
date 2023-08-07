@@ -23,7 +23,7 @@
  *
  * \brief This module contains misc development tools.
  */
-include("../Misc.js");
+include("scripts/Misc/Misc.js");
 
 /**
  * \class MiscDevelopment
@@ -62,7 +62,7 @@ MiscDevelopment.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(true);
         //action.setIcon(MiscDevelopment.includeBasePath + "/MiscDevelopment.svg");
-        action.setStatusTip(qsTr("Show misc development tools"));
+        //action.setStatusTip(qsTr("Show misc development tools"));
         action.setNoState();
         action.setDefaultCommands(["miscdevelopmentmenu"]);
         action.setGroupSortOrder(90);

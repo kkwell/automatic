@@ -1,5 +1,6 @@
 #include "qtscriptshell_QStackedLayout.h"
 
+#include <QtGlobal>
 #include <QtScript/QScriptEngine>
 #include <QVariant>
 #include <qbytearray.h>
@@ -14,6 +15,8 @@
 #include <qstackedlayout.h>
 #include <qwidget.h>
 
+#include <QToolBar>
+
 #define QTSCRIPT_IS_GENERATED_FUNCTION(fun) ((fun.data().toUInt32() & 0xFFFF0000) == 0xBABE0000)
 
 Q_DECLARE_METATYPE(QLayoutItem*)
@@ -27,13 +30,26 @@ Q_DECLARE_METATYPE(QSpacerItem*)
 Q_DECLARE_METATYPE(QTimerEvent*)
 
 QtScriptShell_QStackedLayout::QtScriptShell_QStackedLayout()
-    : QStackedLayout() {}
+    : QStackedLayout()
+#ifdef Q_OS_MACOS
+    , cacheMinimumSizeOri(-1), cacheSizeHintOri(-1)
+#endif
+{}
+
 
 QtScriptShell_QStackedLayout::QtScriptShell_QStackedLayout(QLayout*  parentLayout)
-    : QStackedLayout(parentLayout) {}
+    : QStackedLayout(parentLayout)
+#ifdef Q_OS_MACOS
+    , cacheMinimumSizeOri(-1), cacheSizeHintOri(-1)
+#endif
+{}
 
 QtScriptShell_QStackedLayout::QtScriptShell_QStackedLayout(QWidget*  parent)
-    : QStackedLayout(parent) {}
+    : QStackedLayout(parent)
+#ifdef Q_OS_MACOS
+    , cacheMinimumSizeOri(-1), cacheSizeHintOri(-1)
+#endif
+{}
 
 QtScriptShell_QStackedLayout::~QtScriptShell_QStackedLayout() {}
 
@@ -268,7 +284,28 @@ QSize  QtScriptShell_QStackedLayout::minimumSize() const
     QScriptValue _q_function = __qtscript_self.property("minimumSize");
     if (!_q_function.isFunction() || QTSCRIPT_IS_GENERATED_FUNCTION(_q_function)
         || (__qtscript_self.propertyFlags("minimumSize") & QScriptValue::QObjectMember)) {
+
+#ifdef Q_OS_MACOS
+        // macOS on M1: random crashes in QStackedLayout::minimumSize (FS#2271):
+        QWidget* parent = parentWidget();
+        if (parent) {
+            QWidget* parent2 = parent->parentWidget();
+            QToolBar* tb = qobject_cast<QToolBar*>(parent2);
+            if (tb) {
+                Qt::Orientation ori = tb->orientation();
+                if (cacheMinimumSize.isValid() && cacheSizeHintOri==(int)ori) {
+                    return cacheMinimumSize;
+                }
+                cacheMinimumSize = QStackedLayout::minimumSize();
+                cacheMinimumSizeOri=(int)ori;
+                return cacheMinimumSize;
+            }
+
+        }
         return QStackedLayout::minimumSize();
+#else
+        return QStackedLayout::minimumSize();
+#endif
     } else {
         return qscriptvalue_cast<QSize >(_q_function.call(__qtscript_self));
     }
@@ -293,7 +330,26 @@ QSize  QtScriptShell_QStackedLayout::sizeHint() const
     QScriptValue _q_function = __qtscript_self.property("sizeHint");
     if (!_q_function.isFunction() || QTSCRIPT_IS_GENERATED_FUNCTION(_q_function)
         || (__qtscript_self.propertyFlags("sizeHint") & QScriptValue::QObjectMember)) {
+#ifdef Q_OS_MACOS
+        // macOS on M1: random crashes in QStackedLayout::minimumSize (FS#2271):
+        QWidget* parent = parentWidget();
+        if (parent) {
+            QWidget* parent2 = parent->parentWidget();
+            QToolBar* tb = qobject_cast<QToolBar*>(parent2);
+            if (tb) {
+                Qt::Orientation ori = tb->orientation();
+                if (cacheSizeHint.isValid() && cacheSizeHintOri==(int)ori) {
+                    return cacheSizeHint;
+                }
+                cacheSizeHint = QStackedLayout::sizeHint();
+                cacheSizeHintOri=(int)ori;
+                return cacheSizeHint;
+            }
+        }
         return QStackedLayout::sizeHint();
+#else
+        return QStackedLayout::sizeHint();
+#endif
     } else {
         return qscriptvalue_cast<QSize >(_q_function.call(__qtscript_self));
     }

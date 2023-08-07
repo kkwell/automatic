@@ -53,6 +53,9 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getStaticPropertyTypeIds
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -65,7 +68,13 @@
         exportEntity
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        renderDimensionText
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getData
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        clearStyleOverrides
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setDefinitionPoint
@@ -84,6 +93,18 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getTextData
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        updateBoundingBox
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        updateTextPositionCenter
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        updateTextData
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        updateShapes
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setTextPosition
@@ -119,16 +140,43 @@
         setLinearFactor
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        getDimScale
+        getDimscale
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        setDimScale
+        setDimscale
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getDimBlockName
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         hasDimensionBlockReference
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isArrow1Flipped
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setArrow1Flipped
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isArrow2Flipped
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setArrow2Flipped
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isExtLineFix
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setExtLineFix
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getExtLineFixLength
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setExtLineFixLength
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        hasOverride
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getDimensionBlockNames

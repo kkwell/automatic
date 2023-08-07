@@ -16,42 +16,58 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Decimal Point:</string>
+        <string>Decimal point:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QComboBox" name="DecimalPoint"/>
+      <widget class="QComboBox" name="DecimalPoint">
+       <property name="RequiresRestart" stdset="0">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Cartesian Coordinate Separator:</string>
+        <string>Cartesian coordinate separator:</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QComboBox" name="CartesianCoordinateSeparator"/>
+      <widget class="QComboBox" name="CartesianCoordinateSeparator">
+       <property name="RequiresRestart" stdset="0">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Polar Coordinate Separator:</string>
+        <string>Polar coordinate separator:</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QComboBox" name="PolarCoordinateSeparator"/>
+      <widget class="QComboBox" name="PolarCoordinateSeparator">
+       <property name="RequiresRestart" stdset="0">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item row="3" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Relative Coordinate Prefix:</string>
+        <string>Relative coordinate prefix:</string>
        </property>
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QComboBox" name="RelativeCoordinatePrefix"/>
+      <widget class="QComboBox" name="RelativeCoordinatePrefix">
+       <property name="RequiresRestart" stdset="0">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -64,7 +80,7 @@
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_5">
         <property name="text">
-         <string>Absolute Cartesian Coordinate:</string>
+         <string>Absolute Cartesian coordinate:</string>
         </property>
        </widget>
       </item>
@@ -78,7 +94,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Absolute Polar Coordinate:</string>
+         <string>Absolute polar coordinate:</string>
         </property>
        </widget>
       </item>
@@ -92,7 +108,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="label_7">
         <property name="text">
-         <string>Relative Cartesian Coordinate:</string>
+         <string>Relative Cartesian coordinate:</string>
         </property>
        </widget>
       </item>
@@ -113,7 +129,7 @@
       <item row="3" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
-         <string>Relative Polar Coordinate:</string>
+         <string>Relative polar coordinate:</string>
         </property>
        </widget>
       </item>

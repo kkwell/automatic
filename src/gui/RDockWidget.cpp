@@ -25,7 +25,7 @@
 
 
 RDockWidget::RDockWidget(const QString& title, QWidget* parent, Qt::WindowFlags flags) :
-    QDockWidget(title, parent, flags), layout(NULL) {
+    QDockWidget(title, parent, flags), flowLayout(NULL) {
 
     // avoid document drag error when dragging icon under macOS:
     setWindowIcon(QIcon());
@@ -48,12 +48,12 @@ void RDockWidget::hideEvent(QHideEvent* event) {
     QDockWidget::hideEvent(event);
 }
 
-// workaround for Qt 5.6.1, 5.6.2 bug:
+// Part 2 of workaround for Qt 5.6.1, 5.6.2, 5.15.0 bug:
 // dock widget closes before close dialog is shown
 // dock widget state not persistent between sessions
 // dock widget closes if user cancels close dialog
 #ifdef Q_OS_MAC
-#if QT_VERSION >= 0x050601 && QT_VERSION <= 0x050602
+#if (QT_VERSION >= 0x050601 && QT_VERSION <= 0x050602) || QT_VERSION >= 0x050F00
 void RDockWidget::closeEvent(QCloseEvent* event) {
     // remember that this dock was closed by this event:
     RMainWindowQt* mw = RMainWindowQt::getMainWindow();
@@ -70,36 +70,36 @@ void RDockWidget::closeEvent(QCloseEvent* event) {
 void RDockWidget::actionEvent(QActionEvent* event) {
     QAction* action = event->action();
 
-    if (layout==NULL) {
+    if (flowLayout==NULL) {
         // first action added: add widget with flow layout to dock:
         QWidget* w = new QWidget();
-        layout = new RFlowLayout(2,2,2);
-        w->setLayout(layout);
+        flowLayout = new RFlowLayout(2,2,2);
+        w->setLayout(flowLayout);
         setWidget(w);
     }
 
     switch (event->type()) {
         case QEvent::ActionAdded: {
-            Q_ASSERT_X(qobject_cast<QWidgetAction*>(action) == 0 || layout->indexOf(qobject_cast<QWidgetAction*>(action)) == -1,
+            Q_ASSERT_X(qobject_cast<QWidgetAction*>(action) == 0 || flowLayout->indexOf(qobject_cast<QWidgetAction*>(action)) == -1,
                         "RDockWidget", "widgets cannot be inserted multiple times");
 
-            int index = layout->count();
+            int index = flowLayout->count();
             if (event->before()) {
-                index = layout->indexOf(event->before());
+                index = flowLayout->indexOf(event->before());
                 Q_ASSERT_X(index != -1, "RDockWidget::insertAction", "internal error");
             }
-            layout->insertAction(index, action);
+            flowLayout->insertAction(index, action);
             break;
         }
 
         case QEvent::ActionChanged:
-            layout->invalidate();
+            flowLayout->invalidate();
             break;
 
         case QEvent::ActionRemoved: {
-            int index = layout->indexOf(action);
+            int index = flowLayout->indexOf(action);
             if (index != -1) {
-                delete layout->takeAt(index);
+                delete flowLayout->takeAt(index);
             }
             break;
         }
@@ -113,7 +113,7 @@ bool RDockWidget::event(QEvent* e) {
     if (e->type()==QEvent::KeyPress || e->type()==QEvent::KeyRelease) {
         //if (!appWin->isAncestorOf(this)) {
         if (isFloating()) {
-            // dock widget is in undocked, floating:
+            // dock widget is undocked, floating:
             // forward event to main window:
             QKeyEvent* ke = dynamic_cast<QKeyEvent*>(e);
             RMainWindowQt* appWin = RMainWindowQt::getMainWindow();

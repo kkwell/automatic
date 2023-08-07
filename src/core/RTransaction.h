@@ -73,6 +73,23 @@ class RExporter;
  */
 class QCADCORE_EXPORT RTransaction {
 public:
+    /**
+     * Transaction type for optimizations.
+     */
+    enum Type {
+        Generic = 0x0000,
+        CurrentLayerChange = 0x0001,
+        CurrentLayerSelectionChange = 0x0002,
+        LayerLockStatusChange = 0x0004,
+        LayerVisibilityStatusChange = 0x0008,
+        SaveWorkingSet = 0x0010,
+        ChangeDocumentSetting = 0x0020,
+        Undo = 0x0040,
+        Redo = 0x0080
+    };
+    Q_DECLARE_FLAGS(Types, Type)
+
+public:
     RTransaction();
 
     RTransaction(RStorage& storage);
@@ -122,6 +139,13 @@ public:
 
     void setKeepHandles(bool on) {
         keepHandles = on;
+    }
+
+    /**
+     * Keep child entities (e.g. keep block attributes when deleting block references)
+     */
+    void setKeepChildren(bool on) {
+        keepChildren = on;
     }
 
 //    void setUndoing(bool on) {
@@ -256,6 +280,15 @@ public:
 
     bool isPreview() const;
 
+    void setTypes(RTransaction::Types t) {
+        types = t;
+    }
+    RTransaction::Types getTypes() const {
+        return types;
+    }
+    void setType(RTransaction::Type type, bool on = true);
+    bool isType(RTransaction::Type type) const;
+
 protected:
     bool addPropertyChange(RObject::Id objectId, const RPropertyChange& propertyChange);
     //void appendChild(RTransaction& t);
@@ -264,6 +297,8 @@ protected:
     void rollback();
 
 protected:
+    RTransaction::Types types;
+
     /**
      * A transaction always belongs to the storage of a document.
      */
@@ -286,8 +321,10 @@ protected:
 
     /**
      * List of IDs of all objects that are affected by this transaction.
+     * Needs to be in order (not a set):
      */
     QList<RObject::Id> affectedObjectIds;
+    QSet<RObject::Id> affectedObjectIdsSet;
 
     /**
      * List of IDs of all block references that need to be updated.
@@ -328,7 +365,7 @@ protected:
     bool onlyChanges;
 
     /**
-     * True if caller is intereseted in list of objects that are affected
+     * True if caller is interested in list of objects that are affected
      * by this transaction.
      */
     bool recordAffectedObjects;
@@ -377,6 +414,11 @@ protected:
      */
     bool keepHandles;
 
+    /**
+     * True to keep and not delete child entities (block attributes for block references).
+     */
+    bool keepChildren;
+
     QMap<RObject::Id, RObject::Id> cloneIds;
 
     bool undoing;
@@ -385,7 +427,12 @@ protected:
 
 QCADCORE_EXPORT QDebug operator<<(QDebug dbg, RTransaction& t);
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(RTransaction::Types)
 Q_DECLARE_METATYPE(RTransaction)
 Q_DECLARE_METATYPE(RTransaction*)
+Q_DECLARE_METATYPE(RTransaction::Type)
+Q_DECLARE_METATYPE(RTransaction::Type*)
+Q_DECLARE_METATYPE(QFlags<RTransaction::Type>)
+Q_DECLARE_METATYPE(QFlags<RTransaction::Type>*)
 
 #endif

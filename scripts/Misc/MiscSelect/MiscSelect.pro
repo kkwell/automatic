@@ -1,5 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-    ts \
+    dir \
+    SelectByColor \
     SelectByHandle

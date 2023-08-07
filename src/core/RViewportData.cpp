@@ -56,14 +56,37 @@ RBox RViewportData::getBoundingBox(bool ignoreEmpty) const {
     return RBox(position, width, height);
 }
 
+void RViewportData::to2D() {
+    RPoint::to2D();
+
+    viewCenter = viewCenter.get2D();
+    viewTarget = viewTarget.get2D();
+}
+
 /**
  * \return Offset or position of 0/0 of view (model space block) for this viewport.
  */
 RVector RViewportData::getViewOffset() const {
     RVector offset(0,0);
-    offset -= viewCenter * scaleFactor;
-    offset -= viewTarget * scaleFactor;
+    offset -= viewCenter.get2D() * scaleFactor;
+    offset -= viewTarget.get2D() * scaleFactor;
     return position + offset;
+}
+
+QList<RRefPoint> RViewportData::getInternalReferencePoints(RS::ProjectionRenderingHint hint, QList<REntity::Id>* subEntityIds) const {
+    QList<RRefPoint> ret;
+
+    QList<QSharedPointer<RShape> > shapes = getShapes();
+    for (int i=0; i<shapes.size(); i++) {
+        QSharedPointer<RShape> shape = shapes[i];
+
+        QList<RVector> ps = shape->getArcReferencePoints();
+        for (int k=0; k<ps.length(); k++) {
+            ret.append(RRefPoint(ps[k], RRefPoint::Tertiary));
+        }
+    }
+
+    return ret;
 }
 
 QList<RRefPoint> RViewportData::getReferencePoints(RS::ProjectionRenderingHint hint) const {
@@ -82,8 +105,9 @@ QList<RRefPoint> RViewportData::getReferencePoints(RS::ProjectionRenderingHint h
     return ret;
 }
 
-bool RViewportData::moveReferencePoint(const RVector& referencePoint,
-        const RVector& targetPoint) {
+bool RViewportData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers) {
+    Q_UNUSED(modifiers)
+
     bool ret = false;
 
     RVector offset = targetPoint - referencePoint;
@@ -135,11 +159,13 @@ double RViewportData::getDistanceTo(const RVector& point, bool limited, double r
         ret = strictRange;
     }
 
-    return qMin(ret, REntityData::getDistanceTo(point, limited, range, draft, strictRange));
+    //return qMin(ret, REntityData::getDistanceTo(point, limited, range, draft, strictRange));
+    return ret;
 }
 
-QList<QSharedPointer<RShape> > RViewportData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment) const {
+QList<QSharedPointer<RShape> > RViewportData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment, QList<RObject::Id>* entityIds) const {
     Q_UNUSED(segment)
+    Q_UNUSED(entityIds)
 
     QList<QSharedPointer<RShape> > ret;
 
@@ -218,7 +244,4 @@ bool RViewportData::scale(const RVector& scaleFactors, const RVector& center) {
     position.scale(scaleFactors, center);
 
     return true;
-
-    // TODO: crashes:
-    //return REntityData::scale(scaleFactors, center);
 }

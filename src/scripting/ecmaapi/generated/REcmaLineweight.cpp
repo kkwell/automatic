@@ -70,6 +70,8 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, getName, "getName");
             
+            REcmaHelper::registerFunction(&engine, &ctor, getClosestMatch, "getClosestMatch");
+            
 
     // static properties:
     
@@ -347,6 +349,51 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < QPair < QString , RLineweight::Lineweight > >'
+    QList < QPair < QString , RLineweight::Lineweight > > cppResult =
+        RLineweight::
+       getList(a0
+        ,
+    a1);
+        // return type: QList < QPair < QString , RLineweight::Lineweight > >
+                // List of Pairs of ...:
+                result = REcmaHelper::pairListToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RLineweight.getList().",
                    context);
@@ -389,6 +436,61 @@
     QIcon cppResult =
         RLineweight::
        getIcon(a0);
+        // return type: QIcon
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isNumber()
+        ) /* type: RLineweight::Lineweight */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: QSize */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    RLineweight::Lineweight
+                    a0 =
+                    (RLineweight::Lineweight)
+                    (int)
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument is reference
+                    QSize*
+                    ap1 =
+                    qscriptvalue_cast<
+                    QSize*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if( ap1 == NULL ){
+                           return REcmaHelper::throwError("RLineweight: Argument 1 is not of type QSize*.",
+                               context);                    
+                    }
+                    QSize& a1 = *ap1;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QIcon'
+    QIcon cppResult =
+        RLineweight::
+       getIcon(a0
+        ,
+    a1);
         // return type: QIcon
                 // not standard type nor reference
                 result = qScriptValueFromValue(engine, cppResult);
@@ -452,6 +554,56 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaLineweight::getName", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaLineweight::getClosestMatch
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaLineweight::getClosestMatch", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaLineweight::getClosestMatch";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RLineweight::Lineweight'
+    RLineweight::Lineweight cppResult =
+        RLineweight::
+       getClosestMatch(a0);
+        // return type: RLineweight::Lineweight
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RLineweight.getClosestMatch().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaLineweight::getClosestMatch", context, engine);
             return result;
         }
          QScriptValue REcmaLineweight::toString

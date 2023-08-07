@@ -43,6 +43,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -63,7 +64,15 @@ public:
     static RPropertyTypeId PropertyMeasuredValue;
     static RPropertyTypeId PropertyFontName;
 
-    static RPropertyTypeId PropertyDimScale;
+    //static RPropertyTypeId PropertyArrow1Flipped;
+    //static RPropertyTypeId PropertyArrow2Flipped;
+
+    //static RPropertyTypeId PropertyExtLineFix;
+    //static RPropertyTypeId PropertyExtLineFixLength;
+
+    static RPropertyTypeId PropertyDimscale;
+    static RPropertyTypeId PropertyDimlfac;
+
     static RPropertyTypeId PropertyDimBlockName;
 
     static RPropertyTypeId PropertyOriginX;
@@ -86,19 +95,23 @@ public:
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityDimOrdinate;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RDimOrdinateEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RDimOrdinateEntity::getRtti());
     }
 
     virtual RDimOrdinateEntity* clone() const {
         return new RDimOrdinateEntity(*this);
     }
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual RDimOrdinateData& getData() {
         return data;

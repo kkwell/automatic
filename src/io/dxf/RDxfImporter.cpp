@@ -19,7 +19,11 @@
 #include <QDir>
 #include <QList>
 #include <QFileInfo>
-#include <QTextCodec>
+#if QT_VERSION >= 0x060000
+#  include <QStringConverter>
+#else
+#  include <QTextCodec>
+#endif
 #include <QMultiMap>
 #include  <QDebug>
 
@@ -33,7 +37,8 @@
 #include "RColor.h"
 #include "RDebug.h"
 #include "RDimAlignedEntity.h"
-#include "RDimAngularEntity.h"
+#include "RDimAngular2LEntity.h"
+#include "RDimAngular3PEntity.h"
 #include "RDimDiametricEntity.h"
 #include "RDimRadialEntity.h"
 #include "RDimRotatedEntity.h"
@@ -76,8 +81,8 @@ RDxfImporter::RDxfImporter(RDocument& document, RMessageHandler* messageHandler,
 RDxfImporter::~RDxfImporter() {
 }
 
-bool RDxfImporter::importFile(const QString& fileName, const QString& nameFilter) {
-    Q_UNUSED(nameFilter);
+bool RDxfImporter::importFile(const QString& fileName, const QString& nameFilter, const QVariantMap& params) {
+    Q_UNUSED(nameFilter)
 
     this->fileName = fileName;
     QFileInfo fi(fileName);
@@ -113,6 +118,7 @@ bool RDxfImporter::importFile(const QString& fileName, const QString& nameFilter
     setKnownVariable(RS::DIMTSZ, 0.0);
     setKnownVariable(RS::DIMTXT, 0.18);
     setKnownVariable(RS::DIMZIN, 0);
+    setKnownVariable(RS::DIMDLI, 0.18*2);
     setKnownVariable(RS::LTSCALE, 1);
 
     setCurrentBlockId(document->getModelSpaceBlockId());
@@ -120,7 +126,15 @@ bool RDxfImporter::importFile(const QString& fileName, const QString& nameFilter
     RImporter::startImport();
 
     DL_Dxf dxflib;
+
+#ifdef Q_OS_WIN
+    wchar_t* winfn = new wchar_t[2000];
+    int len = fileName.toWCharArray(winfn);
+    winfn[len] = '\0';
+    bool success = dxflib.in((std::istream&)std::ifstream(winfn, std::ifstream::in), this);
+#else
     bool success = dxflib.in((const char*)fileName.toUtf8(), this);
+#endif
 
     if (success==false) {
         qWarning() << "Cannot open DXF file: " << fileName;
@@ -133,6 +147,11 @@ bool RDxfImporter::importFile(const QString& fileName, const QString& nameFilter
     // the only dimension font supported by the QCAD CE:
     document->setDimensionFont("Standard");
 
+    // dimension text color always by block:
+    QVariant v;
+    v.setValue(RColor(RColor::ByBlock));
+    document->setKnownVariable(RS::DIMCLRT, v);
+
     // lock locked layers now. they are unlocked during import to load
     // the entities on them:
     for (int i=0; i<lockedLayers.size(); i++) {
@@ -143,6 +162,23 @@ bool RDxfImporter::importFile(const QString& fileName, const QString& nameFilter
         }
         layer->setLocked(true);
         op.addObject(layer);
+        op.apply(*document, false);
+    }
+
+    // update dimension style from document variables:
+    QSharedPointer<RDimStyle> dimStyle = document->queryDimStyle();
+    if (!dimStyle.isNull()) {
+        RAddObjectsOperation op;
+        dimStyle->updateFromDocumentVariables();
+
+        // force text above dimension line as dxflib does not support anything else:
+        int fileQCADVersion = RDxfServices::getFileQCADVersion(*document);
+        if (fileQCADVersion!=-1 && fileQCADVersion<=3260406) {
+            dimStyle->setBool(RS::DIMTIH, false);
+            dimStyle->setInt(RS::DIMTAD, 1);
+        }
+
+        op.addObject(dimStyle);
         op.apply(*document, false);
     }
 
@@ -705,6 +741,8 @@ void RDxfImporter::addTextStyle(const DL_StyleData& data) {
     s.font = decode(data.primaryFontFile.c_str());
     //qDebug() << "text style: name:" << (const char*)data.name.c_str();
     //qDebug() << "text style: s.font:" << s.font;
+    s.font = s.font.replace(".ttf", "", Qt::CaseInsensitive);
+    s.font = s.font.replace(".shx", "", Qt::CaseInsensitive);
     if (s.font.isEmpty()) {
         s.font = xDataFont;
         //qDebug() << "text style: xDataFont:" << xDataFont;
@@ -713,7 +751,7 @@ void RDxfImporter::addTextStyle(const DL_StyleData& data) {
     s.italic = xDataFlags&0x1000000;
     s.bold = xDataFlags&0x2000000;
 
-    textStyles.insert(decode(data.name.c_str()), s);
+    textStyles.insert(dxfServices.fixFontName(decode(data.name.c_str())), s);
 }
 
 void RDxfImporter::addMTextChunk(const std::string& text) {
@@ -774,14 +812,16 @@ void RDxfImporter::addMText(const DL_MTextData& data) {
         QString dwgCodePage = vDwgCodePage.toString();
         QString enc = getEncoding(dwgCodePage);
 
-        // get the text codec:
-        QTextCodec* codec = QTextCodec::codecForName(enc.toLatin1());
-        if (codec!=NULL) {
-            mtextString = codec->toUnicode(mtext);
-        }
-        else {
-            qWarning() << "RDxfImporter::addMText: unsupported text codec: " << enc;
-        }
+        mtextString = RS::convert(mtext, enc);
+
+//        // get the text codec:
+//        QTextCodec* codec = QTextCodec::codecForName(enc.toLatin1());
+//        if (codec!=NULL) {
+//            mtextString = codec->toUnicode(mtext);
+//        }
+//        else {
+//            qWarning() << "RDxfImporter::addMText: unsupported text codec: " << enc;
+//        }
     }
 
     // use default style for the drawing:
@@ -803,7 +843,7 @@ void RDxfImporter::addMText(const DL_MTextData& data) {
         valign, halign,
         dir, lss,
         data.lineSpacingFactor,
-        mtextString, s.font,
+        mtextString, dxfServices.fixFontName(s.font),
         s.bold,
         s.italic,
         data.angle,
@@ -906,7 +946,7 @@ RTextBasedData RDxfImporter::getTextBasedData(const DL_TextData& data) {
         RS::LeftToRight, RS::Exact,
         1.0,
         data.text.c_str(),
-        s.font,
+        dxfServices.fixFontName(s.font),
         s.bold,                      // bold
         s.italic,                    // italic
         data.angle,
@@ -984,7 +1024,7 @@ RDimensionData RDxfImporter::convDimensionData(const DL_DimensionData& data) {
     if (dxfServices.getVersion2Compatibility()) {
         // middlepoint of text can be 0/0 which is considered to be invalid (!):
         //  because older QCad 1 versions save the middle of the text as 0/0
-        //  althought they didn't support custom text positions.
+        //  although they didn't support custom text positions.
         if (fabs(data.mpx)<1.0e-6 && fabs(data.mpy)<1.0e-6) {
             midP = RVector::invalid;
         }
@@ -1032,6 +1072,8 @@ RDimensionData RDxfImporter::convDimensionData(const DL_DimensionData& data) {
                        data.angle);
     ret.setUpperTolerance(uTol);
     ret.setLowerTolerance(lTol);
+    ret.setArrow1Flipped(data.arrow1Flipped);
+    ret.setArrow2Flipped(data.arrow2Flipped);
 
     if (midP.isValid()) {
         ret.setCustomTextPosition(true);
@@ -1052,7 +1094,7 @@ RDimensionData RDxfImporter::convDimensionData(const DL_DimensionData& data) {
             if (tuple.first==1070 && tuple.second==40 && i<list.size()-1) {
                 tuple = list[i+1];
                 if (tuple.first==1040) {
-                    ret.setDimScale(tuple.second.toDouble());
+                    ret.setDimscale(tuple.second.toDouble());
                 }
             }
         }
@@ -1109,31 +1151,30 @@ void RDxfImporter::addDimDiametric(const DL_DimensionData& data,
 }
 
 void RDxfImporter::addDimAngular(const DL_DimensionData& data,
-                                 const DL_DimAngularData& edata) {
+                                 const DL_DimAngular2LData& edata) {
     RDimensionData dimData = convDimensionData(data);
     RVector dp1(edata.dpx1, edata.dpy1);
     RVector dp2(edata.dpx2, edata.dpy2);
     RVector dp3(edata.dpx3, edata.dpy3);
     RVector dp4(edata.dpx4, edata.dpy4);
 
-    RDimAngularData d(dimData, dp1, dp2, dp3, dp4);
+    RDimAngular2LData d(dimData, dp1, dp2, dp3, dp4);
 
-    QSharedPointer<RDimAngularEntity> entity(new RDimAngularEntity(document, d));
+    QSharedPointer<RDimAngular2LEntity> entity(new RDimAngular2LEntity(document, d));
     importEntity(entity);
 }
 
 void RDxfImporter::addDimAngular3P(const DL_DimensionData& data,
                                    const DL_DimAngular3PData& edata) {
+
     RDimensionData dimData = convDimensionData(data);
-    RVector dp1(edata.dpx3, edata.dpy3);
-    RVector dp2(edata.dpx1, edata.dpy1);
-    RVector dp3(edata.dpx3, edata.dpy3);
-    RVector dp4 = dimData.getDefinitionPoint();
-    dimData.setDefinitionPoint(RVector(edata.dpx2, edata.dpy2));
+    RVector center(edata.dpx3, edata.dpy3);
+    RVector dp1(edata.dpx1, edata.dpy1);
+    RVector dp2(edata.dpx2, edata.dpy2);
 
-    RDimAngularData d(dimData, dp1, dp2, dp3, dp4);
+    RDimAngular3PData d(dimData, center, dp1, dp2);
 
-    QSharedPointer<RDimAngularEntity> entity(new RDimAngularEntity(document, d));
+    QSharedPointer<RDimAngular3PEntity> entity(new RDimAngular3PEntity(document, d));
     importEntity(entity);
 }
 
@@ -1167,7 +1208,7 @@ void RDxfImporter::addLeader(const DL_LeaderData& data) {
             if (tuple.first==1070 && tuple.second==40 && i<list.size()-1) {
                 tuple = list[i+1];
                 if (tuple.first==1040) {
-                    leader.setDimScaleOverride(tuple.second.toDouble());
+                    leader.setDimscale(tuple.second.toDouble());
                 }
             }
         }
@@ -1534,7 +1575,8 @@ QString RDxfImporter::getEncoding(const QString& str) {
     if (l=="latin1" || l=="ansi_1252" || l=="iso-8859-1" ||
             l=="cp819" || l=="csiso" || l=="ibm819" || l=="iso_8859-1" ||
             l=="iso8859-1" || l=="iso-ir-100" || l=="l1") {
-        return "Latin1";
+        //return "Latin1";
+        return "utf8";
     } else if (l=="big5" || l=="ansi_950" || l=="cn-big5" || l=="csbig5" ||
                l=="x-x-big5") {
         return "Big5";
@@ -1632,7 +1674,7 @@ QString RDxfImporter::getEncoding(const QString& str) {
 
 QString RDxfImporter::getXDataString(const QString& appId, int code, int pos) {
     if (!xData.contains(appId)) {
-        return QString::null;
+        return QString();
     }
 
     int c = 0;
@@ -1642,7 +1684,7 @@ QString RDxfImporter::getXDataString(const QString& appId, int code, int pos) {
         }
     }
 
-    return QString::null;
+    return QString();
 }
 
 int RDxfImporter::getXDataInt(const QString& appId, int code, int pos) {

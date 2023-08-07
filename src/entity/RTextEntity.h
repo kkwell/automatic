@@ -43,6 +43,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -61,6 +62,7 @@ public:
     static RPropertyTypeId PropertyPlainText;
     static RPropertyTypeId PropertyFontName;
     static RPropertyTypeId PropertyHeight;
+    static RPropertyTypeId PropertyWidth;
     static RPropertyTypeId PropertyAngle;
     static RPropertyTypeId PropertyXScale;
     static RPropertyTypeId PropertyBold;
@@ -68,6 +70,8 @@ public:
     static RPropertyTypeId PropertyLineSpacingFactor;
     static RPropertyTypeId PropertyHAlign;
     static RPropertyTypeId PropertyVAlign;
+    static RPropertyTypeId PropertyBackward;
+    static RPropertyTypeId PropertyUpsideDown;
 
 public:
     RTextEntity(RDocument* document, const RTextData& data);
@@ -75,8 +79,12 @@ public:
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityText;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RTextEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RTextEntity::getRtti());
     }
 
     virtual RTextEntity* clone() const {

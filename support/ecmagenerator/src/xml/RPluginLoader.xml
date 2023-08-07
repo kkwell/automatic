@@ -39,7 +39,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       </variant>
       <variant returnType="void" isPureVirtual="false">
         <arg type="QObject *" typeName="QObject *" name="plugin"
-        isConst="true" />
+        isConst="false" />
         <arg type="bool" typeName="bool" name="remove"
         hasDefault="true" default="false" isConst="false" />
       </variant>
@@ -52,6 +52,11 @@ xmlns:rs="http://www.ribbonsoft.com">
         typeName="RPluginInterface::InitStatus" name="status"
         isConst="false" />
       </variant>
+    </method>
+    <method name="initTranslations" cppName="initTranslations"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false" />
     </method>
     <method name="countPlugins" cppName="countPlugins"
     specifier="public" isStatic="true" isVirtual="false"
@@ -79,6 +84,19 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="bool" isPureVirtual="false">
         <arg type="QString &amp;" typeName="QString" name="id"
         isConst="true" />
+      </variant>
+    </method>
+    <method name="checkPluginLicenses"
+    cppName="checkPluginLicenses" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="checkPluginLicense" cppName="checkPluginLicense"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="QObject *" typeName="QObject *" name="plugin"
+        isConst="false" />
       </variant>
     </method>
   </class>

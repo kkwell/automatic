@@ -67,6 +67,9 @@
 
     // public methods:
     static  QScriptValue
+        operator_assign
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getShapeType
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -139,6 +142,9 @@
         removeFitPointAt
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        removeFirstFitPoint
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         removeLastFitPoint
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -170,6 +176,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getWeights
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setWeights
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setDegree
@@ -271,6 +280,9 @@
         getPointsWithDistanceToEnd
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getPointCloud
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getVectorTo
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -296,6 +308,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         reverse
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        stretch
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getTransformed

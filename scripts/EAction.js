@@ -17,15 +17,9 @@
  * along with QCAD.
  */
 
-include("WidgetFactory.js");
+include("scripts/library.js");
+include("scripts/WidgetFactory.js");
 include("scripts/Widgets/OptionsToolBar/OptionsToolBar.js");
-
-if (RSettings.isGuiEnabled()) {
-    if (exists("scripts/Widgets/CadToolBar/CadToolBar.js")) {
-        include("scripts/Widgets/CadToolBar/ColumnLayout.js");
-        include("scripts/Widgets/CadToolBar/CadToolBar.js");
-    }
-}
 
 /**
  * Base class for all ECMAScript based actions.
@@ -55,6 +49,12 @@ function EAction(guiAction) {
     // set to true to prefer dialog over options tool bar:
     this.useDialog = false;
     this.dialogUiFile = undefined;
+
+    this.waitingForContextMenu = false;
+
+    this.optOutRelativeZeroResume = false;
+
+    this.resuming = false;
 }
 
 EAction.prototype = new RActionAdapter();
@@ -63,6 +63,7 @@ EAction.includeBasePath = includeBasePath;
 // some commonly used translated strings:
 EAction.trBack = qsTr("Back");
 EAction.trCancel = qsTr("Cancel");
+EAction.trDone = qsTr("Done");
 
 EAction.crossCursor = undefined;
 EAction.noRelativeZeroResume = false;
@@ -146,9 +147,12 @@ EAction.prototype.finishEvent = function() {
 
     // reset CAD tool bar:
     if (!isNull(guiAction) && guiAction.getGroup() === "") {
-        if (typeof(CadToolBar) !== "undefined") {
-            if (CadToolBar.getCurrentPanelName()==="SnapToolsPanel") {
-                CadToolBar.back();
+        var appWin = EAction.getMainWindow();
+        if (!isNull(appWin)) {
+            // appWin can be NULL if it is being deleted
+            var cadToolBar = appWin.findChild("CadToolBar");
+            if (!isNull(cadToolBar) && cadToolBar.getCurrentPanelName()==="SnapToolsPanel") {
+                cadToolBar.back();
             }
         }
     }
@@ -158,6 +162,8 @@ EAction.prototype.finishEvent = function() {
     if (!isNull(di)) {
         di.repaintViews();
     }
+
+    this.setCommandPrompt();
 };
 
 /**
@@ -242,7 +248,7 @@ EAction.prototype.initState = function() {
 };
 
 /**
- * Called whenver the action resumes its operation, for example after it was
+ * Called whenever the action resumes its operation, for example after it was
  * temporary suspended for another action.
  */
 EAction.prototype.resumeEvent = function() {
@@ -260,21 +266,23 @@ EAction.prototype.resumeEvent = function() {
         this.setState(this.state);
     }
 
-    // restore relative zero position when returning from another command:
-    var di = this.getDocumentInterface();
-    if (!isNull(di) && isValidVector(this.relativeZeroPos)) {
-        if (EAction.noRelativeZeroResume===true) {
-            EAction.noRelativeZeroResume = false;
+    if (!this.optOutRelativeZeroResume) {
+        // restore relative zero position when returning from another command:
+        var di = this.getDocumentInterface();
+        if (!isNull(di) && isValidVector(this.relativeZeroPos)) {
+            if (EAction.noRelativeZeroResume===true) {
+                EAction.noRelativeZeroResume = false;
+            }
+            else {
+                di.setRelativeZero(this.relativeZeroPos);
+            }
         }
-        else {
-            di.setRelativeZero(this.relativeZeroPos);
-        }
+        this.relativeZeroPos = undefined;
     }
-    this.relativeZeroPos = undefined;
 };
 
 /**
- * Called whenver the action is suspended, for example if another action is
+ * Called whenever the action is suspended, for example if another action is
  * started while this action is active.
  */
 EAction.prototype.suspendEvent = function() {
@@ -347,6 +355,8 @@ EAction.prototype.showUiOptions = function(resume, restoreFromSettings) {
         return;
     }
 
+    this.resuming = true;
+
     this.optionWidgetActions = [];
     for (var i = 0; i < this.uiFile.length; ++i) {
         var uiFile = this.uiFile[i];
@@ -380,11 +390,11 @@ EAction.prototype.showUiOptions = function(resume, restoreFromSettings) {
         if (optionsToolBar.floating) {
             optionsToolBar.resize(optionsToolBar.sizeHint.width(), optionsToolBar.height);
         }
-        wOptions.destroy();
+        destr(wOptions);
 
         // automatically add separator to toolbar:
         var a = optionsToolBar.addSeparator();
-        a.objectName = "LastSeparator";
+        a.objectName = "LastSeparator" + i;
         this.optionWidgetActions.push(a);
 
         // give action a chance to initialize toolbar widgets that cannot
@@ -399,6 +409,8 @@ EAction.prototype.showUiOptions = function(resume, restoreFromSettings) {
 
     // hide options tool bar widgets which are shown in a dialog instead:
     this.hideOptionsToolBarWidgets();
+
+    this.resuming = false;
 };
 
 /**
@@ -415,6 +427,10 @@ EAction.prototype.initUiOptions = function(resume, optionsToolBar) {
     var children = optionsToolBar.children();
     for (var i=0; i<children.length; i++) {
         var child = children[i];
+        if (isNull(child)) {
+            continue;
+        }
+
         var shortCut = child.shortcut;
         if (!isNull(shortCut) && !shortCut.isEmpty()) {
             var str = shortCut.toString();
@@ -483,7 +499,7 @@ EAction.prototype.hideUiOptions = function(saveToSettings) {
         if (!isNull(optionsToolBar)) {
             optionsToolBar.removeAction(a);
         }
-        a.destroy();
+        destr(a);
     }
 
     // delete additional toolbars of this tool if available:
@@ -493,7 +509,7 @@ EAction.prototype.hideUiOptions = function(saveToSettings) {
             if (isDeleted(tb)) {
                 continue;
             }
-            tb.destroy();
+            destr(tb);
         }
     }
 
@@ -529,8 +545,12 @@ EAction.prototype.hideOptionsToolBarWidgets = function(widgets, noSyncWidgets) {
     var children = optionsToolBar.children();
     for (i = 0; i < children.length; ++i) {
         c = children[i];
+        if (isNull(c)) {
+            continue;
+        }
+
         if (c["HideInDialogMode"]===true) {
-            c.destroy();
+            destr(c);
         }
         else if (c["MoveToDialog"]===true) {
             widgets.push(c);
@@ -561,10 +581,12 @@ EAction.prototype.hideOptionsToolBarWidgets = function(widgets, noSyncWidgets) {
 };
 
 /**
- * Called when user presses enter. Default implementation calls showDialog.
+ * Called when user presses enter. Default implementation calls showDialog if configured.
  */
 EAction.prototype.enterEvent = function() {
-    this.showDialog();
+    if (RSettings.getBoolValue("Transform/EnterShowsDialog", false)===true) {
+        this.showDialog();
+    }
 };
 
 /**
@@ -598,7 +620,12 @@ EAction.prototype.showDialog = function() {
     this.dialog = WidgetFactory.createDialog(this.includeBasePath, this.dialogUiFile, EAction.getMainWindow());
     this.initUiOptions(false, this.dialog);
     WidgetFactory.restoreState(this.dialog, this.settingsGroup, this);
-    this.dialog.windowTitle = this.getToolTitle();
+    var title = this.getToolTitle();
+    if (title.indexOf("\t")!==-1) {
+        // remove shortcuts Windows:
+        title = title.replace(/\t.*/g, "");
+    }
+    this.dialog.windowTitle = title;
     this.dialog.windowIcon = new QIcon();
 
     // give focus to control with custom property 'DefaultFocus':
@@ -643,7 +670,7 @@ EAction.prototype.showDialog = function() {
         noSyncWidgets[i].setProperty("Loaded", false);
     }
 
-    this.dialog.destroy();
+    destr(this.dialog);
     this.dialog = undefined;
 
 //    var view = EAction.getGraphicsView();
@@ -733,18 +760,24 @@ EAction.prototype.keyReleaseEvent = function(event) {
  */
 EAction.prototype.setCrosshairCursor = function() {
     if (isNull(EAction.crossCursor)) {
-        var bitmap, mask
-        if (RSettings.getDevicePixelRatio()===2 && RS.getSystemId()!=="osx") {
-            bitmap = new QBitmap(EAction.includeBasePath + "/CrosshairCursor@2x.png", "PNG");
-            mask = new QBitmap(EAction.includeBasePath + "/CrosshairCursorMask@2x.png", "PNG");
-            //bitmap.setDevicePixelRatio(2);
-            //mask.setDevicePixelRatio(2);
-            EAction.crossCursor = new QCursor(bitmap, mask, 15, 15);
+
+        if (RSettings.getBoolValue("GraphicsView/SystemCursors", false)===true) {
+            EAction.crossCursor = new QCursor(Qt.CrossCursor);
         }
         else {
-            bitmap = new QBitmap(EAction.includeBasePath + "/CrosshairCursor.png", "PNG");
-            mask = new QBitmap(EAction.includeBasePath + "/CrosshairCursorMask.png", "PNG");
-            EAction.crossCursor = new QCursor(bitmap, mask, 15, 15);
+            var bitmap, mask
+            if (RSettings.getDevicePixelRatio()===2 && RS.getSystemId()!=="osx") {
+                bitmap = new QBitmap(EAction.includeBasePath + "/CrosshairCursor@2x.png", "PNG");
+                mask = new QBitmap(EAction.includeBasePath + "/CrosshairCursorMask@2x.png", "PNG");
+                //bitmap.setDevicePixelRatio(2);
+                //mask.setDevicePixelRatio(2);
+                EAction.crossCursor = new QCursor(bitmap, mask, 30, 30);
+            }
+            else {
+                bitmap = new QBitmap(EAction.includeBasePath + "/CrosshairCursor.png", "PNG");
+                mask = new QBitmap(EAction.includeBasePath + "/CrosshairCursorMask.png", "PNG");
+                EAction.crossCursor = new QCursor(bitmap, mask, 15, 15);
+            }
         }
     }
 
@@ -764,14 +797,24 @@ EAction.prototype.setCursor = function(cursor, name) {
     if (!isNull(di)) {
         di.setCursor(cursor);
     }
-    if (!isNull(name)) {
-        var views = this.getGraphicsViews();
-        for (var i=0; i<views.length; i++) {
-            if (isFunction(views[i].setProperty)) {
-                views[i].setProperty("CursorName", name);
-            }
+    var appWin = EAction.getMainWindow();
+    if (!isNull(appWin)) {
+        if (isNull(name)) {
+            appWin.setProperty("MouseCursor", "");
+        }
+        else {
+            appWin.setProperty("MouseCursor", name);
         }
     }
+
+//    if (!isNull(name)) {
+//        var views = this.getGraphicsViews();
+//        for (var i=0; i<views.length; i++) {
+//            if (isFunction(views[i].setProperty)) {
+//                views[i].setProperty("CursorName", name);
+//            }
+//        }
+//    }
 };
 
 /**
@@ -951,9 +994,10 @@ EAction.getMenu = function(title, objectName, initFunction) {
     var appWin = EAction.getMainWindow();
     var menuBar = appWin.menuBar();
     var menu;
-    for ( var i in menuBar.children()) {
-        menu = menuBar.children()[i];
-        if (menu.objectName === objectName) {
+    var children = menuBar.children();
+    for (var i in children) {
+        menu = children[i];
+        if (!isNull(menu) && menu.objectName === objectName) {
             break;
         }
         menu = undefined;
@@ -961,7 +1005,8 @@ EAction.getMenu = function(title, objectName, initFunction) {
     if (isNull(menu)) {
         menu = new QMenu(title, menuBar);
         menu.objectName = objectName;
-        menuBar.addMenu(menu);
+        var action = menuBar.addMenu(menu);
+        action.objectName = objectName + "Action";
         if (initFunction != undefined) {
             initFunction(menu);
         }
@@ -975,7 +1020,7 @@ EAction.getMenu = function(title, objectName, initFunction) {
  * icon.
  * 
  * \param menu Parent menu.
- * \param sortOrder Sort oder among other submenus. All
+ * \param sortOrder Sort order among other submenus. All
  *      submenus within the same menu are ordered by this number.
  * \param title Translated title of the submenu. E.g. qsTr("&Line").
  * \param objectName Object name to use for the menu. Used mainly for
@@ -1063,31 +1108,18 @@ EAction.getToolBar = function(title, objectName, toolBarArea, category, before) 
         return undefined;
     }
 
-    var tb;
+    var tb = undefined;
     if (objectName.length !== 0) {
         tb = appWin.findChild(objectName);
     }
 
     if (!isNull(tb) && !isOfType(tb, QToolBar)) {
-        qWarning("Not a toolbar: ", tb);
+        qWarning("Not a toolbar: " + tb);
         return undefined;
     }
 
     if (isNull(tb)) {
         tb = new QToolBar(title);
-        if (RSettings.isQt(5)) {
-            if (!RSettings.hasCustomStyleSheet()) {
-                // Mac OS X: remove border around tool buttons:
-                tb.setStyleSheet(
-                    "QToolButton {" +
-                    "  border: 1px solid transparent;" +
-                    "} " +
-                    "QToolButton:checked { " +
-                    "  border:1px solid #7f7f7f; " +
-                    "  background: qlineargradient(x1:0 y1:0, x2:0 y2:1 stop:0 #c0c0c0, stop:0.1 #8a8a8a stop:0.2 #a3a3a3 stop:1 transparent); " +
-                    "}");
-            }
-        }
         tb.objectName = objectName;
         if (!isNull(category)) {
             tb.setProperty("Category", category);
@@ -1137,7 +1169,7 @@ EAction.getOptionsToolBar = function() {
     }
 
     if (!isNull(EAction.optionsToolBar)) {
-        if (!QCoreApplication.arguments().contains("-no-show")) {
+        if (!RSettings.getOriginalArguments().contains("-no-show")) {
             EAction.optionsToolBar.visible = true;
         }
     }
@@ -1177,46 +1209,37 @@ EAction.getMainCadToolBarPanel = function() {
  * back to the main CAD toolbar panel.
  */
 EAction.getCadToolBarPanel = function(title, objectName, hasBackButton) {
-    if (typeof(CadToolBar) === "undefined") {
-        return undefined;
-    }
-
     var appWin = EAction.getMainWindow();
-    var cadToolBar = appWin.findChild("CadQToolBar");
+    var cadToolBar = appWin.findChild("CadToolBar");
 
     // create CAD toolbar if it does not exist already:
     if (isNull(cadToolBar)) {
-        var toolBar = new QToolBar(qsTr("CAD Tools"), appWin);
-        toolBar.objectName = "CadQToolBar";
-        cadToolBar = new CadToolBar(toolBar);
-        toolBar.addWidget(cadToolBar);
-        cadToolBar.updateIconSize();
+        cadToolBar = new RCadToolBar(qsTr("CAD Tools"), appWin);
+        cadToolBar.objectName = "CadToolBar";
+//        cadToolBar.updateIconSize();
 
-        toolBar.topLevelChanged.connect(function(onOff) {
+        cadToolBar.topLevelChanged.connect(function(onOff) {
             RSettings.setValue("CadToolBar/VerticalWhenFloating", false);
         });
-        toolBar.orientationChanged.connect(function(orientation) {
+        cadToolBar.orientationChanged.connect(function(orientation) {
             RSettings.setValue("CadToolBar/VerticalWhenFloating", false);
         });
     }
 
-    return CadToolBar.getPanel(title, objectName, hasBackButton);
+    return cadToolBar.getPanel(title, objectName, hasBackButton);
 };
 
 /**
  * Shows the CAD toolbar panel with the given objectName.
  */
 EAction.showCadToolBarPanel = function(objectName) {
-    if (typeof (CadToolBar) == "undefined") {
-        return;
-    }
-
     var appWin = EAction.getMainWindow();
     if (isNull(appWin)) {
         return;
     }
 
-    CadToolBar.showPanel(objectName);
+    var toolBar = appWin.findChild("CadToolBar");
+    toolBar.showPanel(objectName);
 };
 
 /**
@@ -1345,6 +1368,8 @@ EAction.addGuiActionTo = function(action, iface, addToMenu, addToToolBar,
     if (isNull(addSeparator)) {
         addSeparator = false;
     }
+    var addToUserToolBar1 = false;
+    var addToUserToolBar2 = false;
 
     if (className.length!==0) {
         var key = className + "/VisibleInMenu";
@@ -1362,13 +1387,21 @@ EAction.addGuiActionTo = function(action, iface, addToMenu, addToToolBar,
         if (!RSettings.hasValue(key)) {
             RSettings.setValue(key, addToCadToolBar);
         }
+        key = className + "/VisibleInUserToolBar1";
+        addToUserToolBar1 = RSettings.getBoolValue(key, addToUserToolBar1);
+        if (!RSettings.hasValue(key)) {
+            RSettings.setValue(key, addToUserToolBar1);
+        }
+        key = className + "/VisibleInUserToolBar2";
+        addToUserToolBar2 = RSettings.getBoolValue(key, addToUserToolBar2);
+        if (!RSettings.hasValue(key)) {
+            RSettings.setValue(key, addToUserToolBar2);
+        }
     }
 
     if (isNull(iface)) {
         qWarning("EAction.js:", "addGuiActionTo(): iface not defined");
     }
-
-
 
     if (action.icon.isNull() && !action.isIconDisabled()) {
         action.setIcon(autoPath("scripts/Empty.svg"));
@@ -1419,6 +1452,21 @@ EAction.addGuiActionTo = function(action, iface, addToMenu, addToToolBar,
                 //ctb.addAction(action);
                 action.addToWidget(ctb);
             }
+        }
+    }
+
+    var appWin = EAction.getMainWindow();
+    if (addToUserToolBar1) {
+        var tb = appWin.findChild("UserToolBar1");
+        if (!isNull(tb)) {
+            action.addToToolBar(tb);
+        }
+    }
+
+    if (addToUserToolBar2) {
+        var tb = appWin.findChild("UserToolBar2");
+        if (!isNull(tb)) {
+            action.addToToolBar(tb);
         }
     }
 };
@@ -1604,8 +1652,16 @@ EAction.getScales = function(unit) {
                 '1" = 512"', '1" = 1024"', '1" = 2048"', '1" = 4096"',
                 '1/4096" = 1\'-0"', '1/2048" = 1\'-0"', '1/1024" = 1\'-0"',
                 '1/512" = 1\'-0"', '1/256" = 1\'-0"', '1/128" = 1\'-0"',
-                '1/64" = 1\'-0"', '1/32" = 1\'-0"', '1/16" = 1\'-0"',
-                '1/8" = 1\'-0"', '1/4" = 1\'-0"', '3/4" = 1\'-0"', '1/2" = 1\'-0"',
+                '1/64" = 1\'-0"', 
+                '1/32" = 1\'-0"', 
+                '1/16" = 1\'-0"',
+                '3/32" = 1\'-0"', 
+                '1/8" = 1\'-0"', 
+                '3/16" = 1\'-0"', 
+                '1/4" = 1\'-0"', 
+                '3/8" = 1\'-0"',
+                '1/2" = 1\'-0"',
+                '3/4" = 1\'-0"', 
                 '1" = 1\'-0"', '2" = 1\'-0"', '3" = 1\'-0"', '4" = 1\'-0"',
                 '5" = 1\'-0"', '6" = 1\'-0"', '7" = 1\'-0"', '8" = 1\'-0"',
                 '9" = 1\'-0"', '10" = 1\'-0"', '11" = 1\'-0"');
@@ -1630,7 +1686,7 @@ EAction.prototype.getAuxPreview = function() {
 };
 
 /**
- * Called by updatePreview. Implementations must return an array of enitity IDs
+ * Called by updatePreview. Implementations must return an array of entity IDs
  * which should be highlighted.
  */
 EAction.prototype.getHighlightedEntities = function() {
@@ -1702,7 +1758,8 @@ EAction.prototype.applyOperation = function() {
         return false;
     }
     this.complementOperation(op);
-    di.applyOperation(op);
+    var t = di.applyOperation(op);
+    this.postOperation(t);
     return true;
 };
 
@@ -1710,6 +1767,13 @@ EAction.prototype.applyOperation = function() {
  * Can be reimplemented to complement the operation of an action.
  */
 EAction.prototype.complementOperation = function(op) {
+    return;
+};
+
+/**
+ * Can be reimplemented to work with the transaction returned by the operation.
+ */
+EAction.prototype.postOperation = function(transaction) {
     return;
 };
 
@@ -1724,6 +1788,13 @@ EAction.prototype.pickCoordinate = function(event, preview) {
  * Default implementation. Calls pickCoordinate(event, false)
  */
 EAction.prototype.coordinateEvent = function(event) {
+    // don't let invalid positions go through for most cases (this is overridden for DefaultAction):
+    var pos = event.getModelPosition();
+    if (!isValidVector(pos)) {
+        EAction.handleUserWarning(qsTr("Invalid position"));
+        return;
+    }
+
     this.pickCoordinate(event, false);
 };
 
@@ -1787,9 +1858,7 @@ EAction.prototype.simulateMouseMoveEvent = function() {
         return;
     }
 
-    if (isFunction(view.getRGraphicsView)) {
-        view = view.getRGraphicsView();
-    }
+    view = getRGraphicsView(view);
 
     if (isNull(view)) {
         return;
@@ -1896,7 +1965,12 @@ EAction.setProgressEnd = function() {
 EAction.assertEditable = function(entity, quiet) {
     if (!entity.isEditable()) {
         if (!quiet) {
-            EAction.handleUserWarning(qsTr("Entity is on a locked layer."));
+            if (!entity.isInWorkingSet()) {
+                EAction.handleUserWarning(qsTr("Entity is not in working set."));
+            }
+            else {
+                EAction.handleUserWarning(qsTr("Entity is on a locked layer."));
+            }
         }
         return false;
     }
@@ -1905,7 +1979,7 @@ EAction.assertEditable = function(entity, quiet) {
 };
 
 /**
- * Allows all actions to handle property change events. This is neccessary to
+ * Allows all actions to handle property change events. This is necessary to
  * ensure that properties can be changed even if a tool is active (e.g. while
  * drawing lines).
  */
@@ -2029,7 +2103,7 @@ EAction.getEntityIdsUnderCursor = function(di, event, range, selectable) {
  * \return Entity ID under the mouse cursor. User may choose between multiple candidates if
  * result is ambiguous and Alt key is pressed.
  *
- * \param event RRInputEvent
+ * \param event RInputEvent
  * \param preview for previewing purposes
  * \param selectable Only return selectable (editable) entities
  */
@@ -2057,16 +2131,8 @@ EAction.getEntityId = function(di, action, event, preview, selectable) {
         selectable = false;
     }
 
-    var mod;
-    if (isFunction(event.getModifiers)) {
-        mod = event.getModifiers();
-    }
-    else {
-        mod = event.modifiers();
-    }
-
-    var altPressed = (mod & Qt.AltModifier)!==0;
-    if (!altPressed || preview) {
+    var altPressed = isAltPressed(event);
+    if (!altPressed || preview || RSettings.getBoolValue("GraphicsView/DisableAltPicking", false)===true) {
         if (!isNull(action.idFromContextMenu)) {
             // user already chose an entity from the context menu:
             return action.idFromContextMenu;
@@ -2094,7 +2160,6 @@ EAction.getEntityId = function(di, action, event, preview, selectable) {
     var ret = RObject.INVALID_ID;
     var doc = di.getDocument();
     var menu = new QMenu(EAction.getGraphicsView());
-    var a, r;
     menu.objectName = "EntityContextMenu";
 
     // reacts to hovering and clicking of context menu items:
@@ -2116,6 +2181,7 @@ EAction.getEntityId = function(di, action, event, preview, selectable) {
     // invalid entity id is used to to cancel:
     entityIds.push(RObject.INVALID_ID);
 
+    var a, reactor;
     for (var i=0; i<entityIds.length && i<20; i++) {
         var id = entityIds[i];
         var str;
@@ -2145,23 +2211,45 @@ EAction.getEntityId = function(di, action, event, preview, selectable) {
         a = menu.addAction(str);
         if (!isNull(icon)) {
             a.icon = icon;
+            a.iconVisibleInMenu = true;
         }
 
-        r = new Reactor(id);
-        a.triggered.connect(r, "trigger");
-        a.hovered.connect(r, "hover");
+        reactor = new Reactor(id);
+        a.triggered.connect(reactor, reactor.trigger);
+        a.hovered.connect(reactor, reactor.hover);
     }
 
     // show context menu:
     if (!menu.isEmpty()) {
-        var prev = QCoreApplication.testAttribute(Qt.AA_DontShowIconsInMenus);
-        QCoreApplication.setAttribute(Qt.AA_DontShowIconsInMenus, false);
+        this.waitingForContextMenu = true;
         menu.exec(new QPoint(QCursor.pos().x(), QCursor.pos().y()+10));
-        QCoreApplication.setAttribute(Qt.AA_DontShowIconsInMenus, prev);
+        this.waitingForContextMenu = false;
         di.clearPreview();
     }
 
     return ret;
+};
+
+EAction.prototype.isEntitySnappable = function(e) {
+    if (!isEntity(e)) {
+        return false;
+    }
+
+    var layerId = e.getLayerId();
+    var data = e.getData();
+    var doc = data.getDocument();
+    if (isNull(doc)) {
+        return false;
+    }
+
+    return doc.isLayerSnappable(layerId);
+};
+
+EAction.prototype.isEntityEditable = function(e) {
+    if (!isEntity(e)) {
+        return false;
+    }
+    return e.isEditable();
 };
 
 /**
@@ -2183,12 +2271,20 @@ EAction.warnNotLine = function() {
     EAction.handleUserWarning(qsTr("Entity is not a line."));
 };
 
+EAction.warnNotArc = function() {
+    EAction.handleUserWarning(qsTr("Entity is not an arc."));
+};
+
 EAction.warnNotArcCircle = function() {
     EAction.handleUserWarning(qsTr("Entity is not an arc or circle."));
 };
 
 EAction.warnNotLineArcCircle = function() {
     EAction.handleUserWarning(qsTr("Entity is not a line, arc or circle."));
+};
+
+EAction.warnNotLineArcSplineEllipseArcPolyline = function() {
+    EAction.handleUserWarning(qsTr("Entity is not a line, arc, spline, ellipse arc or polyline."));
 };
 
 EAction.warnNotArcCircleEllipse = function() {
@@ -2207,10 +2303,18 @@ EAction.warnNotLineArcCircleEllipseSpline = function() {
     EAction.handleUserWarning(qsTr("Entity is not a line, arc, circle, ellipse or spline."));
 };
 
+EAction.warnNotLineArcCircleSplinePolyline = function() {
+    EAction.handleUserWarning(qsTr("Entity is not a line, arc, circle, spline or polyline."));
+};
+
 EAction.warnNotLineArcCircleEllipseSplinePolyline = function() {
     EAction.handleUserWarning(qsTr("Entity is not a line, arc, circle, ellipse, spline or polyline."));
 };
 
 EAction.warnNotPolyline = function() {
     EAction.handleUserWarning(qsTr("Entity is not a polyline."));
+};
+
+EAction.warnNotSplineWithFitPoints = function() {
+    EAction.handleUserWarning(qsTr("Entity is not a spline with fit points."));
 };

@@ -150,13 +150,19 @@
         highlightReferencePoint
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        selectReferencePoints
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         exportCurrentEntity
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         unexportEntity
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        getReferencePoints
+        countReferencePoints
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        hasSelectedReferencePoints
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         dump

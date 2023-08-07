@@ -28,16 +28,21 @@
 #include "RRay.h"
 #include "RXLine.h"
 
+class RTriangle;
+
 /**
  * Exports all exported geometry into one painter path.
  */
 class QCADCORE_EXPORT RPainterPathExporter : public RExporter {
 public:
     RPainterPathExporter() :
-        RExporter(), exportZeroLinesAsPoints(true), ignoreZeroLines(false) { }
+        RExporter(), exportZeroLinesAsPoints(true), ignoreZeroLines(false), ignoreLineTypePatternScale(false), scaleHint(1.0) { }
+
+    RPainterPathExporter(RDocument& doc) :
+        RExporter(doc), exportZeroLinesAsPoints(true), ignoreZeroLines(false), ignoreLineTypePatternScale(false), scaleHint(1.0) { }
 
     virtual void exportLineSegment(const RLine& line, double angle = RNANDOUBLE);
-    virtual void exportPainterPaths(const QList<RPainterPath>& paths);
+    virtual void exportPainterPaths(const QList<RPainterPath>& paths, double z = 0.0);
 
     virtual void exportXLine(const RXLine& xLine) {
         Q_UNUSED(xLine)
@@ -51,7 +56,7 @@ public:
         Q_UNUSED(point)
     }
     virtual void exportTriangle(const RTriangle& triangle) {
-        Q_UNUSED(triangle)
+        //Q_UNUSED(triangle)
     }
 
     //void clear();
@@ -62,11 +67,25 @@ public:
     void setIgnoreZeroLines(bool on) {
         ignoreZeroLines = on;
     }
+    void setIgnoreLineTypePatternScale(bool on) {
+        ignoreLineTypePatternScale = on;
+    }
+    /**
+     * @brief setScaleHint Set additional pattern scale hint, used for scaling dots in patterns in viewports.
+     * @param s Factor (viewport scale)
+     */
+    void setScaleHint(double s) {
+        scaleHint = s;
+    }
+
+    virtual double getLineTypePatternScale(const RLinetypePattern& p) const;
 
 private:
     RPainterPath path;
     bool exportZeroLinesAsPoints;
     bool ignoreZeroLines;
+    bool ignoreLineTypePatternScale;
+    double scaleHint;
 };
 
 #endif

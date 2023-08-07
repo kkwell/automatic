@@ -29,11 +29,20 @@ function Mirror(guiAction) {
 
     this.axisPoint1 = undefined;
     this.axisPoint2 = undefined;
+
+    this.useDialog = RSettings.getBoolValue("Mirror/UseDialog", true);
+
+    if (!this.useDialog) {
+        this.setUiOptions("Mirror.ui");
+    }
 }
 
 Mirror.prototype = new Transform();
-
 Mirror.includeBasePath = includeBasePath;
+
+Mirror.getPreferencesCategory = function() {
+    return [qsTr("Modify"), qsTr("Mirror")];
+};
 
 Mirror.State = {
     SettingAxisPoint1 : 0,
@@ -107,16 +116,21 @@ Mirror.prototype.pickCoordinate = function(event, preview) {
             this.updatePreview();
         }
         else {
-            this.setState(-1);
-            if (!this.showDialog()) {
-                // dialog canceled:
-                this.terminate();
-                return;
+            if (this.useDialog) {
+                this.setState(-1);
+                if (!this.showDialog()) {
+                    // dialog canceled:
+                    this.terminate();
+                    return;
+                }
             }
 
-            di.applyOperation(this.getOperation(false));
-            di.setRelativeZero(this.axisPoint2);
-            this.terminate();
+            var op = this.getOperation(false);
+            if (!isNull(op)) {
+                di.applyOperation(op);
+                di.setRelativeZero(this.axisPoint2);
+                this.terminate();
+            }
         }
         break;
     }
@@ -131,7 +145,7 @@ Mirror.prototype.showDialog = function() {
     var dialog = WidgetFactory.createDialog(Mirror.includeBasePath, "MirrorDialog.ui");
     WidgetFactory.restoreState(dialog);
     if (!dialog.exec()) {
-        dialog.destroy();
+        destr(dialog);
         EAction.activateMainWindow();
         return false;
     }
@@ -139,16 +153,18 @@ Mirror.prototype.showDialog = function() {
     var widgets = getWidgets(dialog);
     if (widgets["DeleteOriginal"].checked===true) {
         this.copies = 0;
+        this.copy = false;
     }
     else if (widgets["KeepOriginal"].checked===true) {
         this.copies = 1;
+        this.copy = true;
     }
 
     this.useCurrentAttributes = (widgets["UseCurrentAttributes"].checked===true);
 
     WidgetFactory.saveState(dialog);
 
-    dialog.destroy();
+    destr(dialog);
     EAction.activateMainWindow();
     return true;
 };
@@ -156,9 +172,9 @@ Mirror.prototype.showDialog = function() {
 /**
  * Callback function for Transform.getOperation.
  */
-Mirror.prototype.transform = function(entity, k, op, preview, forceNew) {
+Mirror.prototype.transform = function(entity, k, op, preview, flags) {
     entity.mirror(this.axisPoint1, this.axisPoint2);
-    op.addObject(entity, this.useCurrentAttributes, forceNew);
+    op.addObject(entity, flags);
 };
 
 Mirror.prototype.getAuxPreview = function() {
@@ -173,3 +189,13 @@ Mirror.prototype.getAuxPreview = function() {
     return ret;
 };
 
+Mirror.prototype.slotCopyChanged = function(checked) {
+    Transform.prototype.slotCopyChanged.call(this, checked);
+
+    if (this.copy) {
+        this.copies = 1;
+    }
+    else {
+        this.copies = 0;
+    }
+};

@@ -17,8 +17,8 @@
  * along with QCAD.
  */
 
-#ifndef RDimAngularDataDATA_H
-#define RDimAngularDataDATA_H
+#ifndef RDimAngularData_H
+#define RDimAngularData_H
 
 #include "entity_global.h"
 
@@ -29,10 +29,10 @@
 #include "RVector.h"
 
 /**
- * Angular dimension entity data class.
+ * Angular dimension entity data base class.
  *
  * \scriptable
- * \copyable
+ * \abstract
  * \ingroup entity
  */
 class QCADENTITY_EXPORT RDimAngularData: public RDimensionData {
@@ -43,11 +43,7 @@ protected:
 
 public:
     RDimAngularData();
-    RDimAngularData(const RDimensionData& dimData,
-                    const RVector& extensionLine1Start,
-                    const RVector& extensionLine1End,
-                    const RVector& extensionLine2Start,
-                    const RVector& dimArcPosition);
+    RDimAngularData(const RDimensionData& dimData);
 
     virtual RS::EntityType getType() const {
         return RS::EntityDimAngular;
@@ -55,77 +51,36 @@ public:
     virtual bool isValid() const;
     virtual bool isSane() const;
 
-    void setExtensionLine1Start(const RVector& p) {
-        extensionLine1Start = p;
-    }
-
-    RVector getExtensionLine1Start() const {
-        return extensionLine1Start;
-    }
-
-    void setExtensionLine1End(const RVector& p) {
-        extensionLine1End = p;
-    }
-
-    RVector getExtensionLine1End() const {
-        return extensionLine1End;
-    }
-
-    void setExtensionLine2Start(const RVector& p) {
-        extensionLine2Start = p;
-    }
-
-    RVector getExtensionLine2Start() const {
-        return extensionLine2Start;
-    }
-
-    void setExtensionLine2End(const RVector& p) {
-        setDefinitionPoint(p);
-    }
-
-    RVector getExtensionLine2End() const {
-        return getDefinitionPoint();
-    }
-
-    void setDimArcPosition(const RVector& p) {
-        dimArcPosition = p;
-    }
-
-    RVector getDimArcPosition() const {
-        return dimArcPosition;
-    }
+    virtual void setExtensionLine1End(const RVector& p) = 0;
+    virtual RVector getExtensionLine1End() const = 0;
+    virtual void setExtensionLine2End(const RVector& p) = 0;
+    virtual RVector getExtensionLine2End() const = 0;
+    virtual void setDimArcPosition(const RVector& p) = 0;
+    virtual RVector getDimArcPosition() const = 0;
 
     virtual QList<RRefPoint> getReferencePoints(RS::ProjectionRenderingHint hint = RS::RenderTop) const;
 
-    virtual bool moveReferencePoint(const RVector& referencePoint, 
-        const RVector& targetPoint);
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
+    /*
     virtual bool move(const RVector& offset);
     virtual bool rotate(double rotation, const RVector& center);
     virtual bool scale(const RVector& scaleFactors, const RVector& center);
     virtual bool mirror(const RLine& axis);
+    */
 
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const;
+    //virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const;
     double getAngle() const;
-    bool getAngles(double& ang1, double& ang2,
+    virtual bool getAngles(double& ang1, double& ang2,
                    bool& reversed,
-                   RVector& p1, RVector& p2) const;
-    RVector getCenter() const;
+                   RVector& p1, RVector& p2) const = 0;
+    virtual RVector getCenter() const = 0;
     virtual double getMeasuredValue() const;
     virtual QString getAutoLabel() const;
 
-private:
-    /** Start point of first extension line. */
-    RVector extensionLine1Start;
-    /** End point of first extension line. */
-    RVector extensionLine1End;
-    /** Start point of second extension line. End is definition point. */
-    RVector extensionLine2Start;
-    /** Arc position */
-    RVector dimArcPosition;
+    virtual RArc getDimensionArc() const;
 };
 
-Q_DECLARE_METATYPE(RDimAngularData)
 Q_DECLARE_METATYPE(RDimAngularData*)
 Q_DECLARE_METATYPE(const RDimAngularData*)
 Q_DECLARE_METATYPE(QSharedPointer<RDimAngularData>)

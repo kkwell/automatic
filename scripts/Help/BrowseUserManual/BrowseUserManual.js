@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Help.js");
+include("scripts/Help/Help.js");
 
 function BrowseUserManual(guiAction) {
     Help.call(this, guiAction);
@@ -34,6 +34,27 @@ BrowseUserManual.prototype.beginEvent = function() {
     if (locale.language()===QLocale.German) {
         dir = "de";
     }
+    else if (locale.language()===QLocale.Danish) {
+        dir = "da";
+    }
+    else if (locale.language()===QLocale.Dutch) {
+        dir = "nl";
+    }
+    else if (locale.language()===QLocale.French) {
+        dir = "fr";
+    }
+    else if (locale.language()===QLocale.Italian) {
+        dir = "it";
+    }
+    else if (locale.language()===QLocale.Spanish) {
+        dir = "es";
+    }
+    else if (locale.language()===QLocale.Portuguese) {
+        dir = "pt";
+    }
+    else if (locale.language()===QLocale.Polish) {
+        dir = "pl";
+    }
     else if (locale.language()===QLocale.Japanese) {
         dir = "ja";
     }
@@ -42,7 +63,7 @@ BrowseUserManual.prototype.beginEvent = function() {
     }
 
     Help.openUrl(
-        "http://www.qcad.org/doc/qcad/%1.%2.%3/reference/%4/index.html"
+        "https://qcad.org/doc/qcad/%1.%2.%3/reference/%4/index.html"
         .arg(RSettings.getMajorVersion())
         .arg(RSettings.getMinorVersion())
         .arg(RSettings.getRevisionVersion())

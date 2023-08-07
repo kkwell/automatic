@@ -17,8 +17,8 @@
  * along with QCAD.
  */
 
-include("../../EAction.js");
-include("../../WidgetFactory.js");
+include("scripts/EAction.js");
+include("scripts/WidgetFactory.js");
 
 // TODO: use QLocale::decimalPoint
 
@@ -29,7 +29,9 @@ function InputPreferences(guiAction) {
 InputPreferences.prototype = new EAction();
 
 InputPreferences.getPreferencesCategory = function() {
-    return [qsTr("General"), qsTr("Coordinate Format")];
+    if (!hasPlugin("PROTOOLS")) {
+        return [qsTr("General"), qsTr("Coordinate Format")];
+    }
 };
 
 InputPreferences.initPreferences = function(pageWidget, calledByPrefDialog, document) {
@@ -40,18 +42,18 @@ InputPreferences.initPreferences = function(pageWidget, calledByPrefDialog, docu
     combo = pageWidget.findChild("DecimalPoint");
     var decimalPointCombo = combo;
     InputPreferences.updateDecimalPointCombo(combo);
-    combo['currentIndexChanged(int)'].connect(InputPreferences, "correctBasedOnDecimalPoint");
-    combo['currentIndexChanged(int)'].connect(InputPreferences, "updatePreview");
+    combo['currentIndexChanged(int)'].connect(InputPreferences.correctBasedOnDecimalPoint);
+    combo['currentIndexChanged(int)'].connect(InputPreferences.updatePreview);
 
     combo = pageWidget.findChild("CartesianCoordinateSeparator");
     combo.addItem(qsTr("Comma") + " ',' " + qsTr("(Default)"), ",");
     combo.addItem(qsTr("Semicolon") + " ';'", ";");
-    combo['currentIndexChanged(int)'].connect(InputPreferences, "correctBasedOnSeparator");
-    combo['currentIndexChanged(int)'].connect(InputPreferences, "updatePreview");
+    combo['currentIndexChanged(int)'].connect(InputPreferences.correctBasedOnSeparator);
+    combo['currentIndexChanged(int)'].connect(InputPreferences.updatePreview);
 
     combo = pageWidget.findChild("PolarCoordinateSeparator");
     combo.addItem(qsTr("Less Than") + " '<' " + qsTr("(Default)"), "<");
-    combo['currentIndexChanged(int)'].connect(InputPreferences, "updatePreview");
+    combo['currentIndexChanged(int)'].connect(InputPreferences.updatePreview);
 
     combo = pageWidget.findChild("RelativeCoordinatePrefix");
     var at = String.fromCharCode(64);  // @ (doxygen can't cope with an @ here)
@@ -59,10 +61,16 @@ InputPreferences.initPreferences = function(pageWidget, calledByPrefDialog, docu
     combo.addItem(qsTr("Percentage") + " '%'", "%");
     combo.addItem(qsTr("Dollar") + " '$'", "$");
     combo.addItem(qsTr("Hash") + " '#'", "#");
-    combo['currentIndexChanged(int)'].connect(InputPreferences, "updatePreview");
+    combo['currentIndexChanged(int)'].connect(InputPreferences.updatePreview);
 
     var locale = QLocale.system();
-    var dot = String.fromCharCode(locale.decimalPoint());
+    var dot;
+    if (RSettings.getQtVersion() >= 0x060000) {
+        dot = locale.decimalPoint();
+    }
+    else {
+        dot = String.fromCharCode(locale.decimalPoint());
+    }
     decimalPointCombo.currentIndex = decimalPointCombo.findData(dot);
 
     InputPreferences.updatePreview();

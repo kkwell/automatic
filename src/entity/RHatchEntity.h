@@ -28,6 +28,10 @@
 class RDocument;
 class RExporter;
 
+#ifndef RDEFAULT_MIN1
+#define RDEFAULT_MIN1 -1
+#endif
+
 /**
  * Point entity.
  *
@@ -41,6 +45,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -52,6 +57,7 @@ public:
     static RPropertyTypeId PropertyDrawOrder;
 
     static RPropertyTypeId PropertySolid;
+    static RPropertyTypeId PropertyTransparency;
 
     static RPropertyTypeId PropertyPatternName;
     static RPropertyTypeId PropertyEntityPattern;
@@ -65,14 +71,23 @@ public:
     static RPropertyTypeId PropertyVertexNY;
     static RPropertyTypeId PropertyVertexNZ;
 
+    static RPropertyTypeId PropertyLength;
+    static RPropertyTypeId PropertyTotalLength;
+    static RPropertyTypeId PropertyArea;
+    static RPropertyTypeId PropertyTotalArea;
+
 public:
     RHatchEntity(RDocument* document, const RHatchData& data);
     virtual ~RHatchEntity();
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityHatch;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RHatchEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RHatchEntity::getRtti());
     }
 
     virtual RHatchEntity* clone() const;
@@ -89,14 +104,18 @@ public:
         return data.getCustomPattern();
     }
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    void setCustomPattern(const RPattern& p) {
+        data.setCustomPattern(p);
+    }
+
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
     bool setBoundaryVector(RObject::XYZ xyz, const QVariant& value, bool condition);
     RVector setComponent(const RVector& p, double v, RObject::XYZ xyz);
 
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual void exportEntity(RExporter& e, bool preview=false, bool forceSelected=false) const;
 
@@ -168,6 +187,14 @@ public:
         data.setPatternName(n);
     }
 
+    int getTransparency() const {
+        return data.getTransparency();
+    }
+
+    void setTransparency(int t) {
+        data.setTransparency(t);
+    }
+
     void clearCustomPattern() {
         data.clearCustomPattern();
     }
@@ -176,17 +203,19 @@ public:
         return data.getLoopBoundary(index);
     }
 
-    QList<RPolyline> getBoundaryAsPolylines(double segmentLength) const {
+    QList<RPolyline> getBoundaryAsPolylines(double segmentLength = RDEFAULT_MIN1) const {
         return data.getBoundaryAsPolylines(segmentLength);
     }
 
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const {
+    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const {
         return data.getShapes(queryBox, ignoreComplex, segment);
     }
 
     virtual QList<QSharedPointer<RShape> > getExploded() const {
         return data.getExploded();
     }
+
+    virtual void setViewportContext(const RViewportData& origin);
 
 protected:
     virtual void print(QDebug dbg) const;

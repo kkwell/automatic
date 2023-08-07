@@ -93,6 +93,8 @@
     
             REcmaHelper::registerFunction(&engine, &ctor, init, "init");
             
+            REcmaHelper::registerFunction(&engine, &ctor, getRtti, "getRtti");
+            
             REcmaHelper::registerFunction(&engine, &ctor, getStaticPropertyTypeIds, "getStaticPropertyTypeIds");
             
 
@@ -108,6 +110,10 @@
             
             ctor.setProperty("PropertyProtected",
                 qScriptValueFromValue(&engine, RTextEntity::PropertyProtected),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyWorkingSet",
+                qScriptValueFromValue(&engine, RTextEntity::PropertyWorkingSet),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
             ctor.setProperty("PropertyType",
@@ -178,6 +184,10 @@
                 qScriptValueFromValue(&engine, RTextEntity::PropertyHeight),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
+            ctor.setProperty("PropertyWidth",
+                qScriptValueFromValue(&engine, RTextEntity::PropertyWidth),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
             ctor.setProperty("PropertyAngle",
                 qScriptValueFromValue(&engine, RTextEntity::PropertyAngle),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
@@ -204,6 +214,14 @@
             
             ctor.setProperty("PropertyVAlign",
                 qScriptValueFromValue(&engine, RTextEntity::PropertyVAlign),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyBackward",
+                qScriptValueFromValue(&engine, RTextEntity::PropertyBackward),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyUpsideDown",
+                qScriptValueFromValue(&engine, RTextEntity::PropertyUpsideDown),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
 
@@ -427,6 +445,45 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaTextEntity::init", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaTextEntity::getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaTextEntity::getRtti", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaTextEntity::getRtti";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RS::EntityType'
+    RS::EntityType cppResult =
+        RTextEntity::
+       getRtti();
+        // return type: RS::EntityType
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTextEntity.getRtti().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaTextEntity::getRtti", context, engine);
             return result;
         }
          QScriptValue

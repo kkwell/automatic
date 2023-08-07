@@ -59,6 +59,8 @@
  * entity to provide similar behavior (e.g. a wall might
  * behave similar like a line entity).
  *
+ * \TODO derive from RObjectData with flags for selection status etc.
+ *
  * \scriptable
  * \sharedPointerSupport
  * \ingroup core
@@ -109,19 +111,29 @@
      * \param ignoreComplex Ignore complex shapes and explode those into simple shapes
      * \param segment Split up splines into spline segments
      */</comment>
-    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getShapes</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>segment</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getShapes</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>segment</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>entityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
         <macro><name>Q_UNUSED</name><argument_list>(<argument>queryBox</argument>)</argument_list></macro>
         <macro><name>Q_UNUSED</name><argument_list>(<argument>ignoreComplex</argument>)</argument_list></macro>
         <macro><name>Q_UNUSED</name><argument_list>(<argument>segment</argument>)</argument_list></macro>
+        <macro><name>Q_UNUSED</name><argument_list>(<argument>entityIds</argument>)</argument_list></macro>
 
         <return>return <expr><call><name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+
+    <comment type="block">/**
+     * Convenience function for scripts.
+     */</comment>
+    <function><type><name><name>RObject</name>::<name>Id</name></name></type> <name>getClosestSubEntityId</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>pos</name></decl></param>, <param><decl><type><name>double</name></type> <name>range</name></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <decl_stmt><decl><type><name><name>RObject</name>::<name>Id</name></name></type> <name>ret</name></decl>;</decl_stmt>
+        <decl_stmt><decl><type><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></type> <name>shape</name> =<init> <expr><call><name>getClosestShape</name><argument_list>(<argument><expr><name>pos</name></expr></argument>, <argument><expr><name>range</name></expr></argument>, <argument><expr><name>ignoreComplex</name></expr></argument>, <argument><expr>&amp;<name>ret</name></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
+        <return>return <expr><name>ret</name></expr>;</return>
     }</block></function>
 
     <comment type="block">/**
      * \return The one shape that is part of this entity which is the
      *      closest to the given position.
      */</comment>
-    <function_decl><type><name>virtual</name> <name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></type> <name>getClosestShape</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>pos</name></decl></param>, <param><decl><type><name>double</name></type> <name>range</name> =<init> <expr><name>RNANDOUBLE</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></type> <name>getClosestShape</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>pos</name></decl></param>, <param><decl><type><name>double</name></type> <name>range</name> =<init> <expr><name>RNANDOUBLE</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name><name>RObject</name>::<name>Id</name></name>*</type> <name>subEntityId</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function><type><name>virtual</name> <name>RShape</name>*</type> <name>castToShape</name><parameter_list>()</parameter_list> <block>{
         <return>return <expr><name>NULL</name></expr>;</return>
@@ -135,6 +147,8 @@
     }</block></function>
 
     <function_decl><type><name>virtual</name> <name>RBox</name></type> <name>getBoundingBox</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>ignoreEmpty</name>=<init><expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function_decl><type><name>void</name></type> <name>copyAttributesFrom</name><parameter_list>(<param><decl><type><name>const</name> <name>REntityData</name>&amp;</type> <name>entityData</name></decl></param>, <param><decl><type><name>bool</name></type> <name>copyBlockId</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>to2D</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>setZ</name><parameter_list>(<param><decl><type><name>double</name></type> <name>z</name></decl></param>)</parameter_list>;</function_decl>
@@ -186,6 +200,20 @@
      */</comment>
     <function><type><name>virtual</name> <name>void</name></type> <name>setSelected</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list> <block>{
         <expr_stmt><expr><name>selectionStatus</name> = <name>on</name></expr>;</expr_stmt>
+    }</block></function>
+
+    <comment type="block">/**
+     * \return True if the entity is currently selected to be added to the working set.
+     */</comment>
+    <function><type><name>virtual</name> <name>bool</name></type> <name>isSelectedWorkingSet</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>selectionStatusWorkingSet</name></expr>;</return>
+    }</block></function>
+
+    <comment type="block">/**
+     * Selects or deselects this entity for addition to the current working set.
+     */</comment>
+    <function><type><name>virtual</name> <name>void</name></type> <name>setSelectedWorkingSet</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>selectionStatusWorkingSet</name> = <name>on</name></expr>;</expr_stmt>
     }</block></function>
 
     <comment type="block">/**
@@ -288,6 +316,7 @@
         <return>return <expr><name>color</name></expr>;</return>
     }</block></function>
 
+    <function_decl><type><name>virtual</name> <name>RColor</name></type> <name>getColor</name><parameter_list>(<param><decl><type><name>const</name> <name>RColor</name>&amp;</type> <name>unresolvedColor</name></decl></param>, <param><decl><type><name>const</name> <name>QStack<argument_list>&lt;<argument><name>REntity</name> *</argument>&gt;</argument_list></name>&amp;</type> <name>blockRefStack</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>virtual</name> <name>RColor</name></type> <name>getColor</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>resolve</name></decl></param>, <param><decl><type><name>const</name> <name>QStack<argument_list>&lt;<argument><name>REntity</name> *</argument>&gt;</argument_list></name>&amp;</type> <name>blockRefStack</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function><type><name>virtual</name> <name>RColor</name></type> <name>getDisplayColor</name><parameter_list>()</parameter_list> <block>{
@@ -301,7 +330,9 @@
      * snap to reference points.
      * Default implementation returns same as getReferencePoints().
      */</comment>
-    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RRefPoint</name></argument>&gt;</argument_list></name></type> <name>getInternalReferencePoints</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>ProjectionRenderingHint</name></name></type> <name>hint</name>=<init><expr><name><name>RS</name>::<name>RenderTop</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RRefPoint</name></argument>&gt;</argument_list></name></type> <name>getInternalReferencePoints</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>ProjectionRenderingHint</name></name></type> <name>hint</name>=<init><expr><name><name>RS</name>::<name>RenderTop</name></name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>subEntityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <macro><name>Q_UNUSED</name><argument_list>(<argument>subEntityIds</argument>)</argument_list></macro>
+
         <return>return <expr><call><name>getReferencePoints</name><argument_list>(<argument><expr><name>hint</name></expr></argument>)</argument_list></call></expr>;</return>
     }</block></function>
 
@@ -313,14 +344,15 @@
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RRefPoint</name></argument>&gt;</argument_list></name></type> <name>getReferencePoints</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>ProjectionRenderingHint</name></name></type> <name>hint</name>=<init><expr><name><name>RS</name>::<name>RenderTop</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <specifier>= 0</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>RVector</name></type> <name>getPointOnEntity</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getEndPoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getMiddlePoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getCenterPoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getEndPoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>subEntityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getMiddlePoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>subEntityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getCenterPoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>subEntityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getArcReferencePoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getPointsWithDistanceToEnd</name><parameter_list>(
-        <param><decl><type><name>double</name></type> <name>distance</name></decl></param>, <param><decl><type><name>int</name></type> <name>from</name> =<init> <expr><name><name>RS</name>::<name>FromAny</name></name></expr></init></decl></param>, <param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+        <param><decl><type><name>double</name></type> <name>distance</name></decl></param>, <param><decl><type><name>int</name></type> <name>from</name> =<init> <expr><name><name>RS</name>::<name>FromAny</name></name></expr></init></decl></param>, <param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>subEntityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>RVector</name></type> <name>getClosestPointOnEntity</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>point</name></decl></param>,
-        <param><decl><type><name>double</name></type> <name>range</name>=<init><expr><name>RNANDOUBLE</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>limited</name>=<init><expr><name>true</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+        <param><decl><type><name>double</name></type> <name>range</name>=<init><expr><name>RNANDOUBLE</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>limited</name>=<init><expr><name>true</name></expr></init></decl></param>, <param><decl><type><name><name>RObject</name>::<name>Id</name></name>*</type> <name>subEntityId</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
 <comment type="line">//    /**</comment>
 <comment type="line">//     * Override to disable intersection point</comment>
@@ -331,7 +363,8 @@
 
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getIntersectionPoints</name><parameter_list>(
             <param><decl><type><name>const</name> <name>REntityData</name>&amp;</type> <name>other</name></decl></param>, <param><decl><type><name>bool</name></type> <name>limited</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>same</name> =<init> <expr><name>false</name></expr></init></decl></param>,
-            <param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+            <param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>true</name></expr></init></decl></param>,
+            <param><decl><type><name>QList<argument_list>&lt;<argument><name>QPair<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>, <argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name>*</type> <name>entityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getIntersectionPoints</name><parameter_list>(
             <param><decl><type><name>const</name> <name>RShape</name>&amp;</type> <name>shape</name></decl></param>, <param><decl><type><name>bool</name></type> <name>limited</name> =<init> <expr><name>true</name></expr></init></decl></param>,
             <param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
@@ -353,15 +386,23 @@
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>intersectsWith</name><parameter_list>(<param><decl><type><name>const</name> <name>RShape</name>&amp;</type> <name>shape</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <comment type="block">/**
+     * Called when user clicks a reference point.
+     *
+     * \return True if clicking the reference point had any immediate effect.
+     */</comment>
+    <function><type><name>virtual</name> <name>bool</name></type> <name>clickReferencePoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>)</parameter_list> <block>{
+        <macro><name>Q_UNUSED</name><argument_list>(<argument>referencePoint</argument>)</argument_list></macro>
+        <return>return <expr><name>false</name></expr>;</return>
+    }</block></function>
+
+    <comment type="block">/**
      * Moves the given reference point to the given target point or does nothing
      * if this entity has no reference point as the given location.
      *
      * \return True if a reference point has been moved successfully,
      *        false otherwise.
      */</comment>
-    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>moveReferencePoint</name><parameter_list>(
-        <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>targetPoint</name></decl></param>
-    )</parameter_list> <specifier>= 0</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>moveReferencePoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>targetPoint</name></decl></param>, <param><decl><type><name><name>Qt</name>::<name>KeyboardModifiers</name></name></type> <name>modifiers</name> =<init> <expr><name><name>Qt</name>::<name>NoModifier</name></name></expr></init></decl></param>)</parameter_list> <specifier>= 0</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>move</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>offset</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>rotate</name><parameter_list>(<param><decl><type><name>double</name></type> <name>rotation</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name> =<init> <expr><name>RDEFAULT_RVECTOR</name></expr></init></decl></param>)</parameter_list>;</function_decl>
@@ -389,6 +430,7 @@
     <decl_stmt><decl><type><name>RDocument</name>*</type> <name>document</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>bool</name></type> <name>updatesEnabled</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>bool</name></type> <name>selectionStatus</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>bool</name></type> <name>selectionStatusWorkingSet</name></decl>;</decl_stmt>
     <comment type="block">/** Block auto updates is true during imports, undo and redo. */</comment>
     <decl_stmt><decl><type><name>bool</name></type> <name>autoUpdatesBlocked</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>int</name></type> <name>drawOrder</name></decl>;</decl_stmt>

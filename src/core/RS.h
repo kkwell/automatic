@@ -22,10 +22,48 @@
 
 #include "core_global.h"
 
+#include <QApplication>
+#include <QDebug>
+#include <QEasingCurve>
 #include <QPair>
 #include <QString>
 #include <QStringList>
+//#include <QTextCodec>
 #include <QVariant>
+#include <QMetaType>
+#include <QTextCharFormat>
+
+#if QT_VERSION >= 0x060000
+#include <QScreen>
+#include <QPageLayout>
+#else
+#include <QPrinter>
+#endif
+
+// Qt < 5.10
+#if QT_VERSION < 0x050A00
+#  ifdef ssize_t
+#    define qsizetype ssize_t
+#  else
+#    define qsizetype int
+#  endif
+#endif
+
+#if QT_VERSION >= 0x050000
+#  include <QRegularExpression>
+#  include <QGuiApplication>
+#else
+#  include <QRegExp>
+#  ifndef QRegularExpression
+#    define QRegularExpression QRegExp
+#  endif
+#endif
+
+#if QT_VERSION >= 0x060000
+#  ifndef qSort
+#    define qSort std::sort
+#  endif
+#endif
 
 class RVector;
 class RPropertyAttributes;
@@ -44,6 +82,64 @@ class RPropertyAttributes;
 #  define ROS_POSIX
 #endif
 
+#define REASING_LINEAR QEasingCurve::Linear
+#define REASING_INQUAD QEasingCurve::InQuad
+#define REASING_OUTQUAD QEasingCurve::OutQuad
+#define REASING_INOUTQUAD QEasingCurve::InOutQuad
+#define REASING_OUTINQUAD QEasingCurve::OutInQuad
+#define REASING_INCUBIC QEasingCurve::InCubic
+#define REASING_OUTCUBIC QEasingCurve::OutCubic
+#define REASING_INOUTCUBIC QEasingCurve::InOutCubic
+#define REASING_OUTINCUBIC QEasingCurve::OutInCubic
+#define REASING_INQUART QEasingCurve::InQuart
+#define REASING_OUTQUART QEasingCurve::OutQuart
+#define REASING_INOUTQUART QEasingCurve::InOutQuart
+#define REASING_OUTINQUART QEasingCurve::OutInQuart
+#define REASING_INQUINT QEasingCurve::InQuint
+#define REASING_OUTQUINT QEasingCurve::OutQuint
+#define REASING_INOUTQUINT QEasingCurve::InOutQuint
+#define REASING_OUTINQUINT QEasingCurve::OutInQuint
+#define REASING_INSINE QEasingCurve::InSine
+#define REASING_OUTSINE QEasingCurve::OutSine
+#define REASING_INOUTSINE QEasingCurve::InOutSine
+#define REASING_OUTINSINE QEasingCurve::OutInSine
+#define REASING_INEXPO QEasingCurve::InExpo
+#define REASING_OUTEXPO QEasingCurve::OutExpo
+#define REASING_INOUTEXPO QEasingCurve::InOutExpo
+#define REASING_OUTINEXPO QEasingCurve::OutInExpo
+#define REASING_INCIRC QEasingCurve::InCirc
+#define REASING_OUTCIRC QEasingCurve::OutCirc
+#define REASING_INOUTCIRC QEasingCurve::InOutCirc
+#define REASING_OUTINCIRC QEasingCurve::OutInCirc
+#define REASING_INELASTIC QEasingCurve::InElastic
+#define REASING_OUTELASTIC QEasingCurve::OutElastic
+#define REASING_INOUTELASTIC QEasingCurve::InOutElastic
+#define REASING_OUTINELASTIC QEasingCurve::OutInElastic
+#define REASING_INBACK QEasingCurve::InBack
+#define REASING_OUTBACK QEasingCurve::OutBack
+#define REASING_INOUTBACK QEasingCurve::InOutBack
+#define REASING_OUTINBACK QEasingCurve::OutInBack
+#define REASING_INBOUNCE QEasingCurve::InBounce
+#define REASING_OUTBOUNCE QEasingCurve::OutBounce
+#define REASING_INOUTBOUNCE QEasingCurve::InOutBounce
+#define REASING_OUTINBOUNCE QEasingCurve::OutInBounce
+//#define REASING_INCURVE QEasingCurve::InCurve
+//#define REASING_OUTCURVE QEasingCurve::OutCurve
+//#define REASING_SINECURVE QEasingCurve::SineCurve
+//#define REASING_COSINECURVE QEasingCurve::CosineCurve
+//#define REASING_BEZIERSPLINE QEasingCurve::BezierSpline
+//#define REASING_TCBSPLINE QEasingCurve::TCBSpline
+
+#if QT_VERSION < 0x050000
+class QRegularExpressionMatch {
+};
+/*
+#  ifndef QRegularExpressionMatch
+#    define QRegularExpressionMatch int
+#  endif
+*/
+#endif
+
 /**
  * Class namespace for various global enums.
  *
@@ -57,6 +153,66 @@ class RPropertyAttributes;
  */
 class QCADCORE_EXPORT RS {
 public:
+
+#if QT_VERSION >= 0x060000
+    // handled as include to avoid inclusion in Qt 4-5 ECMAScript API:
+    #include "RSMetaType.h"
+#else
+    enum MetaType {
+        Bool = QVariant::Bool,
+        Char = QVariant::Char,
+        Double = QVariant::Double,
+        Int = QVariant::Int,
+        UnknownType = QVariant::Invalid,
+        LongLong = QVariant::LongLong,
+        BitArray = QVariant::BitArray,
+        Bitmap = QVariant::Bitmap,
+        Brush = QVariant::Brush,
+        ByteArray = QVariant::ByteArray,
+        Color = QVariant::Color,
+        Cursor = QVariant::Cursor,
+        Date = QVariant::Date,
+        DateTime = QVariant::DateTime,
+        EasingCurve = QVariant::EasingCurve,
+        Font = QVariant::Font,
+        Hash = QVariant::Hash,
+        Icon = QVariant::Icon,
+        Image = QVariant::Image,
+        KeySequence = QVariant::KeySequence,
+        Line = QVariant::Line,
+        LineF = QVariant::LineF,
+        List = QVariant::List,
+        Locale = QVariant::Locale,
+        Map = QVariant::Map,
+        Matrix4x4 = QVariant::Matrix4x4,
+        Palette = QVariant::Palette,
+        Pen = QVariant::Pen,
+        Pixmap = QVariant::Pixmap,
+        Point = QVariant::Point,
+        PointF = QVariant::PointF,
+        Polygon = QVariant::Polygon,
+        Rect = QVariant::Rect,
+        RectF = QVariant::RectF,
+        Region = QVariant::Region,
+        Size = QVariant::Size,
+        SizeF = QVariant::SizeF,
+        SizePolicy = QVariant::SizePolicy,
+        String = QVariant::String,
+        StringList = QVariant::StringList,
+        TextFormat = QVariant::TextFormat,
+        TextLength = QVariant::TextLength,
+        Time = QVariant::Time,
+        Transform = QVariant::Transform,
+        Url = QVariant::Url,
+        Vector2D = QVariant::Vector2D,
+        Vector3D = QVariant::Vector3D,
+        Vector4D = QVariant::Vector4D,
+        Quaternion = QVariant::Quaternion,
+        UInt = QVariant::UInt,
+        ULongLong = QVariant::ULongLong,
+        UserType = QVariant::UserType
+    };
+#endif
 
     /**
      * Message type for debugging and displaying user messages.
@@ -77,16 +233,19 @@ public:
         ObjectAll,
         ObjectUnknown,      /**< Unknown object */
 
-        ObjectBlock,
-        ObjectLayer,
         ObjectLinetype,
-        ObjectView,
+        ObjectLayer,
+        ObjectBlock,
         ObjectLayout,
+        ObjectLayerState,
+        ObjectView,
         ObjectUcs,
         ObjectDocumentVariable,
+        ObjectDimStyle,
 
         EntityAll,          /**< All entities (for filters) */
         EntityUnknown,      /**< Unknown entity */
+
         EntityAttribute,    /**< Block attribute */
         EntityAttributeDefinition,     /**< Block attribute definition */
         EntityBlockRef,     /**< Block reference */
@@ -112,12 +271,17 @@ public:
         EntityDimRadial,    /**< Radial Dimension */
         EntityDimDiametric, /**< Diametric Dimension */
         EntityDimAngular,   /**< Angular Dimension */
+        EntityDimAngular2L, /**< Angular Dimension from 2 lines */
+        EntityDimAngular3P, /**< Angular Dimension from 3 points */
+        EntityDimArcLength, /**< Arc Length Dimension */
         EntityDimOrdinate,  /**< Ordinate Dimension */
         EntityHatch,        /**< Hatch */
         EntityImage,        /**< Image */
         EntityLeader,       /**< Leader */
         EntitySpline,       /**< Spline */
         EntityViewport,     /**< Viewport */
+        EntityTolerance,    /**< Tolerance */
+
         EntityUser          /**< User defined entity. Use this to identify
                                  entities that are added in a separate library
                                  and resort to C++ RTTI for RTTI. */
@@ -136,7 +300,16 @@ public:
     };
 
     /**
-     * Side used for side of a point relativ to an entity
+     * Orthogonal mode, used for snap restrictions.
+     */
+    enum OrthoMode {
+        OrthoVertical,
+        OrthoHorizonal,
+        Orthogonal
+    };
+
+    /**
+     * Side used for side of a point relative to an entity
      * (right hand or left hand side)
      */
     enum Side {
@@ -208,6 +381,7 @@ public:
      * Projection type for isometric projections.
      */
     enum IsoProjectionType {
+        NoProjection =  0x00000000,      //!< No projection (2d x/y)
         Top =           0x00000001,      //!< Top projection (x/y)
         Bottom =        0x00000002,      //!< Bottom projection (x/y)
         Left =          0x00000004,      //!< Front left projection (x/z)
@@ -337,7 +511,7 @@ public:
         CHAMFERA,
         CHAMFERB,
         CHAMFERC,
-        CHAMFERD,
+        CHAMFERD,  // 10
         CLAYER,
         CMLJUST,
         CMLSCALE,
@@ -348,7 +522,7 @@ public:
         DIMALTF,
         DIMALTRND,
         DIMALTTD,
-        DIMALTTZ,
+        DIMALTTZ,  // 20
         DIMALTU,
         DIMALTZ,
         DIMAPOST,
@@ -360,7 +534,7 @@ public:
         DIMAZIN,
         DIMBLK,
         DIMBLK1,
-        DIMBLK2,
+        DIMBLK2,  // 30
         DIMCEN,
         DIMCLRD,
         DIMCLRE,
@@ -372,7 +546,7 @@ public:
         /** Decimal separator in dimensions */
         DIMDSEP,
         DIMEXE,
-        DIMEXO,
+        DIMEXO,  // 40
         DIMFRAC,
         /** Distance between dimension text and dimension lines, negative for box */
         DIMGAP,
@@ -385,7 +559,7 @@ public:
         DIMLUNIT,
         DIMLWD,
         DIMLWE,
-        DIMPOST,
+        DIMPOST,  // 50
         DIMRND,
         DIMSAH,
         DIMSCALE,
@@ -396,7 +570,7 @@ public:
         DIMSOXD,
         /** Vertical position of dimension label */
         DIMTAD,
-        DIMTDEC,
+        DIMTDEC,  // 60
         DIMTFAC,
         DIMTIH,
         DIMTIX,
@@ -407,7 +581,7 @@ public:
         DIMTOLJ,
         DIMTP,
         /** Archtick size or 0 for arrows */
-        DIMTSZ,
+        DIMTSZ,  // 70
         DIMTVP,
         DIMTXSTY,
         /** Dimension text size */
@@ -419,7 +593,7 @@ public:
         DISPSILH,
         DWGCODEPAGE,
         DRAWORDERCTL,
-        ELEVATION,
+        ELEVATION,  // 80
         EXTMAX,
         EXTMIN,
         FACETRES,
@@ -498,7 +672,16 @@ public:
         VISRETAIN,
         WORLDVIEW,
         MaxKnownVariable = WORLDVIEW,
-        INVALID = -1
+        //QCADARCHTICK,
+        INVALID = -1,
+    };
+
+    enum KnownVariableType {
+        VarTypeBool = 1,
+        VarTypeInt = 2,
+        VarTypeDouble = 3,
+        VarTypeColor = 4,
+        VarTypeUnknown = -1
     };
 
     enum BooleanOperation {
@@ -537,16 +720,70 @@ public:
         EndOpenSingle
     };
 
+    enum Easing {
+        Linear = REASING_LINEAR,
+        InQuad = REASING_INQUAD,
+        OutQuad = REASING_OUTQUAD,
+        InOutQuad = REASING_INOUTQUAD,
+        OutInQuad = REASING_OUTINQUAD,
+        InCubic = REASING_INCUBIC,
+        OutCubic = REASING_OUTCUBIC,
+        InOutCubic = REASING_INOUTCUBIC,
+        OutInCubic = REASING_OUTINCUBIC,
+        InQuart = REASING_INQUART,
+        OutQuart = REASING_OUTQUART,
+        InOutQuart = REASING_INOUTQUART,
+        OutInQuart = REASING_OUTINQUART,
+        InQuint = REASING_INQUINT,
+        OutQuint = REASING_OUTQUINT,
+        InOutQuint = REASING_INOUTQUINT,
+        OutInQuint = REASING_OUTINQUINT,
+        InSine = REASING_INSINE,
+        OutSine = REASING_OUTSINE,
+        InOutSine = REASING_INOUTSINE,
+        OutInSine = REASING_OUTINSINE,
+        InExpo = REASING_INEXPO,
+        OutExpo = REASING_OUTEXPO,
+        InOutExpo = REASING_INOUTEXPO,
+        OutInExpo = REASING_OUTINEXPO,
+        InCirc = REASING_INCIRC,
+        OutCirc = REASING_OUTCIRC,
+        InOutCirc = REASING_INOUTCIRC,
+        OutInCirc = REASING_OUTINCIRC,
+        InElastic = REASING_INELASTIC,
+        OutElastic = REASING_OUTELASTIC,
+        InOutElastic = REASING_INOUTELASTIC,
+        OutInElastic = REASING_OUTINELASTIC,
+        InBack = REASING_INBACK,
+        OutBack = REASING_OUTBACK,
+        InOutBack = REASING_INOUTBACK,
+        OutInBack = REASING_OUTINBACK,
+        InBounce = REASING_INBOUNCE,
+        OutBounce = REASING_OUTBOUNCE,
+        InOutBounce = REASING_INOUTBOUNCE,
+        OutInBounce = REASING_OUTINBOUNCE,
+        //InCurve = REASING_INCURVE,
+        //OutCurve = REASING_OUTCURVE,
+        //SineCurve = REASING_SINECURVE,
+        //CosineCurve = REASING_COSINECURVE,
+        //BezierSpline = REASING_BEZIERSPLINE,
+        //TCBSpline = REASING_TCBSPLINE
+    };
+
 public:
-    static bool compare(const QVariant& v1, const QVariant& v2);
+    static bool compare(const QVariant& v1, const QVariant& v2, bool noTolerance = false);
     static bool compare(const QPair<QVariant, RPropertyAttributes>& p1,
-                        const QPair<QVariant, RPropertyAttributes>& p2);
+                        const QPair<QVariant, RPropertyAttributes>& p2,
+                        bool noTolerance = false);
     static int getCpuCores();
+    static int getIdealThreadCount();
     static QString getBuildCpuArchitecture();
 
     static QString getHostId();
     static QString getSystemId();
     static QString getWindowManagerId();
+
+    static bool showInFileManager(const QString& filePaths);
 
     static QStringList getDirectoryList(const QString& subDirectory);
     static QStringList getFileList(const QString& subDirectory,
@@ -573,11 +810,128 @@ public:
         return T();
     }
 
+    static QStringList sortAlphanumerical(const QStringList& list);
+    static QStringList compareChunkify(const QString& s);
+    static int compareAlphanumerical(const QString& s1, const QString& s2);
+    static bool lessThanAlphanumerical(const QString& s1, const QString& s2);
+
+    // workaround for Qt 6 deprecating QList::toSet / QSet::toList:
+    template<class T>
+    static QList<T> unique(const QList<T>& list) {
+#if QT_VERSION >= 0x060000
+        return RS::toList<T>(RS::toSet<T>(list));
+#else
+        return list.toSet().toList();
+#endif
+    }
+
+    // workaround for Qt 6 deprecating QList::toSet:
+    template<class T>
+    static QSet<T> toSet(const QList<T>& list) {
+#if QT_VERSION >= 0x060000
+        return QSet<T>(list.begin(), list.end());
+#else
+        return list.toSet();
+#endif
+    }
+
+    // workaround for Qt 6 deprecating QSet::toList:
+    template<class T>
+    static QList<T> toList(const QSet<T>& set) {
+#if QT_VERSION >= 0x060000
+        return QList<T>(set.begin(), set.end());
+#else
+        return set.toList();
+#endif
+    }
+
+    static QString getFontFamily(const QTextCharFormat& format) {
+#if QT_VERSION >= 0x060000
+        // note: QTextCharFormat::fontFamily is deprecated and broken in Qt 6:
+        QVariant v = format.fontFamilies();
+        if (v.isValid()) {
+            QStringList l = v.toStringList();
+            if (!l.isEmpty()) {
+                return l.first();
+            }
+        }
+        return "";
+#else
+        return format.fontFamily();
+#endif
+    }
+
+    static int getPageSizeId(const QString& name);
+    static QSizeF getPageSize(const QString& name);
+
+    // workarounds for Qt 6 QRegExp changes:
+    /**
+     * \nonscriptable
+     */
+    static bool exactMatch(const QRegularExpression& rx, const QString& string);
+    /**
+     * \nonscriptable
+     */
+    static bool exactMatch(const QRegularExpression& rx, QRegularExpressionMatch& match, const QString& string);
+    /**
+     * \nonscriptable
+     */
+    static bool exactMatch(const QString& rxStr, const QString& string);
+    /**
+     * \nonscriptable
+     */
+    static int indexIn(const QRegularExpression& rx, QRegularExpressionMatch& match, const QString& string, int from = 0);
+    /**
+     * \nonscriptable
+     */
+    static QString captured(const QRegularExpression& rx, const QRegularExpressionMatch& match, int nth = 0);
+    /**
+     * \nonscriptable
+     */
+    static int matchedLength(const QRegularExpression& rx, const QRegularExpressionMatch& match);
+    /**
+     * \nonscriptable
+     */
+    static QRegularExpression createRegEpCI(const QString& str, bool regExp2 = false);
+
+    static void setUtf8Codec(QTextStream& ts);
+
+    static QString escape(const QString& plain);
+
+    static int getScreenCount();
+
+    static QSize getAvailableGeometry(int screen);
+
+    /**
+     * \nonscriptable
+     */
+    static QString convert(const QByteArray& str, const QString& codecName);
+
+    static int getMetaType(const QVariant& v) {
+#if QT_VERSION >= 0x060000
+        return v.metaType().id();
+#else
+        return v.type();
+#endif
+    }
+
     static const double PointTolerance;
     static const double AngleTolerance;
+
+    static const Qt::MouseButton MiddleButton;
+
+#if QT_VERSION >= 0x060000
+    static const QPageLayout::Orientation Portrait;
+    static const QPageLayout::Orientation Landscape;
+#else
+    static const QPrinter::Orientation Portrait;
+    static const QPrinter::Orientation Landscape;
+#endif
 };
 
 Q_DECLARE_METATYPE(RS*)
+Q_DECLARE_METATYPE(RS::MetaType)
+Q_DECLARE_METATYPE(RS::MetaType*)
 Q_DECLARE_METATYPE(RS::AngleFormat)
 Q_DECLARE_METATYPE(RS::AngleFormat*)
 Q_DECLARE_METATYPE(RS::AngleUnit)
@@ -589,8 +943,12 @@ Q_DECLARE_METATYPE(RS::HAlign)
 Q_DECLARE_METATYPE(RS::HAlign*)
 Q_DECLARE_METATYPE(RS::IsoProjectionType)
 Q_DECLARE_METATYPE(RS::IsoProjectionType*)
+Q_DECLARE_METATYPE(RS::OrthoMode)
+Q_DECLARE_METATYPE(RS::OrthoMode*)
 Q_DECLARE_METATYPE(RS::KnownVariable)
 Q_DECLARE_METATYPE(RS::KnownVariable*)
+Q_DECLARE_METATYPE(RS::KnownVariableType)
+Q_DECLARE_METATYPE(RS::KnownVariableType*)
 Q_DECLARE_METATYPE(RS::LinearFormat)
 Q_DECLARE_METATYPE(RS::LinearFormat*)
 Q_DECLARE_METATYPE(RS::MessageType)
@@ -612,6 +970,8 @@ Q_DECLARE_METATYPE(RS::FillType)
 Q_DECLARE_METATYPE(RS::Orientation)
 Q_DECLARE_METATYPE(RS::JoinType)
 Q_DECLARE_METATYPE(RS::EndType)
+Q_DECLARE_METATYPE(RS::Easing)
+Q_DECLARE_METATYPE(RS::Easing*)
 Q_DECLARE_METATYPE(QList<RS::EntityType>)
 
 #endif

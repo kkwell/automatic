@@ -44,6 +44,7 @@
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RXLine.h"</cpp:file></cpp:include>
 
 <class_decl>class <name>RGraphicsViewImage</name>;</class_decl>
+<class_decl>class <name>RTriangle</name>;</class_decl>
 
 <cpp:ifndef>#<cpp:directive>ifndef</cpp:directive> <name>RDEFAULT_MIN1</name></cpp:ifndef>
 <cpp:define>#<cpp:directive>define</cpp:directive> <name>RDEFAULT_MIN1</name> -1</cpp:define>
@@ -73,8 +74,14 @@
 
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>clearPreview</name><parameter_list>()</parameter_list>;</function_decl>
 
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportEntities</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>allBlocks</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>undone</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>invisible</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>exportEntitiesThread</name><parameter_list>(<param><decl><type><name>int</name></type> <name>threadId</name></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>REntity</name>::<name>Id</name></name></argument>&gt;</argument_list></name>&amp;</type> <name>list</name></decl></param>, <param><decl><type><name>int</name></type> <name>start</name></decl></param>, <param><decl><type><name>int</name></type> <name>end</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>exportEntityThread</name><parameter_list>(<param><decl><type><name>int</name></type> <name>threadId</name></decl></param>, <param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>id</name></decl></param>)</parameter_list>;</function_decl>
+
     <function_decl><type><name>bool</name></type> <name>beginPath</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>endPath</name><parameter_list>()</parameter_list>;</function_decl>
+
+    <function_decl><type><name>void</name></type> <name>transformAndApplyPatternPath</name><parameter_list>(<param><decl><type><name>RPainterPath</name>&amp;</type> <name>path</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>unexportEntity</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>)</parameter_list>;</function_decl>
 
@@ -89,31 +96,43 @@
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportArcSegment</name><parameter_list>(<param><decl><type><name>const</name> <name>RArc</name>&amp;</type> <name>arc</name></decl></param>, <param><decl><type><name>bool</name></type> <name>allowForZeroLength</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportLineSegment</name><parameter_list>(<param><decl><type><name>const</name> <name>RLine</name>&amp;</type> <name>line</name></decl></param>, <param><decl><type><name>double</name></type> <name>angle</name> =<init> <expr><name>RNANDOUBLE</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportXLine</name><parameter_list>(<param><decl><type><name>const</name> <name>RXLine</name>&amp;</type> <name>xLine</name></decl></param>)</parameter_list>;</function_decl>
+
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportRay</name><parameter_list>(<param><decl><type><name>const</name> <name>RRay</name>&amp;</type> <name>ray</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportTriangle</name><parameter_list>(<param><decl><type><name>const</name> <name>RTriangle</name>&amp;</type> <name>triangle</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportRectangle</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>p1</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>p2</name></decl></param>)</parameter_list>;</function_decl>
 
-    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportPainterPaths</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RPainterPath</name></argument>&gt;</argument_list></name>&amp;</type> <name>paths</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportPainterPaths</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RPainterPath</name></argument>&gt;</argument_list></name>&amp;</type> <name>paths</name></decl></param>, <param><decl><type><name>double</name></type> <name>z</name> =<init> <expr>0.0</expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportImage</name><parameter_list>(<param><decl><type><name>const</name> <name>RImageData</name>&amp;</type> <name>image</name></decl></param>, <param><decl><type><name>bool</name></type> <name>forceSelected</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RPainterPath</name></argument>&gt;</argument_list></name></type> <name>exportText</name><parameter_list>(<param><decl><type><name>const</name> <name>RTextBasedData</name>&amp;</type> <name>text</name></decl></param>, <param><decl><type><name>bool</name></type> <name>forceSelected</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportClipRectangle</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>clipRectangles</name></decl></param>, <param><decl><type><name>bool</name></type> <name>forceSelected</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportTransform</name><parameter_list>(<param><decl><type><name>const</name> <name>RTransform</name>&amp;</type> <name>t</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>exportEndTransform</name><parameter_list>()</parameter_list>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>double</name></type> <name>getLineTypePatternScale</name><parameter_list>(<param><decl><type><name>const</name> <name>RLinetypePattern</name>&amp;</type> <name>p</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>highlightEntity</name><parameter_list>(<param><decl><type><name>REntity</name>&amp;</type> <name>entity</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>void</name></type> <name>deleteDrawables</name><parameter_list>()</parameter_list>;</function_decl>
-    <function_decl><type><name>QList<argument_list>&lt;<argument><name>RGraphicsSceneDrawable</name></argument>&gt;</argument_list></name></type> <name>getDrawables</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>)</parameter_list>;</function_decl>
+
+    <comment type="block">/**
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>QList<argument_list>&lt;<argument><name>RGraphicsSceneDrawable</name></argument>&gt;</argument_list></name>*</type> <name>getDrawables</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>bool</name></type> <name>hasPreview</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>QList<argument_list>&lt;<argument><name><name>REntity</name>::<name>Id</name></name></argument>&gt;</argument_list></name></type> <name>getPreviewEntityIds</name><parameter_list>()</parameter_list>;</function_decl>
-    <function_decl><type><name>QList<argument_list>&lt;<argument><name>RGraphicsSceneDrawable</name></argument>&gt;</argument_list></name></type> <name>getPreviewDrawables</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>)</parameter_list>;</function_decl>
+
+    <comment type="block">/**
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>QList<argument_list>&lt;<argument><name>RGraphicsSceneDrawable</name></argument>&gt;</argument_list></name>*</type> <name>getPreviewDrawables</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>)</parameter_list>;</function_decl>
+
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>addToPreview</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name>RGraphicsSceneDrawable</name></argument>&gt;</argument_list></name>&amp;</type> <name>drawables</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>addToPreview</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>, <param><decl><type><name>RGraphicsSceneDrawable</name>&amp;</type> <name>drawable</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>addTextToPreview</name><parameter_list>(<param><decl><type><name>const</name> <name>RTextBasedData</name>&amp;</type> <name>text</name></decl></param>)</parameter_list>;</function_decl>
 
-    <function_decl><type><name>bool</name></type> <name>hasClipRectangleFor</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>, <param><decl><type><name>bool</name></type> <name>preview</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
-    <function_decl><type><name>RBox</name></type> <name>getClipRectangle</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>, <param><decl><type><name>bool</name></type> <name>preview</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>bool</name></type> <name>hasClipRectangleFor</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>, <param><decl><type><name>bool</name></type> <name>preview</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>RBox</name></type> <name>getClipRectangle</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>, <param><decl><type><name>bool</name></type> <name>preview</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>void</name></type> <name>addDrawable</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>entityId</name></decl></param>, <param><decl><type><name>RGraphicsSceneDrawable</name>&amp;</type> <name>drawable</name></decl></param>, <param><decl><type><name>bool</name></type> <name>draft</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>preview</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
 
@@ -146,6 +165,11 @@
 
     <decl_stmt><decl><type><name>bool</name></type> <name>decorating</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>bool</name></type> <name>screenBasedLinetypesOverride</name></decl>;</decl_stmt>
+
+    <decl_stmt><decl><type><name>QStack<argument_list>&lt;<argument><name>QTransform</name></argument>&gt;</argument_list></name></type> <name>transformStack</name></decl>;</decl_stmt>
+
+
+    <decl_stmt><decl><type><name>QList<argument_list>&lt;<argument><name>RGraphicsSceneQt</name>*</argument>&gt;</argument_list></name></type> <name>threadScenes</name></decl>;</decl_stmt>
 </private>}</block>;</class>
 
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RGraphicsSceneQt*</argument>)</argument_list></macro>

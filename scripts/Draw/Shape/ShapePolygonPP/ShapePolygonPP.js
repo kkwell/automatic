@@ -55,6 +55,8 @@ ShapePolygonPP.prototype.setState = function(state) {
     var appWin = RMainWindowQt.getMainWindow();
     switch (this.state) {
     case ShapePolygonPP.State.SettingCorner1:
+        this.corner1 = undefined;
+        this.corner2 = undefined;
         var trCorner1 = qsTr("First corner");
         this.setCommandPrompt(trCorner1);
         this.setLeftMouseTip(trCorner1);
@@ -65,7 +67,7 @@ ShapePolygonPP.prototype.setState = function(state) {
         var trCorner2 = qsTr("Corner point");
         this.setCommandPrompt(trCorner2);
         this.setLeftMouseTip(trCorner2);
-        this.setRightMouseTip(qsTr("Done"));
+        this.setRightMouseTip(EAction.trDone);
         break;
     }
 

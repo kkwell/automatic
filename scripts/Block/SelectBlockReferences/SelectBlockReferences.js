@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Block.js");
+include("scripts/Block/Block.js");
 include("scripts/Widgets/BlockList/BlockList.js");
  
 /**
@@ -37,13 +37,7 @@ SelectBlockReferences.prototype.beginEvent = function() {
     var doc = this.getDocument();
     var di = this.getDocumentInterface();
 
-    var blockList = EAction.getMainWindow().findChild("BlockList");
-    if (isNull(blockList)) {
-        this.terminate();
-        return;
-    }
-
-    var item = blockList.currentItem();
+    var item = BlockList.getActiveItem();
     if (isNull(item)) {
         this.terminate();
         return;

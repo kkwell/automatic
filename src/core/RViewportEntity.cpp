@@ -58,33 +58,33 @@ RViewportEntity::~RViewportEntity() {
 }
 
 void RViewportEntity::init() {
-    RViewportEntity::PropertyCustom.generateId(typeid(RViewportEntity), RObject::PropertyCustom);
-    RViewportEntity::PropertyHandle.generateId(typeid(RViewportEntity), RObject::PropertyHandle);
-    RViewportEntity::PropertyType.generateId(typeid(RViewportEntity), REntity::PropertyType);
-    RViewportEntity::PropertyBlock.generateId(typeid(RViewportEntity), REntity::PropertyBlock);
-    RViewportEntity::PropertyLayer.generateId(typeid(RViewportEntity), REntity::PropertyLayer);
-    RViewportEntity::PropertyLinetype.generateId(typeid(RViewportEntity), REntity::PropertyLinetype);
-    RViewportEntity::PropertyLinetypeScale.generateId(typeid(RViewportEntity), REntity::PropertyLinetypeScale);
-    RViewportEntity::PropertyLineweight.generateId(typeid(RViewportEntity), REntity::PropertyLineweight);
-    RViewportEntity::PropertyColor.generateId(typeid(RViewportEntity), REntity::PropertyColor);
-    RViewportEntity::PropertyDisplayedColor.generateId(typeid(RViewportEntity), REntity::PropertyDisplayedColor);
-    RViewportEntity::PropertyDrawOrder.generateId(typeid(RViewportEntity), REntity::PropertyDrawOrder);
+    RViewportEntity::PropertyCustom.generateId(RViewportEntity::getRtti(), RObject::PropertyCustom);
+    RViewportEntity::PropertyHandle.generateId(RViewportEntity::getRtti(), RObject::PropertyHandle);
+    RViewportEntity::PropertyType.generateId(RViewportEntity::getRtti(), REntity::PropertyType);
+    RViewportEntity::PropertyBlock.generateId(RViewportEntity::getRtti(), REntity::PropertyBlock);
+    RViewportEntity::PropertyLayer.generateId(RViewportEntity::getRtti(), REntity::PropertyLayer);
+    RViewportEntity::PropertyLinetype.generateId(RViewportEntity::getRtti(), REntity::PropertyLinetype);
+    RViewportEntity::PropertyLinetypeScale.generateId(RViewportEntity::getRtti(), REntity::PropertyLinetypeScale);
+    RViewportEntity::PropertyLineweight.generateId(RViewportEntity::getRtti(), REntity::PropertyLineweight);
+    RViewportEntity::PropertyColor.generateId(RViewportEntity::getRtti(), REntity::PropertyColor);
+    RViewportEntity::PropertyDisplayedColor.generateId(RViewportEntity::getRtti(), REntity::PropertyDisplayedColor);
+    RViewportEntity::PropertyDrawOrder.generateId(RViewportEntity::getRtti(), REntity::PropertyDrawOrder);
 
-    RViewportEntity::PropertyCenterX.generateId(typeid(RViewportEntity), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RViewportEntity::PropertyCenterY.generateId(typeid(RViewportEntity), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RViewportEntity::PropertyCenterZ.generateId(typeid(RViewportEntity), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Z"));
-    RViewportEntity::PropertyWidth.generateId(typeid(RViewportEntity), "", QT_TRANSLATE_NOOP("REntity", "Width"));
-    RViewportEntity::PropertyHeight.generateId(typeid(RViewportEntity), "", QT_TRANSLATE_NOOP("REntity", "Height"));
-    RViewportEntity::PropertyScale.generateId(typeid(RViewportEntity), "", QT_TRANSLATE_NOOP("REntity", "Scale"));
-    RViewportEntity::PropertyRotation.generateId(typeid(RViewportEntity), "", QT_TRANSLATE_NOOP("REntity", "Rotation"));
-    RViewportEntity::PropertyOn.generateId(typeid(RViewportEntity), "", QT_TRANSLATE_NOOP("REntity", "On"));
-    RViewportEntity::PropertyViewCenterX.generateId(typeid(RViewportEntity), QT_TRANSLATE_NOOP("REntity", "View Center"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RViewportEntity::PropertyViewCenterY.generateId(typeid(RViewportEntity), QT_TRANSLATE_NOOP("REntity", "View Center"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RViewportEntity::PropertyViewTargetX.generateId(typeid(RViewportEntity), QT_TRANSLATE_NOOP("REntity", "View Target"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RViewportEntity::PropertyViewTargetY.generateId(typeid(RViewportEntity), QT_TRANSLATE_NOOP("REntity", "View Target"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RViewportEntity::PropertyViewTargetZ.generateId(typeid(RViewportEntity), QT_TRANSLATE_NOOP("REntity", "View Target"), QT_TRANSLATE_NOOP("REntity", "Z"));
+    RViewportEntity::PropertyCenterX.generateId(RViewportEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyCenterY.generateId(RViewportEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyCenterZ.generateId(RViewportEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Z"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyWidth.generateId(RViewportEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Width"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyHeight.generateId(RViewportEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Height"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyScale.generateId(RViewportEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Scale"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyRotation.generateId(RViewportEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Rotation"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyOn.generateId(RViewportEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "On"));
+    RViewportEntity::PropertyViewCenterX.generateId(RViewportEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "View Center"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyViewCenterY.generateId(RViewportEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "View Center"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyViewTargetX.generateId(RViewportEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "View Target"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyViewTargetY.generateId(RViewportEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "View Target"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RViewportEntity::PropertyViewTargetZ.generateId(RViewportEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "View Target"), QT_TRANSLATE_NOOP("REntity", "Z"), false, RPropertyAttributes::Geometry);
 
-    RViewportEntity::PropertyOverall.generateId(typeid(RViewportEntity), "", QT_TRANSLATE_NOOP("REntity", "Overall"));
+    RViewportEntity::PropertyOverall.generateId(RViewportEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Overall"));
 }
 
 bool RViewportEntity::setProperty(RPropertyTypeId propertyTypeId,
@@ -114,7 +114,8 @@ bool RViewportEntity::setProperty(RPropertyTypeId propertyTypeId,
 }
 
 QPair<QVariant, RPropertyAttributes> RViewportEntity::getProperty(
-        RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes) {
+        RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes, bool showOnRequest) {
+
     if (propertyTypeId == PropertyCenterX) {
         return qMakePair(QVariant(data.position.x), RPropertyAttributes());
     } else if (propertyTypeId == PropertyCenterY) {
@@ -126,7 +127,7 @@ QPair<QVariant, RPropertyAttributes> RViewportEntity::getProperty(
     } else if (propertyTypeId == PropertyHeight) {
         return qMakePair(QVariant(data.height), RPropertyAttributes());
     } else if (propertyTypeId == PropertyScale) {
-        return qMakePair(QVariant(data.scaleFactor), RPropertyAttributes());
+        return qMakePair(QVariant(data.scaleFactor), RPropertyAttributes(RPropertyAttributes::Scale));
     } else if (propertyTypeId == PropertyRotation) {
         return qMakePair(QVariant(data.rotation), RPropertyAttributes(RPropertyAttributes::Angle));
     } else if (propertyTypeId == PropertyOn) {
@@ -144,7 +145,7 @@ QPair<QVariant, RPropertyAttributes> RViewportEntity::getProperty(
     } else if (propertyTypeId == PropertyOverall) {
         return qMakePair(QVariant(data.overall), RPropertyAttributes(RPropertyAttributes::ReadOnly|RPropertyAttributes::Invisible));
     }
-    return REntity::getProperty(propertyTypeId, humanReadable, noAttributes);
+    return REntity::getProperty(propertyTypeId, humanReadable, noAttributes, showOnRequest);
 }
 
 void RViewportEntity::setData(RViewportData& d) {
@@ -153,8 +154,8 @@ void RViewportEntity::setData(RViewportData& d) {
 }
 
 void RViewportEntity::exportEntity(RExporter& e, bool preview, bool forceSelected) const {
-    Q_UNUSED(preview);
-    Q_UNUSED(forceSelected);
+    Q_UNUSED(preview)
+    Q_UNUSED(forceSelected)
 
     RDocument* doc = (RDocument*)getDocument();
     if (doc==NULL) {
@@ -200,10 +201,13 @@ void RViewportEntity::exportEntity(RExporter& e, bool preview, bool forceSelecte
     // clip rectangle export
     e.exportClipRectangle(viewportBox);
 
-    RVector offset = getViewOffset();
+    //RVector offset = getViewOffset();
     //RVector offset(0,0);
     //offset -= data.viewCenter * data.scale;
     //offset -= data.viewTarget * data.scale;
+
+    QSharedPointer<RBlock> model = doc->queryBlockDirect(doc->getModelSpaceBlockId());
+    model->setOrigin(data.viewCenter);
 
     // create temporary block reference to model space block:
     RBlockReferenceData modelSpaceData(
@@ -211,12 +215,23 @@ void RViewportEntity::exportEntity(RExporter& e, bool preview, bool forceSelecte
         RBlockReferenceData(
             doc->getModelSpaceBlockId(),
             //data.position + offset,
-            offset,
+            //offset,
+            data.position,
             RVector(data.scaleFactor, data.scaleFactor),
-            0.0
+            //0.0
+            data.rotation
         )
     );
-    modelSpaceData.update();
+    //modelSpaceData.scaleVisualProperties(data.scaleFactor);
+    //modelSpaceData.update();
+
+    RTransform blockRefTransform = modelSpaceData.getTransform();
+//    RTransform rot;
+//    rot.rotateRadians(data.rotation);
+//    rot *= blockRefTransform;
+//    blockRefTransform = rot;
+    //blockRefTransform.translate(offset.x, offset.y);
+    e.exportTransform(blockRefTransform);
 
     // start clipping from here:
     e.setClipping(true);
@@ -231,6 +246,7 @@ void RViewportEntity::exportEntity(RExporter& e, bool preview, bool forceSelecte
             break;
         }
 
+        //QSharedPointer<REntity> entity = modelSpaceData.queryEntity(*it, true);
         QSharedPointer<REntity> entity = modelSpaceData.queryEntity(*it);
         if (entity.isNull()) {
             continue;
@@ -241,27 +257,43 @@ void RViewportEntity::exportEntity(RExporter& e, bool preview, bool forceSelecte
             continue;
         }
 
+//        if (entity->getType()==RS::EntityBlockRef) {
+//            QSharedPointer<RBlockReferenceEntity> blockRef = entity.dynamicCast<RBlockReferenceEntity>();
+//            blockRef->scaleVisualProperties(blockRef->getScaleFactors().x);
+//        }
+
         // transform according to viewport settings:
-        entity->rotate(data.rotation, data.position);
+        //entity->rotate(data.rotation, data.position);
 
         RBox bb = entity->getBoundingBox();
+        bb.c1.z = 0;
+        bb.c2.z = 0;
+        bb.transform(blockRefTransform);
         if (!viewportBox.intersects(bb)) {
             continue;
         }
 
-        entity->scaleVisualProperties(data.scaleFactor);
-
         if (doc->getKnownVariable(RS::PSLTSCALE, true).toBool()==false) {
-            // scale line type pattern:
-            entity->setLinetypeScale(data.scaleFactor);
+            // scale line type pattern to match viewport scale:
+            entity->setLinetypeScale(entity->getLinetypeScale() * data.scaleFactor);
         }
 
+        if (entity->getType()==RS::EntityHatch) {
+            entity->setViewportContext(data);
+        }
+
+        //RDebug::startTimer(7);
         e.exportEntity(*entity, preview, true);
+        //RDebug::stopTimer(7, "export entity as part of viewport");
 
         i++;
     }
 
     e.setClipping(false);
+
+    model->setOrigin(RVector(0,0));
+
+    e.exportEndTransform();
 }
 
 void RViewportEntity::print(QDebug dbg) const {

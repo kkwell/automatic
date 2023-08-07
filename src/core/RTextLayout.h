@@ -107,6 +107,13 @@ public:
         return layout->font().italic();
     }
 
+    bool isUnderline() const {
+        if (layout.isNull()) {
+            return false;
+        }
+        return layout->font().underline();
+    }
+
 //    RVector getPosition() const {
 //        return position;
 //    }
@@ -123,8 +130,9 @@ public:
     bool ttf;
     QSharedPointer<QTextLayout> layout;
     QTransform transform;
+    // painter paths for CAD font glyphs:
     QList<RPainterPath> painterPaths;
-    // number of painter paths corresponding to this layout
+    // number of RTextRenderer::painterPaths corresponding to this layout
     // used to keep track of painter path and layout relationships
     int correspondingPainterPaths;
     QColor color;

@@ -46,6 +46,9 @@
 
     // public methods:
     static  QScriptValue
+        operator_assign
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getId
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -68,6 +71,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         isCustom
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        generateId
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getPropertyGroupTitle

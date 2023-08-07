@@ -2,6 +2,7 @@
 <unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns:rs="http://www.ribbonsoft.com">
   <class_decl name="RBox" />
+  <class_decl name="RLine" />
   <class name="RPolyline"
   xsi:noNamespaceSchemaLocation="../class.xsd" isCopyable="true"
   hasShell="false" sharedPointerSupport="true" isQObject="false"
@@ -43,6 +44,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="double" typeName="double" name="z"
         isConst="false" />
       </variant>
+    </method>
+    <method name="isFlat" cppName="isFlat" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
     </method>
     <method name="getVectorProperties"
     cppName="getVectorProperties" specifier="public"
@@ -100,12 +105,36 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="true" />
       </variant>
     </method>
+    <method name="appendShapeTrim" cppName="appendShapeTrim"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="RShape &amp;" typeName="RShape" name="shape"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="closeTrim" cppName="closeTrim" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
     <method name="appendVertex" cppName="appendVertex"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
         <arg type="RVector &amp;" typeName="RVector" name="vertex"
         isConst="true" />
+        <arg type="double" typeName="double" name="bulge"
+        hasDefault="true" default="0.0" isConst="false" />
+        <arg type="double" typeName="double" name="w1"
+        hasDefault="true" default="0.0" isConst="false" />
+        <arg type="double" typeName="double" name="w2"
+        hasDefault="true" default="0.0" isConst="false" />
+      </variant>
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="double" typeName="double" name="x"
+        isConst="false" />
+        <arg type="double" typeName="double" name="y"
+        isConst="false" />
         <arg type="double" typeName="double" name="bulge"
         hasDefault="true" default="0.0" isConst="false" />
         <arg type="double" typeName="double" name="w1"
@@ -136,6 +165,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
         <arg type="RVector &amp;" typeName="RVector" name="vertex"
         isConst="true" />
+        <arg type="double" typeName="double" name="bulgeBefore"
+        hasDefault="true" default="0.0" isConst="false" />
+        <arg type="double" typeName="double" name="bulgeAfter"
+        hasDefault="true" default="0.0" isConst="false" />
       </variant>
     </method>
     <method name="insertVertexAt" cppName="insertVertexAt"
@@ -144,6 +177,14 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="void" isPureVirtual="false">
         <arg type="RVector &amp;" typeName="RVector" name="point"
         isConst="true" />
+      </variant>
+    </method>
+    <method name="insertVertexAtDistance"
+    cppName="insertVertexAtDistance" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RVector" isPureVirtual="false">
+        <arg type="double" typeName="double" name="dist"
+        isConst="false" />
       </variant>
     </method>
     <method name="removeFirstVertex" cppName="removeFirstVertex"
@@ -205,6 +246,15 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="void" isPureVirtual="false">
         <arg type="int" typeName="int" name="i" isConst="false" />
         <arg type="RVector &amp;" typeName="RVector" name="v"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="moveVertexAt" cppName="moveVertexAt"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="int" typeName="int" name="i" isConst="false" />
+        <arg type="RVector &amp;" typeName="RVector" name="offset"
         isConst="true" />
       </variant>
     </method>
@@ -406,7 +456,11 @@ xmlns:rs="http://www.ribbonsoft.com">
     cppName="getSelfIntersectionPoints" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="QList &lt; RVector &gt;"
-      isPureVirtual="false" />
+      isPureVirtual="false">
+        <arg type="double" typeName="double" name="tolerance"
+        hasDefault="true" default="RS :: PointTolerance"
+        isConst="false" />
+      </variant>
     </method>
     <method name="getOrientation" cppName="getOrientation"
     specifier="public" isStatic="false" isVirtual="false"
@@ -432,8 +486,16 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
-    <method name="contains" cppName="contains" specifier="public"
+    <method name="convertArcToLineSegmentsLength"
+    cppName="convertArcToLineSegmentsLength" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RPolyline" isPureVirtual="false">
+        <arg type="double" typeName="double" name="segmentLength"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="contains" cppName="contains" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
         <arg type="RVector &amp;" typeName="RVector" name="point"
         isConst="true" />
@@ -485,6 +547,15 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
         <arg type="RVector &amp;" typeName="RVector" name="pos"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="moveSegmentAt" cppName="moveSegmentAt"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="int" typeName="int" name="i" isConst="false" />
+        <arg type="RVector &amp;" typeName="RVector" name="offset"
         isConst="true" />
       </variant>
     </method>
@@ -574,6 +645,14 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="QList &lt; RVector &gt;"
       isPureVirtual="false" />
     </method>
+    <method name="getPointAtPercent" cppName="getPointAtPercent"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="RVector" isPureVirtual="false">
+        <arg type="double" typeName="double" name="p"
+        isConst="false" />
+      </variant>
+    </method>
     <method name="getPointsWithDistanceToEnd"
     cppName="getPointsWithDistanceToEnd" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
@@ -583,6 +662,15 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
         <arg type="int" typeName="int" name="from"
         hasDefault="true" default="RS :: FromAny"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="getPointCloud" cppName="getPointCloud"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="QList &lt; RVector &gt;"
+      isPureVirtual="false">
+        <arg type="double" typeName="double" name="segmentLength"
         isConst="false" />
       </variant>
     </method>
@@ -682,6 +770,11 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
     </method>
+    <method name="getReversed" cppName="getReversed"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="RPolyline" isPureVirtual="false" />
+    </method>
     <method name="stretch" cppName="stretch" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
@@ -760,6 +853,24 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="QList &lt; RPolyline &gt;"
       isPureVirtual="false" />
     </method>
+    <method name="getLeftRightOutline"
+    cppName="getLeftRightOutline" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="QList &lt; QPair &lt; RPolyline , RPolyline &gt; &gt;"
+      isPureVirtual="false" />
+    </method>
+    <method name="getLeftOutline" cppName="getLeftOutline"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QList &lt; RPolyline &gt;"
+      isPureVirtual="false" />
+    </method>
+    <method name="getRightOutline" cppName="getRightOutline"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QList &lt; RPolyline &gt;"
+      isPureVirtual="false" />
+    </method>
     <method name="isInterpolated" cppName="isInterpolated"
     specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
@@ -808,13 +919,16 @@ xmlns:rs="http://www.ribbonsoft.com">
     <method name="toPainterPath" cppName="toPainterPath"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
-      <variant returnType="RPainterPath" isPureVirtual="false" />
+      <variant returnType="RPainterPath" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="addOriginalShapes"
+        hasDefault="true" default="false" isConst="false" />
+      </variant>
     </method>
     <method name="simplify" cppName="simplify" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
-        <arg type="double" typeName="double" name="angleTolerance"
-        hasDefault="true" default="RS :: AngleTolerance"
+        <arg type="double" typeName="double" name="tolerance"
+        hasDefault="true" default="RS :: PointTolerance"
         isConst="false" />
       </variant>
     </method>
@@ -893,6 +1007,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="NULL" isConst="true" />
       </variant>
     </method>
+    <method name="isConcave" cppName="isConcave" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
     <method name="getConvexVertices" cppName="getConvexVertices"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -916,6 +1034,12 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="double" typeName="double" name="tolerance"
         isConst="false" />
       </variant>
+    </method>
+    <method name="splitAtSegmentTypeChange"
+    cppName="splitAtSegmentTypeChange" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="QList &lt; RPolyline &gt;"
+      isPureVirtual="false" />
     </method>
     <method name="getBaseAngle" cppName="getBaseAngle"
     specifier="public" isStatic="false" isVirtual="false"
@@ -942,6 +1066,50 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="bool" isPureVirtual="false">
         <arg type="double" typeName="double" name="v"
         isConst="false" />
+      </variant>
+    </method>
+    <method name="morph" cppName="morph" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="QList &lt; RPolyline &gt;"
+      isPureVirtual="false">
+        <arg type="RPolyline &amp;" typeName="RPolyline"
+        name="target" isConst="true" />
+        <arg type="int" typeName="int" name="steps"
+        isConst="false" />
+        <arg type="RS::Easing" typeName="RS::Easing" name="easing"
+        hasDefault="true" default="RS :: Linear" isConst="false" />
+        <arg type="bool" typeName="bool" name="zLinear"
+        hasDefault="true" default="true" isConst="false" />
+        <arg type="double" typeName="double" name="customFactor"
+        hasDefault="true" default="RNANDOUBLE" isConst="false" />
+      </variant>
+    </method>
+    <method name="roundAllCorners" cppName="roundAllCorners"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="RPolyline" isPureVirtual="false">
+        <arg type="double" typeName="double" name="radius"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="getPolygon" cppName="getPolygon"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="RPolyline" isPureVirtual="false">
+        <arg type="double" typeName="double" name="segmentLength"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="getPolygonHull" cppName="getPolygonHull"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="RPolyline" isPureVirtual="false">
+        <arg type="double" typeName="double" name="angle"
+        isConst="false" />
+        <arg type="double" typeName="double" name="tolerance"
+        isConst="false" />
+        <arg type="bool" typeName="bool" name="inner"
+        hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
     <method name="hasProxy" cppName="hasProxy" specifier="public"

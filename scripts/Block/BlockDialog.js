@@ -52,11 +52,10 @@ BlockDialog.prototype.show = function() {
 
     var widgets = getWidgets(this.dialog);
     var leBlockName = widgets["BlockName"];
-    leBlockName.selectAll();
     var rx = new RegExp("[^<>/\\\\\":;\?\*|,=`]{1,255}");
     this.validator = new QRegExpValidator(rx, leBlockName);
     leBlockName.setValidator(this.validator);
-    leBlockName.textChanged.connect(this, "validate");
+    leBlockName.textChanged.connect(this, this.validate);
     var creatingBlock = isNull(this.block);
 
     if (!creatingBlock) {
@@ -79,12 +78,13 @@ BlockDialog.prototype.show = function() {
         var c = 0;
         while (!this.validate()) {
             ++c;
-            leBlockName.text = "block " + c;
+            leBlockName.text = qsTr("block", "default block name prefix") + " " + c;
         }
+        leBlockName.selectAll();
     }
 
     if (!this.dialog.exec()) {
-        this.dialog.destroy();
+        destr(this.dialog);
         EAction.activateMainWindow();
         return undefined;
     }
@@ -93,7 +93,7 @@ BlockDialog.prototype.show = function() {
 	
     if (!creatingBlock) {
         // rename block:
-        this.dialog.destroy();
+        destr(this.dialog);
         EAction.activateMainWindow();
         this.block.setName(text);
         return this.block;
@@ -101,7 +101,7 @@ BlockDialog.prototype.show = function() {
     else {
         // create new block:
         var block = new RBlock(this.document, text, new RVector(0,0));
-        this.dialog.destroy();
+        destr(this.dialog);
         EAction.activateMainWindow();
         return block;
     }
@@ -152,7 +152,7 @@ BlockDialog.validate = function(block, blockName, document, dialog, validator, a
     if (document.hasBlock(leBlockName.text)) {
         if (creatingBlock && allowOverwrite===true) {
             // warning: overwriting an existing block:
-            message.text += "<font color='red'>" + qsTr("Block '%1' already exists<br>and will be overwritten.").arg(leBlockName.text.toString())  + "</font>";
+            message.text += "<font color='red'>" + qsTr("Block \"%1\" already exists<br>and will be overwritten.").arg(leBlockName.text.toString())  + "</font>";
             acceptable = true;
         }
         else if ((isNull(block) || block.getName().toLowerCase() !== leBlockName.text.toLowerCase()) && !allowSameName) {

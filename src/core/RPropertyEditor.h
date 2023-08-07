@@ -32,6 +32,7 @@
 #include "RDocumentInterface.h"
 #include "RLayerListener.h"
 #include "RObject.h"
+#include "RProperty.h"
 #include "RPropertyListener.h"
 
 
@@ -51,17 +52,24 @@ public:
     RPropertyEditor();
     virtual ~RPropertyEditor();
 
+    static RPropertyEditor* getInstance();
+
     // from RPropertyListener interface:
-    virtual void updateFromDocument(RDocument* document, bool onlyChanges, RS::EntityType filter = RS::EntityUnknown, bool manual = false);
+    virtual void updateFromDocument(RDocument* document, bool onlyChanges, RS::EntityType filter = RS::EntityUnknown, bool manual = false, bool showOnRequest = false);
     virtual void updateFromObject(RObject* object, RDocument* document = NULL);
     virtual void clearEditor();
 
+    virtual QStringList getFixedCustomPropertyNames(const QList<RS::EntityType>& objectTypes) {
+        return QStringList();
+    }
+
+    virtual void updateLayers(RDocumentInterface* documentInterface, QList<RLayer::Id>& layerIds);
     virtual void updateLayers(RDocumentInterface* documentInterface);
-    virtual void setCurrentLayer(RDocumentInterface* documentInterface);
+    virtual void setCurrentLayer(RDocumentInterface* documentInterface, RLayer::Id previousLayerId);
     virtual void clearLayers();
 
     void propertyChanged(RPropertyTypeId propertyTypeId, QVariant propertyValue,
-                         QVariant::Type typeHint = QVariant::Invalid);
+                         RS::MetaType typeHint = RS::UnknownType);
     void listPropertyChanged(RPropertyTypeId propertyTypeId,
                          int index, QVariant propertyValue);
 
@@ -83,10 +91,17 @@ public:
         return entityTypeFilter;
     }
 
+    virtual QStringList getAppProperties() { return QStringList(); }
+
     static bool checkType(RS::EntityType type, RS::EntityType filter);
 
+    static void makeReadOnly(QWidget* control, bool on);
+
 protected:
-    virtual void updateEditor(RObject& object, bool doUpdateGui, RDocument* document = NULL);
+    /**
+     * \nonscriptable
+     */
+    virtual void updateEditor(RObject& object, const QList<RPropertyTypeId>& propertyTypeIds, bool doUpdateGui, RDocument* document = NULL, bool showOnRequest = false);
 
     /**
      * Updates the user interface of this property editor. This is the
@@ -97,8 +112,11 @@ protected:
         Q_UNUSED(onlyChanges)
     }
 
-    void updateProperty(const RPropertyTypeId& propertyTypeId, RObject& object, RDocument* document);
-    void removeAllButThese(const QMultiMap<QString, QString>& propertyTitles, bool customOnly=false);
+    void updateProperty(const RPropertyTypeId& propertyTypeId, RObject& object, RDocument* document, bool showOnRequest = false);
+
+    virtual bool showCustomAppProperties(RPropertyAttributes::Option opt);
+
+    static void computePropertyValue(RProperty& property);
 
 protected:
     //! key / value / attributes
@@ -114,6 +132,8 @@ protected:
     bool updatesDisabled;
 
     RS::EntityType entityTypeFilter;
+
+    static RPropertyEditor* instance;
 };
 
 Q_DECLARE_METATYPE(RPropertyEditor*)

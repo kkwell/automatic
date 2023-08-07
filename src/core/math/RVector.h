@@ -69,6 +69,8 @@ public:
 
     RVector(const QList<double>& tuples);
 
+    ~RVector();
+
     /**
      * Sets new values for the vector and makes the vector valid.
      */
@@ -123,6 +125,7 @@ public:
 
     RVector rotate(double rotation);
     RVector rotate(double rotation, const RVector& center);
+    RVector getRotated(double rotation, const RVector& center) const;
     RVector rotate3D(const RLine& axis, double rotation);
     RVector rotate3D(const QQuaternion& quaternion);
 
@@ -138,6 +141,7 @@ public:
 
     RVector scale(double factor, const RVector& center=nullVector);
     RVector scale(const RVector& factors, const RVector& center=nullVector);
+    RVector getScaled(const RVector& factors, const RVector& center) const;
 
     /**
      * \nonscriptable
@@ -150,6 +154,7 @@ public:
     static void scaleList(QList<RVector>& list, const RVector& factors, const RVector& center=nullVector);
 
     RVector mirror(const RLine& axis);
+    RVector getMirrored(const RLine& axis) const;
     RVector mirror(const RVector& axis1, const RVector& axis2);
     RVector flipHorizontal();
     RVector flipVertical();
@@ -182,6 +187,7 @@ public:
     RVector operator /(double s) const;
     RVector operator -() const;
     RVector getNegated() const;
+    RVector getAbsolute() const;
 
     double dot(const RVector& other) const {
         return RVector::getDotProduct(*this, other);
@@ -209,6 +215,16 @@ public:
     bool gteXY(const RVector& v) const {
         return RVector::greaterThanEqualXY(*this, v);
     }
+
+#if QT_VERSION >= 0x060000
+    /**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */
+    RVector copy() const {
+        return *this;
+    }
+#endif
 
     static bool containsFuzzy(const QList<RVector>& vectors, const RVector& v, double tol = RS::PointTolerance);
     static int findFirstFuzzy(const QList<RVector>& vectors, const RVector& v, double tol = RS::PointTolerance);

@@ -24,8 +24,9 @@
 
 #include "RDocument.h"
 #include "RDimLinearData.h"
-#include "RVector.h"
 #include "RPolyline.h"
+#include "RTriangle.h"
+#include "RVector.h"
 
 /**
  * Leader entity data class.
@@ -34,7 +35,7 @@
  * \copyable
  * \ingroup entity
  */
-class QCADENTITY_EXPORT RLeaderData: public REntityData, protected RPolyline {
+class QCADENTITY_EXPORT RLeaderData: public REntityData, public RPolyline {
     friend class RLeaderEntity;
 
 protected:
@@ -51,11 +52,125 @@ public:
         return this;
     }
 
-    double getDimasz() const;
-    void setDimaszOverride(double v);
+    bool isValid() const {
+        return RPolyline::isValid();
+    }
+    virtual QList<RVector> getEndPoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return REntityData::getEndPoints(queryBox, subEntityIds);
+    }
+    virtual void setZ(double z) {
+        RPolyline::setZ(z);
+    }
+    virtual void to2D() {
+        RPolyline::to2D();
+    }
+    virtual RBox getBoundingBox(bool ignoreEmpty=false) const {
+        return REntityData::getBoundingBox();
+    }
+    virtual QList<RVector> getMiddlePoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return REntityData::getMiddlePoints(queryBox, subEntityIds);
+    }
+    virtual QList<RVector> getCenterPoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return REntityData::getCenterPoints(queryBox, subEntityIds);
+    }
+    virtual QList<RVector> getArcReferencePoints(const RBox& queryBox = RDEFAULT_RBOX) const {
+        return REntityData::getArcReferencePoints(queryBox);
+    }
+    virtual QList<RVector> getPointsWithDistanceToEnd(double distance, int from = RS::FromAny, const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return REntityData::getPointsWithDistanceToEnd(distance, from, queryBox, subEntityIds);
+    }
+    virtual QList<RVector> getIntersectionPoints(const REntityData& other, bool limited = true, bool same = false, const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = true, QList<QPair<RObject::Id, RObject::Id> >* entityIds = NULL) const {
+        return REntityData::getIntersectionPoints(other, limited, same, queryBox, ignoreComplex, entityIds);
+    }
+    virtual QList<RVector> getIntersectionPoints(const RShape& shape, bool limited = true, const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = true) const {
+        return REntityData::getIntersectionPoints(shape, limited, queryBox, ignoreComplex);
+    }
+    virtual RVector getVectorTo(const RVector& point, bool limited=true, double strictRange = RMAXDOUBLE) const {
+        return REntityData::getVectorTo(point, limited, strictRange);
+    }
+    virtual double getDistanceTo(const RVector& point, bool limited = true, double range = 0.0, bool draft = false, double strictRange = RMAXDOUBLE) const {
+        return REntityData::getDistanceTo(point, limited, range, draft, strictRange);
+    }
+    virtual bool intersectsWith(const RShape& shape) const {
+        return REntityData::intersectsWith(shape);
+    }
+    virtual bool move(const RVector& offset) {
+        return RPolyline::move(offset);
+    }
+    virtual bool rotate(double rotation, const RVector& center = RDEFAULT_RVECTOR) {
+        return RPolyline::rotate(rotation, center);
+    }
+    virtual bool mirror(const RLine& axis) {
+        return RPolyline::mirror(axis);
+    }
+    virtual bool mirror(const RVector& axis1, const RVector& axis2) {
+        return REntityData::mirror(axis1, axis2);
+    }
+    virtual bool flipHorizontal() {
+        return REntityData::flipHorizontal();
+    }
+    virtual bool flipVertical() {
+        return REntityData::flipVertical();
+    }
 
-    double getDimScale(bool fromDocument=true) const;
-    void setDimScaleOverride(double v);
+    double getDimasz(bool scale = true) const {
+        double v = 2.5;
+
+        // get value from override:
+        if (dimasz>0.0) {
+            v = dimasz;
+        }
+
+        else if (document!=NULL) {
+            QSharedPointer<RDimStyle> dimStyle = document->queryDimStyleDirect();
+            if (!dimStyle.isNull()) {
+                // get value from dimension style:
+                v = dimStyle->getDouble(RS::DIMASZ);
+            }
+            else {
+                // TODO: get value from document (should never happen):
+                Q_ASSERT(false);
+            }
+        }
+
+        if (scale) {
+            v *= getDimscale();
+        }
+
+        return v;
+    }
+
+    void setDimasz(double v) {
+        dimasz = v;
+        update();
+    }
+
+    double getDimscale() const {
+        // get value from override:
+        if (dimscale>0.0) {
+            return dimscale;
+        }
+
+        double v = 1.0;
+        if (document!=NULL) {
+            QSharedPointer<RDimStyle> dimStyle = document->queryDimStyleDirect();
+            if (!dimStyle.isNull()) {
+                // get value from dimension style:
+                v = dimStyle->getDouble(RS::DIMSCALE);
+            }
+            else {
+                // TODO: get value from document (should never happen):
+                Q_ASSERT(false);
+            }
+        }
+
+        return v;
+    }
+
+    void setDimscale(double f) {
+        dimscale = f;
+        update();
+    }
 
     virtual void scaleVisualProperties(double scaleFactor);
 
@@ -65,7 +180,7 @@ public:
     }
 
     bool canHaveArrowHead() const;
-    bool updateArrowHead();
+    bool updateArrowHead() const;
 
 //    void setPolyline(const RPolyline& polyline) {
 //        *((RPolyline*)this) = polyline;
@@ -91,9 +206,17 @@ public:
         RPolyline::appendVertex(vertex);
     }
 
+    bool isSplineShaped() const {
+        return splineShaped;
+    }
+
+    void setSplineShaped(bool on) {
+        splineShaped = on;
+    }
+
     virtual QList<RRefPoint> getReferencePoints(RS::ProjectionRenderingHint hint = RS::RenderTop) const;
 
-    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint);
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
     QList<QSharedPointer<RShape> > getExploded(int segments = RDEFAULT_MIN1) const {
         return RPolyline::getExploded(segments);
@@ -102,33 +225,31 @@ public:
     virtual bool scale(const RVector& scaleFactors, const RVector& center);
     virtual bool stretch(const RPolyline& area, const RVector& offset);
 
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const {
-        Q_UNUSED(queryBox)
-        Q_UNUSED(ignoreComplex)
-        Q_UNUSED(segment)
-
-        QList<QSharedPointer<RShape> > ret;
-        ret << QSharedPointer<RShape>(new RPolyline(*this));
-        if (arrowHead) {
-            ret << QSharedPointer<RShape>(new RTriangle(getArrowShape()));
-        }
-        return ret;
-    }
-
+    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const;
     RTriangle getArrowShape() const;
 
     REntity::Id getDimLeaderBlockId() const;
     void setDimLeaderBlockId(REntity::Id id);
 
+    virtual void update() const;
+
+    void clearStyleOverrides() {
+        dimscale = -1.0;
+        dimasz = -1.0;
+        update();
+    }
+
 private:
     /** Arrow head on / off */
-    bool arrowHead;
+    mutable bool arrowHead;
     /** Arrow size */
-    double dimaszOverride;
+    double dimasz;
     /** Dimension scale */
-    double dimScaleOverride;
+    double dimscale;
     /** Block to use instead of arrow */
     RBlock::Id dimLeaderBlockId;
+    /** Spline shaped leader */
+    bool splineShaped;
 };
 
 Q_DECLARE_METATYPE(RLeaderData)

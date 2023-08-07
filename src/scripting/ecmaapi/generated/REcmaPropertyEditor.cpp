@@ -83,6 +83,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, clearEditor, "clearEditor");
             
+            REcmaHelper::registerFunction(&engine, proto, getFixedCustomPropertyNames, "getFixedCustomPropertyNames");
+            
             REcmaHelper::registerFunction(&engine, proto, updateLayers, "updateLayers");
             
             REcmaHelper::registerFunction(&engine, proto, setCurrentLayer, "setCurrentLayer");
@@ -111,6 +113,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, getEntityTypeFilter, "getEntityTypeFilter");
             
+            REcmaHelper::registerFunction(&engine, proto, getAppProperties, "getAppProperties");
+            
         engine.setDefaultPrototype(
             qMetaTypeId<RPropertyEditor*>(), *proto);
 
@@ -121,7 +125,11 @@
     
     // static methods:
     
+            REcmaHelper::registerFunction(&engine, &ctor, getInstance, "getInstance");
+            
             REcmaHelper::registerFunction(&engine, &ctor, checkType, "checkType");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, makeReadOnly, "makeReadOnly");
             
 
     // static properties:
@@ -243,6 +251,45 @@
 
     // public methods:
      QScriptValue
+        REcmaPropertyEditor::getInstance
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPropertyEditor::getInstance", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPropertyEditor::getInstance";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RPropertyEditor *'
+    RPropertyEditor * cppResult =
+        RPropertyEditor::
+       getInstance();
+        // return type: RPropertyEditor *
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPropertyEditor.getInstance().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPropertyEditor::getInstance", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaPropertyEditor::updateFromDocument
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -443,6 +490,92 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    5 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RDocument * */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: RS::EntityType */
+     && (
+            context->argument(3).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(4).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    RDocument * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<RDocument >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RPropertyEditor: Argument 0 is not of type RDocument *RDocument *.", context);                    
+                    }
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    RS::EntityType
+                    a2 =
+                    (RS::EntityType)
+                    (int)
+                    context->argument( 2 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    bool
+                    a3 =
+                    (bool)
+                    
+                    context->argument( 3 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a4 =
+                    (bool)
+                    
+                    context->argument( 4 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->updateFromDocument(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3
+        ,
+    a4);
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RPropertyEditor.updateFromDocument().",
                    context);
@@ -611,6 +744,67 @@
             return result;
         }
          QScriptValue
+        REcmaPropertyEditor::getFixedCustomPropertyNames
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPropertyEditor::getFixedCustomPropertyNames", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPropertyEditor::getFixedCustomPropertyNames";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPropertyEditor* self = 
+                        getSelf("getFixedCustomPropertyNames", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isArray()
+        ) /* type: QList < RS::EntityType > */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QList < RS::EntityType >
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QStringList'
+    QStringList cppResult =
+        
+               self->getFixedCustomPropertyNames(a0);
+        // return type: QStringList
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPropertyEditor.getFixedCustomPropertyNames().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPropertyEditor::getFixedCustomPropertyNames", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaPropertyEditor::updateLayers
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -631,6 +825,54 @@
                     return REcmaHelper::throwError("self is NULL", context);
                 }
                 
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RDocumentInterface * */
+     && (
+            context->argument(1).isArray()
+        ) /* type: QList < RLayer::Id > */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    RDocumentInterface * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<RDocumentInterface >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RPropertyEditor: Argument 0 is not of type RDocumentInterface *RDocumentInterface *.", context);                    
+                    }
+                
+                    // argument isArray or QVariantMap
+                    QList < RLayer::Id >
+                    a1;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(1),
+                        a1
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->updateLayers(a0
+        ,
+    a1);
+    } else
+
+
+        
     
     if( context->argumentCount() ==
     1 && (
@@ -695,11 +937,14 @@
                 
     
     if( context->argumentCount() ==
-    1 && (
+    2 && (
             context->argument(0).isVariant() || 
             context->argument(0).isQObject() || 
             context->argument(0).isNull()
         ) /* type: RDocumentInterface * */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: RLayer::Id */
     
     ){
     // prepare arguments:
@@ -717,12 +962,22 @@
                         return REcmaHelper::throwError("RPropertyEditor: Argument 0 is not of type RDocumentInterface *RDocumentInterface *.", context);                    
                     }
                 
+                    // argument isStandardType
+                    RLayer::Id
+                    a1 =
+                    (RLayer::Id)
+                    (int)
+                    context->argument( 1 ).
+                    toNumber();
+                
     // end of arguments
 
     // call C++ function:
     // return type 'void'
     
-               self->setCurrentLayer(a0);
+               self->setCurrentLayer(a0
+        ,
+    a1);
     } else
 
 
@@ -880,7 +1135,7 @@
         ) /* type: QVariant */
      && (
             context->argument(2).isNumber()
-        ) /* type: QVariant::Type */
+        ) /* type: RS::MetaType */
     
     ){
     // prepare arguments:
@@ -915,9 +1170,9 @@
                     );
                 
                     // argument isStandardType
-                    QVariant::Type
+                    RS::MetaType
                     a2 =
-                    (QVariant::Type)
+                    (RS::MetaType)
                     (int)
                     context->argument( 2 ).
                     toNumber();
@@ -1676,6 +1931,55 @@
             return result;
         }
          QScriptValue
+        REcmaPropertyEditor::getAppProperties
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPropertyEditor::getAppProperties", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPropertyEditor::getAppProperties";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RPropertyEditor* self = 
+                        getSelf("getAppProperties", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QStringList'
+    QStringList cppResult =
+        
+               self->getAppProperties();
+        // return type: QStringList
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPropertyEditor.getAppProperties().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPropertyEditor::getAppProperties", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaPropertyEditor::checkType
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -1736,6 +2040,68 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaPropertyEditor::checkType", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaPropertyEditor::makeReadOnly
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaPropertyEditor::makeReadOnly", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaPropertyEditor::makeReadOnly";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QWidget * */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+            // argument isQObject
+            QWidget *
+            a0 =
+            qobject_cast<
+            QWidget *>
+            ( context->argument(
+            0
+            ).
+            toQObject()
+            );
+        
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    RPropertyEditor::
+       makeReadOnly(a0
+        ,
+    a1);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RPropertyEditor.makeReadOnly().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaPropertyEditor::makeReadOnly", context, engine);
             return result;
         }
          QScriptValue REcmaPropertyEditor::toString

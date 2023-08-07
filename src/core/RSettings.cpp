@@ -23,10 +23,13 @@
 #include <QFileInfo>
 #include <QFrame>
 #include <QPrinterInfo>
+#include <QString>
 #include <QStringList>
+#include <QSysInfo>
 #include <QTranslator>
 
 #if QT_VERSION >= 0x050000
+#  include <QWindow>
 #  include <QStandardPaths>
 #else
 #  include <QDesktopServices>
@@ -35,7 +38,12 @@
 #include "RDebug.h"
 #include "RMath.h"
 #include "RSettings.h"
+#include "RUnit.h"
 #include "RVersion.h"
+
+#ifdef Q_OS_MAC
+#include "detectmacdarkmode.h"
+#endif
 
 bool RSettings::noWrite = false;
 QVariantMap RSettings::cache;
@@ -52,6 +60,8 @@ RColor* RSettings::referencePointColor = NULL;
 RColor* RSettings::startReferencePointColor = NULL;
 RColor* RSettings::endReferencePointColor = NULL;
 RColor* RSettings::secondaryReferencePointColor = NULL;
+RColor* RSettings::tertiaryReferencePointColor = NULL;
+int RSettings::darkMode = -1;
 int RSettings::darkGuiBackground = -1;
 int RSettings::snapRange = -1;
 int RSettings::pickRange = -1;
@@ -64,12 +74,14 @@ int RSettings::highResolutionGraphicsView = -1;
 int RSettings::previewEntities = -1;
 int RSettings::limitZoomAndScroll = -1;
 int RSettings::autoScaleLinetypePattern = -1;
+int RSettings::applyLineweightToPoints = -1;
 int RSettings::useSecondarySelectionColor = -1;
 int RSettings::mouseThreshold = -1;
 int RSettings::positionByMousePress = -1;
 int RSettings::allowMouseMoveInterruptions = -1;
 int RSettings::useSolidLineSelection = -1;
 double RSettings::arcAngleLengthThreshold = -1;
+double RSettings::fadingFactor = -1;
 double RSettings::minArcAngleStep = -1;
 int RSettings::dashThreshold = -1;
 int RSettings::textRenderedAsText = -1;
@@ -79,9 +91,19 @@ int RSettings::hideAttributeWithBlock = -1;
 int RSettings::importRecomputedDimBlocks = -1;
 int RSettings::ignoreBlockReferencePoint = -1;
 int RSettings::ignoreAllReferencePoints = -1;
+int RSettings::referencePointSize = -1;
+int RSettings::referencePointShape = -1;
+int RSettings::maxReferencePointEntities = -1;
+int RSettings::maxReferencePointEntitiesDisplay = -1;
+int RSettings::propertyEditorShowOnRequest = -1;
+int RSettings::simpleTextAlignLeft = -1;
+QString RSettings::polarCoordinateSeparator = QString();
+QString RSettings::cartesianCoordinateSeparator = QString();
+QString RSettings::relativeCoordinatePrefix = QString();
 QStringList RSettings::recentFiles;
 QLocale* RSettings::numberLocale = NULL;
 QString RSettings::applicationNameOverride;
+
 QSettings* RSettings::qSettings = NULL;
 
 QStringList RSettings::originalArguments;
@@ -95,6 +117,7 @@ bool RSettings::newVersion = false;
 int RSettings::previousVersion = 0;
 
 QStringList RSettings::openGLMessages;
+
 
 /**
  * App ID used for DXF/DWG exports / imports to identify app XData.
@@ -114,7 +137,17 @@ QString RSettings::getAppId() {
  * \return Device pixel ratio of the display. Usually 1 or 2 (for retina/high res displays).
  */
 double RSettings::getDevicePixelRatio() {
+    // DPR can be overridden in settings:
+    int dpr = RSettings::getIntValue("Appearance/DevicePixelRatio", 0);
+    if (dpr>0) {
+        return dpr;
+    }
+
 #if QT_VERSION >= 0x050000
+    QWindow* window = QGuiApplication::focusWindow();
+    if (window!=NULL) {
+        return window->devicePixelRatio();
+    }
     return qApp->devicePixelRatio();
 #else
     return 1.0;
@@ -130,6 +163,166 @@ QStringList RSettings::getOriginalArguments() {
 
 void RSettings::setOriginalArguments(const QStringList& a) {
     originalArguments = a;
+}
+
+/**
+ * \return The argument after the first one of the given flags or the given default value.
+ *
+ * \param args Array of strings (program arguments)
+ * \param shortFlag E.g. "-o"
+ * \param longFlag E.g. "-output"
+ */
+QString RSettings::getArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, const QString& def) {
+    QStringList ret = getArguments(args, shortFlag, longFlag);
+    if (ret.isEmpty()) {
+        return def;
+    }
+    return ret[0];
+}
+
+/**
+ * \return Array of all arguments after the given flags or an empty array.
+ *
+ * \param args Array of strings (program arguments)
+ * \param shortFlag E.g. "-o"
+ * \param longFlag E.g. "-output"
+ */
+QStringList RSettings::getArguments(const QStringList& args, const QString& shortFlag, const QString& longFlag) {
+    QStringList ret;
+
+    for (int k=0; k<args.length(); k++) {
+        if (args[k]==shortFlag) {
+            if (k+1 < args.length()) {
+                ret.append(args[k+1]);
+            }
+        }
+
+        if (args[k].startsWith(longFlag+"=")) {
+            ret.append(args[k].mid(longFlag.length()+1));
+        }
+    }
+
+    return ret;
+}
+
+int RSettings::getIntArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, int def) {
+    QString ret = getArgument(args, shortFlag, longFlag);
+    if (ret.isNull()) {
+        return def;
+    }
+    return ret.toInt();
+}
+
+QList<int> RSettings::getIntListArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, QList<int> def) {
+    QString arg = getArgument(args, shortFlag, longFlag);
+    if (arg.isNull()) {
+        return def;
+    }
+
+    QList<int> ret;
+    QStringList tokens = arg.split(",");
+
+    bool singleInt = false;
+    if (tokens.length()==1) {
+        singleInt = true;
+    }
+
+    for (int i=0; i<tokens.length(); i++) {
+        QString token = tokens[i];
+        QStringList range = token.split("-");
+        int start, stop;
+
+        if (range.length()==1) {
+            start = singleInt ? 0 : range[0].toInt();
+            stop = range[0].toInt();
+        }
+        else if (range.length()==2) {
+            start = range[0].toInt();
+            stop = range[1].toInt();
+        }
+        else {
+            qWarning() << "invalid token in list: " << token;
+            continue;
+        }
+
+        for (int k=start; k<=stop; k++) {
+            ret.append(k);
+        }
+    }
+
+    return ret;
+}
+
+double RSettings::getFloatArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, double def) {
+    QString ret = getArgument(args, shortFlag, longFlag);
+    if (ret.isNull()) {
+        return def;
+    }
+    return ret.toDouble();
+}
+
+RColor RSettings::getColorArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, const RColor& def) {
+    QString ret = getArgument(args, shortFlag, longFlag);
+    if (ret.isNull()) {
+        return def;
+    }
+    return RColor(ret);
+}
+
+RVector RSettings::getVectorArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, const RVector& def) {
+    QString ret = getArgument(args, shortFlag, longFlag);
+    if (ret.isNull()) {
+        return def;
+    }
+    QStringList parts = ret.split(',');
+    if (parts.length()!=2) {
+        return def;
+    }
+    QList<double> floatParts;
+    for (int i=0; i<parts.length(); i++) {
+        floatParts.append(parts[i].toDouble());
+    }
+
+    return RVector(floatParts[0], floatParts[1]);
+}
+
+RBox RSettings::getBoxArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag, const RBox& def) {
+    QString ret = getArgument(args, shortFlag, longFlag);
+    if (ret.isNull()) {
+        return def;
+    }
+    QStringList parts = ret.split(',');
+    if (parts.length()!=4) {
+        return def;
+    }
+    QList<double> floatParts;
+    for (int i=0; i<parts.length(); i++) {
+        //parts[i] = parts[i].toDouble();
+        floatParts.append(parts[i].toDouble());
+    }
+
+    return RBox(RVector(floatParts[0], floatParts[1]), RVector(floatParts[0] + floatParts[2], floatParts[1] + floatParts[3]));
+}
+
+/**
+ * \return True if the given arguments contain one of the given flags.
+ */
+bool RSettings::testArgument(const QStringList& args, const QString& shortFlag, const QString& longFlag) {
+    if (!shortFlag.isEmpty() && args.contains(shortFlag)) {
+        return true;
+    }
+    if (!longFlag.isEmpty()) {
+        if (args.contains(longFlag)) {
+            return true;
+        }
+        for (int k=0; k<args.length(); k++) {
+            if (args[k].startsWith(longFlag+"=")) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -276,7 +469,9 @@ QString RSettings::getCacheLocation() {
  * \return Standard path for user data.
  */
 QString RSettings::getDataLocation() {
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= 0x060000
+    return RSettings::getStandardLocation(QStandardPaths::AppDataLocation);
+#elif QT_VERSION >= 0x050000
     return RSettings::getStandardLocation(QStandardPaths::DataLocation);
 #else
     return RSettings::getStandardLocation(QDesktopServices::DataLocation);
@@ -415,9 +610,15 @@ void RSettings::loadTranslations(const QString& module, const QStringList& dirs)
 
     QTranslator* translator = new QTranslator(qApp);
     for (int i=0; i<translationsDirs.size(); ++i) {
-        if (translator->load(module + "_" + locale, translationsDirs[i])) {
+        QString name = module + "_" + locale;
+        if (translator->load(name, translationsDirs[i])) {
             QCoreApplication::installTranslator(translator);
             break;
+        }
+        else {
+            if (locale!="en") {
+                qWarning() << "Cannot load translation:" << name;
+            }
         }
     }
 }
@@ -426,7 +627,7 @@ void RSettings::loadTranslations(const QString& module, const QStringList& dirs)
  * Translates the given string for the given context.
  */
 QString RSettings::translate(const QString& context, const QString& str) {
-    return QCoreApplication::translate((const char*)context.toLatin1(), (const char*)str.toLatin1());
+    return QCoreApplication::translate((const char*)context.toUtf8(), (const char*)str.toUtf8());
 }
 
 /**
@@ -585,7 +786,8 @@ QFont RSettings::getStatusBarFont() {
 
 RColor RSettings::getSelectionColor() {
     if (selectionColor==NULL) {
-        selectionColor = new RColor(getColor("GraphicsViewColors/SelectionColor", RColor(164,70,70,128)));
+        //selectionColor = new RColor(getColor("GraphicsViewColors/SelectionColor", RColor(164,70,70,128)));
+        selectionColor = new RColor(getColor("GraphicsViewColors/SelectionColor", RColor(209,90,90,128)));
     }
     return *selectionColor;
 }
@@ -618,6 +820,13 @@ RColor RSettings::getSecondaryReferencePointColor() {
     return *secondaryReferencePointColor;
 }
 
+RColor RSettings::getTertiaryReferencePointColor() {
+    if (tertiaryReferencePointColor==NULL) {
+        tertiaryReferencePointColor = new RColor(getColor("GraphicsViewColors/TertiaryReferencePointColor", RColor(0,64,172)));
+    }
+    return *tertiaryReferencePointColor;
+}
+
 bool RSettings::getAutoScaleGrid() {
     return getValue("GraphicsView/AutoScaleGrid", true).toBool();
 }
@@ -648,6 +857,13 @@ int RSettings::getColorThreshold() {
 
 int RSettings::getTextHeightThreshold() {
     return getValue("GraphicsView/TextHeightThreshold", 3).toInt();
+}
+
+double RSettings::getFadingFactor() {
+    if (fadingFactor<0.0) {
+        fadingFactor = getValue("GraphicsView/FadingFactor", 3.5).toDouble();
+    }
+    return fadingFactor;
 }
 
 double RSettings::getArcAngleLengthThreshold() {
@@ -730,29 +946,145 @@ bool RSettings::getIgnoreAllReferencePoints() {
     return ignoreAllReferencePoints;
 }
 
+/**
+ * \return Size of reference points.
+ */
+int RSettings::getReferencePointSize() {
+    if (referencePointSize==-1) {
+        referencePointSize = getIntValue("GraphicsView/ReferencePointSize", 10);
+    }
+    return referencePointSize;
+}
+
+/**
+ * \return Shape of reference points.
+ */
+int RSettings::getReferencePointShape() {
+    if (referencePointShape==-1) {
+        referencePointShape = getIntValue("GraphicsView/ReferencePointShape", 0);
+    }
+    return referencePointShape;
+}
+
+/**
+ * \return Max reference points to use.
+ */
+int RSettings::getMaxReferencePointEntities() {
+    if (maxReferencePointEntities==-1) {
+        maxReferencePointEntities = getIntValue("GraphicsView/MaxReferencePointEntities", 1000);
+    }
+    return maxReferencePointEntities;
+}
+
+/**
+ * \return Max reference points to display.
+ */
+int RSettings::getMaxReferencePointEntitiesDisplay() {
+    if (maxReferencePointEntitiesDisplay==-1) {
+        maxReferencePointEntitiesDisplay = getIntValue("GraphicsView/MaxReferencePointEntitiesDisplay", 1000);
+    }
+    return maxReferencePointEntitiesDisplay;
+}
+
+/**
+ * \return True to show slow properties available on request.
+ */
+bool RSettings::getPropertyEditorShowOnRequest() {
+    if (propertyEditorShowOnRequest==-1) {
+        propertyEditorShowOnRequest = getBoolValue("PropertyEditor/ShowOnRequest", false);
+    }
+    return propertyEditorShowOnRequest;
+}
+
+/**
+ * \return True to align left aligned simple text to the reference point exactly.
+ */
+bool RSettings::getSimpleTextAlignLeft() {
+    if (simpleTextAlignLeft==-1) {
+        simpleTextAlignLeft = getBoolValue("TextRendering/SimpleTextAlignLeft", false);
+    }
+    return simpleTextAlignLeft;
+}
+
+/**
+ * \return Polar coordinate separator (<).
+ */
+QString RSettings::getPolarCoordinateSeparator() {
+    if (polarCoordinateSeparator.isNull()) {
+        polarCoordinateSeparator = getStringValue("Input/PolarCoordinateSeparator", "<");
+    }
+    return polarCoordinateSeparator;
+}
+
+/**
+ * \return Cartesian coordinate separator (,).
+ */
+QString RSettings::getCartesianCoordinateSeparator() {
+    if (cartesianCoordinateSeparator.isNull()) {
+        cartesianCoordinateSeparator = getStringValue("Input/CartesianCoordinateSeparator", ",");
+    }
+    return cartesianCoordinateSeparator;
+}
+
+/**
+ * \return Relative coordinate prefix (@).
+ */
+QString RSettings::getRelativeCoordinatePrefix() {
+    if (relativeCoordinatePrefix.isNull()) {
+        relativeCoordinatePrefix = getStringValue("Input/RelativeCoordinatePrefix", "@");
+    }
+    return relativeCoordinatePrefix;
+}
+
+/**
+ * \return True for macOS dark mode only.
+ */
+bool RSettings::isDarkMode() {
+    if (darkMode==-1) {
+#ifdef Q_OS_MAC
+        darkMode = (isMacDarkMode() ? 1 : 0);
+#else
+        darkMode = 0;
+#endif
+    }
+    return darkMode==1;
+}
+
 bool RSettings::hasDarkGuiBackground() {
     if (darkGuiBackground==-1) {
-//        // find out what color is used for QFrames (this might originate from a CSS stylesheet):
-//        QFrame* w = new QFrame();
-//        w->resize(1,1);
-//#if QT_VERSION >= 0x050000
-//        QPixmap pixmap = w->grab(QRect(0, 0, 1, 1));
-//#else
-//        QPixmap pixmap = QPixmap::grabWidget(w, QRect(0, 0, 1, 1));
-//#endif
-//        delete w;
-//        QImage img = pixmap.toImage();
-//        darkGuiBackground = QColor(img.pixel(0,0)).value()<128;
+        // detect dark QCAD theme:
         if (qApp->styleSheet().contains("IconPostfix:inverse", Qt::CaseInsensitive)) {
             darkGuiBackground = 1;
         }
         else {
+#ifdef Q_OS_MAC
+            // detect macOS dark mode:
+            if (isMacDarkMode()) {
+                darkGuiBackground = 1;
+            }
+            else {
+                darkGuiBackground = 0;
+            }
+            // TODO: support Windows Dark Theme:
+//#elif Q_OS_WINDOWS
+//            QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",QSettings::NativeFormat);
+//            if (settings.value("AppsUseLightTheme")==0){
+//                darkGuiBackground = 1;
+//            }
+//            else {
+//                darkGuiBackground = 0;
+//            }
+#else
             darkGuiBackground = 0;
+#endif
         }
     }
     return darkGuiBackground==1;
 }
 
+/**
+ * \return True if a custom stylesheet is present for the whole application. Z.B. a theme is present.
+ */
 bool RSettings::hasCustomStyleSheet() {
     return !qApp->styleSheet().isEmpty();
 }
@@ -809,7 +1141,7 @@ QString RSettings::getQtVersionString() {
 }
 
 /**
- * \return True if application was compiled against the given major Qt version.
+ * \return True if application was compiled against at least the given major Qt version.
  */
 bool RSettings::isQt(int majorVersion) {
     return QT_VERSION >= majorVersion<<16;
@@ -847,6 +1179,9 @@ QString RSettings::getCompilerVersion() {
  * \return OS name and version as human readable string.
  */
 QString RSettings::getOSVersion() {
+#if QT_VERSION >= 0x050400
+    return QSysInfo::productVersion();
+#else
 #ifdef Q_OS_WIN
     switch (QSysInfo::windowsVersion()) {
     case QSysInfo::WV_NT:
@@ -869,7 +1204,7 @@ QString RSettings::getOSVersion() {
         return "Windows 8.1";
     // QSysInfo::WV_WINDOWS10:
     case 0x00c0:
-        return "Windows 10";
+        return "Windows 10 or 11";
     default:
         return "Windows >= 10";
     }
@@ -884,38 +1219,45 @@ QString RSettings::getOSVersion() {
     case QSysInfo::MV_10_2:
         return "Mac OS X 10.2 (Unsupported)";
     case QSysInfo::MV_10_3:
-        return "Mac OS X 10.3";
+        return "Mac OS X 10.3 (Panther)";
     case QSysInfo::MV_10_4:
-        return "Mac OS X 10.4";
+        return "Mac OS X 10.4 (Tiger)";
     case QSysInfo::MV_10_5:
-        return "Mac OS X 10.5";
+        return "Mac OS X 10.5 (Leopard)";
     case QSysInfo::MV_10_6:
-        return "Mac OS X 10.6";
+        return "Mac OS X 10.6 (Snow Leopard)";
     case QSysInfo::MV_10_7:
-        return "Mac OS X 10.7";
+        return "Mac OS X 10.7 (Lion)";
     case QSysInfo::MV_10_8:
-        return "Mac OS X 10.8";
+        return "OS X 10.8 (Mountain Lion)";
     // QSysInfo::MV_10_9:
     case 0x000B:
-        return "Mac OS X 10.9";
+        return "OS X 10.9 (Mavericks)";
     // QSysInfo::MV_10_10:
     case 0x000C:
-        return "Mac OS X 10.10";
+        return "OS X 10.10 (Yosemite)";
     // QSysInfo::MV_10_11:
     case 0x000D:
-        return "Mac OS X 10.11";
+        return "OS X 10.11 (El Capitan)";
     // QSysInfo::MV_10_12:
     case 0x000E:
-        return "macOS 10.12";
+        return "macOS 10.12 (Sierra)";
     // QSysInfo::MV_10_13:
     case 0x000F:
-        return "macOS 10.13";
+        return "macOS 10.13 (High Sierra)";
+    // QSysInfo::MV_10_14:
+    case 0x0010:
+        return "macOS 10.14 (Mojave)";
+    // QSysInfo::MV_10_15:
+    case 0x0011:
+        return "macOS 10.15 (Catalina)";
     default:
     case QSysInfo::MV_Unknown:
-        return "macOS > 10.13 (Unsupported)";
+        return "macOS > 10.15 (Unsupported)";
     }
 #else
     return "Unknown";
+#endif
 #endif
 }
 
@@ -1166,9 +1508,25 @@ bool RSettings::getBoolValue(const QString& key, bool defaultValue) {
  * \return Value of the given setting as color or defaultValue.
  */
 RColor RSettings::getColorValue(const QString& key, const RColor& defaultValue) {
-    QVariant ret = getValue(key, defaultValue);
+    QVariant vd;
+    vd.setValue(defaultValue);
+    QVariant ret = getValue(key, vd);
     if (ret.canConvert<RColor>()) {
         return ret.value<RColor>();
+    }
+#if QT_VERSION >= 0x050000
+    else if (ret.canConvert(QMetaType::QString)) {
+#else
+    else if (ret.canConvert(QVariant::String)) {
+#endif
+        return RColor(ret.toString());
+    }
+#if QT_VERSION >= 0x050000
+    else if (ret.canConvert(QMetaType::QColor)) {
+#else
+    else if (ret.canConvert(QVariant::Color)) {
+#endif
+        return RColor(ret.value<QColor>());
     }
     else {
         return defaultValue;
@@ -1183,19 +1541,26 @@ double RSettings::getDoubleValue(const QString& key, double defaultValue) {
 
     // if the variant is a list or string list, return the first entry
     // used for example for stored RMathLineEdit values
-    if (ret.type()==QVariant::List || ret.canConvert<QStringList>()) {
+    if (ret.type()==QVariant::List
+#if QT_VERSION < 0x060000
+        // Qt 6: strings can always be converted to string lists.
+        // "1.02" is converted to a list of "1", ".", "0", "2":
+        || ret.canConvert<QStringList>()
+#endif
+        ) {
         if (ret.toList().count()>0) {
             ret = ret.toList().at(0);
         }
     }
 
     QString str = ret.toString();
+
     double d;
     if (str.isEmpty()) {
         return defaultValue;
     }
-    else if (QRegExp("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$").exactMatch(str)) {
-        d = ret.toDouble();
+    else if (RS::exactMatch(QRegularExpression("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$"), str)) {
+        d = str.toDouble();
     }
     else {
         d = RMath::eval(str);
@@ -1211,8 +1576,13 @@ double RSettings::getDoubleValue(const QString& key, double defaultValue) {
  * \return Value of the given setting as int or defaultValue.
  */
 int RSettings::getIntValue(const QString& key, int defaultValue) {
-    QVariant ret = getValue(key, defaultValue);
-    return ret.toInt();
+    QVariant retVar = getValue(key, defaultValue);
+    bool ok;
+    int ret = retVar.toInt(&ok);
+    if (!ok) {
+        return defaultValue;
+    }
+    return ret;
 }
 
 /**
@@ -1240,6 +1610,105 @@ QChar RSettings::getCharValue(const QString& key, const QChar& defaultValue) {
         return defaultValue;
     }
     return ret[0];
+}
+
+QStringList RSettings::getScaleList(const RS::Unit unit) {
+    QString key;
+    QStringList defaults;
+
+    // add appropriate scale items:
+    if (RUnit::isMetric(unit)) {
+        key = "Print/ScaleListMetric";
+        defaults << "1:1" << "1:2" << "1:5" << "1:10" << "1:20" << "1:25" << "1:50" << "1:75" <<
+                    "1:100" << "1:125" << "1:150" << "1:175" <<
+                    "1:200" << "1:250" << "1:500" << "1:750" <<
+                    "1:1000" << "1:2500" << "1:5000" << "1:7500" <<
+                    "1:10000" << "1:25000" << "1:50000" << "1:75000" <<
+                    "1:100000" << "1:250000" << "1:500000" << "1:750000" <<
+                    "1:1000000" <<
+                    "2:1" << "5:1" << "10:1" << "20:1" << "25:1" << "50:1" << "75:1" <<
+                    "100:1" << "125:1" << "150:1" << "175:1" <<
+                    "200:1" << "250:1" << "500:1" << "750:1" <<
+                    "1000:1" << "2500:1" << "5000:1" << "7500:1" <<
+                    "10000:1" << "25000:1" << "50000:1" << "75000:1" <<
+                    "100000:1" << "250000:1" << "500000:1" << "750000:1" <<
+                    "1000000:1";
+    }
+    else {
+        key = "Print/ScaleListImperial";
+
+
+//        defaults << "1\" = 1\"" << "1\" = 2\"" << "1\" = 4\"" << "1\" = 8\"" << "1\" = 16\"" <<
+//                "1\" = 32\"" << "1\" = 64\"" << "1\" = 128\"" << "1\" = 256\"" <<
+//                "1\" = 512\"" << "1\" = 1024\"" << "1\" = 2048\"" << "1\" = 4096\"" <<
+
+//                "1/4096\" = 1'-0\"" << "1/2048\" = 1'-0\"" << "1/1024\" = 1'-0\"" <<
+//                "1/512\" = 1'-0\"" << "1/256\" = 1'-0\"" << "1/128\" = 1'-0\"" <<
+//                "1/64\" = 1'-0\"" <<
+//                "1/32\" = 1'-0\"" <<
+//                "1/16\" = 1'-0\"" <<
+//                "3/32\" = 1'-0\"" <<
+//                "1/8\" = 1'-0\"" <<
+//                "3/16\" = 1'-0\"" <<
+//                "1/4\" = 1'-0\"" <<
+//                "3/8\" = 1'-0\"" <<
+//                "1/2\" = 1'-0\"" <<
+//                "3/4\" = 1'-0\"" <<
+//                "1\" = 1'-0\"" << "2\" = 1'-0\"" << "3\" = 1'-0\"" << "4\" = 1'-0\"" <<
+//                "5\" = 1'-0\"" << "6\" = 1'-0\"" << "7\" = 1'-0\"" << "8\" = 1'-0\"" <<
+//                "9\" = 1'-0\"" << "10\" = 1'-0\"" << "11\" = 1'-0\"";
+
+        defaults << "1\" = 1\""
+                 << "1\" = 2\""
+                 << "1\" = 4\""
+                 << "1\" = 8\""
+                 << "1\" = 16\""
+                 << "1\" = 32\""
+                 << "1\" = 64\""
+                 << "1\" = 128\""
+                 << "1\" = 256\""
+                 << "1\" = 512\""
+                 << "1\" = 1024\""
+                 << "1\" = 2048\""
+                 << "1\" = 4096\"";
+
+        // Standard Imperial Engineering Scale
+        defaults << "1\"= 10'"
+                 << "1\" = 20'"
+                 << "1\" = 30'"
+                 << "1\" = 40'"
+                 << "1\" = 50'"
+                 << "1\" = 60'"
+                 << "1\" = 70'"
+                 << "1\" = 80'"
+                 << "1\" = 90'"
+                 << "1\" = 100'"
+                 << "1\" = 150'"
+                 << "1\" = 200'"
+                 << "1\" = 300'"
+                 << "1\" = 400'"
+                 << "1\" = 500'";
+
+        // Standard Imperial Architectural Scale
+        defaults << "1' = 1'-0\""
+                 << "6\" = 1'-0\""
+                 << "3\" = 1'-0\""
+                 << "1 1/2\" = 1'-0\""
+                 << "1\" = 1'-0\""
+                 << "3/4\" = 1'-0\""
+                 << "1/2\" = 1'-0\""
+                 << "3/8\" = 1'-0\""
+                 << "1/4\" = 1'-0\""
+                 << "3/16\" = 1'-0\""
+                 << "1/8\" = 1'-0\""
+                 << "3/32\" = 1'-0\""
+                 << "1/16\" = 1'-0\""
+                 << "1/32\" = 1'-0\""
+                 << "1/64\" = 1'-0\""
+                 << "1/128\" = 1'-0\"";
+    }
+
+    return getStringListValue(key, defaults);
 }
 
 /**
@@ -1325,6 +1794,13 @@ bool RSettings::getAutoScaleLinetypePatterns() {
     return (bool)autoScaleLinetypePattern;
 }
 
+bool RSettings::getApplyLineweightToPoints() {
+    if (applyLineweightToPoints==-1) {
+        applyLineweightToPoints = getValue("GraphicsView/ApplyLineweightToPoints", QVariant(false)).toBool();
+    }
+    return (bool)applyLineweightToPoints;
+}
+
 bool RSettings::getUseSecondarySelectionColor() {
     if (useSecondarySelectionColor==-1) {
         useSecondarySelectionColor = getValue("GraphicsViewColors/UseSecondarySelectionColor", QVariant(false)).toBool();
@@ -1389,6 +1865,10 @@ void RSettings::resetCache() {
         delete secondaryReferencePointColor;
         secondaryReferencePointColor = NULL;
     }
+    if (tertiaryReferencePointColor!=NULL) {
+        delete tertiaryReferencePointColor;
+        tertiaryReferencePointColor = NULL;
+    }
     snapRange = -1;
     zeroWeightWeight = -1;
     showCrosshair = -1;
@@ -1399,10 +1879,15 @@ void RSettings::resetCache() {
     previewEntities = -1;
     limitZoomAndScroll = -1;
     autoScaleLinetypePattern = -1;
+    applyLineweightToPoints = -1;
     useSecondarySelectionColor = -1;
     useSolidLineSelection = -1;
     arcAngleLengthThreshold = -1;
     positionByMousePress = -1;
+    maxReferencePointEntities = -1;
+    maxReferencePointEntitiesDisplay = -1;
+    propertyEditorShowOnRequest = -1;
+    simpleTextAlignLeft = -1;
     minArcAngleStep = -1;
     dashThreshold = -1;
     textRenderedAsText = -1;
@@ -1410,9 +1895,19 @@ void RSettings::resetCache() {
     selectBlockWithAttribute = -1;
     hideAttributeWithBlock = -1;
     importRecomputedDimBlocks = -1;
+    ignoreBlockReferencePoint = -1;
+    ignoreAllReferencePoints = -1;
+    referencePointSize = -1;
+    referencePointShape = -1;
+    cartesianCoordinateSeparator = QString();
+    polarCoordinateSeparator = QString();
+    relativeCoordinatePrefix = QString();
     mouseThreshold = -1;
     themePath = QString();
     cache.clear();
+    darkMode = -1;
+    darkGuiBackground = -1;
+    fadingFactor = -1;
 }
 
 void RSettings::uninit() {

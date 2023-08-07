@@ -48,21 +48,21 @@ public:
      * to indicate what snap was used.
      */
     enum Status {
-        Unknown,
-        Free,
-        Grid,
-        Endpoint,
-        OnEntity,
-        Center,
-        Middle,
-        Distance,
-        Intersection,
-        IntersectionManual,
-        Reference,
-        Perpendicular,
-        Tangential,
-        Coordinate,
-        CoordinatePolar
+        Unknown = 0,
+        Free = 1,
+        Grid = 2,
+        Endpoint = 3,
+        OnEntity = 4,
+        Center = 5,
+        Middle = 6,
+        Distance = 7,
+        Intersection = 8,
+        IntersectionManual = 9,
+        Reference = 10,
+        Perpendicular = 11,
+        Tangential = 12,
+        Coordinate = 13,
+        CoordinatePolar = 14
     };
 
 public:
@@ -76,7 +76,10 @@ public:
     virtual RVector snap(
             const RVector& position,
             RGraphicsView& view,
-            double range=RNANDOUBLE) = 0;
+            double range=RNANDOUBLE) {
+
+        return RVector::invalid;
+    }
 
     /**
      * \overload
@@ -100,7 +103,7 @@ public:
      * \return Set of entity IDs that are relevant for the last performed
      * snap, usually used for highlighting.
      */
-    QSet<REntity::Id> getEntityIds() {
+    QList<REntity::Id> getEntityIds() {
         return entityIds;
     }
 
@@ -108,18 +111,21 @@ public:
         return status;
     }
 
+    void setStatus(RSnap::Status s) {
+        status = s;
+    }
+
     RVector getLastSnap() const {
         return lastSnap;
     }
 
-    void reset() {
+    virtual void reset() {
         entityIds.clear();
-        status = RSnap::Unknown;
         lastSnap = RVector::invalid;
     }
 
 protected:
-    QSet<REntity::Id> entityIds;
+    QList<REntity::Id> entityIds;
     RSnap::Status status;
     RVector lastSnap;
 };

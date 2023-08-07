@@ -60,6 +60,12 @@
         setSecondary
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        isTertiary
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setTertiary
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         isIgnore
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -82,6 +88,18 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setEnd
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isArrow
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setArrow
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isSelected
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setSelected
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setFlag

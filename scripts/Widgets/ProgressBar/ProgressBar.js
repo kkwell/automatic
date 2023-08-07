@@ -39,9 +39,9 @@ ProgressBar.postInit = function(basePath) {
     }
 
     var appWin = EAction.getMainWindow();
-    appWin.progressText.connect(this, "setProgressText");
-    appWin.progress.connect(this, "progress");
-    appWin.progressEnd.connect(this, "progressEnd");
+    appWin.progressText.connect(this, this.setProgressText);
+    appWin.progress.connect(this, this.progress);
+    appWin.progressEnd.connect(this, this.progressEnd);
 };
 
 ProgressBar.prepare = function() {
@@ -90,14 +90,16 @@ ProgressBar.progress = function(value) {
     }
     else {
         if (!isNull(ProgressBar.progressBar)) {
-            if (!QCoreApplication.arguments().contains("-no-show")) {
+            if (!RSettings.getOriginalArguments().contains("-no-show")) {
                 ProgressBar.progressBar.visible = true;
             }
             ProgressBar.progressBar.value = value;
         }
     }
     var appWin = EAction.getMainWindow();
-    appWin.enabled = false;
+    if (appWin.enabled) {
+        appWin.disable();
+    }
 };
 
 ProgressBar.progressEnd = function() {
@@ -116,6 +118,8 @@ ProgressBar.progressEnd = function() {
         }
     }
     var appWin = EAction.getMainWindow();
-    appWin.enabled = true;
+    if (!appWin.enabled) {
+        appWin.enable();
+    }
 };
 

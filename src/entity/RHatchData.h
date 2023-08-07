@@ -33,6 +33,10 @@
 #include "RPoint.h"
 #include "RVector.h"
 
+#ifndef RDEFAULT_MIN1
+#define RDEFAULT_MIN1 -1
+#endif
+
 /**
  * Stores and manages all data that defines the geometry and
  * appearance of a hatch or solid fill entity.
@@ -68,9 +72,15 @@ public:
         return pattern;
     }
 
+    void setCustomPattern(const RPattern& p) {
+        pattern = p;
+    }
+
     virtual bool cloneOnChange() const {
         // force clone to preserve custom pattern for undo:
-        return hasCustomPattern();
+        //return hasCustomPattern();
+        // 20190510: always clone (since allowing non-uniform scaling of hatches)
+        return true;
     }
 
     virtual RBox getBoundingBox(bool ignoreEmpty=false) const;
@@ -81,7 +91,7 @@ public:
 
     virtual QList<RRefPoint> getReferencePoints(RS::ProjectionRenderingHint hint = RS::RenderTop) const;
 
-    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint);
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
     virtual bool move(const RVector& offset);
     virtual bool rotate(double rotation, const RVector& center = RDEFAULT_RVECTOR);
@@ -93,7 +103,7 @@ public:
         return NULL;
     }
 
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const;
+    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const;
     virtual QList<QSharedPointer<RShape> > getExploded() const;
 
     bool isSolid() const {
@@ -127,9 +137,11 @@ public:
         return originPoint;
     }
 
-    void setOriginPoint(const RVector& op) {
+    void setOriginPoint(const RVector& op, bool clearCustom = true) {
         originPoint = op;
-        clearCustomPattern();
+        if (clearCustom) {
+            clearCustomPattern();
+        }
     }
 
     QString getPatternName() const {
@@ -141,14 +153,27 @@ public:
         clearCustomPattern();
     }
 
-    void clearCustomPattern() {
-        pattern.clear();
-        update();
+    int getTransparency() const {
+        return transparency;
     }
+
+    void setTransparency(int t) {
+        transparency = t;
+    }
+
+    double getLength() const;
+    double getArea() const;
+
+    void clearCustomPattern();
 
     void newLoop();
     void cancelLoop();
-    void addBoundary(QSharedPointer<RShape> shape);
+    void addBoundary(QSharedPointer<RShape> shape, bool addAutoLoops = true);
+    void addBoundaryShape(QSharedPointer<RShape> shape, int loop) {
+        if (loop < boundary.length()) {
+            boundary[loop].append(shape);
+        }
+    }
     RPainterPath getBoundaryPath(double pixelSizeHint = RDEFAULT_MIN1) const;
     virtual QList<RPainterPath> getPainterPaths(bool draft = false, double pixelSizeHint = RDEFAULT_MIN1) const;
 
@@ -170,12 +195,35 @@ public:
 
     QList<QSharedPointer<RShape> > getLoopBoundary(int index) const;
 
-    QList<RPolyline> getBoundaryAsPolylines(double segmentLength) const;
+    QList<RPolyline> getBoundaryAsPolylines(double segmentLength = RDEFAULT_MIN1) const;
+
+    void autoCloseLoops() {
+        if (hatchProxy!=NULL) {
+            hatchProxy->autoCloseLoops(*this);
+        }
+    }
 
     int getComplexity() const;
 
     void setPattern(const RPattern& p) {
         pattern = p;
+    }
+
+    virtual RColor getColor() const {
+        RColor c = REntityData::getColor();
+        c.setAlpha(transparency);
+        return c;
+    }
+
+    virtual RColor getColor(const RColor& unresolvedColor, const QStack<REntity *>& blockRefStack) const {
+        RColor c = REntityData::getColor(unresolvedColor, blockRefStack);
+        c.setAlpha(transparency);
+        return c;
+    }
+    virtual RColor getColor(bool resolve, const QStack<REntity *>& blockRefStack) const {
+        RColor c = REntityData::getColor(resolve, blockRefStack);
+        c.setAlpha(transparency);
+        return c;
     }
 
     static bool hasProxy() {
@@ -208,6 +256,7 @@ private:
     double angle;
     QString patternName;
     RVector originPoint;
+    int transparency;
 
     /**
      * Hatch boundary, ordered by loops, in strictly defined order.

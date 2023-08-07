@@ -31,6 +31,7 @@
 #include "RVector.h"
 
 class RBox;
+class RLine;
 
 #ifndef RDEFAULT_MIN1
 #define RDEFAULT_MIN1 -1
@@ -66,6 +67,7 @@ public:
     }
 
     virtual void setZ(double z);
+    bool isFlat() const;
 
     virtual QList<RVector> getVectorProperties() const;
     virtual QList<double> getDoubleProperties() const;
@@ -77,24 +79,29 @@ public:
     bool prependShape(const RShape& shape);
     bool appendShape(const RShape& shape, bool prepend = false);
     bool appendShapeAuto(const RShape& shape);
+    bool appendShapeTrim(const RShape& shape);
+    bool closeTrim();
 
     void appendVertex(const RVector& vertex, double bulge = 0.0, double w1 = 0.0, double w2 = 0.0);
+    void appendVertex(double x, double y, double bulge = 0.0, double w1 = 0.0, double w2 = 0.0);
     void prependVertex(const RVector& vertex, double bulge = 0.0, double w1 = 0.0, double w2 = 0.0);
-    void insertVertex(int index, const RVector& vertex);
+    void insertVertex(int index, const RVector& vertex, double bulgeBefore = 0.0, double bulgeAfter = 0.0);
     void insertVertexAt(const RVector& point);
+    RVector insertVertexAtDistance(double dist);
     void removeFirstVertex();
     void removeLastVertex();
     void removeVertex(int index);
     void removeVerticesAfter(int index);
     void removeVerticesBefore(int index);
 
-    bool isEmpty() {
+    bool isEmpty() const {
         return countVertices()==0;
     }
 
     void setVertices(const QList<RVector>& vertices);
     QList<RVector> getVertices() const;
     void setVertexAt(int i, const RVector& v);
+    void moveVertexAt(int i, const RVector& offset);
     RVector getVertexAt(int i) const;
     int getVertexIndex(const RVector& v, double tolerance=RS::PointTolerance) const;
     RVector getLastVertex() const;
@@ -129,14 +136,15 @@ public:
     bool toLogicallyClosed(double tolerance=RS::PointTolerance);
     bool toLogicallyOpen();
 
-    QList<RVector> getSelfIntersectionPoints() const;
+    QList<RVector> getSelfIntersectionPoints(double tolerance=RS::PointTolerance) const;
 
     RS::Orientation getOrientation(bool implicitelyClosed = false) const;
     bool setOrientation(RS::Orientation orientation);
 
     RPolyline convertArcToLineSegments(int segments) const;
+    RPolyline convertArcToLineSegmentsLength(double segmentLength) const;
 
-    bool contains(const RVector& point, bool borderIsInside=false, double tolerance=RS::PointTolerance) const;
+    virtual bool contains(const RVector& point, bool borderIsInside=false, double tolerance=RS::PointTolerance) const;
     bool containsShape(const RShape& shape) const;
 
     RVector getPointInside() const;
@@ -147,6 +155,8 @@ public:
 
     void moveStartPoint(const RVector& pos);
     void moveEndPoint(const RVector& pos);
+
+    void moveSegmentAt(int i, const RVector& offset);
 
     virtual double getDirection1() const;
     virtual double getDirection2() const;
@@ -173,8 +183,10 @@ public:
     virtual QList<RVector> getEndPoints() const;
     virtual QList<RVector> getMiddlePoints() const;
     virtual QList<RVector> getCenterPoints() const;
+    virtual RVector getPointAtPercent(double p) const;
     virtual QList<RVector> getPointsWithDistanceToEnd(
         double distance, int from = RS::FromAny) const;
+    virtual QList<RVector> getPointCloud(double segmentLength) const;
 
     virtual double getAngleAt(double distance, RS::From from = RS::FromStart) const;
 
@@ -191,6 +203,7 @@ public:
     virtual bool scale(const RVector& scaleFactors, const RVector& center = RDEFAULT_RVECTOR);
     virtual bool mirror(const RLine& axis);
     virtual bool reverse();
+    virtual RPolyline getReversed() const;
     virtual bool stretch(const RPolyline& area, const RVector& offset);
 
     virtual QSharedPointer<RShape> getTransformed(const QTransform& transform) const;
@@ -203,6 +216,23 @@ public:
 
     virtual QList<QSharedPointer<RShape> > getExploded(int segments = RDEFAULT_MIN1) const;
     QList<RPolyline> getOutline() const;
+    QList<QPair<RPolyline, RPolyline> > getLeftRightOutline() const;
+    QList<RPolyline> getLeftOutline() const {
+        QList<QPair<RPolyline, RPolyline> > lr = getLeftRightOutline();
+        QList<RPolyline> ret;
+        for (int i=0; i<lr.length(); i++) {
+            ret.append(lr[i].first);
+        }
+        return ret;
+    }
+    QList<RPolyline> getRightOutline() const {
+        QList<QPair<RPolyline, RPolyline> > lr = getLeftRightOutline();
+        QList<RPolyline> ret;
+        for (int i=0; i<lr.length(); i++) {
+            ret.append(lr[i].second);
+        }
+        return ret;
+    }
     virtual bool isInterpolated() const {
         return false;
     }
@@ -214,9 +244,9 @@ public:
 
     static bool isStraight(double bulge);
 
-    RPainterPath toPainterPath() const;
+    RPainterPath toPainterPath(bool addOriginalShapes = false) const;
 
-    bool simplify(double angleTolerance = RS::AngleTolerance);
+    bool simplify(double tolerance = RS::PointTolerance);
     QList<RVector> verifyTangency(double toleranceMin = RS::AngleTolerance, double toleranceMax = M_PI_4);
 
     void stripWidths();
@@ -233,16 +263,23 @@ public:
             const RShape& trimmedShape2, RS::Ending ending2, int segmentIndex2,
             const RShape* cornerShape = NULL) const;
 
+    bool isConcave() const;
     QList<RVector> getConvexVertices(bool convex = true) const;
     QList<RVector> getConcaveVertices() const;
 
     QList<RPolyline> splitAtDiscontinuities(double tolerance) const;
+    QList<RPolyline> splitAtSegmentTypeChange() const;
 
     double getBaseAngle() const;
     double getWidth() const;
     bool setWidth(double v);
     double getHeight() const;
     bool setHeight(double v);
+
+    QList<RPolyline> morph(const RPolyline& target, int steps, RS::Easing easing = RS::Linear, bool zLinear = true, double customFactor = RNANDOUBLE) const;
+    RPolyline roundAllCorners(double radius) const;
+    RPolyline getPolygon(double segmentLength) const;
+    RPolyline getPolygonHull(double angle, double tolerance, bool inner = false) const;
 
     static bool hasProxy() {
         return polylineProxy!=NULL;
@@ -264,6 +301,16 @@ public:
     static RPolylineProxy* getPolylineProxy() {
         return polylineProxy;
     }
+
+#if QT_VERSION >= 0x060000
+    /**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */
+    RPolyline copy() const {
+        return *this;
+    }
+#endif
 
 protected:
     bool isLineSegment(int i) const;

@@ -46,6 +46,7 @@ StatusBar.init = function(basePath) {
     action.setWidgetNames(["ViewMenu", "!WidgetsToolBar", "!ViewToolsPanel"]);
 
     var statusBar = appWin.statusBar();
+    statusBar.objectName = "StatusBarWidget";
     var splitter = new QSplitter(statusBar);
     splitter.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed);
     splitter.setFixedHeight(40);
@@ -161,7 +162,7 @@ StatusBar.applyFont = function(widget) {
 StatusBar.prototype.beginEvent = function() {
     EAction.prototype.beginEvent.call(this);
 
-    if (QCoreApplication.arguments().contains("-no-show")) {
+    if (RSettings.getOriginalArguments().contains("-no-show")) {
         return;
     }
 

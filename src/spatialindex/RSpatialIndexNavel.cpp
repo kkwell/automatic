@@ -182,7 +182,7 @@ void RSpatialIndexNavel::bulkLoad(const QList<int>& ids, const QList<QList<RBox>
  * \param x2 higher value of the first dimension.
  * \param y2 higher value of the second dimension.
  * \param z2 higher value of the third dimension.
- * \param dataLength Legth of the data in bytes or 0.
+ * \param dataLength Length of the data in bytes or 0.
  * \param data Pointer to the data associated with the item. The
  *      index makes a deep copy of the data, the caller is responsible 
  *      for deleting the data. NULL indicates that the item data is stored
@@ -196,6 +196,13 @@ void RSpatialIndexNavel::addToIndex(
     //qDebug() << "RSpatialIndexNavel::addToIndex: id: " << id << ", pos: " << pos << ", " << x1 << "," << y1 << "/" << x2 << "," << y2;
 
     //qDebug() << "\tbefore: " << *this;
+
+    if (RMath::isNaN(x1) || RMath::isNaN(y1) || RMath::isNaN(z1) ||
+            RMath::isNaN(x2) || RMath::isNaN(y2) || RMath::isNaN(z2)) {
+
+        qWarning() << "trying to add NaN values to spatial index";
+        return;
+    }
 
     addToIndex(
         id, pos,

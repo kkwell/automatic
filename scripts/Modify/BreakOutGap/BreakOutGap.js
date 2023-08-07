@@ -2,7 +2,7 @@
  * Copyright (c) 2015 by Norbert Kolb. All rights reserved.
  */
 
-include("../Modify.js");
+include("scripts/Modify/Modify.js");
 
 /**
  * \class BreakOutGap
@@ -42,6 +42,7 @@ BreakOutGap.prototype.setState = function(state) {
 
     this.setCrosshairCursor();
 
+    var tr;
     var appWin = RMainWindowQt.getMainWindow();
     switch (this.state) {
         case BreakOutGap.State.ChoosingEntity:
@@ -50,7 +51,9 @@ BreakOutGap.prototype.setState = function(state) {
             this.pos = undefined;
             this.cutPos = undefined;
             this.getDocumentInterface().setClickMode(RAction.PickEntity);
-            this.setLeftMouseTip(qsTr("Choose line, arc or circle"));
+            tr = qsTr("Choose line, arc or circle");
+            this.setLeftMouseTip(tr);
+            this.setCommandPrompt(tr);
             this.setRightMouseTip(EAction.trCancel);
             EAction.showModificationTools();
             break;
@@ -58,7 +61,9 @@ BreakOutGap.prototype.setState = function(state) {
             this.pos = undefined;
             this.cutPos = undefined;
             this.getDocumentInterface().setClickMode(RAction.PickCoordinate);
-            this.setLeftMouseTip(qsTr("Specify point"));
+            tr = qsTr("Specify point");
+            this.setLeftMouseTip(tr);
+            this.setCommandPrompt(tr);
             this.setRightMouseTip(EAction.trBack);
             EAction.showSnapTools();
             break;
@@ -179,7 +184,7 @@ BreakOutGap.prototype.getOperation = function(preview) {
         var line2 = new RLine(points[0], shape2.getEndPoint());
         e = shapeToEntity(this.entity.getDocument(), line2);
         if (!isNull(e)) {
-            e.copyAttributesFrom(this.entity.data());
+            e.copyAttributesFrom(getPtr(this.entity));
             op.addObject(e, false);
         }
     } else if (isArcShape(this.shape)) {

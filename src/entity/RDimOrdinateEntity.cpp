@@ -22,6 +22,7 @@
 RPropertyTypeId RDimOrdinateEntity::PropertyCustom;
 RPropertyTypeId RDimOrdinateEntity::PropertyHandle;
 RPropertyTypeId RDimOrdinateEntity::PropertyProtected;
+RPropertyTypeId RDimOrdinateEntity::PropertyWorkingSet;
 RPropertyTypeId RDimOrdinateEntity::PropertyType;
 RPropertyTypeId RDimOrdinateEntity::PropertyBlock;
 RPropertyTypeId RDimOrdinateEntity::PropertyLayer;
@@ -40,8 +41,15 @@ RPropertyTypeId RDimOrdinateEntity::PropertyUpperTolerance;
 RPropertyTypeId RDimOrdinateEntity::PropertyLowerTolerance;
 RPropertyTypeId RDimOrdinateEntity::PropertyMeasuredValue;
 RPropertyTypeId RDimOrdinateEntity::PropertyFontName;
+//RPropertyTypeId RDimOrdinateEntity::PropertyArrow1Flipped;
+//RPropertyTypeId RDimOrdinateEntity::PropertyArrow2Flipped;
 
-RPropertyTypeId RDimOrdinateEntity::PropertyDimScale;
+//RPropertyTypeId RDimOrdinateEntity::PropertyExtLineFix;
+//RPropertyTypeId RDimOrdinateEntity::PropertyExtLineFixLength;
+
+RPropertyTypeId RDimOrdinateEntity::PropertyDimscale;
+RPropertyTypeId RDimOrdinateEntity::PropertyDimlfac;
+
 RPropertyTypeId RDimOrdinateEntity::PropertyDimBlockName;
 
 RPropertyTypeId RDimOrdinateEntity::PropertyOriginX;
@@ -67,42 +75,50 @@ RDimOrdinateEntity::~RDimOrdinateEntity() {
 }
 
 void RDimOrdinateEntity::init() {
-    RDimOrdinateEntity::PropertyCustom.generateId(typeid(RDimOrdinateEntity), RObject::PropertyCustom);
-    RDimOrdinateEntity::PropertyHandle.generateId(typeid(RDimOrdinateEntity), RObject::PropertyHandle);
-    RDimOrdinateEntity::PropertyProtected.generateId(typeid(RDimOrdinateEntity), RObject::PropertyProtected);
-    RDimOrdinateEntity::PropertyType.generateId(typeid(RDimOrdinateEntity), REntity::PropertyType);
-    RDimOrdinateEntity::PropertyBlock.generateId(typeid(RDimOrdinateEntity), REntity::PropertyBlock);
-    RDimOrdinateEntity::PropertyLayer.generateId(typeid(RDimOrdinateEntity), REntity::PropertyLayer);
-    RDimOrdinateEntity::PropertyLinetype.generateId(typeid(RDimOrdinateEntity), REntity::PropertyLinetype);
-    RDimOrdinateEntity::PropertyLinetypeScale.generateId(typeid(RDimOrdinateEntity), REntity::PropertyLinetypeScale);
-    RDimOrdinateEntity::PropertyLineweight.generateId(typeid(RDimOrdinateEntity), REntity::PropertyLineweight);
-    RDimOrdinateEntity::PropertyColor.generateId(typeid(RDimOrdinateEntity), REntity::PropertyColor);
-    RDimOrdinateEntity::PropertyDisplayedColor.generateId(typeid(RDimOrdinateEntity), REntity::PropertyDisplayedColor);
-    RDimOrdinateEntity::PropertyDrawOrder.generateId(typeid(RDimOrdinateEntity), REntity::PropertyDrawOrder);
+    RDimOrdinateEntity::PropertyCustom.generateId(RDimOrdinateEntity::getRtti(), RObject::PropertyCustom);
+    RDimOrdinateEntity::PropertyHandle.generateId(RDimOrdinateEntity::getRtti(), RObject::PropertyHandle);
+    RDimOrdinateEntity::PropertyProtected.generateId(RDimOrdinateEntity::getRtti(), RObject::PropertyProtected);
+    RDimOrdinateEntity::PropertyWorkingSet.generateId(RDimOrdinateEntity::getRtti(), RObject::PropertyWorkingSet);
+    RDimOrdinateEntity::PropertyType.generateId(RDimOrdinateEntity::getRtti(), REntity::PropertyType);
+    RDimOrdinateEntity::PropertyBlock.generateId(RDimOrdinateEntity::getRtti(), REntity::PropertyBlock);
+    RDimOrdinateEntity::PropertyLayer.generateId(RDimOrdinateEntity::getRtti(), REntity::PropertyLayer);
+    RDimOrdinateEntity::PropertyLinetype.generateId(RDimOrdinateEntity::getRtti(), REntity::PropertyLinetype);
+    RDimOrdinateEntity::PropertyLinetypeScale.generateId(RDimOrdinateEntity::getRtti(), REntity::PropertyLinetypeScale);
+    RDimOrdinateEntity::PropertyLineweight.generateId(RDimOrdinateEntity::getRtti(), REntity::PropertyLineweight);
+    RDimOrdinateEntity::PropertyColor.generateId(RDimOrdinateEntity::getRtti(), REntity::PropertyColor);
+    RDimOrdinateEntity::PropertyDisplayedColor.generateId(RDimOrdinateEntity::getRtti(), REntity::PropertyDisplayedColor);
+    RDimOrdinateEntity::PropertyDrawOrder.generateId(RDimOrdinateEntity::getRtti(), REntity::PropertyDrawOrder);
 
-    RDimOrdinateEntity::PropertyMiddleOfTextX.generateId(typeid(RDimOrdinateEntity), RDimensionEntity::PropertyMiddleOfTextX);
-    RDimOrdinateEntity::PropertyMiddleOfTextY.generateId(typeid(RDimOrdinateEntity), RDimensionEntity::PropertyMiddleOfTextY);
-    RDimOrdinateEntity::PropertyMiddleOfTextZ.generateId(typeid(RDimOrdinateEntity), RDimensionEntity::PropertyMiddleOfTextZ);
-    RDimOrdinateEntity::PropertyText.generateId(typeid(RDimOrdinateEntity), RDimensionEntity::PropertyText);
-    RDimOrdinateEntity::PropertyUpperTolerance.generateId(typeid(RDimOrdinateEntity), RDimensionEntity::PropertyUpperTolerance);
-    RDimOrdinateEntity::PropertyLowerTolerance.generateId(typeid(RDimOrdinateEntity), RDimensionEntity::PropertyLowerTolerance);
-    RDimOrdinateEntity::PropertyMeasuredValue.generateId(typeid(RDimOrdinateEntity), RDimensionEntity::PropertyMeasuredValue);
-    RDimOrdinateEntity::PropertyFontName.generateId(typeid(RDimOrdinateEntity), RDimensionEntity::PropertyFontName);
+    RDimOrdinateEntity::PropertyMiddleOfTextX.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyMiddleOfTextX);
+    RDimOrdinateEntity::PropertyMiddleOfTextY.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyMiddleOfTextY);
+    RDimOrdinateEntity::PropertyMiddleOfTextZ.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyMiddleOfTextZ);
+    RDimOrdinateEntity::PropertyText.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyText);
+    RDimOrdinateEntity::PropertyUpperTolerance.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyUpperTolerance);
+    RDimOrdinateEntity::PropertyLowerTolerance.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyLowerTolerance);
+    RDimOrdinateEntity::PropertyMeasuredValue.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyMeasuredValue);
+    RDimOrdinateEntity::PropertyFontName.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyFontName);
+    //RDimOrdinateEntity::PropertyArrow1Flipped.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyArrow1Flipped);
+    //RDimOrdinateEntity::PropertyArrow2Flipped.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyArrow2Flipped);
 
-    RDimOrdinateEntity::PropertyDimScale.generateId(typeid(RDimOrdinateEntity), RDimensionEntity::PropertyDimScale);
-    RDimOrdinateEntity::PropertyDimBlockName.generateId(typeid(RDimOrdinateEntity), RDimensionEntity::PropertyDimBlockName);
+    //RDimOrdinateEntity::PropertyExtLineFix.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyExtLineFix);
+    //RDimOrdinateEntity::PropertyExtLineFixLength.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyExtLineFixLength);
 
-    RDimOrdinateEntity::PropertyOriginX.generateId(typeid(RDimOrdinateEntity), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RDimOrdinateEntity::PropertyOriginY.generateId(typeid(RDimOrdinateEntity), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RDimOrdinateEntity::PropertyOriginZ.generateId(typeid(RDimOrdinateEntity), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "Z"));
+    RDimOrdinateEntity::PropertyDimscale.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyDimscale);
+    RDimOrdinateEntity::PropertyDimlfac.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyDimlfac);
 
-    RDimOrdinateEntity::PropertyOrdinate.generateId(typeid(RDimOrdinateEntity), "", QT_TRANSLATE_NOOP("REntity", "Ordinate"));
-    RDimOrdinateEntity::PropertyDefiningPointX.generateId(typeid(RDimOrdinateEntity), QT_TRANSLATE_NOOP("REntity", "Defining Point"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RDimOrdinateEntity::PropertyDefiningPointY.generateId(typeid(RDimOrdinateEntity), QT_TRANSLATE_NOOP("REntity", "Defining Point"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RDimOrdinateEntity::PropertyDefiningPointZ.generateId(typeid(RDimOrdinateEntity), QT_TRANSLATE_NOOP("REntity", "Defining Point"), QT_TRANSLATE_NOOP("REntity", "Z"));
-    RDimOrdinateEntity::PropertyLeaderEndPointX.generateId(typeid(RDimOrdinateEntity), QT_TRANSLATE_NOOP("REntity", "Leader End Point"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RDimOrdinateEntity::PropertyLeaderEndPointY.generateId(typeid(RDimOrdinateEntity), QT_TRANSLATE_NOOP("REntity", "Leader End Point"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RDimOrdinateEntity::PropertyLeaderEndPointZ.generateId(typeid(RDimOrdinateEntity), QT_TRANSLATE_NOOP("REntity", "Leader End Point"), QT_TRANSLATE_NOOP("REntity", "Z"));
+    RDimOrdinateEntity::PropertyDimBlockName.generateId(RDimOrdinateEntity::getRtti(), RDimensionEntity::PropertyDimBlockName);
+
+    RDimOrdinateEntity::PropertyOriginX.generateId(RDimOrdinateEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RDimOrdinateEntity::PropertyOriginY.generateId(RDimOrdinateEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RDimOrdinateEntity::PropertyOriginZ.generateId(RDimOrdinateEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Origin"), QT_TRANSLATE_NOOP("REntity", "Z"), false, RPropertyAttributes::Geometry);
+
+    RDimOrdinateEntity::PropertyOrdinate.generateId(RDimOrdinateEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Ordinate"), false, RPropertyAttributes::Geometry);
+    RDimOrdinateEntity::PropertyDefiningPointX.generateId(RDimOrdinateEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Defining Point"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RDimOrdinateEntity::PropertyDefiningPointY.generateId(RDimOrdinateEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Defining Point"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RDimOrdinateEntity::PropertyDefiningPointZ.generateId(RDimOrdinateEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Defining Point"), QT_TRANSLATE_NOOP("REntity", "Z"), false, RPropertyAttributes::Geometry);
+    RDimOrdinateEntity::PropertyLeaderEndPointX.generateId(RDimOrdinateEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Leader End Point"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RDimOrdinateEntity::PropertyLeaderEndPointY.generateId(RDimOrdinateEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Leader End Point"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RDimOrdinateEntity::PropertyLeaderEndPointZ.generateId(RDimOrdinateEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Leader End Point"), QT_TRANSLATE_NOOP("REntity", "Z"), false, RPropertyAttributes::Geometry);
 }
 
 bool RDimOrdinateEntity::setProperty(RPropertyTypeId propertyTypeId,
@@ -110,10 +126,10 @@ bool RDimOrdinateEntity::setProperty(RPropertyTypeId propertyTypeId,
     bool ret = RDimensionEntity::setProperty(propertyTypeId, value, transaction);
 
     if (PropertyOrdinate == propertyTypeId) {
-        if (value.type() == QVariant::Bool) {
+        if (RS::getMetaType(value) == RS::Bool) {
             ret = ret || RObject::setMember(getData().xType, value.toBool(), true);
             data.autoTextPos = true;
-        } else if (value.type() == QVariant::String) {
+        } else if (RS::getMetaType(value) == RS::String) {
             ret = ret || RObject::setMember(getData().xType, value.toString()=="X", true);
             data.autoTextPos = true;
         }
@@ -136,7 +152,7 @@ bool RDimOrdinateEntity::setProperty(RPropertyTypeId propertyTypeId,
 }
 
 QPair<QVariant, RPropertyAttributes> RDimOrdinateEntity::getProperty(
-        RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes) {
+        RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes, bool showOnRequest) {
     if (propertyTypeId == PropertyOrdinate) {
         if (humanReadable) {
             RPropertyAttributes attr;
@@ -168,7 +184,7 @@ QPair<QVariant, RPropertyAttributes> RDimOrdinateEntity::getProperty(
         return qMakePair(QVariant(data.leaderEndPoint.z), RPropertyAttributes());
     }
 
-    return RDimensionEntity::getProperty(propertyTypeId, humanReadable, noAttributes);
+    return RDimensionEntity::getProperty(propertyTypeId, humanReadable, noAttributes, showOnRequest);
 }
 
 void RDimOrdinateEntity::print(QDebug dbg) const {

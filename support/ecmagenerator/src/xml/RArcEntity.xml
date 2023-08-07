@@ -24,6 +24,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="getRtti" cppName="getRtti" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RS::EntityType" isPureVirtual="false" />
+    </method>
     <method name="getStaticPropertyTypeIds"
     cppName="getStaticPropertyTypeIds" specifier="public"
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
@@ -42,7 +46,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       </variant>
     </method>
     <method name="setProperty" cppName="setProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
         <arg type="RPropertyTypeId" typeName="RPropertyTypeId"
@@ -55,7 +59,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       </variant>
     </method>
     <method name="getProperty" cppName="getProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="QPair &lt; QVariant , RPropertyAttributes &gt;"
       isPureVirtual="false">
@@ -65,6 +69,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="humanReadable"
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="noAttributes"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
@@ -78,6 +84,26 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="forceSelected"
         hasDefault="true" default="false" isConst="false" />
+      </variant>
+    </method>
+    <method name="scaleNonUniform" cppName="scaleNonUniform"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="QSharedPointer &lt; REntity &gt;"
+      isPureVirtual="false">
+        <arg type="RVector &amp;" typeName="RVector"
+        name="scaleFactors" isConst="true" />
+        <arg type="RVector &amp;" typeName="RVector" name="center"
+        isConst="true" />
+      </variant>
+      <variant returnType="QSharedPointer &lt; REntity &gt;"
+      isPureVirtual="false">
+        <arg type="REntity &amp;" typeName="REntity" name="entity"
+        isConst="false" />
+        <arg type="RVector &amp;" typeName="RVector"
+        name="scaleFactors" isConst="true" />
+        <arg type="RVector &amp;" typeName="RVector" name="center"
+        isConst="true" />
       </variant>
     </method>
     <method name="getData" cppName="getData" specifier="public"
@@ -181,6 +207,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="true" />
       </variant>
     </method>
+    <method name="getSweep" cppName="getSweep" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="double" isPureVirtual="false" />
+    </method>
     <method name="getTrimEnd" cppName="getTrimEnd"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -252,6 +282,8 @@ xmlns:rs="http://www.ribbonsoft.com">
     isConst="false" isStatic="true" />
     <property name="PropertyProtected" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
+    <property name="PropertyWorkingSet" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
     <property name="PropertyType" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyBlock" type="RPropertyTypeId"
@@ -275,6 +307,12 @@ xmlns:rs="http://www.ribbonsoft.com">
     <property name="PropertyCenterY" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyCenterZ" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyMiddlePointX" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyMiddlePointY" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyMiddlePointZ" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyRadius" type="RPropertyTypeId"
     isConst="false" isStatic="true" />

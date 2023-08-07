@@ -7,7 +7,7 @@ xmlns:rs="http://www.ribbonsoft.com">
   xsi:noNamespaceSchemaLocation="../class.xsd" isCopyable="false"
   hasShell="false" sharedPointerSupport="true" isQObject="false"
   hasStreamOperator="false" isAbstract="false" isScriptable="true">
-    <baseClass name="RDimensionEntity" specifier="public" />
+    <baseClass name="RDimLinearEntity" specifier="public" />
     <constructor>
       <variant>
         <arg type="RDocument *" typeName="RDocument *"
@@ -19,6 +19,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     <method name="init" cppName="init" specifier="public"
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
+    </method>
+    <method name="getRtti" cppName="getRtti" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RS::EntityType" isPureVirtual="false" />
     </method>
     <method name="getStaticPropertyTypeIds"
     cppName="getStaticPropertyTypeIds" specifier="public"
@@ -32,7 +36,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       isPureVirtual="false" />
     </method>
     <method name="setProperty" cppName="setProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
         <arg type="RPropertyTypeId" typeName="RPropertyTypeId"
@@ -45,7 +49,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       </variant>
     </method>
     <method name="getProperty" cppName="getProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="QPair &lt; QVariant , RPropertyAttributes &gt;"
       isPureVirtual="false">
@@ -55,6 +59,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="humanReadable"
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="noAttributes"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
@@ -98,6 +104,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="RVector" isPureVirtual="false" />
     </method>
+    <method name="getAngle" cppName="getAngle" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="double" isPureVirtual="false" />
+    </method>
     <method name="print" cppName="print" specifier="protected"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
@@ -110,6 +120,8 @@ xmlns:rs="http://www.ribbonsoft.com">
     <property name="PropertyHandle" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyProtected" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyWorkingSet" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyType" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
@@ -143,9 +155,37 @@ xmlns:rs="http://www.ribbonsoft.com">
     isConst="false" isStatic="true" />
     <property name="PropertyMeasuredValue" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
-    <property name="PropertyLinearFactor" type="RPropertyTypeId"
+    <property name="PropertyDimscale" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
-    <property name="PropertyDimScale" type="RPropertyTypeId"
+    <property name="PropertyDimlfac" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimtxt" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimgap" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimasz" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimexe" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimexo" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimtad" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimtih" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimtsz" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimlunit" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimdec" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimdsep" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimzin" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyArchTick" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimclrt" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyDimBlockName" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
@@ -153,6 +193,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     isConst="false" isStatic="true" />
     <property name="PropertyFontName" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
+    <property name="PropertyArrow1Flipped" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyArrow2Flipped" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyExtLineFix" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyExtLineFixLength"
+    type="RPropertyTypeId" isConst="false" isStatic="true" />
     <property name="PropertyDimensionLinePosX"
     type="RPropertyTypeId" isConst="false" isStatic="true" />
     <property name="PropertyDimensionLinePosY"

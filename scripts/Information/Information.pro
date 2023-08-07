@@ -1,13 +1,12 @@
 TEMPLATE = subdirs
 SUBDIRS = \
-    ts \
+    dir \
     InfoAngle \
     InfoArcCircleArea \
     InfoArea \
     InfoDistanceEE \
     InfoDistanceEP \
     InfoDistancePP \
-    InfoPolylineArea \
     InfoPosition \
     InfoPositionRel \
     InfoPositionPol \

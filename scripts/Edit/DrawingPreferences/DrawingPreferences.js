@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Edit.js");
+include("scripts/Edit/Edit.js");
 include("../AbstractPreferences.js");
 
 function DrawingPreferences(guiAction, initialClassName) {
@@ -45,10 +45,10 @@ DrawingPreferences.init = function(basePath) {
     action.setRequiresDocument(true);
     action.setScriptFile(basePath + "/DrawingPreferences.js");
     action.setIcon(basePath + "/DrawingPreferences.svg");
-    action.setDefaultShortcut(new QKeySequence(Qt.ControlModifier + Qt.Key_I));
+    action.setDefaultShortcut(new QKeySequence("Ctrl+I"));
     action.setDefaultCommands(["drawingpreferences"]);
     action.setNoState();
     action.setGroupSortOrder(2800);
     action.setSortOrder(100);
-    action.setWidgetNames(["EditMenu"]);
+    action.setWidgetNames(["EditMenu", "!EditToolBar", "!EditToolsPanel", "!EditMatrixPanel"]);
 };

@@ -51,8 +51,11 @@ public:
     virtual bool isValid() const;
     virtual bool isSane() const;
 
+    virtual RBox getBoundingBox(bool ignoreEmpty) const;
+
     void setLeaderEndPoint(const RVector& p) {
         leaderEndPoint = p;
+        update();
     }
 
     RVector getLeaderEndPoint() const {
@@ -69,6 +72,7 @@ public:
 
     void setDefiningPoint(const RVector& p) {
         definingPoint = p;
+        update();
     }
 
     RVector getDefiningPoint() const {
@@ -77,10 +81,12 @@ public:
 
     void setMeasuringXAxis() {
         xType = true;
+        update();
     }
 
     void setMeasuringYAxis() {
         xType = false;
+        update();
     }
 
     bool isMeasuringXAxis() const {
@@ -89,7 +95,7 @@ public:
 
     virtual QList<RRefPoint> getReferencePoints(RS::ProjectionRenderingHint hint = RS::RenderTop) const;
 
-    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint);
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
     virtual bool move(const RVector& offset);
     virtual bool rotate(double rotation, const RVector& center);
@@ -97,9 +103,15 @@ public:
     virtual bool mirror(const RLine& axis);
     virtual bool stretch(const RPolyline& area, const RVector& offset);
 
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const;
+    //virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const;
     virtual double getMeasuredValue() const;
     virtual QString getAutoLabel() const;
+
+    virtual void to2D() {
+        RDimensionData::to2D();
+        definingPoint.z = 0.0;
+        leaderEndPoint.z = 0.0;
+    }
 
 private:
     /** Defining point (feature location) */

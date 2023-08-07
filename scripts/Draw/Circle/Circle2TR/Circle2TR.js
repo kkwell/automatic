@@ -131,6 +131,10 @@ Circle2TR.prototype.pickEntity = function(event, preview) {
 
     var shape = undefined;
     if (this.state!==Circle2TR.State.ChoosingSolution) {
+        if (!this.isEntitySnappable(entity)) {
+            // entity not on a snappable layer:
+            return;
+        }
         if (isNull(entity)) {
             return;
         }
@@ -165,10 +169,11 @@ Circle2TR.prototype.pickEntity = function(event, preview) {
         break;
 
     case Circle2TR.State.ChoosingShape2:
-        if (entityId!==this.entity2Id) {
+        // optimization breaks when choosing two segments of the same polyline:
+        //if (entityId!==this.entity2Id) {
             // force re-calculation:
             this.candidates = [];
-        }
+        //}
         this.entity2 = entity;
         this.entity2Id = entityId;
         this.shape2 = shape;
@@ -244,6 +249,9 @@ Circle2TR.prototype.getCircles2TR = function(preview) {
 
 Circle2TR.prototype.slotRadiusChanged = function(value) {
     this.radius = value;
+    // update candidates in case we are already choosing a solution:
+    this.candidates = [];
+    this.getCircles2TR(true);
     this.updatePreview(true);
 };
 

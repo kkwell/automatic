@@ -87,8 +87,6 @@
             
             REcmaHelper::registerFunction(&engine, proto, getProperty, "getProperty");
             
-            REcmaHelper::registerFunction(&engine, proto, isVisible, "isVisible");
-            
             REcmaHelper::registerFunction(&engine, proto, exportEntity, "exportEntity");
             
             REcmaHelper::registerFunction(&engine, proto, getTag, "getTag");
@@ -98,6 +96,8 @@
             REcmaHelper::registerFunction(&engine, proto, isInvisible, "isInvisible");
             
             REcmaHelper::registerFunction(&engine, proto, setInvisible, "setInvisible");
+            
+            REcmaHelper::registerFunction(&engine, proto, isSelectable, "isSelectable");
             
         engine.setDefaultPrototype(
             qMetaTypeId<RAttributeEntityPointer>(), *proto);
@@ -109,6 +109,8 @@
     // static methods:
     
             REcmaHelper::registerFunction(&engine, &ctor, init, "init");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getRtti, "getRtti");
             
             REcmaHelper::registerFunction(&engine, &ctor, getStaticPropertyTypeIds, "getStaticPropertyTypeIds");
             
@@ -125,6 +127,10 @@
             
             ctor.setProperty("PropertyProtected",
                 qScriptValueFromValue(&engine, RAttributeEntity::PropertyProtected),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyWorkingSet",
+                qScriptValueFromValue(&engine, RAttributeEntity::PropertyWorkingSet),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
             ctor.setProperty("PropertyType",
@@ -163,6 +169,10 @@
                 qScriptValueFromValue(&engine, RAttributeEntity::PropertyDrawOrder),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
+            ctor.setProperty("PropertyParentId",
+                qScriptValueFromValue(&engine, RAttributeEntity::PropertyParentId),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
             ctor.setProperty("PropertyAngle",
                 qScriptValueFromValue(&engine, RAttributeEntity::PropertyAngle),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
@@ -185,6 +195,10 @@
             
             ctor.setProperty("PropertyHeight",
                 qScriptValueFromValue(&engine, RAttributeEntity::PropertyHeight),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyWidth",
+                qScriptValueFromValue(&engine, RAttributeEntity::PropertyWidth),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
             ctor.setProperty("PropertyItalic",
@@ -225,6 +239,14 @@
             
             ctor.setProperty("PropertyInvisible",
                 qScriptValueFromValue(&engine, RAttributeEntity::PropertyInvisible),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyBackward",
+                qScriptValueFromValue(&engine, RAttributeEntity::PropertyBackward),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("PropertyUpsideDown",
+                qScriptValueFromValue(&engine, RAttributeEntity::PropertyUpsideDown),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
 
@@ -448,6 +470,45 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerAttributeEntity::init", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerAttributeEntity::getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerAttributeEntity::getRtti", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerAttributeEntity::getRtti";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RS::EntityType'
+    RS::EntityType cppResult =
+        RAttributeEntity::
+       getRtti();
+        // return type: RS::EntityType
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RAttributeEntity.getRtti().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerAttributeEntity::getRtti", context, engine);
             return result;
         }
          QScriptValue
@@ -1100,60 +1161,110 @@
 
 
         
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RAttributeEntity.getProperty().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaSharedPointerAttributeEntity::getProperty", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaSharedPointerAttributeEntity::isVisible
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaSharedPointerAttributeEntity::isVisible", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerAttributeEntity::isVisible";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RAttributeEntity* self = 
-                        getSelf("isVisible", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
     
     if( context->argumentCount() ==
-    0
+    4 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RPropertyTypeId */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(3).isBool()
+        ) /* type: bool */
+    
     ){
     // prepare arguments:
     
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RPropertyTypeId*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RPropertyTypeId*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RAttributeEntity: Argument 0 is not of type RPropertyTypeId.",
+                               context);                    
+                    }
+                    RPropertyTypeId 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a3 =
+                    (bool)
+                    
+                    context->argument( 3 ).
+                    toBool();
+                
     // end of arguments
 
     // call C++ function:
-    // return type 'bool'
-    bool cppResult =
+    // return type 'QPair < QVariant , RPropertyAttributes >'
+    QPair < QVariant , RPropertyAttributes > cppResult =
         
-               self->isVisible();
-        // return type: bool
-                // standard Type
-                result = QScriptValue(cppResult);
+               self->getProperty(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: QPair < QVariant , RPropertyAttributes >
+                // Pair of ...:
+                //result = REcmaHelper::pairToScriptValue(engine, cppResult);
+                QVariantList vl;
+                QVariant v;
+                
+                    // first type of pair is variant:
+                    if (QString(cppResult.first.typeName())=="RLineweight::Lineweight") {
+                        v.setValue((int)cppResult.first.value<RLineweight::Lineweight>());
+                    }
+                    else {
+                        v.setValue(cppResult.first);
+                    }
+                  
+
+                vl.append(v);
+                v.setValue(cppResult.second);
+                vl.append(v);
+                result = qScriptValueFromValue(engine, vl);
             
     } else
 
 
         
             {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RAttributeEntity.isVisible().",
+               return REcmaHelper::throwError("Wrong number/types of arguments for RAttributeEntity.getProperty().",
                    context);
             }
-            //REcmaHelper::functionEnd("REcmaSharedPointerAttributeEntity::isVisible", context, engine);
+            //REcmaHelper::functionEnd("REcmaSharedPointerAttributeEntity::getProperty", context, engine);
             return result;
         }
          QScriptValue
@@ -1503,6 +1614,55 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaSharedPointerAttributeEntity::setInvisible", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaSharedPointerAttributeEntity::isSelectable
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaSharedPointerAttributeEntity::isSelectable", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaSharedPointerAttributeEntity::isSelectable";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RAttributeEntity* self = 
+                        getSelf("isSelectable", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->isSelectable();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RAttributeEntity.isSelectable().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaSharedPointerAttributeEntity::isSelectable", context, engine);
             return result;
         }
          QScriptValue REcmaSharedPointerAttributeEntity::toString

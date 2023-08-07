@@ -51,10 +51,16 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getType
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         clone
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        mustAlwaysClone
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getDocument
@@ -81,7 +87,25 @@
         setProtected
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        isInvisible
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setInvisible
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isSelected
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setSelected
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         isUndone
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isWorkingSet
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setWorkingSet
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getPropertyTypeIds
@@ -97,9 +121,6 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         hasPropertyType
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
-        isSelectedForPropertyEditing
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         hasCustomProperties
@@ -148,6 +169,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         dump
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        validate
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

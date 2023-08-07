@@ -23,7 +23,7 @@
 #include <QPainter>
 #include <QSvgRenderer>
 #include <QToolBar>
-#include <QVectorIterator>
+//#include <QVectorIterator>
 
 #include "RDebug.h"
 #include "RGuiAction.h"
@@ -75,12 +75,30 @@ RGuiAction::RGuiAction(const QString& text, QObject* parent)
 
 
 RGuiAction::~RGuiAction() {
+    //qDebug() << "RGuiAction::~RGuiAction:" << scriptFile << " / sep: " << isSeparator();
+
     QList<QMap<QString, RGuiAction*>*> maps;
     maps << &actionsByCommand;
     maps << &actionsByShortcut;
     maps << &actionsByPrimaryCommand;
     maps << &actionsByScriptFile;
+#if QT_VERSION >= 0x060000
+    QMultiMap<QString, RGuiAction*>::iterator it;
+    QStringList keys;
+    for (it=actionsByGroup.begin(); it!=actionsByGroup.end(); it++) {
+        if (it.value() == this) {
+            keys << it.key();
+        }
+    }
+    keys.removeDuplicates();
+    QStringListIterator ki(keys);
+    while (ki.hasNext()) {
+        QString s = ki.next();
+        actionsByGroup.remove(s);
+    }
+#else
     maps << &actionsByGroup;
+#endif
 
     QListIterator<QMap<QString, RGuiAction*>*> vi(maps);
     while (vi.hasNext()) {
@@ -133,7 +151,7 @@ void RGuiAction::initTexts() {
             textAndKeycode += " (" + shortcutText + ")";
         }
 #else
-        // tab does not work for Mac OS X:
+        // tab does not work for macOS:
         if (textAndKeycode.indexOf(QLatin1Char('\t'))!=-1) {
             textAndKeycode = textAndKeycode.left(textAndKeycode.indexOf('\t'));
         }
@@ -144,7 +162,7 @@ void RGuiAction::initTexts() {
 
     QAction::setText(textAndKeycode);
 
-    QString tip = toolTip;
+    QString tip = oriToolTip;
     if (tip.isNull()) {
         tip = textOnly;
     }
@@ -167,7 +185,7 @@ QString RGuiAction::formatToolTip(const QString& text, const QString& shortcut) 
     sc.replace("Ctrl+", QString("%1").arg(QChar(0x2318)));
     sc.replace("Shift+", QString("%1").arg(QChar(0x21E7)));
 #endif
-    QString col = RSettings::hasDarkGuiBackground() ? "white" : "gray";
+    QString col = RSettings::hasDarkGuiBackground() ? "lightgray" : "gray";
 
     return QString("%1 <span style=\"color: " + col + "; font-size: small\">%2</span>")
                 .arg(text)
@@ -197,7 +215,42 @@ QString RGuiAction::getShortcutText() const {
     return shortcutText;
 }
 
+QString RGuiAction::getShortcutsString(const QString& separator, QKeySequence::SequenceFormat format) const {
+//    if (isNull(ksList)) {
+//        return "";
+//    }
+
+    QString ret = "";
+
+    QList<QKeySequence> scs = getShortcuts();
+    for (int i=0; i<scs.length(); ++i) {
+        ret += scs[i].toString(format);
+        if (i<scs.length()-1) {
+            ret += separator;
+        }
+    }
+
+    return ret;
+}
+
+void RGuiAction::updateIcons() {
+    QList<RGuiAction*> actions = getActions();
+    for (int i=0; i<actions.length(); i++) {
+        RGuiAction* action = actions[i];
+        if (action==NULL) {
+            continue;
+        }
+        action->updateIcon();
+    }
+}
+
+void RGuiAction::updateIcon() {
+    setIcon(iconFile);
+}
+
 void RGuiAction::setIcon(const QString& iconFile) {
+    this->iconFile = iconFile;
+
     // look up theme specific icon:
     QFileInfo fi(iconFile);
     QString iconFileName = fi.fileName();
@@ -270,7 +323,7 @@ bool RGuiAction::isIconDisabled() const {
 
 void RGuiAction::setDefaultShortcuts(const QList<QKeySequence>& shortcuts) {
     defaultShortcuts = shortcuts;
-    this->setShortcuts(shortcuts);
+    setShortcuts(shortcuts);
 }
 
 QList<QKeySequence> RGuiAction::getDefaultShortcuts() {
@@ -279,10 +332,47 @@ QList<QKeySequence> RGuiAction::getDefaultShortcuts() {
 
 void RGuiAction::setDefaultShortcut(const QKeySequence& shortcut) {
     defaultShortcuts = QList<QKeySequence>() << shortcut;
-    this->setShortcut(shortcut);
+    setShortcut(shortcut);
+}
+
+void RGuiAction::addShortcut(const QKeySequence& shortcut) {
+    if (shortcut.count()==1) {
+        return;
+    }
+
+    QString key;
+    for (int i=0; i<shortcut.count(); i++) {
+        key += QChar(shortcut[i]);
+    }
+    key = key.toLower();
+    actionsByShortcut.insert(key, this);
+
+    if (shortcutText.isEmpty()) {
+        // for first shortcut, set text to display in menu:
+        shortcutText = key.toUpper();
+    }
+
+    multiKeyShortcuts.append(shortcut);
+}
+
+void RGuiAction::removeShortcuts() {
+    QStringList toRemove;
+    QMap<QString, RGuiAction*>::iterator it;
+    for (it=actionsByShortcut.begin(); it!=actionsByShortcut.end(); it++) {
+        if (it.value()==this) {
+            toRemove.append(it.key());
+        }
+    }
+    for (int i=0; i<toRemove.length(); i++) {
+        actionsByShortcut.remove(toRemove[i]);
+    }
+    // TODO:
+    //multiKeyShortcuts.remove(shortcut);
 }
 
 void RGuiAction::setShortcut(const QKeySequence& shortcut) {
+    multiKeyShortcuts.clear();
+
     if (shortcut.count()==1) {
         // single key stroke (Ctrl-A, +, ...):
         // supported by Qt:
@@ -291,40 +381,64 @@ void RGuiAction::setShortcut(const QKeySequence& shortcut) {
     else {
         // multi key stroke (LI, ...):
         // broken in Qt, use own implementation:
-        QString key;
-        for (int i=0; i<shortcut.count(); i++) {
-            key += QChar(shortcut[i]);
-        }
-        key = key.toLower();
-        actionsByShortcut.insert(key, this);
-
-        if (shortcutText.isEmpty()) {
-            shortcutText = key.toUpper();
-        }
+        addShortcut(shortcut);
     }
 
-//    QAction::setShortcut(shortcut);
+    //QAction::setShortcut(shortcut);
+    //shortcuts = QList<QKeySequence>() << shortcut;
     initTexts();
 }
 
 void RGuiAction::setShortcuts(const QList<QKeySequence>& shortcuts) {
     QList<QKeySequence> scs;
 
+    multiKeyShortcuts.clear();
+
     for (int i=0; i<shortcuts.length(); i++) {
         if (shortcuts[i].count()==1) {
             scs.append(shortcuts[i]);
         }
         else {
-            setShortcut(shortcuts[i]);
+            //setShortcut(shortcuts[i]);
+            addShortcut(shortcuts[i]);
         }
     }
 
+    // only one key shortcuts are set here:
     QAction::setShortcuts(scs);
     initTexts();
 }
 
+void RGuiAction::setShortcutsFromStrings(const QStringList& shortcuts) {
+    QList<QKeySequence> scs;
+
+    multiKeyShortcuts.clear();
+
+    for (int i=0; i<shortcuts.length(); i++) {
+        QKeySequence ks(shortcuts[i]);
+        if (ks.count()==1) {
+            scs.append(ks);
+        }
+        else {
+            //setShortcut(shortcuts[i]);
+            addShortcut(ks);
+        }
+    }
+
+    // only one key shortcuts are set here:
+    QAction::setShortcuts(scs);
+    initTexts();
+}
+
+QList<QKeySequence> RGuiAction::getShortcuts() const {
+    QList<QKeySequence> ret;
+    ret = multiKeyShortcuts;
+    ret.append(shortcuts());
+    return ret;
+}
+
 void RGuiAction::setToolTip(const QString& tip) {
-    toolTip = tip;
+    oriToolTip = tip;
     initTexts();
 }
 
@@ -462,12 +576,13 @@ void RGuiAction::setWidgetNamesStatic(QAction* a, const QStringList& widgetNames
 }
 
 QStringList RGuiAction::getWidgetNamesStatic(const QAction* a) {
+    QStringList ret;
     if (a->property("WidgetNames").isValid()) {
-        return a->property("WidgetNames").toStringList();
+        ret = a->property("WidgetNames").toStringList();
     }
-    else {
-        return QStringList();
-    }
+    ret.append("!UserToolBar1");
+    ret.append("!UserToolBar2");
+    return ret;
 }
 
 void RGuiAction::setWidgetNames(const QStringList& widgetNames) {
@@ -564,6 +679,12 @@ void RGuiAction::addToWidget(QAction* action, QWidget* w) {
     }
 
     RWidget* rw = dynamic_cast<RWidget*>(w);
+
+    if (action->isSeparator() && rw!=NULL) {
+        // don't add separator to CAD toolbar (handled differently, by RColumnLayout):
+        delete action;
+        return;
+    }
 
     // find existing groups:
     QSet<int> groupSortOrders;
@@ -682,7 +803,8 @@ void RGuiAction::updateTransactionListener(RDocument* document, RTransaction* tr
             if (undoText.isEmpty()) {
                 undoText = "-";
             }
-            t.replace(QRegExp("\\[[^\\]]*\\]"), "[" + undoText + "]");
+            undoText.replace("\t", " ");
+            t.replace(QRegularExpression("\\[[^\\]]*\\]"), "[" + undoText + "]");
             setText(t);
         }
     }
@@ -694,7 +816,8 @@ void RGuiAction::updateTransactionListener(RDocument* document, RTransaction* tr
             if (redoText.isEmpty()) {
                 redoText = "-";
             }
-            t.replace(QRegExp("\\[[^\\]]*\\]"), "[" + redoText + "]");
+            redoText.replace("\t", " ");
+            t.replace(QRegularExpression("\\[[^\\]]*\\]"), "[" + redoText + "]");
             setText(t);
         }
     }
@@ -836,7 +959,7 @@ void RGuiAction::triggerGroupDefault(const QString& group) {
 }
 
 void RGuiAction::triggerGroupDefaults() {
-    QStringList groups = actionsByGroup.keys().toSet().toList();
+    QStringList groups = RS::unique<QString>(actionsByGroup.keys());
     for (int i=0; i<groups.length(); i++) {
         triggerGroupDefault(groups.at(i));
     }
@@ -915,7 +1038,12 @@ RGuiAction* RGuiAction::getByScriptFile(const QString& scriptFile) {
 
     QString relFilePath;
     if (scriptFile.startsWith(":")) {
-        relFilePath = scriptFile;
+        if (actionsByScriptFile.count(scriptFile) != 0) {
+            return actionsByScriptFile[scriptFile];
+        }
+
+        // strip : at start:
+        relFilePath = scriptFile.mid(1);
     }
     else {
         relFilePath = dir.relativeFilePath(scriptFile);

@@ -17,6 +17,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="getRtti" cppName="getRtti" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RS::EntityType" isPureVirtual="false" />
+    </method>
     <method name="getType" cppName="getType" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="RS::EntityType" isPureVirtual="false" />
@@ -25,11 +29,6 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="RDocumentVariables *"
       isPureVirtual="false" />
-    </method>
-    <method name="isSelectedForPropertyEditing"
-    cppName="isSelectedForPropertyEditing" specifier="public"
-    isStatic="false" isVirtual="true" isScriptOverwritable="true">
-      <variant returnType="bool" isPureVirtual="false" />
     </method>
     <method name="getProperty" cppName="getProperty"
     specifier="public" isStatic="false" isVirtual="true"
@@ -42,6 +41,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="humanReadable"
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="noAttributes"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
@@ -75,6 +76,12 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="RS::KnownVariable" typeName="RS::KnownVariable"
         name="key" isConst="false" />
         <arg type="RVector &amp;" typeName="RVector" name="value"
+        isConst="true" />
+      </variant>
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RS::KnownVariable" typeName="RS::KnownVariable"
+        name="key" isConst="false" />
+        <arg type="RColor &amp;" typeName="RColor" name="value"
         isConst="true" />
       </variant>
       <variant returnType="void" isPureVirtual="false">
@@ -164,6 +171,19 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="true" />
       </variant>
     </method>
+    <method name="addAutoVariable" cppName="addAutoVariable"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QString" isPureVirtual="false">
+        <arg type="double" typeName="double" name="value"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="getAutoVariables" cppName="getAutoVariables"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QStringList" isPureVirtual="false" />
+    </method>
     <method name="print" cppName="print" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
@@ -185,5 +205,7 @@ xmlns:rs="http://www.ribbonsoft.com">
     isConst="false" isStatic="true" />
     <property name="PropertyDimensionFont" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
+    <property name="PropertyWorkingSetBlockReferenceId"
+    type="RPropertyTypeId" isConst="false" isStatic="true" />
   </class>
 </unit>

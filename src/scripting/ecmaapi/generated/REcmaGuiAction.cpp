@@ -113,11 +113,19 @@
             
             REcmaHelper::registerFunction(&engine, proto, getToolTip, "getToolTip");
             
+            REcmaHelper::registerFunction(&engine, proto, addShortcut, "addShortcut");
+            
+            REcmaHelper::registerFunction(&engine, proto, removeShortcuts, "removeShortcuts");
+            
             REcmaHelper::registerFunction(&engine, proto, setShortcut, "setShortcut");
             
             REcmaHelper::registerFunction(&engine, proto, setDefaultShortcut, "setDefaultShortcut");
             
             REcmaHelper::registerFunction(&engine, proto, setShortcuts, "setShortcuts");
+            
+            REcmaHelper::registerFunction(&engine, proto, setShortcutsFromStrings, "setShortcutsFromStrings");
+            
+            REcmaHelper::registerFunction(&engine, proto, getShortcuts, "getShortcuts");
             
             REcmaHelper::registerFunction(&engine, proto, setDefaultShortcuts, "setDefaultShortcuts");
             
@@ -126,6 +134,8 @@
             REcmaHelper::registerFunction(&engine, proto, setShortcutText, "setShortcutText");
             
             REcmaHelper::registerFunction(&engine, proto, getShortcutText, "getShortcutText");
+            
+            REcmaHelper::registerFunction(&engine, proto, getShortcutsString, "getShortcutsString");
             
             REcmaHelper::registerFunction(&engine, proto, setGroupSortOrder, "setGroupSortOrder");
             
@@ -142,6 +152,8 @@
             REcmaHelper::registerFunction(&engine, proto, addToMenu, "addToMenu");
             
             REcmaHelper::registerFunction(&engine, proto, addToToolBar, "addToToolBar");
+            
+            REcmaHelper::registerFunction(&engine, proto, updateIcon, "updateIcon");
             
             REcmaHelper::registerFunction(&engine, proto, setIcon, "setIcon");
             
@@ -227,6 +239,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, updateTransactionListener, "updateTransactionListener");
             
+            REcmaHelper::registerFunction(&engine, proto, setCurrentBlock, "setCurrentBlock");
+            
             REcmaHelper::registerFunction(&engine, proto, updateSelectionListener, "updateSelectionListener");
             
             REcmaHelper::registerFunction(&engine, proto, updateFocus, "updateFocus");
@@ -240,8 +254,6 @@
             REcmaHelper::registerFunction(&engine, proto, setWidgetNames, "setWidgetNames");
             
             REcmaHelper::registerFunction(&engine, proto, getWidgetNames, "getWidgetNames");
-            
-            REcmaHelper::registerFunction(&engine, proto, slotTrigger, "slotTrigger");
             
         engine.setDefaultPrototype(
             qMetaTypeId<RGuiAction*>(), *proto);
@@ -278,6 +290,8 @@
             REcmaHelper::registerFunction(&engine, &ctor, addToWidget, "addToWidget");
             
             REcmaHelper::registerFunction(&engine, &ctor, removeFromWidget, "removeFromWidget");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, updateIcons, "updateIcons");
             
             REcmaHelper::registerFunction(&engine, &ctor, triggerGroupDefault, "triggerGroupDefault");
             
@@ -807,6 +821,115 @@
             return result;
         }
          QScriptValue
+        REcmaGuiAction::addShortcut
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGuiAction::addShortcut", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGuiAction::addShortcut";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGuiAction* self = 
+                        getSelf("addShortcut", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QKeySequence */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    QKeySequence*
+                    ap0 =
+                    qscriptvalue_cast<
+                    QKeySequence*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RGuiAction: Argument 0 is not of type QKeySequence*.",
+                               context);                    
+                    }
+                    QKeySequence& a0 = *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->addShortcut(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGuiAction.addShortcut().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGuiAction::addShortcut", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGuiAction::removeShortcuts
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGuiAction::removeShortcuts", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGuiAction::removeShortcuts";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGuiAction* self = 
+                        getSelf("removeShortcuts", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->removeShortcuts();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGuiAction.removeShortcuts().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGuiAction::removeShortcuts", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaGuiAction::setShortcut
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -966,7 +1089,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < QKeySequence >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -990,6 +1113,111 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaGuiAction::setShortcuts", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGuiAction::setShortcutsFromStrings
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGuiAction::setShortcutsFromStrings", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGuiAction::setShortcutsFromStrings";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGuiAction* self = 
+                        getSelf("setShortcutsFromStrings", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setShortcutsFromStrings(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGuiAction.setShortcutsFromStrings().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGuiAction::setShortcutsFromStrings", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGuiAction::getShortcuts
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGuiAction::getShortcuts", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGuiAction::getShortcuts";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGuiAction* self = 
+                        getSelf("getShortcuts", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < QKeySequence >'
+    QList < QKeySequence > cppResult =
+        
+               self->getShortcuts();
+        // return type: QList < QKeySequence >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGuiAction.getShortcuts().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGuiAction::getShortcuts", context, engine);
             return result;
         }
          QScriptValue
@@ -1022,7 +1250,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < QKeySequence >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -1199,6 +1427,142 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaGuiAction::getShortcutText", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGuiAction::getShortcutsString
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGuiAction::getShortcutsString", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGuiAction::getShortcutsString";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGuiAction* self = 
+                        getSelf("getShortcutsString", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        
+               self->getShortcutsString();
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        
+               self->getShortcutsString(a0);
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: QKeySequence::SequenceFormat */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+                    // argument is reference
+                    QKeySequence::SequenceFormat*
+                    ap1 =
+                    qscriptvalue_cast<
+                    QKeySequence::SequenceFormat*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if( ap1 == NULL ){
+                           return REcmaHelper::throwError("RGuiAction: Argument 1 is not of type QKeySequence::SequenceFormat*.",
+                               context);                    
+                    }
+                    QKeySequence::SequenceFormat& a1 = *ap1;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        
+               self->getShortcutsString(a0
+        ,
+    a1);
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGuiAction.getShortcutsString().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGuiAction::getShortcutsString", context, engine);
             return result;
         }
          QScriptValue
@@ -2455,6 +2819,84 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaGuiAction::removeFromWidget", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGuiAction::updateIcons
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGuiAction::updateIcons", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGuiAction::updateIcons";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    RGuiAction::
+       updateIcons();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGuiAction.updateIcons().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGuiAction::updateIcons", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGuiAction::updateIcon
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGuiAction::updateIcon", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGuiAction::updateIcon";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGuiAction* self = 
+                        getSelf("updateIcon", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->updateIcon();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGuiAction.updateIcon().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGuiAction::updateIcon", context, engine);
             return result;
         }
          QScriptValue
@@ -4248,7 +4690,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QStringList
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -4304,7 +4746,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QStringList
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5369,6 +5811,68 @@
             return result;
         }
          QScriptValue
+        REcmaGuiAction::setCurrentBlock
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGuiAction::setCurrentBlock", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGuiAction::setCurrentBlock";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGuiAction* self = 
+                        getSelf("setCurrentBlock", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RDocument * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    RDocument * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<RDocument >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RGuiAction: Argument 0 is not of type RDocument *RDocument *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setCurrentBlock(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGuiAction.setCurrentBlock().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGuiAction::setCurrentBlock", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaGuiAction::updateSelectionListener
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -5674,7 +6178,7 @@
             toQObject()
             );
         
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QStringList
                     a1;
                     REcmaHelper::fromScriptValue(
@@ -5785,7 +6289,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QStringList
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5858,87 +6362,6 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaGuiAction::getWidgetNames", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaGuiAction::slotTrigger
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaGuiAction::slotTrigger", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaGuiAction::slotTrigger";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RGuiAction* self = 
-                        getSelf("slotTrigger", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    0
-    ){
-    // prepare arguments:
-    
-    // end of arguments
-
-    // call C++ function:
-    // return type 'bool'
-    bool cppResult =
-        
-               self->slotTrigger();
-        // return type: bool
-                // standard Type
-                result = QScriptValue(cppResult);
-            
-    } else
-
-
-        
-    
-    if( context->argumentCount() ==
-    1 && (
-            context->argument(0).isString()
-        ) /* type: QString */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isStandardType
-                    QString
-                    a0 =
-                    (QString)
-                    
-                    context->argument( 0 ).
-                    toString();
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'bool'
-    bool cppResult =
-        
-               self->slotTrigger(a0);
-        // return type: bool
-                // standard Type
-                result = QScriptValue(cppResult);
-            
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RGuiAction.slotTrigger().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaGuiAction::slotTrigger", context, engine);
             return result;
         }
          QScriptValue REcmaGuiAction::toString

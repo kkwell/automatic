@@ -21,9 +21,10 @@
 
 RLeaderData::RLeaderData()
     : arrowHead(true),
-      dimaszOverride(0.0),
-      dimScaleOverride(0.0),
-      dimLeaderBlockId(REntity::INVALID_ID) {
+      dimasz(-1.0),
+      dimscale(-1.0),
+      dimLeaderBlockId(REntity::INVALID_ID),
+      splineShaped(false) {
 }
 
 RLeaderData::RLeaderData(RDocument* document, const RLeaderData& data)
@@ -37,49 +38,16 @@ RLeaderData::RLeaderData(RDocument* document, const RLeaderData& data)
 
 RLeaderData::RLeaderData(const RPolyline& polyline, bool arrowHead)
     : RPolyline(polyline),
-      arrowHead(arrowHead), dimaszOverride(-1), dimScaleOverride(1.0), dimLeaderBlockId(REntity::INVALID_ID) {
+      arrowHead(arrowHead),
+      dimasz(-1.0),
+      dimscale(-1.0),
+      dimLeaderBlockId(REntity::INVALID_ID),
+      splineShaped(false) {
 
-}
-
-void RLeaderData::setDimaszOverride(double v) {
-    dimaszOverride = v;
-}
-
-double RLeaderData::getDimasz() const {
-    double dimasz = 2.5;
-
-    if (document!=NULL) {
-        dimasz = document->getKnownVariable(RS::DIMASZ, dimasz).toDouble();
-    }
-    else {
-        qWarning() << "RLeaderData::getDimasz: no document set";
-    }
-
-    return dimasz * getDimScale();
-}
-
-void RLeaderData::setDimScaleOverride(double v) {
-    dimScaleOverride = v;
-}
-
-double RLeaderData::getDimScale(bool fromDocument) const {
-    double ret = dimScaleOverride;
-
-    if (document!=NULL && fromDocument && RMath::fuzzyCompare(ret, 0.0)) {
-        ret = document->getKnownVariable(RS::DIMSCALE, 1.0).toDouble();
-    }
-
-    return ret;
 }
 
 void RLeaderData::scaleVisualProperties(double scaleFactor) {
-    if (dimScaleOverride>RS::PointTolerance) {
-        setDimScaleOverride(dimScaleOverride * scaleFactor);
-    }
-    else {
-        double s = getDimScale();
-        setDimScaleOverride(scaleFactor * s);
-    }
+    setDimscale(getDimscale() * scaleFactor);
 }
 
 void RLeaderData::setArrowHead(bool on) {
@@ -114,8 +82,8 @@ QList<RRefPoint> RLeaderData::getReferencePoints(RS::ProjectionRenderingHint hin
     return RRefPoint::toRefPointList(getVertices());
 }
 
-bool RLeaderData::moveReferencePoint(const RVector& referencePoint,
-        const RVector& targetPoint) {
+bool RLeaderData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers) {
+    Q_UNUSED(modifiers)
 
     bool ret = false;
 
@@ -144,6 +112,19 @@ bool RLeaderData::stretch(const RPolyline &area, const RVector &offset) {
     return ret;
 }
 
+QList<QSharedPointer<RShape> > RLeaderData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment, QList<RObject::Id>* entityIds) const {
+    Q_UNUSED(queryBox)
+    Q_UNUSED(ignoreComplex)
+    Q_UNUSED(segment)
+
+    QList<QSharedPointer<RShape> > ret;
+    ret << QSharedPointer<RShape>(new RPolyline(*this));
+    if (arrowHead) {
+        ret << QSharedPointer<RShape>(new RTriangle(getArrowShape()));
+    }
+    return ret;
+}
+
 RTriangle RLeaderData::getArrowShape() const {
     RVector p = getStartPoint();
     double direction = getDirection1() + M_PI;
@@ -151,7 +132,7 @@ RTriangle RLeaderData::getArrowShape() const {
     return RTriangle::createArrow(p, direction, dimasz);
 }
 
-bool RLeaderData::updateArrowHead() {
+bool RLeaderData::updateArrowHead() const {
     if (arrowHead && !canHaveArrowHead()) {
         arrowHead = false;
         return true;
@@ -166,4 +147,10 @@ REntity::Id RLeaderData::getDimLeaderBlockId() const {
 
 void RLeaderData::setDimLeaderBlockId(REntity::Id id) {
     dimLeaderBlockId = id;
+}
+
+void RLeaderData::update() const {
+    REntityData::update();
+
+    updateArrowHead();
 }

@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2011-2018 by Andrew Mustun. All rights reserved.
- * 
+ *
  * This file is part of the QCAD project.
  *
  * QCAD is free software: you can redistribute it and/or modify
@@ -22,12 +22,20 @@
 
 #include <QString>
 
+#if QT_VERSION >= 0x060000
+#include <QStringDecoder>
+#endif
+
 #include "dxf_global.h"
+
+#include <QColor>
 
 #include "RS.h"
 #include "RColor.h"
 #include "RLineweight.h"
 #include "RLinetypePattern.h"
+
+class RDocument;
 
 /**
  * \brief DXF support tools, mainly for QCAD 2 DXF imports.
@@ -48,8 +56,11 @@ public:
 
 public:
     RDxfServices();
+    ~RDxfServices();
 
     void reset();
+
+    static QString getSafeBlockName(QString& blockName);
 
     void fixBlockName(QString& blockName);
     void fixLayerName(QString& layerName);
@@ -98,6 +109,21 @@ public:
 
     void fixVersion2HatchData(QString& patternName, double& angle, double& scale, bool solid) const;
 
+#if QT_VERSION >= 0x060000
+    /**
+     * \nonscriptable
+     */
+    QStringDecoder* getCodec() const {
+        return codec;
+    }
+
+    /**
+     * \nonscriptable
+     */
+    void setCodec(QStringDecoder* codec) {
+        this->codec = codec;
+    }
+#else
     QTextCodec* getCodec() const {
         return codec;
     }
@@ -105,6 +131,7 @@ public:
     void setCodec(QTextCodec* codec) {
         this->codec = codec;
     }
+#endif
 
     /**
      * \nonscriptable
@@ -135,6 +162,12 @@ public:
 
     static void autoFixLinetypePattern(RLinetypePattern& pattern);
 
+    static int getFileQCADVersion(const RDocument& doc);
+
+    static void initAci();
+    static int getAci(const RColor& col);
+    static RColor getColor(unsigned int index);
+
 private:
     bool version2GotDIMZIN;
     bool version2GotDIMAZIN;
@@ -148,7 +181,14 @@ private:
     QMap<QString, QString> version2TextFonts;
     QMap<QString, QString> version2DimensionLabels;
 
+    static QMap<unsigned int, QRgb> aci;
+    static QMap<QRgb, unsigned int> revAci;
+
+#if QT_VERSION >= 0x060000
+    QStringDecoder* codec;
+#else
     QTextCodec* codec;
+#endif
 };
 
 Q_DECLARE_METATYPE(RDxfServices::Type)

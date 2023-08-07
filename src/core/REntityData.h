@@ -58,6 +58,8 @@ class RExporter;
  * entity to provide similar behavior (e.g. a wall might
  * behave similar like a line entity).
  *
+ * \TODO derive from RObjectData with flags for selection status etc.
+ *
  * \scriptable
  * \sharedPointerSupport
  * \ingroup core
@@ -108,19 +110,29 @@ public:
      * \param ignoreComplex Ignore complex shapes and explode those into simple shapes
      * \param segment Split up splines into spline segments
      */
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const {
+    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const {
         Q_UNUSED(queryBox)
         Q_UNUSED(ignoreComplex)
         Q_UNUSED(segment)
+        Q_UNUSED(entityIds)
 
         return QList<QSharedPointer<RShape> >();
+    }
+
+    /**
+     * Convenience function for scripts.
+     */
+    RObject::Id getClosestSubEntityId(const RVector& pos, double range, bool ignoreComplex) const {
+        RObject::Id ret;
+        QSharedPointer<RShape> shape = getClosestShape(pos, range, ignoreComplex, &ret);
+        return ret;
     }
 
     /**
      * \return The one shape that is part of this entity which is the
      *      closest to the given position.
      */
-    virtual QSharedPointer<RShape> getClosestShape(const RVector& pos, double range = RNANDOUBLE, bool ignoreComplex = false) const;
+    virtual QSharedPointer<RShape> getClosestShape(const RVector& pos, double range = RNANDOUBLE, bool ignoreComplex = false, RObject::Id* subEntityId = NULL) const;
 
     virtual RShape* castToShape() {
         return NULL;
@@ -134,6 +146,8 @@ public:
     }
 
     virtual RBox getBoundingBox(bool ignoreEmpty=false) const;
+
+    void copyAttributesFrom(const REntityData& entityData, bool copyBlockId = true);
 
     virtual void to2D();
     virtual void setZ(double z);
@@ -185,6 +199,20 @@ public:
      */
     virtual void setSelected(bool on) {
         selectionStatus = on;
+    }
+
+    /**
+     * \return True if the entity is currently selected to be added to the working set.
+     */
+    virtual bool isSelectedWorkingSet() const {
+        return selectionStatusWorkingSet;
+    }
+
+    /**
+     * Selects or deselects this entity for addition to the current working set.
+     */
+    virtual void setSelectedWorkingSet(bool on) {
+        selectionStatusWorkingSet = on;
     }
 
     /**
@@ -287,6 +315,7 @@ public:
         return color;
     }
 
+    virtual RColor getColor(const RColor& unresolvedColor, const QStack<REntity *>& blockRefStack) const;
     virtual RColor getColor(bool resolve, const QStack<REntity *>& blockRefStack) const;
 
     virtual RColor getDisplayColor() {
@@ -300,7 +329,9 @@ public:
      * snap to reference points.
      * Default implementation returns same as getReferencePoints().
      */
-    virtual QList<RRefPoint> getInternalReferencePoints(RS::ProjectionRenderingHint hint=RS::RenderTop) const {
+    virtual QList<RRefPoint> getInternalReferencePoints(RS::ProjectionRenderingHint hint=RS::RenderTop, QList<RObject::Id>* subEntityIds = NULL) const {
+        Q_UNUSED(subEntityIds)
+
         return getReferencePoints(hint);
     }
 
@@ -312,14 +343,15 @@ public:
     virtual QList<RRefPoint> getReferencePoints(RS::ProjectionRenderingHint hint=RS::RenderTop) const = 0;
 
     virtual RVector getPointOnEntity() const;
-    virtual QList<RVector> getEndPoints(const RBox& queryBox = RDEFAULT_RBOX) const;
-    virtual QList<RVector> getMiddlePoints(const RBox& queryBox = RDEFAULT_RBOX) const;
-    virtual QList<RVector> getCenterPoints(const RBox& queryBox = RDEFAULT_RBOX) const;
+    virtual QList<RVector> getEndPoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const;
+    virtual QList<RVector> getMiddlePoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const;
+    virtual QList<RVector> getCenterPoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const;
+    virtual QList<RVector> getArcReferencePoints(const RBox& queryBox = RDEFAULT_RBOX) const;
     virtual QList<RVector> getPointsWithDistanceToEnd(
-        double distance, int from = RS::FromAny, const RBox& queryBox = RDEFAULT_RBOX) const;
+        double distance, int from = RS::FromAny, const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const;
 
     virtual RVector getClosestPointOnEntity(const RVector& point,
-        double range=RNANDOUBLE, bool limited=true) const;
+        double range=RNANDOUBLE, bool limited=true, RObject::Id* subEntityId = NULL) const;
 
 //    /**
 //     * Override to disable intersection point
@@ -330,7 +362,8 @@ public:
 
     virtual QList<RVector> getIntersectionPoints(
             const REntityData& other, bool limited = true, bool same = false,
-            const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = true) const;
+            const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = true,
+            QList<QPair<RObject::Id, RObject::Id> >* entityIds = NULL) const;
     virtual QList<RVector> getIntersectionPoints(
             const RShape& shape, bool limited = true,
             const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = true) const;
@@ -352,15 +385,23 @@ public:
     virtual bool intersectsWith(const RShape& shape) const;
 
     /**
+     * Called when user clicks a reference point.
+     *
+     * \return True if clicking the reference point had any immediate effect.
+     */
+    virtual bool clickReferencePoint(const RVector& referencePoint) {
+        Q_UNUSED(referencePoint)
+        return false;
+    }
+
+    /**
      * Moves the given reference point to the given target point or does nothing
      * if this entity has no reference point as the given location.
      *
      * \return True if a reference point has been moved successfully,
      *        false otherwise.
      */
-    virtual bool moveReferencePoint(
-        const RVector& referencePoint, const RVector& targetPoint
-    ) = 0;
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier) = 0;
 
     virtual bool move(const RVector& offset);
     virtual bool rotate(double rotation, const RVector& center = RDEFAULT_RVECTOR);
@@ -388,6 +429,7 @@ protected:
     RDocument* document;
     bool updatesEnabled;
     bool selectionStatus;
+    bool selectionStatusWorkingSet;
     /** Block auto updates is true during imports, undo and redo. */
     bool autoUpdatesBlocked;
     int drawOrder;

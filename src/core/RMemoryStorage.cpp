@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with QCAD.
  */
-#include <QRegExp>
+
+#include <QtGlobal>
 
 #include "RMemoryStorage.h"
 #include "RSettings.h"
@@ -28,7 +29,9 @@ RMemoryStorage::RMemoryStorage() :
     //boundingBoxIgnoreHiddenLayers(false),
     //boundingBoxIgnoreEmpty(false),
     inTransaction(false),
-    selectedEntityMapDirty(true) {
+    selectedEntityMapDirty(true),
+    visibleEntityMapDirty(true),
+    selectedLayerMapDirty(true) {
 
     setLastTransactionId(-1);
 }
@@ -51,18 +54,27 @@ void RMemoryStorage::clear() {
     entityMap.clear();
     selectedEntityMap.clear();
     selectedEntityMapDirty = true;
+    visibleEntityMap.clear();
+    visibleEntityMapDirty = true;
+    selectedLayerMap.clear();
+    selectedLayerMapDirty = true;
     blockEntityMap.clear();
     blockMap.clear();
+    typeObjectMap.clear();
     layerMap.clear();
+    layerNameMap.clear();
+    layerStateMap.clear();
     layoutMap.clear();
     linetypeMap.clear();
     childMap.clear();
     transactionMap.clear();
-    documentVariables.clear();
     variables.clear();
     variableCaseMap.clear();
     if (!documentVariables.isNull()) {
         documentVariables->clear();
+    }
+    if (!dimStyle.isNull()) {
+        dimStyle.clear();
     }
     //linetypeScale = 1.0;
     setLastTransactionId(-1);
@@ -72,6 +84,7 @@ void RMemoryStorage::setCurrentBlock(RBlock::Id blockId) {
     RStorage::setCurrentBlock(blockId);
     boundingBoxDirty = true;
     clearSelectionCache();
+    clearVisibleCache();
 }
 
 /*
@@ -93,6 +106,30 @@ QList<REntity::Id> RMemoryStorage::orderBackToFront(const QSet<REntity::Id>& ent
 bool RMemoryStorage::isSelected(REntity::Id entityId) {
     QSharedPointer<REntity> e = queryEntityDirect(entityId);
     return (!e.isNull() && e->isSelected());
+}
+
+bool RMemoryStorage::isSelectedWorkingSet(REntity::Id entityId) {
+    QSharedPointer<REntity> e = queryEntityDirect(entityId);
+    return (!e.isNull() && e->isSelectedWorkingSet());
+}
+
+bool RMemoryStorage::isEntityVisible(const REntity& entity) const {
+    updateVisibleCache();
+    REntity::Id id = entity.getId();
+    // query visibility cache:
+    if (visibleEntityMap.contains(id)) {
+        return true;
+    }
+    return false;
+
+    //qDebug() << "RMemoryStorage::isEntityVisible: not cached";
+
+    // not in cache, update cache (slow):
+//    bool vis = RStorage::isEntityVisible(entity);
+//    if (vis) {
+//        visibleEntityMap.insert(id, queryEntityDirect(id));
+//    }
+//    return vis;
 }
 
 void RMemoryStorage::beginTransaction() {
@@ -129,11 +166,11 @@ void RMemoryStorage::rollbackTransaction() {
     //Q_ASSERT(false);
 }
 
-QSet<RObject::Id> RMemoryStorage::queryAllObjects() {
+QSet<RObject::Id> RMemoryStorage::queryAllObjects() const {
     //result = QSet<RObject::Id>::fromList(objectMap.keys());
     QSet<RObject::Id> result;
-    QHash<RObject::Id, QSharedPointer<RObject> >::iterator it;
-    for (it = objectMap.begin(); it != objectMap.end(); ++it) {
+    QHash<RObject::Id, QSharedPointer<RObject> >::const_iterator it;
+    for (it = objectMap.constBegin(); it != objectMap.constEnd(); ++it) {
         if (!(*it).isNull() && !(*it)->isUndone()) {
             result.insert((*it)->getId());
         }
@@ -141,7 +178,15 @@ QSet<RObject::Id> RMemoryStorage::queryAllObjects() {
     return result;
 }
 
+/**
+ * \return IDs of all visible entities
+ * (current block only, no frozen or off layers, no frozen blocks, no undone entities).
+ */
 QSet<REntity::Id> RMemoryStorage::queryAllVisibleEntities() {
+    updateVisibleCache();
+    return RS::toSet<REntity::Id>(visibleEntityMap.keys());
+
+    /*
     QSet<REntity::Id> result;
     result.reserve(entityMap.count());
     RBlock::Id currentBlock = getCurrentBlockId();
@@ -189,14 +234,29 @@ QSet<REntity::Id> RMemoryStorage::queryAllVisibleEntities() {
         result.insert(e->getId());
     }
     return result;
+    */
 }
 
 QSet<REntity::Id> RMemoryStorage::queryAllEntities(bool undone, bool allBlocks, RS::EntityType type) {
     QSet<REntity::Id> result;
-    result.reserve(entityMap.count());
-    RBlock::Id currentBlock = getCurrentBlockId();
+
+    QHash<REntity::Id, QSharedPointer<REntity> >* map;
+    if (allBlocks) {
+        map = &entityMap;
+    }
+    else {
+        RBlock::Id currentBlockId = getCurrentBlockId();
+        if (blockEntityMap.contains(currentBlockId)) {
+            map = &blockEntityMap[currentBlockId];
+        }
+        else {
+            return result;
+        }
+    }
+
+    result.reserve(map->count());
     QHash<REntity::Id, QSharedPointer<REntity> >::iterator it;
-    for (it = entityMap.begin(); it != entityMap.end(); ++it) {
+    for (it = map->begin(); it != map->end(); ++it) {
         QSharedPointer<REntity> e = *it;
         if (e.isNull()) {
             continue;
@@ -204,14 +264,15 @@ QSet<REntity::Id> RMemoryStorage::queryAllEntities(bool undone, bool allBlocks, 
         if (!undone && e->isUndone()) {
             continue;
         }
-        if (!allBlocks && e->getBlockId() != currentBlock) {
-            continue;
-        }
+//        if (!allBlocks && e->getBlockId() != currentBlock) {
+//            continue;
+//        }
         if (type!=RS::EntityAll && e->getType()!=type) {
             continue;
         }
         result.insert(e->getId());
     }
+
     return result;
 }
 
@@ -234,6 +295,30 @@ QSet<REntity::Id> RMemoryStorage::queryAllEntities(bool undone, bool allBlocks, 
         if (!types.isEmpty() && !types.contains(e->getType())) {
             continue;
         }
+        result.insert(e->getId());
+    }
+    return result;
+}
+
+QSet<REntity::Id> RMemoryStorage::queryWorkingSetEntities() {
+    QSet<REntity::Id> result;
+    RBlock::Id currentBlock = getCurrentBlockId();
+    QHash<REntity::Id, QSharedPointer<REntity> >::iterator it;
+    for (it = entityMap.begin(); it != entityMap.end(); ++it) {
+        QSharedPointer<REntity> e = *it;
+        if (e.isNull()) {
+            continue;
+        }
+        if (e->isUndone()) {
+            continue;
+        }
+        if (e->getBlockId() != currentBlock) {
+            continue;
+        }
+        if (!e->isWorkingSet()) {
+            continue;
+        }
+
         result.insert(e->getId());
     }
     return result;
@@ -263,6 +348,18 @@ QSet<RLayer::Id> RMemoryStorage::queryAllLayers(bool undone) {
     return result;
 }
 
+QSet<RLayerState::Id> RMemoryStorage::queryAllLayerStates(bool undone) const {
+    QSet<RLayerState::Id> result;
+    QHash<RObject::Id, QSharedPointer<RLayerState> >::const_iterator it;
+    for (it = layerStateMap.constBegin(); it != layerStateMap.constEnd(); ++it) {
+        QSharedPointer<RLayerState> l = *it;
+        if (!l.isNull() && (undone || !l->isUndone())) {
+            result.insert(l->getId());
+        }
+    }
+    return result;
+}
+
 QSet<RBlock::Id> RMemoryStorage::queryAllBlocks(bool undone) {
     QSet<RBlock::Id> result;
     QHash<RObject::Id, QSharedPointer<RBlock> >::iterator it;
@@ -275,10 +372,10 @@ QSet<RBlock::Id> RMemoryStorage::queryAllBlocks(bool undone) {
     return result;
 }
 
-QSet<RBlock::Id> RMemoryStorage::queryAllLayoutBlocks(bool includeModelSpace, bool undone) {
+QSet<RBlock::Id> RMemoryStorage::queryAllLayoutBlocks(bool includeModelSpace, bool undone) const {
     QSet<RBlock::Id> result;
-    QHash<RObject::Id, QSharedPointer<RBlock> >::iterator it;
-    for (it = blockMap.begin(); it != blockMap.end(); ++it) {
+    QHash<RObject::Id, QSharedPointer<RBlock> >::const_iterator it;
+    for (it = blockMap.constBegin(); it != blockMap.constEnd(); ++it) {
         QSharedPointer<RBlock> b = *it;
         if (!b.isNull() && (undone || !b->isUndone()) && b->hasLayout()) {
             if (includeModelSpace || !b->isModelSpace()) {
@@ -325,12 +422,24 @@ QSet<RLinetype::Id> RMemoryStorage::queryAllLinetypes() {
     return result;
 }
 
-QSet<REntity::Id> RMemoryStorage::queryInfiniteEntities() {
-    RBlock::Id currentBlockId = getCurrentBlockId();
-
+QSet<REntity::Id> RMemoryStorage::queryInfiniteEntities() const {
     QSet<REntity::Id> result;
-    QHash<RObject::Id, QSharedPointer<REntity> >::iterator it;
-    for (it = entityMap.begin(); it != entityMap.end(); ++it) {
+
+    if (!typeObjectMap.contains(RS::EntityXLine) && !typeObjectMap.contains(RS::EntityRay)) {
+        return result;
+    }
+
+    RBlock::Id currentBlockId = getCurrentBlockId();
+    const QHash<REntity::Id, QSharedPointer<REntity> >* map;
+    if (blockEntityMap.contains(currentBlockId)) {
+        map = &blockEntityMap[currentBlockId];
+    }
+    else {
+        return result;
+    }
+
+    QHash<RObject::Id, QSharedPointer<REntity> >::const_iterator it;
+    for (it = map->constBegin(); it != map->constEnd(); ++it) {
         QSharedPointer<REntity> e = *it;
         if (e.isNull()) {
             continue;
@@ -344,25 +453,67 @@ QSet<REntity::Id> RMemoryStorage::queryInfiniteEntities() {
             continue;
         }
 
-        if (e->getBlockId() != currentBlockId) {
+        if (!e->isVisible()) {
             continue;
         }
 
-        result.insert(e->getId());
+//        if (e->getBlockId() != currentBlockId) {
+//            continue;
+//        }
 
+        result.insert(e->getId());
     }
+
     return result;
+}
+
+void RMemoryStorage::clearVisibleCache() {
+    visibleEntityMap.clear();
+    visibleEntityMapDirty = true;
+}
+
+void RMemoryStorage::updateVisibleCache() const {
+    if (!visibleEntityMapDirty) {
+        return;
+    }
+
+    visibleEntityMap.clear();
+
+    RBlock::Id currentBlockId = getCurrentBlockId();
+    QHash<RObject::Id, QSharedPointer<REntity> >::const_iterator it;
+    for (it = entityMap.constBegin(); it != entityMap.constEnd(); ++it) {
+        QSharedPointer<REntity> e = *it;
+        if (!e.isNull() && !e->isUndone() /*&& isEntityVisible(*e)*/ &&
+            e->getBlockId() == currentBlockId) {
+
+            // this updates the cache:
+            //isEntityVisible(*e);
+            //selectedEntityMap.insert(e->getId(), e);
+
+            if (RStorage::isEntityVisible(*e, currentBlockId)) {
+                visibleEntityMap.insert(e->getId(), queryEntityDirect(e->getId()));
+            }
+        }
+    }
+
+    visibleEntityMapDirty = false;
 }
 
 void RMemoryStorage::clearSelectionCache() {
     selectedEntityMap.clear();
     selectedEntityMapDirty = true;
+
+    selectedLayerMap.clear();
+    selectedLayerMapDirty = true;
 }
 
+// TODO: rename map to cache
 void RMemoryStorage::updateSelectedEntityMap() const {
     if (!selectedEntityMapDirty) {
         return;
     }
+
+    selectedEntityMap.clear();
 
     RBlock::Id currentBlock = getCurrentBlockId();
     QHash<RObject::Id, QSharedPointer<REntity> >::const_iterator it;
@@ -380,7 +531,33 @@ void RMemoryStorage::updateSelectedEntityMap() const {
 QSet<REntity::Id> RMemoryStorage::querySelectedEntities() const {
     updateSelectedEntityMap();
 
-    return selectedEntityMap.keys().toSet();
+    return RS::toSet<REntity::Id>(selectedEntityMap.keys());
+}
+
+void RMemoryStorage::updateSelectedLayerMap() const {
+    // TODO:
+//    if (!selectedObjectMapDirty) {
+//        return;
+//    }
+
+    selectedLayerMap.clear();
+
+    // TODO: implement for other objects than layers:
+    QHash<RLayer::Id, QSharedPointer<RLayer> >::const_iterator it;
+    for (it = layerMap.constBegin(); it != layerMap.constEnd(); ++it) {
+        QSharedPointer<RLayer> obj = *it;
+        if (!obj.isNull() && !obj->isUndone() && obj->isSelected()) {
+            selectedLayerMap.insert(obj->getId(), obj);
+        }
+    }
+
+    selectedLayerMapDirty = false;
+}
+
+QSet<RObject::Id> RMemoryStorage::querySelectedLayers() const {
+    updateSelectedLayerMap();
+
+    return RS::toSet<RObject::Id>(selectedLayerMap.keys());
 }
 
 QSet<REntity::Id> RMemoryStorage::queryLayerEntities(RLayer::Id layerId, bool allBlocks) {
@@ -397,13 +574,27 @@ QSet<REntity::Id> RMemoryStorage::queryLayerEntities(RLayer::Id layerId, bool al
     return result;
 }
 
+QSet<REntity::Id> RMemoryStorage::querySelectedLayerEntities(RLayer::Id layerId, bool allBlocks) {
+    RBlock::Id currentBlock = getCurrentBlockId();
+    QSet<REntity::Id> result;
+    QHash<RObject::Id, QSharedPointer<REntity> >::iterator it;
+    for (it = entityMap.begin(); it != entityMap.end(); ++it) {
+        QSharedPointer<REntity> e = *it;
+        if (!e.isNull() && e->isSelected() && e->getLayerId() == layerId && !e->isUndone() &&
+                (allBlocks || e->getBlockId() == currentBlock)) {
+            result.insert(e->getId());
+        }
+    }
+    return result;
+}
+
 bool RMemoryStorage::hasBlockEntities(RBlock::Id blockId) const {
     if (!blockEntityMap.contains(blockId)) {
         return false;
     }
 
-    QList<QSharedPointer<REntity> > candidates = blockEntityMap.values(blockId);
-    QList<QSharedPointer<REntity> >::iterator it;
+    QHash<REntity::Id, QSharedPointer<REntity> > candidates = blockEntityMap.value(blockId);
+    QHash<REntity::Id, QSharedPointer<REntity> >::iterator it;
     for (it=candidates.begin(); it!=candidates.end(); it++) {
         QSharedPointer<REntity> e = *it;
         if (!e.isNull() && !e->isUndone()) {
@@ -419,8 +610,8 @@ QSet<REntity::Id> RMemoryStorage::queryBlockEntities(RBlock::Id blockId) {
     }
 
     QSet<REntity::Id> result;
-    QList<QSharedPointer<REntity> > candidates = blockEntityMap.values(blockId);
-    QList<QSharedPointer<REntity> >::iterator it;
+    QHash<REntity::Id, QSharedPointer<REntity> > candidates = blockEntityMap.value(blockId);
+    QHash<REntity::Id, QSharedPointer<REntity> >::iterator it;
     for (it=candidates.begin(); it!=candidates.end(); it++) {
         QSharedPointer<REntity> e = *it;
         if (!e.isNull() && !e->isUndone()) {
@@ -443,12 +634,14 @@ QSet<REntity::Id> RMemoryStorage::queryLayerBlockEntities(RLayer::Id layerId, RB
 }
 
 QSet<REntity::Id> RMemoryStorage::queryChildEntities(REntity::Id parentId, RS::EntityType type) {
+    Q_UNUSED(type)
+
     if (!childMap.contains(parentId)) {
         return QSet<REntity::Id>();
     }
 
     QList<REntity::Id> childIds = childMap.values(parentId);
-    return childIds.toSet();
+    return RS::toSet<REntity::Id>(childIds);
 
     /*
     QSet<REntity::Id> result; // = queryBlockEntities(blockRef->getReferencedBlockId());
@@ -472,7 +665,7 @@ QSet<REntity::Id> RMemoryStorage::queryChildEntities(REntity::Id parentId, RS::E
     */
 }
 
-bool RMemoryStorage::hasChildEntities(REntity::Id parentId) {
+bool RMemoryStorage::hasChildEntities(REntity::Id parentId) const {
     return childMap.contains(parentId);
 
     /*
@@ -490,10 +683,16 @@ bool RMemoryStorage::hasChildEntities(REntity::Id parentId) {
     */
 }
 
-QSet<REntity::Id> RMemoryStorage::queryBlockReferences(RBlock::Id blockId) {
+QSet<REntity::Id> RMemoryStorage::queryBlockReferences(RBlock::Id blockId) const {
     QSet<REntity::Id> result;
-    QHash<RObject::Id, QSharedPointer<REntity> >::iterator it;
-    for (it = entityMap.begin(); it != entityMap.end(); ++it) {
+
+    if (!typeObjectMap.contains(RS::EntityBlockRef)) {
+        return result;
+    }
+
+    const QHash<RObject::Id, QSharedPointer<RObject> >& map = typeObjectMap[RS::EntityBlockRef];
+    QHash<RObject::Id, QSharedPointer<RObject> >::const_iterator it;
+    for (it = map.constBegin(); it != map.constEnd(); ++it) {
         QSharedPointer<RBlockReferenceEntity> e = it->dynamicCast<RBlockReferenceEntity>();
         if (!e.isNull() && e->getReferencedBlockId() == blockId && !e->isUndone()) {
             result.insert(e->getId());
@@ -502,15 +701,51 @@ QSet<REntity::Id> RMemoryStorage::queryBlockReferences(RBlock::Id blockId) {
     return result;
 }
 
-QSet<REntity::Id> RMemoryStorage::queryAllBlockReferences() {
+QSet<REntity::Id> RMemoryStorage::queryAllBlockReferences() const {
+//    QSet<REntity::Id> result;
+//    QHash<RObject::Id, QSharedPointer<REntity> >::const_iterator it;
+//    for (it = entityMap.constBegin(); it != entityMap.constEnd(); ++it) {
+//        QSharedPointer<RBlockReferenceEntity> e = it->dynamicCast<RBlockReferenceEntity>();
+//        if (!e.isNull() && !e->isUndone()) {
+//            result.insert(e->getId());
+//        }
+//    }
+//    return result;
+
     QSet<REntity::Id> result;
-    QHash<RObject::Id, QSharedPointer<REntity> >::iterator it;
-    for (it = entityMap.begin(); it != entityMap.end(); ++it) {
+
+    if (!typeObjectMap.contains(RS::EntityBlockRef)) {
+        return result;
+    }
+
+    const QHash<RObject::Id, QSharedPointer<RObject> >& map = typeObjectMap[RS::EntityBlockRef];
+    QHash<RObject::Id, QSharedPointer<RObject> >::const_iterator it;
+    for (it = map.constBegin(); it != map.constEnd(); ++it) {
         QSharedPointer<RBlockReferenceEntity> e = it->dynamicCast<RBlockReferenceEntity>();
-        if (!e.isNull() && !e->isUndone()) {
+        if (!e->isUndone()) {
             result.insert(e->getId());
         }
     }
+
+    return result;
+}
+
+QSet<REntity::Id> RMemoryStorage::queryAllViewports() const {
+    QSet<REntity::Id> result;
+
+    if (!typeObjectMap.contains(RS::EntityViewport)) {
+        return result;
+    }
+
+    const QHash<RObject::Id, QSharedPointer<RObject> >& map = typeObjectMap[RS::EntityViewport];
+    QHash<RObject::Id, QSharedPointer<RObject> >::const_iterator it;
+    for (it = map.constBegin(); it != map.constEnd(); ++it) {
+        QSharedPointer<RViewportEntity> e = it->dynamicCast<RViewportEntity>();
+        if (!e->isUndone()) {
+            result.insert(e->getId());
+        }
+    }
+
     return result;
 }
 
@@ -543,6 +778,21 @@ QSharedPointer<RDocumentVariables> RMemoryStorage::queryDocumentVariablesDirect(
     return documentVariables;
 }
 
+QSharedPointer<RDimStyle> RMemoryStorage::queryDimStyle() const {
+    if (dimStyle.isNull()) {
+        //qWarning() << "RMemoryStorage::queryDimStyle: document variables is NULL";
+        return QSharedPointer<RDimStyle>();
+    }
+    return QSharedPointer<RDimStyle>(dimStyle->clone());
+}
+
+QSharedPointer<RDimStyle> RMemoryStorage::queryDimStyleDirect() const {
+    if (dimStyle.isNull()) {
+        qWarning() << "RMemoryStorage::queryDimStyleDirect: dim style is NULL";
+    }
+    return dimStyle;
+}
+
 QSharedPointer<RObject> RMemoryStorage::queryObject(RObject::Id objectId) const {
     if (!objectMap.contains(objectId)) {
         return QSharedPointer<RObject> ();
@@ -560,9 +810,21 @@ QSharedPointer<RObject> RMemoryStorage::queryObjectDirect(RObject::Id objectId) 
     return objectMap[objectId];
 }
 
+RObject* RMemoryStorage::queryObjectCC(RObject::Id objectId) const {
+    if (!objectMap.contains(objectId)) {
+        return NULL;
+    }
+    return objectMap[objectId].data();
+}
+
 QSharedPointer<RObject> RMemoryStorage::queryObjectByHandle(RObject::Handle objectHandle) const {
+//    QHash<RObject::Handle, QSharedPointer<RObject> >::const_iterator it;
+//    for (it=objectHandleMap.constBegin(); it!=objectHandleMap.constEnd(); it++) {
+//        qDebug() << "handle: " << QString("%1").arg(it.key(), 0, 16);
+//    }
+
     if (!objectHandleMap.contains(objectHandle)) {
-        return QSharedPointer<RObject> ();
+        return QSharedPointer<RObject>();
     }
     if (!objectHandleMap[objectHandle].isNull()) {
         return QSharedPointer<RObject>(objectHandleMap[objectHandle]->clone());
@@ -612,6 +874,14 @@ QSharedPointer<REntity> RMemoryStorage::queryEntityDirect(REntity::Id objectId) 
     return entityMap[objectId];
 }
 
+QSharedPointer<REntity> RMemoryStorage::queryVisibleEntityDirect(REntity::Id objectId) const {
+    updateVisibleCache();
+    if (!visibleEntityMap.contains(objectId)) {
+        return QSharedPointer<REntity>();
+    }
+    return visibleEntityMap[objectId];
+}
+
 QSharedPointer<RLayer> RMemoryStorage::queryLayerDirect(RLayer::Id layerId) const {
     if (!layerMap.contains(layerId)) {
         return QSharedPointer<RLayer>();
@@ -623,27 +893,76 @@ QSharedPointer<RLayer> RMemoryStorage::queryLayer(RLayer::Id layerId) const {
     if (!layerMap.contains(layerId)) {
         return QSharedPointer<RLayer> ();
     }
-    if (layerMap[layerId].isNull()) {
+    QSharedPointer<RLayer> layer = layerMap[layerId];
+    if (layer.isNull()) {
         return QSharedPointer<RLayer> ();
     }
-    if (!layerMap[layerId].dynamicCast<RLayer>().isNull()) {
-        return QSharedPointer<RLayer>((RLayer*)layerMap[layerId]->clone());
-    }
+    //if (!layer.dynamicCast<RLayer>().isNull()) {
+        return QSharedPointer<RLayer>(layer->clone());
+    //}
 
-    qWarning() << "RMemoryStorage::queryLayer: should never be reached: " << layerId;
-    qWarning() << "RMemoryStorage::queryLayer: found object but not layer: " << *layerMap[layerId];
-    return QSharedPointer<RLayer>();
+//    qWarning() << "RMemoryStorage::queryLayer: should never be reached: " << layerId;
+//    qWarning() << "RMemoryStorage::queryLayer: found object but not layer: " << *layerMap[layerId];
+//    return QSharedPointer<RLayer>();
 }
 
 QSharedPointer<RLayer> RMemoryStorage::queryLayer(const QString& layerName) const {
-    QHash<RObject::Id, QSharedPointer<RLayer> >::const_iterator it;
-    for (it = layerMap.constBegin(); it != layerMap.constEnd(); ++it) {
-        QSharedPointer<RLayer> l = *it;
-        if (!l.isNull() && l->getName().compare(layerName, Qt::CaseInsensitive)==0 && !l->isUndone()) {
-            return QSharedPointer<RLayer> (l->clone());
+    if (!layerNameMap.contains(layerName.toLower())) {
+        return QSharedPointer<RLayer>();
+    }
+    QSharedPointer<RLayer> layer = layerNameMap[layerName.toLower()];
+    if (layer.isNull()) {
+        return QSharedPointer<RLayer> ();
+    }
+    if (layer->isUndone()) {
+        return QSharedPointer<RLayer> ();
+    }
+    return QSharedPointer<RLayer>(layer->clone());
+    //return layerNameMap[layerName.toLower()].dynamicCast<RLayer>();
+
+
+//    QHash<RObject::Id, QSharedPointer<RLayer> >::const_iterator it;
+//    for (it = layerMap.constBegin(); it != layerMap.constEnd(); ++it) {
+//        QSharedPointer<RLayer> l = *it;
+//        if (!l.isNull() && l->getName().compare(layerName, Qt::CaseInsensitive)==0 && !l->isUndone()) {
+//            return QSharedPointer<RLayer> (l->clone());
+//        }
+//    }
+//    return QSharedPointer<RLayer>();
+}
+
+QSharedPointer<RLayerState> RMemoryStorage::queryLayerStateDirect(RLayerState::Id layerStateId) const {
+    if (!layerStateMap.contains(layerStateId)) {
+        return QSharedPointer<RLayerState>();
+    }
+    return layerStateMap[layerStateId].dynamicCast<RLayerState>();
+}
+
+QSharedPointer<RLayerState> RMemoryStorage::queryLayerState(RLayerState::Id layerStateId) const {
+    if (!layerStateMap.contains(layerStateId)) {
+        return QSharedPointer<RLayerState> ();
+    }
+    if (layerStateMap[layerStateId].isNull()) {
+        return QSharedPointer<RLayerState> ();
+    }
+    if (!layerStateMap[layerStateId].dynamicCast<RLayerState>().isNull()) {
+        return QSharedPointer<RLayerState>((RLayerState*)layerStateMap[layerStateId]->clone());
+    }
+
+    qWarning() << "RMemoryStorage::queryLayerState: should never be reached: " << layerStateId;
+    qWarning() << "RMemoryStorage::queryLayerState: found object but not layerState: " << *layerStateMap[layerStateId];
+    return QSharedPointer<RLayerState>();
+}
+
+QSharedPointer<RLayerState> RMemoryStorage::queryLayerState(const QString& layerStateName) const {
+    QHash<RObject::Id, QSharedPointer<RLayerState> >::const_iterator it;
+    for (it = layerStateMap.constBegin(); it != layerStateMap.constEnd(); ++it) {
+        QSharedPointer<RLayerState> l = *it;
+        if (!l.isNull() && l->getName().compare(layerStateName, Qt::CaseInsensitive)==0 && !l->isUndone()) {
+            return QSharedPointer<RLayerState> (l->clone());
         }
     }
-    return QSharedPointer<RLayer>();
+    return QSharedPointer<RLayerState>();
 }
 
 QSharedPointer<RLayout> RMemoryStorage::queryLayoutDirect(RLayout::Id layoutId) const {
@@ -701,8 +1020,23 @@ QSharedPointer<RBlock> RMemoryStorage::queryBlockDirect(RBlock::Id blockId) cons
 }
 
 void RMemoryStorage::setObjectHandle(RObject& object, RObject::Handle objectHandle) {
+    if (object.getHandle()!=RObject::INVALID_HANDLE && objectHandle!=RObject::INVALID_HANDLE) {
+        // release old handle of object:
+        objectHandleMap.remove(object.getHandle());
+    }
+
     if (objectHandleMap.contains(objectHandle)) {
+        qWarning() << "cannot assign original handle to object" << QString("0x%1").arg(objectHandle, 0, 16);
+        QSharedPointer<RObject> obj = queryObjectByHandle(objectHandle);
+        if (obj.isNull()) {
+            qWarning() << "collision with null object";
+        }
+        else {
+            qWarning() << "collision with object of type:" << obj->getType();
+            //obj->dump();
+        }
         objectHandle = getNewObjectHandle();
+        qWarning() << "new handle" << QString("0x%1").arg(objectHandle, 0, 16);
     }
     Q_ASSERT(!objectHandleMap.contains(objectHandle));
     RStorage::setObjectHandle(object, objectHandle);
@@ -722,7 +1056,7 @@ QSharedPointer<RBlock> RMemoryStorage::queryBlock(const QString& blockName) cons
     QHash<RObject::Id, QSharedPointer<RBlock> >::const_iterator it;
     for (it = blockMap.constBegin(); it != blockMap.constEnd(); ++it) {
         QSharedPointer<RBlock> b = *it;
-        if (!b.isNull() && b->getName().compare(blockName, Qt::CaseInsensitive)==0 && !b->isUndone()) {
+        if (!b.isNull() && !b->isUndone() && b->getName().compare(blockName, Qt::CaseInsensitive)==0) {
             return QSharedPointer<RBlock> (b->clone());
         }
     }
@@ -748,14 +1082,49 @@ QString RMemoryStorage::getBlockName(RBlock::Id blockId) const {
     return l->getName();
 }
 
+QString RMemoryStorage::getBlockNameFromHandle(RBlock::Handle blockHandle) const {
+    QSharedPointer<RObject> obj = queryObjectByHandle(blockHandle);
+    if (obj.isNull()) {
+        return QString();
+    }
+
+    return getBlockName(obj->getId());
+}
+
+QString RMemoryStorage::getBlockNameFromLayout(const QString& layoutName) const {
+    // look up layout:
+    QSet<RBlock::Id> ids = queryAllLayoutBlocks();
+    QSet<RBlock::Id>::iterator it;
+    for (it = ids.begin(); it != ids.end(); it++) {
+        QSharedPointer<RBlock> layoutBlock = queryBlockDirect(*it);
+        if (QString::compare(layoutBlock->getLayoutName(), layoutName, Qt::CaseInsensitive)==0) {
+            return layoutBlock->getName();
+        }
+    }
+    return QString();
+}
+
+QString RMemoryStorage::getBlockNameFromLayout(RLayout::Id layoutId) const {
+    // look up layout:
+    QSet<RBlock::Id> ids = queryAllLayoutBlocks();
+    QSet<RBlock::Id>::iterator it;
+    for (it = ids.begin(); it != ids.end(); it++) {
+        QSharedPointer<RBlock> layoutBlock = queryBlockDirect(*it);
+        if (layoutBlock->getLayoutId()==layoutId) {
+            return layoutBlock->getName();
+        }
+    }
+    return QString();
+}
+
 QSet<QString> RMemoryStorage::getBlockNames(const QString& rxStr) const {
-    QRegExp rx(rxStr);
+    QRegularExpression rx(rxStr);
     QSet<QString> ret;
     QHash<RObject::Id, QSharedPointer<RBlock> >::const_iterator it;
     for (it = blockMap.constBegin(); it != blockMap.constEnd(); ++it) {
         QSharedPointer<RBlock> b = *it;
         if (!b.isNull() && !b->isUndone()) {
-            if (rx.isEmpty() || rx.exactMatch(b->getName())) {
+            if (rxStr.isEmpty() || RS::exactMatch(rx, b->getName())) {
                 ret.insert(b->getName());
             }
         }
@@ -868,7 +1237,7 @@ QSharedPointer<RLinetype> RMemoryStorage::queryLinetype(const QString& linetypeN
     return QSharedPointer<RLinetype>();
 }
 
-void RMemoryStorage::selectAllEntites(QSet<REntity::Id>* affectedEntities) {
+void RMemoryStorage::selectAllEntities(QSet<REntity::Id>* affectedEntities) {
     QHash<RObject::Id, QSharedPointer<REntity> >::iterator it;
     RBlock::Id currentBlock = getCurrentBlockId();
     for (it = entityMap.begin(); it != entityMap.end(); ++it) {
@@ -891,7 +1260,7 @@ void RMemoryStorage::clearEntitySelection(QSet<REntity::Id>* affectedEntities) {
     QHash<RObject::Id, QSharedPointer<REntity> >::iterator it;
     for (it = entityMap.begin(); it != entityMap.end(); ++it) {
         QSharedPointer<REntity> e = *it;
-        if (!e.isNull() && e->isSelected()) {
+        if (!e.isNull() && (e->isSelected() || e->isSelectedWorkingSet())) {
             setEntitySelected(e, false, affectedEntities);
         }
     }
@@ -922,7 +1291,7 @@ int RMemoryStorage::selectEntities(const QSet<REntity::Id>& entityIds,
         QHash<RObject::Id, QSharedPointer<REntity> >::iterator it;
         for (it = entityMap.begin(); it != entityMap.end(); ++it) {
             QSharedPointer<REntity> e = *it;
-            if (!e.isNull() && e->isSelected() &&
+            if (!e.isNull() && (e->isSelected() || e->isSelectedWorkingSet()) &&
                 !entityIds.contains(e->getId())) {
 
                 setEntitySelected(e, false, affectedEntities);
@@ -935,8 +1304,7 @@ int RMemoryStorage::selectEntities(const QSet<REntity::Id>& entityIds,
     QSet<REntity::Id>::const_iterator it;
     for (it = entityIds.constBegin(); it != entityIds.constEnd(); ++it) {
         QSharedPointer<REntity> e = queryEntityDirect(*it);
-        if (!e.isNull() && !e->isSelected() &&
-            !isLayerLocked(e->getLayerId()) && !isLayerOffOrFrozen(e->getLayerId())) {
+        if (!e.isNull() && !e->isSelected() && !e->isSelectedWorkingSet() && e->isSelectable()) {
 
             setEntitySelected(e, true, affectedEntities);
             ret++;
@@ -1033,6 +1401,15 @@ RBox RMemoryStorage::getBoundingBox(bool ignoreHiddenLayers, bool ignoreEmpty) c
     }
 
     RBlock::Id currentBlockId = getCurrentBlockId();
+    //const QHash<REntity::Id, QSharedPointer<REntity> >* map;
+    if (!blockEntityMap.contains(currentBlockId)) {
+        return RBox();
+        //QHash<REntity::Id, QSharedPointer<REntity> > m = blockEntityMap[currentBlockId];
+        //map = &blockEntityMap.value(currentBlockId);
+    }
+    //else {
+    //}
+
     boundingBox[0][0] = RBox();
     boundingBox[0][1] = RBox();
     boundingBox[1][0] = RBox();
@@ -1040,7 +1417,7 @@ RBox RMemoryStorage::getBoundingBox(bool ignoreHiddenLayers, bool ignoreEmpty) c
     maxLineweight = RLineweight::Weight000;
 
     QHash<RObject::Id, QSharedPointer<REntity> >::const_iterator it;
-    for (it = entityMap.constBegin(); it != entityMap.constEnd(); ++it) {
+    for (it = blockEntityMap[currentBlockId].constBegin(); it != blockEntityMap[currentBlockId].constEnd(); ++it) {
         QSharedPointer<REntity> e = *it;
         if (e.isNull() || e->isUndone()) {
             continue;
@@ -1055,7 +1432,7 @@ RBox RMemoryStorage::getBoundingBox(bool ignoreHiddenLayers, bool ignoreEmpty) c
 //            }
         //}
 
-        if (e->getBlockId() == currentBlockId) {
+        //if (e->getBlockId() == currentBlockId) {
             //bb.growToInclude(e->getBoundingBox(ignoreEmpty));
 
             RBox bb = e->getBoundingBox(false);
@@ -1071,7 +1448,7 @@ RBox RMemoryStorage::getBoundingBox(bool ignoreHiddenLayers, bool ignoreEmpty) c
                 boundingBox[1][0].growToInclude(bb);
                 boundingBox[1][1].growToInclude(bbIgnoreEmpty);
             }
-        }
+        //}
 
         // don't resolve block references, if line weight is ByBlock,
         // the maxLinewidth will be adjusted when the block reference
@@ -1089,7 +1466,7 @@ RBox RMemoryStorage::getBoundingBox(bool ignoreHiddenLayers, bool ignoreEmpty) c
 //    qDebug() << "bb ignoreHiddenLayers: " << boundingBox[1][0];
 //    qDebug() << "bb ignoreHiddenLayers, ignoreEmpty: " << boundingBox[1][1];
 
-    return boundingBox[ignoreHiddenLayers][ignoreEmpty];
+    return boundingBox[(int)ignoreHiddenLayers][(int)ignoreEmpty];
 }
 
 RBox RMemoryStorage::getSelectionBox() const {
@@ -1125,13 +1502,54 @@ bool RMemoryStorage::removeObject(QSharedPointer<RObject> object) {
         return false;
     }
 
+    bool ret = false;
+
     QSharedPointer<REntity> entity = object.dynamicCast<REntity> ();
     if (!entity.isNull()) {
-        blockEntityMap.remove(entity->getBlockId(), entity);
-        return true;
+        //blockEntityMap.remove(entity->getBlockId(), entity);
+        blockEntityMap[entity->getBlockId()].remove(entity->getId());
+        if (blockEntityMap[entity->getBlockId()].isEmpty()) {
+            // no entities left for this block:
+            blockEntityMap.remove(entity->getBlockId());
+            //qDebug() << "blockEntityMap empty";
+        }
+        //qDebug() << "entities left for block:" << blockEntityMap[entity->getBlockId()].count();
+        ret = true;
     }
 
-    return false;
+    if (object->getType()==RS::ObjectLayer) {
+        QSharedPointer<RLayer> layer = object.dynamicCast<RLayer>();
+        if (!layer.isNull()) {
+            layerNameMap.remove(layer->getName().toLower());
+        }
+        ret = true;
+    }
+
+    // update object type -> object ID -> object map:
+    if (typeObjectMap.contains(object->getType())) {
+        typeObjectMap[object->getType()].remove(object->getId());
+        ret = true;
+    }
+
+//    qDebug() << "objectTypeMap ============================";
+//    QHash<RS::EntityType, QHash<RObject::Id, QSharedPointer<RObject> > >::iterator it;
+//    for (it=typeObjectMap.begin(); it!=typeObjectMap.end(); it++) {
+//        qDebug() << "object type: " << it.key() << ":";
+//        QHash<RObject::Id, QSharedPointer<RObject> >::iterator it2;
+//        for (it2=it->begin(); it2!=it->end(); it2++) {
+//            qDebug() << "\t" << it2.key() << " : " << it2.value();
+//        }
+//    }
+
+//    if (object->getType()==RS::EntityBlockRef) {
+//        QSharedPointer<RBlockReferenceEntity> blockRef = object.dynamicCast<RBlockReferenceEntity>();
+//        if (!blockRef.isNull()) {
+//            blockRefMap.remove(blockRef->getId());
+//        }
+//        return true;
+//    }
+
+    return ret;
 }
 
 bool RMemoryStorage::saveObject(QSharedPointer<RObject> object, bool checkBlockRecursion, bool keepHandles) {
@@ -1141,6 +1559,7 @@ bool RMemoryStorage::saveObject(QSharedPointer<RObject> object, bool checkBlockR
     }
 
     QSharedPointer<RLayer> layer;
+    QSharedPointer<RLayerState> layerState;
     QSharedPointer<RLayout> layout;
     QSharedPointer<RBlock> block;
     QSharedPointer<RLinetype> linetype;
@@ -1160,6 +1579,25 @@ bool RMemoryStorage::saveObject(QSharedPointer<RObject> object, bool checkBlockR
                 if (!existingLayer.isNull()) {
                     if (existingLayer->isProtected()) {
                         layer->setProtected(true);
+                    }
+                }
+            }
+        }
+    }
+
+    // never allow two layer states with identical names, update layer state instead:
+    if (object->getType()==RS::ObjectLayerState) {
+        layerState = object.dynamicCast<RLayerState>();
+        if (!layerState.isNull()) {
+            RLayerState::Id id = getLayerStateId(layerState->getName());
+            if (id != RLayerState::INVALID_ID && id != layerState->getId()) {
+                setObjectId(*layerState, id);
+
+                // never unprotect an existing protected layerState:
+                QSharedPointer<RLayerState> existingLayerState = queryLayerStateDirect(id);
+                if (!existingLayerState.isNull()) {
+                    if (existingLayerState->isProtected()) {
+                        layerState->setProtected(true);
                     }
                 }
             }
@@ -1218,7 +1656,6 @@ bool RMemoryStorage::saveObject(QSharedPointer<RObject> object, bool checkBlockR
     }
 
     QSharedPointer<REntity> entity = object.dynamicCast<REntity> ();
-
     if (!entity.isNull()) {
         Q_ASSERT_X(!queryLayerDirect(entity->getLayerId()).isNull(),
             "RMemoryStrorage::saveObject", "Layer of entity is NULL");
@@ -1230,6 +1667,9 @@ bool RMemoryStorage::saveObject(QSharedPointer<RObject> object, bool checkBlockR
 
         // only set new handle if handle is not set already:
         if (!keepHandles || object->getHandle()==RObject::INVALID_HANDLE) {
+            // make sure old handle is not removed from objectHandleMap:
+            // entity handle might originate from another document:
+            setObjectHandle(*object, RObject::INVALID_HANDLE);
             setObjectHandle(*object, getNewObjectHandle());
         }
 
@@ -1256,7 +1696,18 @@ bool RMemoryStorage::saveObject(QSharedPointer<RObject> object, bool checkBlockR
 
     if (!entity.isNull()) {
         entityMap[entity->getId()] = entity;
-        blockEntityMap.insert(entity->getBlockId(), entity);
+
+        //QHash<REntity::Id, QSharedPointer<REntity> > candidates = blockEntityMap.value(blockId);
+
+        if (!blockEntityMap.contains(entity->getBlockId())) {
+            blockEntityMap.insert(entity->getBlockId(), QHash<REntity::Id, QSharedPointer<REntity> >());
+        }
+        blockEntityMap[entity->getBlockId()].insert(entity->getId(), entity);
+        //qDebug() << "blockEntityMap:" << blockEntityMap.count();
+        //qDebug() << "blockEntityMap block:" << blockEntityMap[entity->getBlockId()].count();
+
+        //blockEntityMap.insert(entity->getBlockId(), entity);
+
         setMaxDrawOrder(qMax(entity->getDrawOrder()+1, getMaxDrawOrder()));
 
         if (entity->getParentId()!=REntity::INVALID_ID) {
@@ -1266,6 +1717,11 @@ bool RMemoryStorage::saveObject(QSharedPointer<RObject> object, bool checkBlockR
 
     if (!layer.isNull()) {
         layerMap[object->getId()] = layer;
+        layerNameMap[layer->getName().toLower()] = layer;
+    }
+
+    if (!layerState.isNull()) {
+        layerStateMap[object->getId()] = layerState;
     }
 
     if (!layout.isNull()) {
@@ -1280,15 +1736,64 @@ bool RMemoryStorage::saveObject(QSharedPointer<RObject> object, bool checkBlockR
         linetypeMap[object->getId()] = linetype;
     }
 
-    QSharedPointer<RDocumentVariables> docVars = object.dynamicCast<RDocumentVariables> ();
-    if (!docVars.isNull()) {
-        documentVariables = docVars;
+    // update object type -> object ID -> object map:
+    if (!typeObjectMap.contains(object->getType())) {
+        typeObjectMap.insert(object->getType(), QHash<RObject::Id, QSharedPointer<RObject> >());
+    }
+    typeObjectMap[object->getType()].insert(object->getId(), object);
+
+//    qDebug() << "objectTypeMap ============================";
+//    QHash<RS::EntityType, QHash<RObject::Id, QSharedPointer<RObject> > >::iterator it;
+//    for (it=typeObjectMap.begin(); it!=typeObjectMap.end(); it++) {
+//        qDebug() << "object type: " << it.key() << ":";
+//        QHash<RObject::Id, QSharedPointer<RObject> >::iterator it2;
+//        for (it2=it->begin(); it2!=it->end(); it2++) {
+//            qDebug() << "\t" << it2.key() << " : " << it2.value();
+//        }
+//    }
+
+    // cache pointer to unique document variables object:
+    if (object->getType()==RS::ObjectDocumentVariable) {
+        QSharedPointer<RDocumentVariables> docVars = object.dynamicCast<RDocumentVariables> ();
+        if (!docVars.isNull()) {
+            documentVariables = docVars;
+        }
+    }
+
+    // cache pointer to unique dim style object:
+    if (object->getType()==RS::ObjectDimStyle) {
+        QSharedPointer<RDimStyle> ds = object.dynamicCast<RDimStyle> ();
+        if (!ds.isNull()) {
+            dimStyle = ds;
+        }
     }
 
     // entity changed:
-    // selection map needs update:
+    // selection map might need an update:
+    // TODO: check if selection status has changed
     if (!entity.isNull()) {
         clearSelectionCache();
+    }
+
+    // entity changed or added or deleted:
+    // visible map might need an update:
+    // TODO: check if layer visibility has changed:
+    if (!entity.isNull()) {
+        clearVisibleCache();
+    }
+
+    // layer changed:
+    // visible map might need an update:
+    // TODO: check if layer visibility has changed:
+    if (!layer.isNull()) {
+        clearVisibleCache();
+    }
+
+    // block changed:
+    // visible map might need an update:
+    // TODO: check if block visibility has changed:
+    if (!block.isNull()) {
+        clearVisibleCache();
     }
 
     return true;
@@ -1341,7 +1846,16 @@ bool RMemoryStorage::deleteObject(RObject::Id objectId) {
 
         QSharedPointer<REntity> entity = obj.dynamicCast<REntity>();
         if (!entity.isNull()) {
-            blockEntityMap.remove(entity->getBlockId(), entity);
+            //blockEntityMap.remove(entity->getBlockId(), entity);
+
+            blockEntityMap[entity->getBlockId()].remove(entity->getId());
+            if (blockEntityMap[entity->getBlockId()].isEmpty()) {
+                // no entities left for this block:
+                blockEntityMap.remove(entity->getBlockId());
+                //qDebug() << "blockEntityMap empty";
+            }
+            //qDebug() << "entities left for block:" << blockEntityMap[entity->getBlockId()].count();
+
             //qDebug() << "deleteObject: removed " << entity->getId() << " from block " << entity->getBlockId();
 
             // remove entity from childMap values:
@@ -1349,11 +1863,23 @@ bool RMemoryStorage::deleteObject(RObject::Id objectId) {
                 childMap.remove(entity->getParentId(), entity->getId());
             }
         }
+
+        // remove layer from layer name map:
+        QSharedPointer<RLayer> layer = obj.dynamicCast<RLayer>();
+        if (!layer.isNull()) {
+            QString layerKey = layer->getName().toLower();
+            if (layerNameMap.contains(layerKey)) {
+                layerNameMap.remove(layerKey);
+            }
+        }
     }
 
     objectMap.remove(objectId);
     if (entityMap.contains(objectId)) {
         entityMap.remove(objectId);
+    }
+    if (visibleEntityMap.contains(objectId)) {
+        visibleEntityMap.remove(objectId);
     }
     if (blockMap.contains(objectId)) {
         blockMap.remove(objectId);
@@ -1363,6 +1889,9 @@ bool RMemoryStorage::deleteObject(RObject::Id objectId) {
     }
     if (layerMap.contains(objectId)) {
         layerMap.remove(objectId);
+    }
+    if (layerStateMap.contains(objectId)) {
+        layerStateMap.remove(objectId);
     }
     if (linetypeMap.contains(objectId)) {
         linetypeMap.remove(objectId);
@@ -1472,7 +2001,10 @@ bool RMemoryStorage::setUndoStatus(RObject::Id objectId, bool status) {
 
 void RMemoryStorage::setUndoStatus(RObject& object, bool status) {
     RStorage::setUndoStatus(object, status);
+
+    // TODO: only add / remove object to / from cache:
     clearSelectionCache();
+    clearVisibleCache();
 }
 
 //bool RMemoryStorage::getUndoStatus(RObject::Id objectId) const {
@@ -1566,13 +2098,13 @@ QString RMemoryStorage::getLayerName(RLayer::Id layerId) const {
 }
 
 QSet<QString> RMemoryStorage::getLayerNames(const QString& rxStr) const {
-    QRegExp rx(rxStr);
+    QRegularExpression rx(rxStr);
     QSet<QString> ret;
     QHash<RObject::Id, QSharedPointer<RLayer> >::const_iterator it;
     for (it = layerMap.constBegin(); it != layerMap.constEnd(); ++it) {
         QSharedPointer<RLayer> l = *it;
         if (!l.isNull() && !l->isUndone()) {
-            if (rx.isEmpty() || rx.exactMatch(l->getName())) {
+            if (rxStr.isEmpty() || RS::exactMatch(rx, l->getName())) {
                 ret.insert(l->getName());
             }
         }
@@ -1588,6 +2120,37 @@ RLayer::Id RMemoryStorage::getLayerId(const QString& layerName) const {
     return l->getId();
 }
 
+QString RMemoryStorage::getLayerStateName(RLayerState::Id layerStateId) const {
+    QSharedPointer<RLayerState> l = queryLayerStateDirect(layerStateId);
+    if (l.isNull()) {
+        return QString();
+    }
+    return l->getName();
+}
+
+QSet<QString> RMemoryStorage::getLayerStateNames(const QString& rxStr) const {
+    QRegularExpression rx(rxStr);
+    QSet<QString> ret;
+    QHash<RObject::Id, QSharedPointer<RLayerState> >::const_iterator it;
+    for (it = layerStateMap.constBegin(); it != layerStateMap.constEnd(); ++it) {
+        QSharedPointer<RLayerState> l = *it;
+        if (!l.isNull() && !l->isUndone()) {
+            if (rxStr.isEmpty() || RS::exactMatch(rx, l->getName())) {
+                ret.insert(l->getName());
+            }
+        }
+    }
+    return ret;
+}
+
+RLayerState::Id RMemoryStorage::getLayerStateId(const QString& layerStateName) const {
+    QSharedPointer<RLayerState> l = queryLayerState(layerStateName);
+    if (l.isNull()) {
+        return RLayerState::INVALID_ID;
+    }
+    return l->getId();
+}
+
 QString RMemoryStorage::getLayoutName(RLayout::Id layoutId) const {
     QSharedPointer<RLayout> l = queryLayout(layoutId);
     if (l.isNull()) {
@@ -1597,13 +2160,13 @@ QString RMemoryStorage::getLayoutName(RLayout::Id layoutId) const {
 }
 
 QSet<QString> RMemoryStorage::getLayoutNames(const QString& rxStr) const {
-    QRegExp rx(rxStr);
+    QRegularExpression rx(rxStr);
     QSet<QString> ret;
     QHash<RObject::Id, QSharedPointer<RLayout> >::const_iterator it;
     for (it = layoutMap.constBegin(); it != layoutMap.constEnd(); ++it) {
         QSharedPointer<RLayout> l = *it;
         if (!l.isNull() && !l->isUndone()) {
-            if (rx.isEmpty() || rx.exactMatch(l->getName())) {
+            if (rxStr.isEmpty() || RS::exactMatch(rx, l->getName())) {
                 ret.insert(l->getName());
             }
         }
@@ -1625,6 +2188,25 @@ RBlock::Id RMemoryStorage::getBlockId(const QString& blockName) const {
         return RBlock::INVALID_ID;
     }
     return b->getId();
+}
+
+RBlock::Id RMemoryStorage::getBlockIdAuto(const QString& blockLayoutName) const {
+    if (hasBlock(blockLayoutName)) {
+        return getBlockId(blockLayoutName);
+    }
+    else {
+        // look up layout instead:
+        QSet<RBlock::Id> ids = queryAllLayoutBlocks();
+        QSet<RBlock::Id>::iterator it;
+        for (it = ids.begin(); it != ids.end(); it++) {
+            QSharedPointer<RBlock> layoutBlock = queryBlockDirect(*it);
+            if (QString::compare(layoutBlock->getLayoutName(), blockLayoutName, Qt::CaseInsensitive)==0) {
+                return *it;
+            }
+        }
+    }
+
+    return RBlock::INVALID_ID;
 }
 
 RView::Id RMemoryStorage::getViewId(const QString& viewName) const {
@@ -1707,15 +2289,21 @@ void RMemoryStorage::update() {
 void RMemoryStorage::setEntityParentId(REntity& entity, REntity::Id parentId) {
     RStorage::setEntityParentId(entity, parentId);
 
-    QList<REntity::Id> parentIds = childMap.keys();
-    for (int i=0; i<parentIds.length(); i++) {
-        REntity::Id parentId = parentIds[i];
-        if (childMap.contains(parentId, entity.getId())) {
-            childMap.remove(parentId, entity.getId());
+    if (entity.getId()==REntity::INVALID_ID || parentId==REntity::INVALID_ID) {
+        return;
+    }
+
+    // remove links of old parents to this entity:
+    QList<REntity::Id> pIds = childMap.keys();
+    for (int i=0; i<pIds.length(); i++) {
+        REntity::Id pId = pIds[i];
+        if (childMap.contains(pId, entity.getId())) {
+            childMap.remove(pId, entity.getId());
         }
     }
 
-    childMap.insert(entity.getParentId(), entity.getId());
+    // new parent / child link:
+    childMap.insert(parentId, entity.getId());
 }
 
 //void RMemoryStorage::setUnit(RS::Unit unit, RTransaction* transaction) {

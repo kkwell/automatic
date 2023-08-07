@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../File.js");
+include("scripts/File/File.js");
 include("BitmapExportWorker.js");
 include("scripts/Tools/arguments.js");
 
@@ -75,12 +75,12 @@ BitmapExport.prototype.beginEvent = function() {
         print("Error: cannot save file: ", bmpFileName);
         print("Error: ", res[1]);
         appWin.handleUserWarning(
-                qsTr("Error while generating Bitmap file '%1': %2")
+                qsTr("Error while generating bitmap file \"%1\": %2")
                     .arg(bmpFileName).arg(res[1]));
     }
     else {
         appWin.handleUserMessage(
-                qsTr("Bitmap file has been exported to '%1'").arg(bmpFileName));
+                qsTr("Bitmap file has been exported to \"%1\"").arg(bmpFileName));
     }
 
     this.terminate();
@@ -116,7 +116,15 @@ BitmapExport.prototype.getFilename = function() {
         //    filters += ";;";
         //}
 
-        var filter = format.toUpper() + " " + qsTr("Files") + " (";
+        var filter;
+        if (RSettings.getQtVersion()>=0x060000) {
+            filter = format.toUpperCase();
+        }
+        else {
+            filter = format.toUpper();
+        }
+        filter += " " + qsTr("Files") + " (";
+
         if (formatAlt.length!==0) {
             filter += "*." + formatAlt + " ";
         }
@@ -126,7 +134,8 @@ BitmapExport.prototype.getFilename = function() {
         filters.push(filter);
     }
 
-    var ret = File.getSaveFileName(this, qsTr("Export as Bitmap"), initialPath, filters);
+    var appWin = EAction.getMainWindow();
+    var ret = File.getSaveFileName(appWin, qsTr("Export as Bitmap"), initialPath, filters);
 
     if (isNull(ret)) {
         return undefined;
@@ -164,6 +173,7 @@ BitmapExport.prototype.getProperties = function() {
     var antiAliasingCheckbox = this.dialog.findChild("AntiAliasing");
 
     var selectionCheckbox = this.dialog.findChild("Selection");
+    selectionCheckbox.toggled.connect(this, this.selectionChanged);
     var weightMarginCheckbox = this.dialog.findChild("WeightMargin");
 
     widthEdit.valueChanged.connect(
@@ -174,11 +184,11 @@ BitmapExport.prototype.getProperties = function() {
                 function() {
                     resolutionCombo.index = 0;
                 });
-    resolutionCombo.editTextChanged.connect(this, "resolutionChanged");
+    resolutionCombo.editTextChanged.connect(this, this.resolutionChanged);
     this.resolutionChanged(resolutionCombo.currentText);
 
     if (!this.dialog.exec()) {
-        this.dialog.destroy();
+        destr(this.dialog);
         EAction.activateMainWindow();
         return undefined;
     }
@@ -188,7 +198,7 @@ BitmapExport.prototype.getProperties = function() {
     var ret = [];
 
     if (resolutionCombo.currentText!=="auto") {
-        ret["resolution"] = parseInt(resolutionCombo.currentText);
+        ret["resolution"] = parseFloat(resolutionCombo.currentText);
     }
     else {
         ret["width"] = Math.ceil(widthEdit.getValue());
@@ -213,16 +223,24 @@ BitmapExport.prototype.getProperties = function() {
       ret["grayscale"] = true;
     }
 
-    ret["noweightmargin"] = !weightMarginCheckbox.checked;
+    ret["noWeightMargin"] = !weightMarginCheckbox.checked;
 
     if (selectionCheckbox.checked) {
         var doc = this.getDocument();
-        ret["entityids"] = doc.querySelectedEntities();
+        ret["entityIds"] = doc.querySelectedEntities();
     }
 
-    this.dialog.destroy();
+    destr(this.dialog);
     EAction.activateMainWindow();
     return ret;
+};
+
+BitmapExport.prototype.selectionChanged = function(value) {
+    this.documentWidth = undefined;
+    this.documentHeight = undefined;
+
+    var resolutionCombo = this.dialog.findChild("Resolution");
+    this.resolutionChanged(resolutionCombo.currentText);
 };
 
 BitmapExport.prototype.resolutionChanged = function(str) {
@@ -230,7 +248,7 @@ BitmapExport.prototype.resolutionChanged = function(str) {
         return;
     }
 
-    var res = parseInt(str, 10);
+    var res = parseFloat(str, 10);
     if (isNaN(res)) {
         return;
     }

@@ -22,10 +22,12 @@
 
 #include "../core_global.h"
 
+#include "RArc.h"
 #include "RShape.h"
 #include "RVector.h"
 
 class RBox;
+class RLine;
 
 /**
  * Low-level mathematical representation of a circle.
@@ -54,7 +56,9 @@ public:
     static RCircle createFrom2Points(const RVector& p1, const RVector& p2);
     static RCircle createFrom3Points(const RVector& p1, const RVector& p2, const RVector& p3);
 
-    bool isValid() const {
+    RArc toArc(double startAngle=0.0) const;
+
+    virtual bool isValid() const {
         return center.isValid();
     }
 
@@ -69,8 +73,10 @@ public:
     virtual QList<RVector> getEndPoints() const;
     virtual QList<RVector> getMiddlePoints() const;
     virtual QList<RVector> getCenterPoints() const;
+    virtual QList<RVector> getArcReferencePoints() const;
     virtual QList<RVector> getPointsWithDistanceToEnd(
         double distance, int from = RS::FromAny) const;
+    virtual QList<RVector> getPointCloud(double segmentLength) const;
 
     virtual double getAngleAt(double distance, RS::From from = RS::FromStart) const;
     RVector getPointAtAngle(double a) const;
@@ -109,6 +115,16 @@ public:
     }
 
     virtual QList<QSharedPointer<RShape> > splitAt(const QList<RVector>& points) const;
+
+#if QT_VERSION >= 0x060000
+    /**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */
+    RCircle copy() const {
+        return *this;
+    }
+#endif
 
 protected:
     virtual void print(QDebug dbg) const;

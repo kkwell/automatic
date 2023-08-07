@@ -80,7 +80,7 @@ DrawPolyline.prototype.initState = function(state) {
         var trNextVertex = qsTr("Next vertex");
         this.setCommandPrompt(trNextVertex);
         this.setLeftMouseTip(trNextVertex);
-        this.setRightMouseTip(qsTr("Done"));
+        this.setRightMouseTip(EAction.trDone);
         EAction.showSnapTools();
         break;
     }
@@ -118,7 +118,7 @@ DrawPolyline.prototype.keyPressEvent = function(event) {
         if (this.state === DrawPolyline.State.SettingFirstVertex) {
             var view = di.getLastKnownViewWithFocus();
             var pos = di.getLastPosition();
-            var e = new RCoordinateEvent(pos, view.getScene(), view.getRGraphicsView());
+            var e = new RCoordinateEvent(pos, view.getScene(), getRGraphicsView(view));
             this.pickCoordinate(e, false);
         }
     } else {
@@ -301,7 +301,14 @@ DrawPolyline.prototype.getOperation = function(preview) {
         if (!isEntity(entity)) {
             return undefined;
         }
-        entity.copyAttributesFrom(this.polylineEntity.data());
+        var e;
+        if (isFunction(this.polylineEntity.data)) {
+            e = this.polylineEntity.data();
+        }
+        else {
+            e = this.polylineEntity;
+        }
+        entity.copyAttributesFrom(e);
         return new RAddObjectOperation(entity, false);
     }
     else {

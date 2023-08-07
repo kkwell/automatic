@@ -18,6 +18,7 @@
  */
 #include "RSolidData.h"
 #include "RSolidEntity.h"
+#include "RTriangle.h"
 
 RSolidData::RSolidData()
     : REntityData() {
@@ -66,8 +67,9 @@ QList<RRefPoint> RSolidData::getReferencePoints(RS::ProjectionRenderingHint hint
     return RRefPoint::toRefPointList(getVertices());
 }
 
-bool RSolidData::moveReferencePoint(const RVector& referencePoint,
-        const RVector& targetPoint) {
+bool RSolidData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers) {
+    Q_UNUSED(modifiers)
+
     bool ret = false;
     for (int i=0; i<vertices.count(); i++) {
         if (referencePoint.equalsFuzzy(getVertexAt(i))) {

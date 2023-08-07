@@ -42,6 +42,7 @@ class RTransaction;
  */
 class QCADCORE_EXPORT RLayout: public RObject {
 public:
+    static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyName;
     static RPropertyTypeId PropertyTabOrder;
@@ -156,6 +157,10 @@ public:
     virtual ~RLayout();
 
     static void init();
+
+    static RS::EntityType getRtti() {
+        return RS::ObjectLayout;
+    }
 
     virtual RS::EntityType getType() const {
         return RS::ObjectLayout;
@@ -358,11 +363,9 @@ public:
 
 
     virtual QPair<QVariant, RPropertyAttributes> getProperty(RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
     virtual bool setProperty(RPropertyTypeId propertyTypeId,
             const QVariant& value, RTransaction* transaction=NULL);
-
-    virtual bool isSelectedForPropertyEditing();
 
 protected:
     /**

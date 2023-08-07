@@ -23,6 +23,7 @@
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"entity_global.h"</cpp:file></cpp:include>
 
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RColor.h"</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RDocument.h"</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"REntityData.h"</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RTextData.h"</cpp:file></cpp:include>
@@ -54,10 +55,101 @@
                    <param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>fontName</name></decl></param>,
                    <param><decl><type><name>double</name></type> <name>textAngle</name></decl></param>)</parameter_list>;</constructor_decl>
 
+<comment type="line">//    ~RDimensionData() {</comment>
+<comment type="line">//        if (overrides!=NULL) {</comment>
+<comment type="line">//            delete overrides;</comment>
+<comment type="line">//            overrides = NULL;</comment>
+<comment type="line">//        }</comment>
+<comment type="line">//    }</comment>
+
+<comment type="line">//    RDimensionData(const RDimensionData&amp; other) {</comment>
+<comment type="line">//        *this = other;</comment>
+<comment type="line">//    }</comment>
+
+<comment type="line">//    RDimensionData&amp; operator =(const RDimensionData&amp; other) {</comment>
+<comment type="line">//        //*this = other;</comment>
+
+<comment type="line">//        definitionPoint = other.definitionPoint;</comment>
+<comment type="line">//        textPositionCenter = other.textPositionCenter;</comment>
+<comment type="line">//        textPositionSide = other.textPositionSide;</comment>
+<comment type="line">//        valign = other.valign;</comment>
+<comment type="line">//        halign = other.halign;</comment>
+<comment type="line">//        lineSpacingStyle = other.lineSpacingStyle;</comment>
+<comment type="line">//        lineSpacingFactor = other.lineSpacingFactor;</comment>
+<comment type="line">//        text = other.text;</comment>
+<comment type="line">//        upperTolerance = other.upperTolerance;</comment>
+<comment type="line">//        lowerTolerance = other.lowerTolerance;</comment>
+<comment type="line">//        fontName = other.fontName;</comment>
+<comment type="line">//        dimBlockName = other.dimBlockName;</comment>
+<comment type="line">//        defaultAngle = other.defaultAngle;</comment>
+<comment type="line">//        textAngle = other.textAngle;</comment>
+<comment type="line">//        dimlunitOverride = other.dimlunitOverride;</comment>
+<comment type="line">//        arrow1Flipped = other.arrow1Flipped;</comment>
+<comment type="line">//        arrow2Flipped = other.arrow2Flipped;</comment>
+<comment type="line">//        extLineFix = other.extLineFix;</comment>
+<comment type="line">//        extLineFixLength = other.extLineFixLength;</comment>
+<comment type="line">//        dirty = other.dirty;</comment>
+<comment type="line">//        textData = other.textData;</comment>
+<comment type="line">//        boundingBox = other.boundingBox;</comment>
+<comment type="line">//        dimLineLength = other.dimLineLength;</comment>
+<comment type="line">//        arrow1Pos = other.arrow1Pos;</comment>
+<comment type="line">//        arrow2Pos = other.arrow2Pos;</comment>
+<comment type="line">//        autoTextPos = other.autoTextPos;</comment>
+<comment type="line">//        shapes = other.shapes;</comment>
+
+<comment type="line">//        overrides = NULL;</comment>
+<comment type="line">//        if (other.hasOverrides()) {</comment>
+<comment type="line">//            this-&gt;makeOverrides();</comment>
+<comment type="line">//            *this-&gt;overrides = *other.overrides;</comment>
+<comment type="line">//        }</comment>
+<comment type="line">//    }</comment>
+
     <function><type><name>virtual</name> <name><name>RS</name>::<name>EntityType</name></name></type> <name>getType</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><name><name>RS</name>::<name>EntityDimension</name></name></expr>;</return>
     }</block></function>
     <function_decl><type><name>virtual</name> <name>RBox</name></type> <name>getBoundingBox</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>ignoreEmpty</name>=<init><expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function_decl><type><name>void</name></type> <name>render</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function><type><name>void</name></type> <name>updateBoundingBox</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>box</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <expr_stmt><expr><name>boundingBox</name> = <name>box</name></expr>;</expr_stmt>
+    }</block></function>
+    <function><type><name>void</name></type> <name>updateTextPositionCenter</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>p</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <expr_stmt><expr><name>textPositionCenter</name> = <name>p</name></expr>;</expr_stmt>
+    }</block></function>
+    <function><type><name>void</name></type> <name>updateTextPositionSide</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>p</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <expr_stmt><expr><name>textPositionSide</name> = <name>p</name></expr>;</expr_stmt>
+    }</block></function>
+    <function><type><name>void</name></type> <name>updateTextData</name><parameter_list>(<param><decl><type><name>const</name> <name>RTextData</name>&amp;</type> <name>d</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <expr_stmt><expr><name>textData</name> = <name>d</name></expr>;</expr_stmt>
+    }</block></function>
+    <function><type><name>void</name></type> <name>updateShapes</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name>&amp;</type> <name>s</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <expr_stmt><expr><name>shapes</name> = <name>s</name></expr>;</expr_stmt>
+    }</block></function>
+    <function><type><name>void</name></type> <name>updateArrowPos1</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>p</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <expr_stmt><expr><name>arrow1Pos</name> = <name>p</name></expr>;</expr_stmt>
+    }</block></function>
+    <function><type><name>void</name></type> <name>updateArrowPos2</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>p</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <expr_stmt><expr><name>arrow2Pos</name> = <name>p</name></expr>;</expr_stmt>
+    }</block></function>
+
+    <function><type><name>void</name></type> <name>clearStyleOverrides</name><parameter_list>()</parameter_list> <block>{
+        <expr_stmt><expr><name>overrides</name>.<call><name>clear</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+        <constructor_decl><name>update</name><parameter_list>()</parameter_list>;</constructor_decl>
+    }</block></function>
+
+    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getShapes</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>segment</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>entityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <macro><name>Q_UNUSED</name><argument_list>(<argument>queryBox</argument>)</argument_list></macro>
+        <macro><name>Q_UNUSED</name><argument_list>(<argument>ignoreComplex</argument>)</argument_list></macro>
+        <macro><name>Q_UNUSED</name><argument_list>(<argument>segment</argument>)</argument_list></macro>
+        <macro><name>Q_UNUSED</name><argument_list>(<argument>entityIds</argument>)</argument_list></macro>
+
+        <constructor_decl><name>render</name><parameter_list>()</parameter_list>;</constructor_decl>
+
+        <return>return <expr><name>shapes</name></expr>;</return>
+    }</block></function>
+
+    <function_decl><type><name>virtual</name> <name>RVector</name></type> <name>getPointOnEntity</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>isValid</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>isSane</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
@@ -82,10 +174,20 @@
 
     <function><type><name>void</name></type> <name>setUpperTolerance</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>t</name></decl></param>)</parameter_list> <block>{
         <expr_stmt><expr><name>upperTolerance</name> = <name>t</name></expr>;</expr_stmt>
+        <constructor_decl><name>update</name><parameter_list>()</parameter_list>;</constructor_decl>
+    }</block></function>
+
+    <function><type><name>QString</name></type> <name>getUpperTolerance</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>upperTolerance</name></expr>;</return>
     }</block></function>
 
     <function><type><name>void</name></type> <name>setLowerTolerance</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>t</name></decl></param>)</parameter_list> <block>{
         <expr_stmt><expr><name>lowerTolerance</name> = <name>t</name></expr>;</expr_stmt>
+        <constructor_decl><name>update</name><parameter_list>()</parameter_list>;</constructor_decl>
+    }</block></function>
+
+    <function><type><name>QString</name></type> <name>getLowerTolerance</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>lowerTolerance</name></expr>;</return>
     }</block></function>
 
     <function><type><name>void</name></type> <name>setTextPosition</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>p</name></decl></param>)</parameter_list> <block>{
@@ -96,7 +198,9 @@
         <constructor_decl><name>update</name><parameter_list>()</parameter_list>;</constructor_decl>
     }</block></function>
 
-    <function><type><name>RVector</name></type> <name>getTextPosition</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+    <comment type="line">//virtual RVector getTextPosition() const = 0;</comment>
+
+    <function><type><name>virtual</name> <name>RVector</name></type> <name>getTextPosition</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
         <if>if <condition>(<expr><name>textPositionSide</name>.<call><name>isValid</name><argument_list>()</argument_list></call></expr>)</condition><then> <block>{
             <return>return <expr><name>textPositionSide</name></expr>;</return>
         }</block></then>
@@ -114,6 +218,15 @@
         <return>return <expr><name>fontName</name></expr>;</return>
     }</block></function>
 
+<comment type="line">//    void setTextColor(const RColor&amp; tc) {</comment>
+<comment type="line">//        textColor = tc;</comment>
+<comment type="line">//        update();</comment>
+<comment type="line">//    }</comment>
+
+<comment type="line">//    RColor getTextColor() const {</comment>
+<comment type="line">//        return textColor;</comment>
+<comment type="line">//    }</comment>
+
     <function><type><name>void</name></type> <name>setDimBlockName</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>bn</name></decl></param>)</parameter_list> <block>{
         <expr_stmt><expr><name>dimBlockName</name> = <name>bn</name></expr>;</expr_stmt>
         <comment type="line">//update();</comment>
@@ -123,27 +236,106 @@
         <return>return <expr><name>dimBlockName</name></expr>;</return>
     }</block></function>
 
+    <function><type><name>bool</name></type> <name>hasOverrides</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>overrides</name>.<call><name>isValid</name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+
+    <function><type><name>bool</name></type> <name>hasOverride</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>overrides</name>.<call><name>hasOverride</name><argument_list>(<argument><expr><name>key</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+
+    <function><type><name>RDimStyleData</name></type> <name>getOverrides</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>overrides</name></expr>;</return>
+    }</block></function>
+
+<comment type="line">//    void makeOverrides() {</comment>
+<comment type="line">//        if (overrides==NULL) {</comment>
+<comment type="line">//            overrides = new RDimStyleData();</comment>
+<comment type="line">//        }</comment>
+<comment type="line">//    }</comment>
+
+    <function_decl><type><name>void</name></type> <name>setDimXVariant</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>, <param><decl><type><name>const</name> <name>QVariant</name>&amp;</type> <name>v</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>setDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>, <param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>setDimXInt</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>, <param><decl><type><name>int</name></type> <name>v</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>setDimXBool</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>, <param><decl><type><name>bool</name></type> <name>v</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>setDimXColor</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>, <param><decl><type><name>const</name> <name>RColor</name>&amp;</type> <name>v</name></decl></param>)</parameter_list>;</function_decl>
+
+    <function_decl><type><name>QVariant</name></type> <name>getDimXVariant</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>QVariant</name></type> <name>getVariantOverride</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function_decl><type><name>double</name></type> <name>getDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>double</name></type> <name>getDoubleOverride</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function_decl><type><name>int</name></type> <name>getDimXInt</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>int</name></type> <name>getIntOverride</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function_decl><type><name>bool</name></type> <name>getDimXBool</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>bool</name></type> <name>getBoolOverride</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function_decl><type><name>RColor</name></type> <name>getDimXColor</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>RColor</name></type> <name>getColorOverride</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>key</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function><type><name>double</name></type> <name>getDimlfac</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMLFAC</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+
+    <function><type><name>void</name></type> <name>setDimlfac</name><parameter_list>(<param><decl><type><name>double</name></type> <name>f</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMLFAC</name></name></type></decl></param>, <param><decl><type><name>f</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+
     <function><type><name>double</name></type> <name>getLinearFactor</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
-        <return>return <expr><name>linearFactor</name></expr>;</return>
+        <return>return <expr><call><name>getDimlfac</name><argument_list>()</argument_list></call></expr>;</return>
     }</block></function>
-
     <function><type><name>void</name></type> <name>setLinearFactor</name><parameter_list>(<param><decl><type><name>double</name></type> <name>f</name></decl></param>)</parameter_list> <block>{
-        <expr_stmt><expr><name>linearFactor</name> = <name>f</name></expr>;</expr_stmt>
+        <constructor_decl><name>setDimlfac</name><parameter_list>(<param><decl><type><name>f</name></type></decl></param>)</parameter_list>;</constructor_decl>
     }</block></function>
 
-    <function_decl><type><name>double</name></type> <name>getDimScale</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>fromDocument</name>=<init><expr><name>true</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
-
-    <function><type><name>void</name></type> <name>setDimScale</name><parameter_list>(<param><decl><type><name>double</name></type> <name>f</name></decl></param>)</parameter_list> <block>{
-        <expr_stmt><expr><name>dimScaleOverride</name> = <name>f</name></expr>;</expr_stmt>
-        <constructor_decl><name>update</name><parameter_list>()</parameter_list>;</constructor_decl>
+    <function><type><name>double</name></type> <name>getDimscale</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMSCALE</name></name></expr></argument>)</argument_list></call></expr>;</return>
     }</block></function>
+
+    <function><type><name>void</name></type> <name>setDimscale</name><parameter_list>(<param><decl><type><name>double</name></type> <name>f</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMSCALE</name></name></type></decl></param>, <param><decl><type><name>f</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+
+    <function><type><name>bool</name></type> <name>isArrow1Flipped</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>arrow1Flipped</name></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setArrow1Flipped</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>arrow1Flipped</name> = <name>on</name></expr>;</expr_stmt>
+    }</block></function>
+    <function><type><name>bool</name></type> <name>isArrow2Flipped</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>arrow2Flipped</name></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setArrow2Flipped</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>arrow2Flipped</name> = <name>on</name></expr>;</expr_stmt>
+    }</block></function>
+
+    <function><type><name>bool</name></type> <name>isExtLineFix</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>extLineFix</name></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setExtLineFix</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>extLineFix</name> = <name>on</name></expr>;</expr_stmt>
+    }</block></function>
+
+    <function><type><name>double</name></type> <name>getExtLineFixLength</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>extLineFixLength</name></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setExtLineFixLength</name><parameter_list>(<param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>extLineFixLength</name> = <name>v</name></expr>;</expr_stmt>
+    }</block></function>
+
+    <function_decl><type><name>void</name></type> <name>adjustExtensionLineFixLength</name><parameter_list>(<param><decl><type><name>RLine</name>&amp;</type> <name>extLine1</name></decl></param>, <param><decl><type><name>RLine</name>&amp;</type> <name>extLine2</name></decl></param>, <param><decl><type><name>bool</name></type> <name>addDimExe</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function_decl><type><name>bool</name></type> <name>hasSpaceForArrows</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>double</name></type> <name>getDistanceTo</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>point</name></decl></param>, <param><decl><type><name>bool</name></type> <name>limited</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>double</name></type> <name>range</name> =<init> <expr>0.0</expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>draft</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>double</name></type> <name>strictRange</name> =<init> <expr><name>RMAXDOUBLE</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>intersectsWith</name><parameter_list>(<param><decl><type><name>const</name> <name>RShape</name>&amp;</type> <name>shape</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RRefPoint</name></argument>&gt;</argument_list></name></type> <name>getReferencePoints</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>ProjectionRenderingHint</name></name></type> <name>hint</name> =<init> <expr><name><name>RS</name>::<name>RenderTop</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
-    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>moveReferencePoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>targetPoint</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>clickReferencePoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>moveReferencePoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>targetPoint</name></decl></param>, <param><decl><type><name><name>Qt</name>::<name>KeyboardModifiers</name></name></type> <name>modifiers</name> =<init> <expr><name><name>Qt</name>::<name>NoModifier</name></name></expr></init></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>move</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>offset</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>rotate</name><parameter_list>(<param><decl><type><name>double</name></type> <name>rotation</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name></decl></param>)</parameter_list>;</function_decl>
@@ -151,12 +343,195 @@
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>scaleVisualProperties</name><parameter_list>(<param><decl><type><name>double</name></type> <name>scaleFactor</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>mirror</name><parameter_list>(<param><decl><type><name>const</name> <name>RLine</name>&amp;</type> <name>axis</name></decl></param>)</parameter_list>;</function_decl>
 
-    <function_decl><type><name>double</name></type> <name>getDimexo</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>double</name></type> <name>getDimexe</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>double</name></type> <name>getDimasz</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>double</name></type> <name>getDimgap</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>double</name></type> <name>getDimtxt</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>bool</name></type> <name>useArchTick</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function><type><name>double</name></type> <name>getDimexo</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMEXO</name></name></expr></argument>)</argument_list></call> * <call><name>getDimscale</name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimexo</name><parameter_list>(<param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMEXO</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>double</name></type> <name>getDimexe</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMEXE</name></name></expr></argument>)</argument_list></call> * <call><name>getDimscale</name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimexe</name><parameter_list>(<param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMEXE</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>double</name></type> <name>getDimasz</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMASZ</name></name></expr></argument>)</argument_list></call> * <call><name>getDimscale</name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimasz</name><parameter_list>(<param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMASZ</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>double</name></type> <name>getDimdli</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMDLI</name></name></expr></argument>)</argument_list></call> * <call><name>getDimscale</name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimdli</name><parameter_list>(<param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMDLI</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>double</name></type> <name>getDimgap</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMGAP</name></name></expr></argument>)</argument_list></call> * <call><name>getDimscale</name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimgap</name><parameter_list>(<param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMGAP</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>double</name></type> <name>getDimtxt</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMTXT</name></name></expr></argument>)</argument_list></call> * <call><name>getDimscale</name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimtxt</name><parameter_list>(<param><decl><type><name>double</name></type> <name>t</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMTXT</name></name></type></decl></param>, <param><decl><type><name>t</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>int</name></type> <name>getDimlunit</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXInt</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMLUNIT</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimlunit</name><parameter_list>(<param><decl><type><name>int</name></type> <name>l</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXInt</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMLUNIT</name></name></type></decl></param>, <param><decl><type><name>l</name></type></decl></param>)</parameter_list>;</constructor_decl>
+
+        <comment type="line">//makeOverrides();</comment>
+        <comment type="line">//overrides.setDimlunit(l);</comment>
+        <comment type="line">//update();</comment>
+
+<comment type="line">//        dimlunitOverride = l;</comment>
+<comment type="line">//        update();</comment>
+    }</block></function>
+    <function><type><name>int</name></type> <name>getDimjust</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXInt</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMJUST</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <comment type="block">/**
+     * \return 0 for text above dimension line, otherwise text on dimension line.
+     */</comment>
+    <function><type><name>int</name></type> <name>getDimtad</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXInt</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMTAD</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimtad</name><parameter_list>(<param><decl><type><name>int</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXInt</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMTAD</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <comment type="block">/**
+     * \return 0 for aligned, other for horizontal text label.
+     */</comment>
+    <function><type><name>bool</name></type> <name>getDimtih</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXBool</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMTIH</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimtih</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXBool</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMTIH</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>double</name></type> <name>getDimtsz</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMTSZ</name></name></expr></argument>)</argument_list></call> * <call><name>getDimscale</name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimtsz</name><parameter_list>(<param><decl><type><name>double</name></type> <name>t</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXDouble</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMTSZ</name></name></type></decl></param>, <param><decl><type><name>t</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>int</name></type> <name>getDimzin</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXInt</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMZIN</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimzin</name><parameter_list>(<param><decl><type><name>int</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXInt</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMZIN</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>int</name></type> <name>getDimaunit</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXInt</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMAUNIT</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimaunit</name><parameter_list>(<param><decl><type><name>int</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXInt</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMAUNIT</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>int</name></type> <name>getDimadec</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXInt</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMADEC</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimadec</name><parameter_list>(<param><decl><type><name>int</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXInt</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMADEC</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>int</name></type> <name>getDimdec</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXInt</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMDEC</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimdec</name><parameter_list>(<param><decl><type><name>int</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXInt</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMDEC</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>int</name></type> <name>getDimazin</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXInt</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMAZIN</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimazin</name><parameter_list>(<param><decl><type><name>int</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXInt</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMAZIN</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>int</name></type> <name>getDimdsep</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXInt</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMDSEP</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimdsep</name><parameter_list>(<param><decl><type><name>int</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXInt</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMDSEP</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>RColor</name></type> <name>getDimclrt</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXColor</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMCLRT</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>void</name></type> <name>setDimclrt</name><parameter_list>(<param><decl><type><name>const</name> <name>RColor</name>&amp;</type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>setDimXColor</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>DIMCLRT</name></name></type></decl></param>, <param><decl><type><name>v</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+
+    <function><type><name>bool</name></type> <name>useArchTick</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMTSZ</name></name></expr></argument>)</argument_list></call> &gt; 0.0</expr>;</return>
+    }</block></function>
+
+    <function><type><name>int</name></type> <name>getDimblk</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name>getDimXInt</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMBLK</name></name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+
+    <function_decl><type><name>QString</name></type> <name>getDimblkName</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+
+
+<comment type="line">//    template&lt;class T&gt;</comment>
+<comment type="line">//    T getDimX(RS::KnownVariable key, T def) const {</comment>
+<comment type="line">//        T dimX = 0;</comment>
+
+<comment type="line">//        // get value from override:</comment>
+<comment type="line">//        if (hasOverride(key)) {</comment>
+<comment type="line">//            if (typeid(T) == typeid(double)) {</comment>
+<comment type="line">//                return getDoubleOverride(key);</comment>
+<comment type="line">//            }</comment>
+<comment type="line">//            else if (typeid(T) == typeid(int)) {</comment>
+<comment type="line">//                return getIntOverride(key);</comment>
+<comment type="line">//            }</comment>
+<comment type="line">//            else if (typeid(T) == typeid(RColor)) {</comment>
+<comment type="line">//                return getColorOverride(key);</comment>
+<comment type="line">//            }</comment>
+<comment type="line">//        }</comment>
+
+<comment type="line">//        if (document!=NULL) {</comment>
+<comment type="line">//            QSharedPointer&lt;RDimStyle&gt; dimStyle = document-&gt;queryDimStyleDirect();</comment>
+<comment type="line">//            if (!dimStyle.isNull()) {</comment>
+<comment type="line">//                // get value from dimension style:</comment>
+<comment type="line">//                if (typeid(T) == typeid(double)) {</comment>
+<comment type="line">//                    dimX = dimStyle-&gt;getDouble(key);</comment>
+<comment type="line">//                }</comment>
+<comment type="line">//                if (typeid(T) == typeid(int)) {</comment>
+<comment type="line">//                    dimX = dimStyle-&gt;getInt(key);</comment>
+<comment type="line">//                }</comment>
+<comment type="line">//            }</comment>
+<comment type="line">//            else {</comment>
+<comment type="line">//                // TODO: get value from document (should never happen):</comment>
+<comment type="line">//                Q_ASSERT(false);</comment>
+<comment type="line">////                QVariant v = document-&gt;getKnownVariable(key, dimX);</comment>
+<comment type="line">////                if (typeid(T) == typeid(double)) {</comment>
+<comment type="line">////                    dimX = v.toDouble();</comment>
+<comment type="line">////                }</comment>
+<comment type="line">////                else if (typeid(T) == typeid(int)) {</comment>
+<comment type="line">////                    dimX = v.toInt();</comment>
+<comment type="line">////                }</comment>
+<comment type="line">////                if (isDimXScaled(key)) {</comment>
+<comment type="line">////                    dimX *= getDimscale();</comment>
+<comment type="line">////                }</comment>
+<comment type="line">//            }</comment>
+<comment type="line">//        }</comment>
+<comment type="line">//        else {</comment>
+<comment type="line">//            qWarning() &lt;&lt; "RDimensionData::getDimexo: no document";</comment>
+<comment type="line">//        }</comment>
+
+<comment type="line">//        return dimX;</comment>
+<comment type="line">//    }</comment>
+
+    <function><type><name>bool</name></type> <name>isDimXScaled</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>KnownVariable</name></name></type> <name>var</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <if>if <condition>(<expr><name>var</name>==<name><name>RS</name>::<name>DIMEXO</name></name></expr>)</condition><then> <block>{
+            <return>return <expr><name>true</name></expr>;</return>
+        }</block></then></if>
+
+        <return>return <expr><name>false</name></expr>;</return>
+    }</block></function>
+
     <function_decl><type><name>bool</name></type> <name>hasCustomTextPosition</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>void</name></type> <name>setCustomTextPosition</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list>;</function_decl>
 
@@ -172,14 +547,14 @@
         <return>return <expr><name>textAngle</name></expr>;</return>
     }</block></function>
 
-    <function_decl><type><name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getDimensionLineShapes</name><parameter_list>(
-        <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>p1</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>p2</name></decl></param>,
-        <param><decl><type><name>bool</name></type> <name>arrow1</name></decl></param>, <param><decl><type><name>bool</name></type> <name>arrow2</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getArrow</name><parameter_list>(
-        <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>position</name></decl></param>, <param><decl><type><name>double</name></type> <name>direction</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>RTextData</name>&amp;</type> <name>getTextData</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>void</name></type> <name>initTextData</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>virtual</name> <name>void</name></type> <name>updateTextData</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+<comment type="line">//    QList&lt;QSharedPointer&lt;RShape&gt; &gt; getDimensionLineShapes(</comment>
+<comment type="line">//        const RVector&amp; p1, const RVector&amp; p2,</comment>
+<comment type="line">//        bool arrow1, bool arrow2) const;</comment>
+<comment type="line">//    virtual QList&lt;QSharedPointer&lt;RShape&gt; &gt; getArrow(</comment>
+<comment type="line">//        const RVector&amp; position, double direction) const;</comment>
+    <function_decl><type><name>RTextData</name>&amp;</type> <name>getTextData</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>noRender</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>RTextData</name>&amp;</type> <name>initTextData</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+    <comment type="line">//virtual void updateTextData() const;</comment>
     <function_decl><type><name>virtual</name> <name>QString</name></type> <name>getMeasurement</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>resolveAutoMeasurement</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function><type><name>virtual</name> <name>double</name></type> <name>getMeasuredValue</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{ <return>return <expr>0.0</expr>;</return> }</block></function>
     <function><type><name>virtual</name> <name>QString</name></type> <name>getAutoLabel</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{ <return>return <expr>""</expr>;</return> }</block></function>
@@ -191,6 +566,8 @@
 
     <function_decl><type><name>QSharedPointer<argument_list>&lt;<argument><name>RBlockReferenceEntity</name></argument>&gt;</argument_list></name></type> <name>getDimensionBlockReference</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>bool</name></type> <name>hasDimensionBlockReference</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>to2D</name><parameter_list>()</parameter_list>;</function_decl>
 
 </public><protected>protected:
     <comment type="block">/** Definition point */</comment>
@@ -213,7 +590,7 @@
     <comment type="block">/**
      * Text string entered explicitly by user or null
      * or "&lt;&gt;" for the actual measurement or " " (one blank space)
-     * for supressing the text.
+     * for suppressing the text.
      */</comment>
     <decl_stmt><decl><type><name>QString</name></type> <name>text</name></decl>;</decl_stmt>
     <comment type="block">/** Upper tolerance limit */</comment>
@@ -222,6 +599,8 @@
     <decl_stmt><decl><type><name>QString</name></type> <name>lowerTolerance</name></decl>;</decl_stmt>
     <comment type="block">/** Dimension font name */</comment>
     <decl_stmt><decl><type><name>QString</name></type> <name>fontName</name></decl>;</decl_stmt>
+    <comment type="block">/** Dimension text color */</comment>
+    <comment type="line">//RColor textColor;</comment>
     <comment type="block">/** Dimension appearance is defined in this block */</comment>
     <decl_stmt><decl><type><name>mutable</name> <name>QString</name></type> <name>dimBlockName</name></decl>;</decl_stmt>
 
@@ -229,16 +608,32 @@
     <comment type="block">/** Rotation angle of dimension text away from default orientation */</comment>
     <decl_stmt><decl><type><name>double</name></type> <name>textAngle</name></decl>;</decl_stmt>
 
-    <decl_stmt><decl><type><name>double</name></type> <name>linearFactor</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>double</name></type> <name>dimScaleOverride</name></decl>;</decl_stmt>
+    <comment type="line">// RDimStyleData for overrides:</comment>
+    <decl_stmt><decl><type><name>RDimStyleData</name></type> <name>overrides</name></decl>;</decl_stmt>
+
+    <comment type="line">//double linearFactor;</comment>
+    <comment type="line">//double dimScaleOverride;</comment>
+    <comment type="line">//double dimtxtOverride;</comment>
+    <comment type="line">//int dimlunitOverride;</comment>
+
+    <decl_stmt><decl><type><name>bool</name></type> <name>arrow1Flipped</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>bool</name></type> <name>arrow2Flipped</name></decl>;</decl_stmt>
+
+    <decl_stmt><decl><type><name>bool</name></type> <name>extLineFix</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>double</name></type> <name>extLineFixLength</name></decl>;</decl_stmt>
 
     <decl_stmt><decl><type><name>mutable</name> <name>bool</name></type> <name>dirty</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>mutable</name> <name>RTextData</name></type> <name>textData</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>mutable</name> <name>RBox</name></type> <name>boundingBox</name></decl>;</decl_stmt>
+
     <decl_stmt><decl><type><name>mutable</name> <name>double</name></type> <name>dimLineLength</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>mutable</name> <name>RVector</name></type> <name>arrow1Pos</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>mutable</name> <name>RVector</name></type> <name>arrow2Pos</name></decl>;</decl_stmt>
 
     <comment type="block">/** True if the textPosition should be automatically calculated. */</comment>
     <decl_stmt><decl><type><name>mutable</name> <name>bool</name></type> <name>autoTextPos</name></decl>;</decl_stmt>
+
+    <decl_stmt><decl><type><name>mutable</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>shapes</name></decl>;</decl_stmt>
 </protected>}</block>;</class>
 
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RDimensionData*</argument>)</argument_list></macro>

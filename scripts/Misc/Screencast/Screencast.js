@@ -23,7 +23,7 @@
  *
  * \brief This module contains ECMAScript screencast recording tools.
  */
-include("../Misc.js");
+include("scripts/Misc/Misc.js");
 
 /**
  * \class Screencast
@@ -39,7 +39,7 @@ Screencast.includeBasePath = includeBasePath;
 Screencast.getMenu = function() {
     var menu = EAction.getSubMenu(
         Misc.getMenu(),
-        10000,
+        10000, 10,
         Screencast.getTitle(),
         "screencast"
     );
@@ -57,7 +57,7 @@ Screencast.getCadToolBarPanel = function() {
 };
 
 Screencast.getTitle = function() {
-    return qsTr("&Screencast");
+    return "&Screencast";
 };
 
 Screencast.prototype.getTitle = function() {

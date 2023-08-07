@@ -52,6 +52,9 @@
         getCpuCores
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getIdealThreadCount
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getBuildCpuArchitecture
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -62,6 +65,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getWindowManagerId
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        showInFileManager
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getDirectoryList
@@ -78,17 +84,57 @@
         ;static  QScriptValue
         getLinetypeList
         (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        sortAlphanumerical
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        compareChunkify
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        compareAlphanumerical
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        lessThanAlphanumerical
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getFontFamily
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getPageSizeId
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getPageSize
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setUtf8Codec
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        escape
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getScreenCount
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getAvailableGeometry
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getMetaType
+        (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)
     ;static  QScriptValue destroy(QScriptContext *context, QScriptEngine *engine)
     ;static RS* getSelf(const QString& fName, QScriptContext* context)
     ;static RS* getSelfShell(const QString& fName, QScriptContext* context)
+    ;static  QScriptValue toScriptValueEnumMetaType(QScriptEngine* engine, const RS::MetaType& value)
+    ;static  void fromScriptValueEnumMetaType(const QScriptValue& value, RS::MetaType& out)
     ;static  QScriptValue toScriptValueEnumMessageType(QScriptEngine* engine, const RS::MessageType& value)
     ;static  void fromScriptValueEnumMessageType(const QScriptValue& value, RS::MessageType& out)
     ;static  QScriptValue toScriptValueEnumEntityType(QScriptEngine* engine, const RS::EntityType& value)
     ;static  void fromScriptValueEnumEntityType(const QScriptValue& value, RS::EntityType& out)
     ;static  QScriptValue toScriptValueEnumProjectionRenderingHint(QScriptEngine* engine, const RS::ProjectionRenderingHint& value)
     ;static  void fromScriptValueEnumProjectionRenderingHint(const QScriptValue& value, RS::ProjectionRenderingHint& out)
+    ;static  QScriptValue toScriptValueEnumOrthoMode(QScriptEngine* engine, const RS::OrthoMode& value)
+    ;static  void fromScriptValueEnumOrthoMode(const QScriptValue& value, RS::OrthoMode& out)
     ;static  QScriptValue toScriptValueEnumSide(QScriptEngine* engine, const RS::Side& value)
     ;static  void fromScriptValueEnumSide(const QScriptValue& value, RS::Side& out)
     ;static  QScriptValue toScriptValueEnumEnding(QScriptEngine* engine, const RS::Ending& value)
@@ -117,6 +163,8 @@
     ;static  void fromScriptValueEnumAngleUnit(const QScriptValue& value, RS::AngleUnit& out)
     ;static  QScriptValue toScriptValueEnumKnownVariable(QScriptEngine* engine, const RS::KnownVariable& value)
     ;static  void fromScriptValueEnumKnownVariable(const QScriptValue& value, RS::KnownVariable& out)
+    ;static  QScriptValue toScriptValueEnumKnownVariableType(QScriptEngine* engine, const RS::KnownVariableType& value)
+    ;static  void fromScriptValueEnumKnownVariableType(const QScriptValue& value, RS::KnownVariableType& out)
     ;static  QScriptValue toScriptValueEnumBooleanOperation(QScriptEngine* engine, const RS::BooleanOperation& value)
     ;static  void fromScriptValueEnumBooleanOperation(const QScriptValue& value, RS::BooleanOperation& out)
     ;static  QScriptValue toScriptValueEnumFillType(QScriptEngine* engine, const RS::FillType& value)
@@ -127,6 +175,8 @@
     ;static  void fromScriptValueEnumJoinType(const QScriptValue& value, RS::JoinType& out)
     ;static  QScriptValue toScriptValueEnumEndType(QScriptEngine* engine, const RS::EndType& value)
     ;static  void fromScriptValueEnumEndType(const QScriptValue& value, RS::EndType& out)
+    ;static  QScriptValue toScriptValueEnumEasing(QScriptEngine* engine, const RS::Easing& value)
+    ;static  void fromScriptValueEnumEasing(const QScriptValue& value, RS::Easing& out)
     ;};
     #endif
     

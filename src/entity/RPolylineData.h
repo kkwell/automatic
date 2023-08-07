@@ -40,7 +40,7 @@
  * \copyable
  * \ingroup entity
  */
-class QCADENTITY_EXPORT RPolylineData: public REntityData, protected RPolyline {
+class QCADENTITY_EXPORT RPolylineData: public REntityData, public RPolyline {
 
     friend class RPolylineEntity;
 
@@ -54,19 +54,83 @@ public:
     virtual RS::EntityType getType() const {
         return RS::EntityPolyline;
     }
+
+    bool isValid() const {
+        return RPolyline::isValid();
+    }
+    virtual QList<RVector> getEndPoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return REntityData::getEndPoints(queryBox, subEntityIds);
+    }
+    virtual void setZ(double z) {
+        RPolyline::setZ(z);
+    }
+    virtual void to2D() {
+        RPolyline::to2D();
+    }
+    virtual RBox getBoundingBox(bool ignoreEmpty=false) const {
+        return REntityData::getBoundingBox();
+    }
+    virtual QList<RVector> getMiddlePoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return REntityData::getMiddlePoints(queryBox, subEntityIds);
+    }
+    virtual QList<RVector> getCenterPoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return REntityData::getCenterPoints(queryBox, subEntityIds);
+    }
+    virtual QList<RVector> getArcReferencePoints(const RBox& queryBox = RDEFAULT_RBOX) const {
+        return REntityData::getArcReferencePoints(queryBox);
+    }
+    virtual QList<RVector> getPointsWithDistanceToEnd(double distance, int from = RS::FromAny, const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return REntityData::getPointsWithDistanceToEnd(distance, from, queryBox, subEntityIds);
+    }
+    virtual QList<RVector> getIntersectionPoints(const RShape& shape, bool limited = true, const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = true) const {
+        return REntityData::getIntersectionPoints(shape, limited, queryBox, ignoreComplex);
+    }
+    virtual RVector getVectorTo(const RVector& point, bool limited=true, double strictRange = RMAXDOUBLE) const {
+        return REntityData::getVectorTo(point, limited, strictRange);
+    }
+    virtual bool intersectsWith(const RShape& shape) const {
+        return REntityData::intersectsWith(shape);
+    }
+    virtual bool move(const RVector& offset) {
+        return RPolyline::move(offset);
+    }
+    virtual bool rotate(double rotation, const RVector& center = RDEFAULT_RVECTOR) {
+        return RPolyline::rotate(rotation, center);
+    }
+    virtual bool scale(const RVector& scaleFactors, const RVector& center = RDEFAULT_RVECTOR) {
+        return RPolyline::scale(scaleFactors, center);
+    }
+    virtual bool mirror(const RLine& axis) {
+        return RPolyline::mirror(axis);
+    }
+    virtual bool mirror(const RVector& axis1, const RVector& axis2) {
+        return REntityData::mirror(axis1, axis2);
+    }
+    virtual bool flipHorizontal() {
+        return REntityData::flipHorizontal();
+    }
+    virtual bool flipVertical() {
+        return REntityData::flipVertical();
+    }
+    virtual bool stretch(const RPolyline& area, const RVector& offset) {
+        return RPolyline::stretch(area, offset);
+    }
     virtual QList<RBox> getBoundingBoxes(bool ignoreEmpty=false) const;
 
     virtual QList<RRefPoint> getReferencePoints(RS::ProjectionRenderingHint hint = RS::RenderTop) const;
 
-    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint);
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
     virtual RShape* castToShape() {
         return this;
     }
 
     virtual double getDistanceTo(const RVector& point, bool limited = true, double range = 0.0, bool draft = false, double strictRange = RMAXDOUBLE) const {
-        Q_UNUSED(draft)
+        if (!hasWidths()) {
+            return REntityData::getDistanceTo(point, limited, range, draft, strictRange);
+        }
 
+        // polylines with custom segment widths:
         double ret = RPolyline::getDistanceTo(point, limited, strictRange);
         if (ret>range) {
             return RNANDOUBLE;
@@ -130,6 +194,10 @@ public:
         RPolyline::setBulgeAt(i, b);
     }
 
+    double getVertexAngle(int i, RS::Orientation orientation = RS::UnknownOrientation) const {
+        return RPolyline::getVertexAngle(i, orientation);
+    }
+
     double getDirection1() const {
         return RPolyline::getDirection1();
     }
@@ -148,6 +216,14 @@ public:
 
     RVector getStartPoint() const {
         return RPolyline::getStartPoint();
+    }
+
+    bool relocateStartPoint(const RVector& p) {
+        return RPolyline::relocateStartPoint(p);
+    }
+
+    bool relocateStartPoint(double dist) {
+        return RPolyline::relocateStartPoint(dist);
     }
 
     void setClosed(bool on) {
@@ -178,6 +254,46 @@ public:
         return RPolyline::getOrientation(implicitelyClosed);
     }
 
+    void setGlobalWidth(double w) {
+        RPolyline::setGlobalWidth(w);
+    }
+
+    void setStartWidthAt(int i, double w) {
+        RPolyline::setStartWidthAt(i, w);
+    }
+
+    double getStartWidthAt(int i) const {
+        return RPolyline::getStartWidthAt(i);
+    }
+
+    void setEndWidthAt(int i, double w) {
+        RPolyline::setEndWidthAt(i, w);
+    }
+
+    double getEndWidthAt(int i) const {
+        return RPolyline::getEndWidthAt(i);
+    }
+
+    bool hasWidths() const {
+        return RPolyline::hasWidths();
+    }
+
+    void setStartWidths(const QList<double>& sw) {
+        RPolyline::setStartWidths(sw);
+    }
+
+    QList<double> getStartWidths() const {
+        return RPolyline::getStartWidths();
+    }
+
+    void setEndWidths(const QList<double>& ew) {
+        RPolyline::setEndWidths(ew);
+    }
+
+    QList<double> getEndWidths() const {
+        return RPolyline::getEndWidths();
+    }
+
     QList<QSharedPointer<RShape> > getExploded(int segments = RDEFAULT_MIN1) const {
         return RPolyline::getExploded(segments);
     }
@@ -190,11 +306,15 @@ public:
         RPolyline::simplify(angleTolerance);
     }
 
+    RPolyline roundAllCorners(double radius) {
+        return RPolyline::roundAllCorners(radius);
+    }
+
     QList<RVector> verifyTangency(double toleranceMin = RS::AngleTolerance, double toleranceMax = M_PI_4) {
         return RPolyline::verifyTangency(toleranceMin, toleranceMax);
     }
 
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const;
+    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const;
 
     virtual QList<RVector> getIntersectionPoints(
             const REntityData& other, bool limited = true, bool same = false,
@@ -206,6 +326,8 @@ public:
     bool getPolylineGen() const {
         return polylineGen;
     }
+    void setElevation(double v);
+    double getElevation() const;
 
 protected:
     bool polylineGen;

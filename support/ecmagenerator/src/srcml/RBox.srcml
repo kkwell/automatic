@@ -25,9 +25,12 @@
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QRectF&gt;</cpp:file></cpp:include>
 
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RShape.h"</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RVector.h"</cpp:file></cpp:include>
-<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RTriangle.h"</cpp:file></cpp:include>
+<comment type="line">//#include "RTriangle.h"</comment>
 
+<class_decl>class <name>RLine</name>;</class_decl>
+<class_decl>class <name>RTriangle</name>;</class_decl>
 <class_decl>class <name>RPolyline</name>;</class_decl>
 
 <cpp:define>#<cpp:directive>define</cpp:directive> <name>RDEFAULT_RBOX</name> <name>RBox</name>()</cpp:define>
@@ -53,6 +56,9 @@
     <function_decl><type><name>bool</name></type> <name>isValid</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>bool</name></type> <name>isSane</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
+    <function_decl><type><name>bool</name></type> <name>equalsFuzzy</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>b</name></decl></param>, <param><decl><type><name>double</name></type> <name>tol</name> =<init> <expr><name><name>RS</name>::<name>PointTolerance</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>bool</name></type> <name>equalsFuzzy2D</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>b</name></decl></param>, <param><decl><type><name>double</name></type> <name>tol</name> =<init> <expr><name><name>RS</name>::<name>PointTolerance</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
     <function><type><name>RBox</name></type> <name>get2D</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><call><name>RBox</name><argument_list>(<argument><expr><name>c1</name>.<call><name>get2D</name><argument_list>()</argument_list></call></expr></argument>, <argument><expr><name>c2</name>.<call><name>get2D</name><argument_list>()</argument_list></call></expr></argument>)</argument_list></call></expr>;</return>
     }</block></function>
@@ -60,6 +66,7 @@
     <function_decl><type><name>double</name></type> <name>getWidth</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>double</name></type> <name>getHeight</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>getSize</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>double</name></type> <name>getArea</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>getCenter</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>getMinimum</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>getMaximum</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
@@ -105,8 +112,10 @@
 
     <function_decl><type><name>RBox</name>&amp;</type> <name>grow</name><parameter_list>(<param><decl><type><name>double</name></type> <name>offset</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>RBox</name>&amp;</type> <name>growXY</name><parameter_list>(<param><decl><type><name>double</name></type> <name>offset</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>RBox</name>&amp;</type> <name>growXY</name><parameter_list>(<param><decl><type><name>double</name></type> <name>offsetX</name></decl></param>, <param><decl><type><name>double</name></type> <name>offsetY</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>void</name></type> <name>move</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>offset</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>bool</name></type> <name>scaleByReference</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>targetPoint</name></decl></param>, <param><decl><type><name>bool</name></type> <name>keepAspectRatio</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>fromCenter</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>QRectF</name></type> <name>toQRectF</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
@@ -114,6 +123,18 @@
     <function><type><name>bool</name></type> <name>operator !=</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>other</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr>!operator==(<name>other</name>)</expr>;</return>
     }</block></function>
+
+    <function_decl><type><name>void</name></type> <name>transform</name><parameter_list>(<param><decl><type><name>QTransform</name>&amp;</type> <name>t</name></decl></param>)</parameter_list>;</function_decl>
+
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+    <comment type="block">/**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */</comment>
+    <function><type><name>RBox</name></type> <name>copy</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr>*<name>this</name></expr>;</return>
+    }</block></function>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
 
 </public><public>public:
     <comment type="block">/**

@@ -24,7 +24,7 @@
  * \brief This module contains ECMAScript implementations of various
  * window tools.
  */
-include("../EAction.js");
+include("scripts/EAction.js");
 
 function MenuData(d) {
     this.data = d;
@@ -81,16 +81,30 @@ Window.getMenu = function() {
                 if (modified) {
                     text += " *";
                 }
+                text = text.replace(/&/g, "&&");
                 action = menu.addAction(text);
                 action.checkable = true;
-                if (!isNull(mdiArea.activeSubWindow()) && window.getObjectId() == mdiArea.activeSubWindow().getObjectId()) {
+
+                var winId;
+                var activeWinId;
+
+                if (RSettings.getQtVersion() >= 0x060000) {
+                    winId = window.getAddress();
+                    activeWinId = mdiArea.activeSubWindow().getAddress();
+                }
+                else {
+                    winId = window.getObjectId();
+                    activeWinId = mdiArea.activeSubWindow().getObjectId();
+                }
+
+                if (!isNull(mdiArea.activeSubWindow()) && winId === activeWinId) {
                     action.checked = true;
                 } else {
                     action.checked = false;
                 }
                 action.objectName = "MdiChild";
                 var menuData = new MenuData(windows[i]);
-                action.triggered.connect(menuData, "triggered");
+                action.triggered.connect(menuData, menuData.triggered);
             }
         });
     });
@@ -115,4 +129,10 @@ Window.prototype.getTitle = function() {
 Window.init = function() {
     Window.getMenu();
     Window.getToolBar();
+
+    // make sure there's an action:
+    var appWin = EAction.getMainWindow();
+    var action = new RGuiAction(qsTr("Window Tools"), appWin);
+    action.setScriptFile(Window.includeBasePath + "/Window.js");
+    action.setWidgetNames([]);
 };

@@ -24,6 +24,7 @@
 
 #include "RDocument.h"
 #include "RExporter.h"
+#include "RGraphicsScene.h"
 #include "ROperation.h"
 #include "RVector.h"
 
@@ -39,15 +40,22 @@ class REntity;
 class QCADOPERATIONS_EXPORT RMoveReferencePointOperation : public ROperation {
 public:
     RMoveReferencePointOperation(
-        const RVector& referencePoint, const RVector& targetPoint
+        const RVector& referencePoint, const RVector& targetPoint,
+        Qt::KeyboardModifiers modifiers
     );
     virtual ~RMoveReferencePointOperation() {}
     
     virtual RTransaction apply(RDocument& document, bool preview = false);
 
+    void setGraphicsScene(RGraphicsScene* s) {
+        scene = s;
+    }
+
 private:
     RVector referencePoint;
     RVector targetPoint;
+    Qt::KeyboardModifiers modifiers;
+    RGraphicsScene* scene;
 };
 
 Q_DECLARE_METATYPE(RMoveReferencePointOperation*)

@@ -29,6 +29,7 @@
 #include <QPen>
 #include <QStack>
 #include <QTextLayout>
+#include <QTransform>
 
 #include "REntity.h"
 #include "RImageData.h"
@@ -88,7 +89,7 @@ public:
     /**
      * \nonscriptoverwritable
      */
-    RDocument& getDocument() const;
+    virtual RDocument& getDocument() const;
 
     void setProjectionRenderingHint(RS::ProjectionRenderingHint p);
     RS::ProjectionRenderingHint getProjectionRenderingHint();
@@ -104,6 +105,7 @@ public:
     virtual QBrush getBrush(const RPainterPath& path);
     virtual QBrush getBrush();
 
+    virtual RColor getColor(const RColor& unresolvedColor);
     virtual RColor getColor(bool resolve);
 
     virtual void setEntityAttributes(bool forceSelected=false);
@@ -134,6 +136,7 @@ public:
     virtual const REntity* getEntity() const;
 
     virtual bool isEntitySelected();
+    virtual bool isPatternContinuous(const RLinetypePattern& p);
 
     virtual void startExport();
     virtual void endExport();
@@ -145,22 +148,24 @@ public:
     virtual void exportIntListWithName(const QString& dictionaryName, const QString& name, const QString& listName, QList<int64_t>& values);
 
     virtual void exportLayers();
+    virtual void exportLayerStates();
     virtual void exportBlocks();
     virtual void exportViews();
     virtual void exportLinetypes();
 
     virtual void exportLayer(RLayer& /*layer*/) {}
     virtual void exportLayer(RLayer::Id layerId);
+    virtual void exportLayerState(RLayerState& /*layerState*/) {}
     virtual void exportBlock(RBlock& /*block*/) {}
     virtual void exportBlock(RBlock::Id blockId);
     virtual void exportView(RView& /*view*/) {}
     virtual void exportView(RView::Id viewId);
     virtual void exportLinetype(RLinetype& /*linetype*/) {}
 
-    virtual void exportEntities(bool allBlocks = true, bool undone = false);
+    virtual void exportEntities(bool allBlocks = true, bool undone = false, bool invisible = false);
     virtual void exportEntities(const RBox& box);
     virtual void exportEntities(QSet<REntity::Id>& entityIds, bool allBlocks = true);
-    virtual void exportEntity(REntity& entity, bool preview = false, bool allBlocks = true, bool forceSelected = false);
+    virtual void exportEntity(REntity& entity, bool preview = false, bool allBlocks = true, bool forceSelected = false, bool invisible = false);
     virtual void exportEntity(REntity::Id entityId, bool allBlocks = true, bool forceSelected = false);
     virtual QSharedPointer<RLayer> getEntityLayer(REntity& entity);
     virtual bool isVisible(REntity& entity);
@@ -227,9 +232,9 @@ public:
     /**
      * \nonscriptable
      */
-    virtual void exportPainterPathSource(const RPainterPathSource& pathSource);
+    virtual void exportPainterPathSource(const RPainterPathSource& pathSource, double z = 0.0);
 
-    virtual void exportPainterPaths(const QList<RPainterPath>& paths);
+    virtual void exportPainterPaths(const QList<RPainterPath>& paths, double z = 0.0);
     virtual void exportPainterPaths(const QList<RPainterPath>& paths, double angle, const RVector& pos);
 
     virtual void exportBoundingBoxPaths(const QList<RPainterPath>& paths);
@@ -237,6 +242,8 @@ public:
     virtual void exportImage(const RImageData& image, bool forceSelected = false);
     virtual QList<RPainterPath> exportText(const RTextBasedData& text, bool forceSelected = false);
     virtual void exportClipRectangle(const RBox& clipRectangle, bool forceSelected = false);
+    virtual void exportTransform(const RTransform& t);
+    virtual void exportEndTransform();
 
     virtual void exportThickPolyline(const RPolyline& polyline) {
         RPolyline pl = polyline;
@@ -283,7 +290,7 @@ public:
     /**
      * Override to force text rendering mode.
      */
-    virtual bool isTextRenderedAsText() {
+    virtual bool isTextRenderedAsText() const {
         return RSettings::isTextRenderedAsText();
     }
 
@@ -332,9 +339,19 @@ public:
         visualExporter = on;
     }
 
+    bool getExportInvisible() const {
+        return exportInvisible;
+    }
+
+    void setExportInvisible(bool on) {
+        exportInvisible = on;
+    }
+
     double getPixelSizeHint() const {
         return pixelSizeHint;
     }
+
+    virtual double getCurrentPixelSizeHint() const;
 
     void setPixelSizeHint(double v) {
         pixelSizeHint = v;
@@ -356,8 +373,21 @@ public:
         pixelWidth = on;
     }
 
+    void setEnablePatterns(bool on) {
+        enablePatterns = on;
+    }
+
+//    bool getCombineTransforms() const {
+//        return combineTransforms;
+//    }
+
+//    void setCombineTransforms(bool on) {
+//        combineTransforms = on;
+//    }
+
 protected:
     RDocument* document;
+    QTransform transform;
     QPen currentPen;
     RLinetypePattern currentLinetypePattern;
     QBrush currentBrush;
@@ -370,12 +400,15 @@ protected:
     bool twoColorSelectedMode;
     bool screenBasedLinetypes;
     bool visualExporter;
+    bool exportInvisible;
     QString errorMessage;
     double pixelSizeHint;
     bool pixelUnit;
     bool clipping;
     bool pixelWidth;
     Qt::PenCapStyle penCapStyle;
+    bool enablePatterns;
+    //bool combineTransforms;
 
 private:
     RS::ProjectionRenderingHint projectionRenderingHint;

@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 SUBDIRS = \
-    ts \
+    dir \
     AutoZoomView \
     BlockList \
     CadToolBar \
@@ -10,7 +10,6 @@ SUBDIRS = \
     DirectoryList \
     FirstStart \
     LayerList \
-    LibraryBrowser \
     MouseDisplay \
     OptionsToolBar \
     PenToolBar \

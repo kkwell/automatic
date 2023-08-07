@@ -70,6 +70,8 @@
 
     <constructor_decl><name>RVector</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>double</name></argument>&gt;</argument_list></name>&amp;</type> <name>tuples</name></decl></param>)</parameter_list>;</constructor_decl>
 
+    <destructor_decl><name>~RVector</name><parameter_list>()</parameter_list>;</destructor_decl>
+
     <comment type="block">/**
      * Sets new values for the vector and makes the vector valid.
      */</comment>
@@ -124,6 +126,7 @@
 
     <function_decl><type><name>RVector</name></type> <name>rotate</name><parameter_list>(<param><decl><type><name>double</name></type> <name>rotation</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>rotate</name><parameter_list>(<param><decl><type><name>double</name></type> <name>rotation</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>RVector</name></type> <name>getRotated</name><parameter_list>(<param><decl><type><name>double</name></type> <name>rotation</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>rotate3D</name><parameter_list>(<param><decl><type><name>const</name> <name>RLine</name>&amp;</type> <name>axis</name></decl></param>, <param><decl><type><name>double</name></type> <name>rotation</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>rotate3D</name><parameter_list>(<param><decl><type><name>const</name> <name>QQuaternion</name>&amp;</type> <name>quaternion</name></decl></param>)</parameter_list>;</function_decl>
 
@@ -139,6 +142,7 @@
 
     <function_decl><type><name>RVector</name></type> <name>scale</name><parameter_list>(<param><decl><type><name>double</name></type> <name>factor</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name>=<init><expr><name>nullVector</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>scale</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>factors</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name>=<init><expr><name>nullVector</name></expr></init></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>RVector</name></type> <name>getScaled</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>factors</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <comment type="block">/**
      * \nonscriptable
@@ -151,6 +155,7 @@
     <function_decl><type><name>static</name> <name>void</name></type> <name>scaleList</name><parameter_list>(<param><decl><type><name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name>&amp;</type> <name>list</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>factors</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name>=<init><expr><name>nullVector</name></expr></init></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>RVector</name></type> <name>mirror</name><parameter_list>(<param><decl><type><name>const</name> <name>RLine</name>&amp;</type> <name>axis</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>RVector</name></type> <name>getMirrored</name><parameter_list>(<param><decl><type><name>const</name> <name>RLine</name>&amp;</type> <name>axis</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>mirror</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>axis1</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>axis2</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>flipHorizontal</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>flipVertical</name><parameter_list>()</parameter_list>;</function_decl>
@@ -183,6 +188,7 @@
     <function_decl><type><name>RVector</name></type> <name>operator /</name><parameter_list>(<param><decl><type><name>double</name></type> <name>s</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>operator -</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>RVector</name></type> <name>getNegated</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>RVector</name></type> <name>getAbsolute</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function><type><name>double</name></type> <name>dot</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>other</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><call><name><name>RVector</name>::<name>getDotProduct</name></name><argument_list>(<argument><expr>*<name>this</name></expr></argument>, <argument><expr><name>other</name></expr></argument>)</argument_list></call></expr>;</return>
@@ -210,6 +216,16 @@
     <function><type><name>bool</name></type> <name>gteXY</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>v</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><call><name><name>RVector</name>::<name>greaterThanEqualXY</name></name><argument_list>(<argument><expr>*<name>this</name></expr></argument>, <argument><expr><name>v</name></expr></argument>)</argument_list></call></expr>;</return>
     }</block></function>
+
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &gt;= 0x060000</expr></cpp:if>
+    <comment type="block">/**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */</comment>
+    <function><type><name>RVector</name></type> <name>copy</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr>*<name>this</name></expr>;</return>
+    }</block></function>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
 
     <function_decl><type><name>static</name> <name>bool</name></type> <name>containsFuzzy</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name>&amp;</type> <name>vectors</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>v</name></decl></param>, <param><decl><type><name>double</name></type> <name>tol</name> =<init> <expr><name><name>RS</name>::<name>PointTolerance</name></name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>static</name> <name>int</name></type> <name>findFirstFuzzy</name><parameter_list>(<param><decl><type><name>const</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name>&amp;</type> <name>vectors</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>v</name></decl></param>, <param><decl><type><name>double</name></type> <name>tol</name> =<init> <expr><name><name>RS</name>::<name>PointTolerance</name></name></expr></init></decl></param>)</parameter_list>;</function_decl>

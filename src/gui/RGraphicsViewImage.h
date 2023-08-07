@@ -24,6 +24,7 @@
 
 #include <QtCore>
 #include <QPinchGesture>
+#include <QTransform>
 
 #include "RGraphicsView.h"
 #include "RPainterPath.h"
@@ -32,6 +33,7 @@ class RAction;
 class RDocument;
 class RDocumentInterface;
 class RGraphicsSceneQt;
+class RGraphicsSceneDrawable;
 class RLine;
 class RSnap;
 class RSnapRestriction;
@@ -53,6 +55,11 @@ class QCADGUI_EXPORT RGraphicsViewImage : public RGraphicsView {
 public:
     RGraphicsViewImage();
     virtual ~RGraphicsViewImage();
+
+    int getNumThreads() const {
+        return numThreads;
+    }
+    void setNumThreads(int n);
 
     void clear();
 
@@ -265,7 +272,12 @@ public:
     bool getPanOptimization();
 
     virtual void paintEntities(QPainter* painter, const RBox& queryBox);
-    virtual void paintEntity(QPainter* painter, REntity::Id id, bool preview = false);
+    void paintEntitiesMulti(const RBox& queryBox);
+    void paintEntitiesThread(int threadId, const QList<REntity::Id>& list, int start, int end);
+
+    virtual void paintEntityThread(int threadId, REntity::Id id, bool preview = false);
+
+    virtual void paintOverlay(QPainter* painter);
 
     QImage getBuffer() const;
     QTransform getTransform() const;
@@ -277,23 +289,39 @@ public:
     virtual void emitUpdateTextLabel(const RTextLabel& textLabel) {
         Q_UNUSED(textLabel)
     }
-    virtual void emitDecorateBackground(QPainter* painter) { Q_UNUSED(painter) }
-    virtual void emitDecorateForeground(QPainter* painter) { Q_UNUSED(painter) }
+    //virtual void emitDecorateBackground(QPainter* painter) { Q_UNUSED(painter) }
+    //virtual void emitDecorateForeground(QPainter* painter) { Q_UNUSED(painter) }
 
     void clearBackground();
-    void addToBackground(const RPainterPath& path);
+    void addToBackground(const RGraphicsSceneDrawable& drawable);
     void setBackgroundTransform(double bgFactor, const RVector& bgOffset);
 
+    void clearOverlay(int overlayId);
+    void clearOverlay(int overlayId, RObject::Id objectId);
+    void addToOverlay(int overlayId, RObject::Id objectId, const RGraphicsSceneDrawable& drawable);
+
     void setColorCorrectionOverride(bool on) {
-        colorCorrectionOverride = on;
+        colorCorrectionOverride = (int)on;
     }
 
     bool getColorCorrectionOverride() const {
-        return colorCorrectionOverride;
+        return (colorCorrectionOverride!=0);
     }
 
     void setMinimumLineweight(double lw) {
         minimumLineweight = lw;
+    }
+
+    double getMinimumLineweight() const {
+        return minimumLineweight;
+    }
+
+    void setMaximumLineweight(double lw) {
+        maximumLineweight = lw;
+    }
+
+    double getMaximumLineweight() const {
+        return maximumLineweight;
     }
 
     void setPaintOffset(const RVector& offset) {
@@ -327,8 +355,8 @@ protected:
     virtual void drawCircle(QPainter* painter, QPointF pt, double pSize);
     virtual void drawSquare(QPainter* painter, QPointF pt, double pSize);
 
-    virtual void paintImage(QPainter* painter, RImageData& image);
-    virtual void paintText(QPainter* painter, RTextBasedData& text);
+    virtual void paintImage(QPainter* painter, RImageData& image, bool workingSet = true);
+    virtual void paintText(QPainter* painter, RTextBasedData& text, bool workingSet = true);
     virtual void paintOrigin(QPaintDevice& device);
     virtual void paintReferencePoint(QPainter& painter, const RRefPoint& pos, bool highlight);
     virtual void paintErase(QPaintDevice& device, const QRect& rect = QRect());
@@ -349,8 +377,10 @@ protected:
     void updateTransformation() const;
 
 protected:
-    QImage graphicsBuffer;
+    QList<QImage> graphicsBufferThread;
+    QList<QPainter*> painterThread;
     QImage graphicsBufferWithPreview;
+    int numThreads;
 
 protected:
     bool panOptimization;
@@ -372,27 +402,34 @@ protected:
     QSet<RObject::Id> selectedIds;
     int bgColorLightness;
 
-    bool colorCorrectionOverride;
+    int colorCorrectionOverride;
     bool colorCorrection;
     bool colorCorrectionDisableForPrinting;
     int colorThreshold;
 
     double minimumLineweight;
+    double maximumLineweight;
 
 //    int textHeightThresholdOverride;
 //    int textHeightThreshold;
 
     double drawingScale;
 
-    QList<RPainterPath> backgroundDecoration;
+    QList<RGraphicsSceneDrawable> backgroundDecoration;
     //QTransform backgroundTransform;
     double backgroundFactor;
     RVector backgroundOffset;
+
+    QMap<int, QMap<RObject::Id, QList<RGraphicsSceneDrawable> > > overlayDrawables;
+
     RBox clipBox;
+    QList<QStack<RTransform> > entityTransformThread;
     RVector paintOffset;
     bool alphaEnabled;
 
     QString lastScaleString;
+
+    bool showOnlyPlottable;
 };
 
 Q_DECLARE_METATYPE(RGraphicsViewImage*)

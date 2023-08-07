@@ -38,6 +38,18 @@
         
     
     
+      int getNumThreads(
+                
+            );
+        
+    
+    
+      void setNumThreads(
+                int n
+            );
+        
+    
+    
       void clear(
                 
             );
@@ -440,9 +452,27 @@
         
     
     
-      void paintEntity(
-                QPainter * painter, REntity::Id id, bool preview
+      void paintEntitiesMulti(
+                const RBox & queryBox
+            );
+        
+    
+    
+      void paintEntitiesThread(
+                int threadId, const QList < REntity::Id > & list, int start, int end
+            );
+        
+    
+    
+      void paintEntityThread(
+                int threadId, REntity::Id id, bool preview
         = false
+            );
+        
+    
+    
+      void paintOverlay(
+                QPainter * painter
             );
         
     
@@ -471,18 +501,6 @@
         
     
     
-      void emitDecorateBackground(
-                QPainter * painter
-            );
-        
-    
-    
-      void emitDecorateForeground(
-                QPainter * painter
-            );
-        
-    
-    
       void clearBackground(
                 
             );
@@ -490,13 +508,29 @@
     
     
       void addToBackground(
-                const RPainterPath & path
+                const RGraphicsSceneDrawable & drawable
             );
         
     
     
       void setBackgroundTransform(
                 double bgFactor, const RVector & bgOffset
+            );
+        
+    
+    
+      void clearOverlay(
+                int overlayId
+            );
+        
+      void clearOverlay(
+                int overlayId, RObject::Id objectId
+            );
+        
+    
+    
+      void addToOverlay(
+                int overlayId, RObject::Id objectId, const RGraphicsSceneDrawable & drawable
             );
         
     
@@ -515,6 +549,24 @@
     
       void setMinimumLineweight(
                 double lw
+            );
+        
+    
+    
+      double getMinimumLineweight(
+                
+            );
+        
+    
+    
+      void setMaximumLineweight(
+                double lw
+            );
+        
+    
+    
+      double getMaximumLineweight(
+                
             );
         
     
@@ -618,13 +670,15 @@
     
     
       void paintImage(
-                QPainter * painter, RImageData & image
+                QPainter * painter, RImageData & image, bool workingSet
+        = true
             );
         
     
     
       void paintText(
-                QPainter * painter, RTextBasedData & text
+                QPainter * painter, RTextBasedData & text, bool workingSet
+        = true
             );
         
     
@@ -769,7 +823,8 @@
             );
         
       void zoomIn(
-                const RVector & center
+                const RVector & center, double factor
+        = 1.2
             );
         
     
@@ -778,7 +833,8 @@
             );
         
       void zoomOut(
-                const RVector & center
+                const RVector & center, double factor
+        = 1.2
             );
         
     

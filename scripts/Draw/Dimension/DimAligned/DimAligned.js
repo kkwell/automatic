@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Dimension.js");
+include("scripts/Draw/Dimension/Dimension.js");
 
 /**
  * \class DimAligned
@@ -123,8 +123,9 @@ DimAligned.prototype.pickCoordinate = function(event, preview) {
             this.data.getExtensionPoint1().getAngleTo(this.data.getExtensionPoint2()) +
                 Math.PI/2.0;
         var doc = di.getDocument();
-        var dimtxt = doc.getKnownVariable(RS.DIMTXT, 2.5);
-        var dimscale = doc.getKnownVariable(RS.DIMSCALE, 1.0);
+        var dimStyle = doc.queryDimStyleDirect();
+        var dimtxt = dimStyle.getDouble(RS.DIMTXT);
+        var dimscale = dimStyle.getDouble(RS.DIMSCALE);
         var dp = this.data.getExtensionPoint2();
         dp = dp.operator_add(RVector.createPolar(dimtxt*2*dimscale, angle));
         this.data.setDefinitionPoint(dp);
@@ -157,21 +158,36 @@ DimAligned.prototype.pickCoordinate = function(event, preview) {
 };
 
 DimAligned.prototype.getOperation = function(preview) {
+    var entity = this.getEntity(preview);
+    if (isNull(entity)) {
+        return undefined;
+    }
+    return new RAddObjectOperation(entity, this.getToolTitle());
+};
+
+DimAligned.prototype.getEntity = function(preview) {
     if (!this.data.isValid()) {
         return undefined;
     }
 
     var doc = this.getDocument();
-    var scale = this.parseScale(this.getScaleString());
+    var factor = this.getFactor();
     var scaled_data = this.data;
 
-    scaled_data.setLinearFactor(1/scale);
+    scaled_data.setLinearFactor(factor);
 
     var entity = new RDimAlignedEntity(doc, scaled_data);
     if (!isEntity(entity)) {
         return undefined;
     }
 
-    return new RAddObjectOperation(entity, this.getToolTitle());
+    this.initEntity(entity, preview);
+
+    return entity;
 };
 
+/**
+ * Can be overwritten to initialize the added entity.
+ */
+DimAligned.prototype.initEntity = function(entity, preview) {
+};

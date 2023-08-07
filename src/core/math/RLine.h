@@ -44,7 +44,6 @@ public:
     RLine(double x1, double y1, double x2, double y2);
     RLine(const RVector& startPoint, const RVector& endPoint);
     RLine(const RVector& startPoint, double angle, double distance);
-    virtual ~RLine();
 
     virtual RShape::Type getShapeType() const {
         return Line;
@@ -62,7 +61,7 @@ public:
 
     virtual QList<RVector> getVectorProperties() const;
 
-    bool isValid() const;
+    virtual bool isValid() const;
 
     virtual RBox getBoundingBox() const;
 
@@ -71,6 +70,7 @@ public:
     virtual QList<RVector> getCenterPoints() const;
     virtual QList<RVector> getPointsWithDistanceToEnd(
         double distance, int from = RS::FromAny) const;
+    virtual QList<RVector> getPointCloud(double segmentLength) const;
 
     virtual double getAngleAt(double distance, RS::From from = RS::FromStart) const;
 
@@ -87,8 +87,10 @@ public:
     double getLength() const;
     double getAngle() const;
 
-    void setLength(double l);
+    void setLength(double l, bool fromStart = true);
     void setAngle(double a);
+
+    bool isParallel(const RLine& line) const;
 
     bool isVertical(double tolerance = RS::PointTolerance) const;
     bool isHorizontal(double tolerance = RS::PointTolerance) const;
@@ -129,6 +131,16 @@ public:
     }
 
     virtual QList<QSharedPointer<RShape> > splitAt(const QList<RVector>& points) const;
+
+#if QT_VERSION >= 0x060000
+    /**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */
+    RLine copy() const {
+        return *this;
+    }
+#endif
 
 protected:
     virtual void print(QDebug dbg) const;

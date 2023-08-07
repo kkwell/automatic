@@ -100,6 +100,9 @@
         gra2deg
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        isBetween
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getGcd
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -152,6 +155,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         parseCoordinate
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getMd5Hash
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

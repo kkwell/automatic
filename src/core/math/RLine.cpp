@@ -49,9 +49,6 @@ RLine::RLine(const RVector& startPoint, double angle, double distance) :
     endPoint = startPoint + RVector::createPolar(distance, angle);
 }
 
-RLine::~RLine() {
-}
-
 void RLine::setZ(double z) {
     startPoint.z = z;
     endPoint.z = z;
@@ -69,8 +66,13 @@ double RLine::getLength() const {
     return startPoint.getDistanceTo(endPoint);
 }
 
-void RLine::setLength(double l) {
-    endPoint = startPoint + RVector::createPolar(l, getAngle());
+void RLine::setLength(double l, bool fromStart) {
+    if (fromStart) {
+        endPoint = startPoint + RVector::createPolar(l, getAngle());
+    }
+    else {
+        startPoint = endPoint - RVector::createPolar(l, getAngle());
+    }
 }
 
 double RLine::getAngle() const {
@@ -79,6 +81,13 @@ double RLine::getAngle() const {
 
 void RLine::setAngle(double a) {
     endPoint = startPoint + RVector::createPolar(getLength(), a);
+}
+
+bool RLine::isParallel(const RLine& line) const {
+    double a = getAngle();
+    double oa = line.getAngle();
+
+    return RMath::isSameDirection(a, oa) || RMath::isSameDirection(a, oa + M_PI);
 }
 
 /**
@@ -159,6 +168,17 @@ QList<RVector> RLine::getPointsWithDistanceToEnd(double distance, int from) cons
         ret.append(endPoint + normalEnd*distance);
     }
 
+    return ret;
+}
+
+QList<RVector> RLine::getPointCloud(double segmentLength) const {
+    Q_UNUSED(segmentLength)
+    QList<RVector> ret;
+    ret.append(startPoint);
+    for (double d = segmentLength; d<getLength(); d+=segmentLength) {
+        ret.append(getPointWithDistanceToStart(d));
+    }
+    ret.append(endPoint);
     return ret;
 }
 

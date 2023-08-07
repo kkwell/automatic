@@ -26,6 +26,7 @@ function DefaultNavigation(widget) {
     this.panning = false;
     this.savedCursor = undefined;
     this.panOrigin = new RVector();
+    this.panFirstOrigin = new RVector();
     if (!isNull(widget)) {
         this.hruler = widget.findChild("HorizontalRuler");
         this.vruler = widget.findChild("VerticalRuler");
@@ -56,7 +57,12 @@ DefaultNavigation.applyPreferences = function(doc) {
     DefaultNavigation.wheelBehavior = RSettings.getIntValue("GraphicsViewNavigation/Wheel", DefaultNavigation.WheelBehavior.Zoom);
     DefaultNavigation.reverseMouseWheelZoom = RSettings.getBoolValue("GraphicsViewNavigation/ReverseMouseWheelZoom", false);
     DefaultNavigation.mouseWheelZoomFactor = RSettings.getDoubleValue("GraphicsViewNavigation/MouseWheelZoomFactor", 1.2);
+    if (RMath.fuzzyCompare(DefaultNavigation.mouseWheelZoomFactor, 0.0, 0.001)) {
+        DefaultNavigation.mouseWheelZoomFactor = 1.2;
+    }
     DefaultNavigation.panGesture = RSettings.getBoolValue("GraphicsViewNavigation/PanGesture", false);
+    DefaultNavigation.middleMouseButtonZoomFactor = RSettings.getDoubleValue("GraphicsViewNavigation/MiddleMouseButtonZoomFactor", 1.2);
+    DefaultNavigation.panThreshold = RSettings.getDoubleValue("GraphicsViewNavigation/PanThreshold", 4);
 };
 
 DefaultNavigation.prototype.beginEvent = function() {
@@ -102,14 +108,14 @@ DefaultNavigation.prototype.mousePressEvent = function(event) {
     }
 
     // middle button or left button and control (command on mac) to pan:
-    if (event.button() == Qt.MidButton ||
-        (event.button() == Qt.LeftButton &&
+    if (event.button() === Qt.MidButton ||
+        (event.button() === Qt.LeftButton &&
          event.modifiers().valueOf() === Qt.ControlModifier.valueOf())) {
 
         this.panOrigin = event.getScreenPosition();
+        this.panFirstOrigin = this.panOrigin;
         this.panning = true;
         this.savedCursor = this.view.getCursor();
-        this.view.setCursor(new QCursor(Qt.OpenHandCursor));
         this.view.startPan();
         EAction.disableCoordinateWidget();
     }
@@ -124,12 +130,30 @@ DefaultNavigation.prototype.mouseReleaseEvent = function(event) {
         (event.button() === Qt.MidButton ||
          event.button() === Qt.LeftButton)) {
 
+        if (event.button() === Qt.MidButton) {
+            // only middle mouse button to zoom:
+            this.handleMiddleMouseButtonZoom(event);
+        }
+
         if (!isNull(this.savedCursor)) {
             this.view.setCursor(this.savedCursor);
         }
         this.panning = false;
         this.savedCursor = undefined;
         EAction.enableCoordinateWidget();
+    }
+};
+
+DefaultNavigation.prototype.handleMiddleMouseButtonZoom = function(event) {
+    if (this.panFirstOrigin.getDistanceTo(event.getScreenPosition())<DefaultNavigation.panThreshold) {
+        // zoom in / out:
+        var position = event.getModelPosition();
+        if (event.modifiers().valueOf() === Qt.ShiftModifier.valueOf()) {
+            this.view.zoomOut(position, DefaultNavigation.middleMouseButtonZoomFactor);
+        }
+        else {
+            this.view.zoomIn(position, DefaultNavigation.middleMouseButtonZoomFactor);
+        }
     }
 };
 
@@ -145,7 +169,7 @@ DefaultNavigation.prototype.mouseMoveEvent = function(event) {
         if (this.panning === true) {
             var panTarget = event.getScreenPosition();
             var panDelta = panTarget.operator_subtract(this.panOrigin);
-            if (Math.abs(panDelta.x) > 2 || Math.abs(panDelta.y) > 2) {
+            if (Math.abs(panDelta.x) > DefaultNavigation.panThreshold || Math.abs(panDelta.y) > DefaultNavigation.panThreshold) {
                 this.view.setCursor(
                     new QCursor(Qt.ClosedHandCursor)
                 );
@@ -168,7 +192,15 @@ DefaultNavigation.prototype.wheelEvent = function(event) {
         return;
     }
 
-    var wheelDelta = event.delta();
+    var wheelDelta;
+
+    if (isFunction(event.delta)) {
+        wheelDelta = event.delta();
+    }
+    else {
+        // Qt 6:
+        wheelDelta = event.pixelDelta.y();
+    }
 
     switch (event.modifiers().valueOf()) {
     
@@ -205,11 +237,22 @@ DefaultNavigation.prototype.wheelEvent = function(event) {
                 this.panOffset = new RVector(0,0);
             }
 
-            if (event.orientation()===Qt.Vertical) {
-                this.panOffset = this.panOffset.operator_add(new RVector(0, wheelDelta/2));
+            if (RSettings.getQtVersion()>=0x060000) {
+                if (Math.abs(event.pixelDelta.y())>Math.abs(event.pixelDelta.x())) {
+                    // vertical:
+                    this.panOffset = this.panOffset.operator_add(new RVector(0, wheelDelta/2));
+                }
+                else {
+                    this.panOffset = this.panOffset.operator_add(new RVector(wheelDelta/2, 0));
+                }
             }
             else {
-                this.panOffset = this.panOffset.operator_add(new RVector(wheelDelta/2, 0));
+                if (event.orientation()===Qt.Vertical) {
+                    this.panOffset = this.panOffset.operator_add(new RVector(0, wheelDelta/2));
+                }
+                else {
+                    this.panOffset = this.panOffset.operator_add(new RVector(wheelDelta/2, 0));
+                }
             }
 
             if (RSettings.getQtVersionString().startsWith("4.")) {
@@ -308,7 +351,7 @@ DefaultNavigation.prototype.pinchGestureEvent = function(gesture) {
     }
     if (typeof(QPinchGesture)!=="undefined" && (changeFlags & QPinchGesture.ScaleFactorChanged)) {
         var value;
-        if (RSettings.isQt(5)) {
+        if (RSettings.getQtVersion() >= 0x050000) {
             // Qt 5:
             value = gesture.totalScaleFactor;
         }

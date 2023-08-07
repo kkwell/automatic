@@ -26,6 +26,7 @@ __simpleDi = undefined;
 
 include("simple_create.js");
 include("simple_info.js");
+include("simple_input.js");
 include("simple_modify.js");
 include("simple_transaction.js");
 include("simple_view.js");
@@ -45,6 +46,7 @@ function getMainWindow() {
 function getDocumentInterface() {
     var appWin = getMainWindow();
     if (isNull(appWin)) {
+        qWarning("QCAD SIMPLE API: no main window");
         return undefined;
     }
     return appWin.getDocumentInterface();
@@ -57,6 +59,7 @@ function getDocumentInterface() {
 function getDocument() {
     var di = getDocumentInterface();
     if (isNull(di)) {
+        qWarning("QCAD SIMPLE API: no document");
         return undefined;
     }
     return di.getDocument();
@@ -100,7 +103,7 @@ function createDocument() {
  * \return new empty RDocumentInterface with default settings
  */
 function createDocumentInterface() {
-    return new RDocumentInterface(new RDocument(new RMemoryStorage(), new RSpatialIndexSimple()));
+    return new RDocumentInterface(new RDocument(new RMemoryStorage(), createSpatialIndex()));
 }
 
 /**
@@ -113,7 +116,7 @@ function disableInput() {
 }
 
 /**
- * Enables the main application window to prevent user input.
+ * Enables the main application window to allow user input.
  * \ingroup ecma_simple
  */
 function enableInput() {

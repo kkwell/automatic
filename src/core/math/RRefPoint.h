@@ -20,10 +20,13 @@ public:
     enum Flag {
         NoFlags   = 0x000,
         Secondary = 0x001,        /**< Secondary reference point (typically shown with different color) */
-        Center    = 0x002,        /**< Reference point is a center point */
-        Ignore    = 0x004,        /**< Ignore reference point for drag and drop */
-        Start     = 0x008,        /**< Reference point is a start point */
-        End       = 0x010         /**< Reference point is a start point */
+        Tertiary  = 0x002,        /**< Tertiary reference point (typically shown with different color) */
+        Center    = 0x004,        /**< Reference point is a center point */
+        Ignore    = 0x008,        /**< Ignore reference point for drag and drop */
+        Start     = 0x010,        /**< Reference point is a start point */
+        End       = 0x020,        /**< Reference point is a start point */
+        Arrow     = 0x040,        /**< Reference point is a dimension arrow */
+        Selected  = 0x080         /**< Reference point is selected */
     };
     Q_DECLARE_FLAGS(Flags, Flag)
 
@@ -51,9 +54,15 @@ public:
     bool isSecondary() const {
         return getFlag(RRefPoint::Secondary);
     }
-
     void setSecondary(bool on) {
         setFlag(RRefPoint::Secondary, on);
+    }
+
+    bool isTertiary() const {
+        return getFlag(RRefPoint::Tertiary);
+    }
+    void setTertiary(bool on) {
+        setFlag(RRefPoint::Tertiary, on);
     }
 
     bool isIgnore() const {
@@ -88,6 +97,22 @@ public:
         setFlag(RRefPoint::End, on);
     }
 
+    bool isArrow() const {
+        return getFlag(RRefPoint::Arrow);
+    }
+
+    void setArrow(bool on) {
+        setFlag(RRefPoint::Arrow, on);
+    }
+
+    bool isSelected() const {
+        return getFlag(RRefPoint::Selected);
+    }
+
+    void setSelected(bool on) {
+        setFlag(RRefPoint::Selected, on);
+    }
+
     void setFlag(RRefPoint::Flag flag, bool on) {
         if (on) {
             flags |= flag;
@@ -97,7 +122,7 @@ public:
     }
 
     bool getFlag(RRefPoint::Flag flag) const {
-        return (flags & flags) == flag;
+        return (flags & flag) == flag;
     }
 
     RRefPoint::Flags getFlags() const {

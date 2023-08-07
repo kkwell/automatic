@@ -89,13 +89,13 @@
         mirror
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        getShapes
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
         getMeasuredValue
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getAutoLabel
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        to2D
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

@@ -104,6 +104,7 @@ AddOn.prototype.initAddOn = function(splash, text) {
 
     var initFilePath = this.getInitFilePath();
     if (new QFileInfo(initFilePath).exists()) {
+        // include Init file of action (e.g. MyActionInit.js) and call global init function:
         include(initFilePath, className, true);
         init(includeBasePath);
     }
@@ -198,7 +199,7 @@ AddOn.prototype.initPreferencePage = function() {
         WidgetFactory.restoreState(widget);
         WidgetFactory.saveState(widget);
         WidgetFactory.requiresRestart = false;
-        widget.destroy();
+        destr(widget);
 
         RSettings.setValue(settingsKey, true);
     }
@@ -230,7 +231,7 @@ AddOn.prototype.preferenceFileExists = function() {
 
 /**
  * \return True if shortcuts can be defined for this add-on (default) or
- *      false if a add-on explicitely defines, that is does not support
+ *      false if a add-on explicitly defines, that is does not support
  *      shortcuts (ClassName.hasShortcuts()).
  */
 AddOn.prototype.hasShortcuts = function() {
@@ -444,6 +445,7 @@ AddOn.getParentAddOn = function(addOns, addOn) {
 
 /**
  * \return Array of all AddOn objects found.
+ *
  * \param dir Used internally for recursive calls
  */
 AddOn.getAddOns = function(dir) {
@@ -456,14 +458,22 @@ AddOn.getAddOns = function(dir) {
     var fileMenuList, i, k;
 
     var addOns = [];
-    var dirFilter = new QDir.Filters(QDir.NoDotAndDotDot, QDir.Readable, QDir.Dirs);
-    var sortFlags = new QDir.SortFlags(QDir.NoSort);
+    var dirFilter = makeQDirFilters(QDir.NoDotAndDotDot, QDir.Readable, QDir.Dirs);
+    var sortFlags = makeQDirSortFlags(QDir.NoSort);
     
     // first call without recursion:
     if (topCall) {
-        var args = QCoreApplication.arguments();
+        var args = RSettings.getOriginalArguments();
 
-        dir = "scripts";
+        // ignore all scripts in ./scripts directory
+        // and only load scripts from plugins
+        // used mainly for testing / development
+        if (args.contains("-ignore-script-files")) {
+            dir = undefined;
+        }
+        else {
+            dir = "scripts";
+        }
 
         // fixed set of directories that will be scanned for add-ons first to 
         // ensure fixed order of menus and tool bars:
@@ -516,7 +526,12 @@ AddOn.getAddOns = function(dir) {
         var fileInfo = new QFileInfo(dirInfo.filePath() + "/" + dirInfo.fileName() + ".js");
 
         if (dirInfo.fileName().startsWith("AutoLoad")) {
-            RAutoLoadEcma.addAutoLoadFile(fileInfo.filePath());
+            if (typeof(RAutoLoadEcma)!=="undefined") {
+                RAutoLoadEcma.addAutoLoadFile(fileInfo.filePath());
+            }
+            if (typeof(RAutoLoadJs)!=="undefined") {
+                RAutoLoadJs.addAutoLoadFile(fileInfo.filePath());
+            }
         }
         else {
             if (fileInfo.exists() && !AddOn.isIgnored(fileInfo.absoluteFilePath())) {
@@ -638,14 +653,14 @@ AddOn.getAddOns = function(dir) {
 
 AddOn.getLocalAddOns = function() {
     var dataDir = new QDir(RSettings.getDataLocation());
-    var fs = new QDir.Filters(QDir.NoDotAndDotDot, QDir.Readable, QDir.Dirs, QDir.Executable);
-    var sf = new QDir.SortFlags(QDir.Name);
+    var fs = makeQDirFilters(QDir.NoDotAndDotDot, QDir.Readable, QDir.Dirs, QDir.Executable);
+    var sf = makeQDirSortFlags(QDir.Name);
     return dataDir.entryList([], fs, sf);
 };
 
 AddOn.isIgnored = function(path) {
     if (isNull(AddOn.ignores)) {
-        var args = QCoreApplication.arguments();
+        var args = RSettings.getOriginalArguments();
         AddOn.ignores = [];
         for (var i=1; i < args.length; ++i) {
             if (args[i] === "-ignore") {

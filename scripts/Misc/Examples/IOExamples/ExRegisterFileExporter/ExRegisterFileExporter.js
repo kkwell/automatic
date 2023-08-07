@@ -80,7 +80,7 @@ ExFileExporter.prototype.exportFile = function(fileName, nameFilter, setFileName
 
     // the document 'doc' should be exported to file 'fileName' here...
     var file = new QFile(fileName);
-    var flags = new QIODevice.OpenMode(QIODevice.WriteOnly | QIODevice.Text);
+    var flags = makeQIODeviceOpenMode(QIODevice.WriteOnly, QIODevice.Text);
     if (!file.open(flags)) {
         return false;
     }
@@ -90,6 +90,7 @@ ExFileExporter.prototype.exportFile = function(fileName, nameFilter, setFileName
     }
 
     var ts = new QTextStream(file);
+    setUtf8Codec(ts);
     ts.writeString("Example");
 
     file.close();
@@ -118,7 +119,7 @@ ExRegisterFileExporter.prototype.beginEvent = function() {
     QMessageBox.information(
         appWin,
         qsTr("Info"),
-        qsTr("Registered a file exporter for file type '.example'. Use File > Save As to see the filter in action.")
+        qsTr("Registered a file exporter for file type \".example\". Use File > Save As to see the filter in action.")
     );
 };
 

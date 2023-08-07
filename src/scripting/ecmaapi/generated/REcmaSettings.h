@@ -73,6 +73,33 @@
         setOriginalArguments
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getArguments
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getIntArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getIntListArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getFloatArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getColorArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getVectorArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getBoxArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        testArgument
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         isDeployed
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -166,6 +193,9 @@
         getSecondaryReferencePointColor
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getTertiaryReferencePointColor
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getHighResolutionGraphicsView
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -188,6 +218,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getColorThreshold
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getFadingFactor
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getTextHeightThreshold
@@ -346,6 +379,9 @@
         getStringListValue
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getScaleList
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         setValue
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -385,6 +421,9 @@
         getAutoScaleLinetypePatterns
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getApplyLineweightToPoints
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getUseSecondarySelectionColor
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -419,6 +458,36 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getIgnoreAllReferencePoints
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getReferencePointSize
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getReferencePointShape
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getMaxReferencePointEntities
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getMaxReferencePointEntitiesDisplay
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getPropertyEditorShowOnRequest
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getSimpleTextAlignLeft
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getPolarCoordinateSeparator
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getCartesianCoordinateSeparator
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getRelativeCoordinatePrefix
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isDarkMode
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         hasDarkGuiBackground

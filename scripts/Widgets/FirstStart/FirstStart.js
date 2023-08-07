@@ -17,6 +17,8 @@
  * along with QCAD.
  */
 
+include("scripts/library.js");
+include("scripts/EAction.js");
 include("scripts/Edit/AppPreferences/LanguagePreferences/LanguagePreferences.js");
 include("scripts/Edit/AppPreferences/InputPreferences/InputPreferences.js");
 include("scripts/Edit/DrawingPreferences/UnitSettings/UnitSettings.js");
@@ -33,33 +35,44 @@ FirstStart.prototype.showDialog = function() {
     this.dialog = WidgetFactory.createWidget(this.path, "FirstStartDialog.ui", null);
 
     var pathFi = new QFileInfo(this.path);
-    this.dialog.windowTitle = qsTr("%1 First Start").arg(qApp.applicationName);
+    this.dialog.setWindowTitle(qsTr("%1 First Start").arg(qApp.applicationName));
     if (qApp.applicationName.contains("QCAD")) {
-        this.dialog.styleSheet =
-            "QDialog{ background-image: url(" + pathFi.absoluteFilePath() + "/firststart.png) }";
+        if (RSettings.hasDarkGuiBackground()) {
+            this.dialog.setStyleSheet("QDialog { border-image: url(" + pathFi.absoluteFilePath() + "/firststart-inverse.jpg) 0 0 0 0 stretch stretch; border-width: 0px; }");
+        }
+        else {
+            this.dialog.setStyleSheet("QDialog { border-image: url(" + pathFi.absoluteFilePath() + "/firststart.jpg) 0 0 0 0 stretch stretch; border-width: 0px; }");
+                //"QDialog{ background-image: url(" + pathFi.absoluteFilePath() + "/firststart.png) }";
+        }
+
     }
     else {
-        this.dialog.findChild("LanguageBackground").styleSheet = "";
-        this.dialog.findChild("Background").styleSheet = "";
-        this.dialog.findChild("Left").minimumSize = 0;
+        this.dialog.findChild("LanguageBackground").setStyleSheet("");
+        this.dialog.findChild("Background").setStyleSheet("");
+        if (!isNull(this.dialog.findChild("Left"))) {
+            this.dialog.findChild("Left").setMinimumSize(0);
+        }
     }
 
     this.widgets = getWidgets(this.dialog);
 
     // language combo
     var langCombo = this.widgets["Language"];
+    langCombo.blockSignals(true);
     langCombo.addItem("English", "en");
     var codes = LanguagePreferences.getLanguages();
     for ( var i = 0; i < codes.length; ++i) {
         code = codes[i];
         langCombo.addItem(LanguagePreferences.codeToString(code), code);
     }
+    langCombo.blockSignals(false);
 
     // try to set the locale from system
-    var systemLocale = QLocale.system().name();
-    var flags = new Qt.MatchFlags(Qt.MatchExactly);
+    var sysLocale = QLocale.system();
+    var systemLocale = sysLocale.name();
+    var flags = makeQtMatchFlags(Qt.MatchExactly);
     var index = langCombo.findData(systemLocale, Qt.UserRole, flags);
-    if (index == -1) {
+    if (index===-1) {
         var re = new RegExp("(.+)_(.+)", "i");
         var found = systemLocale.match(re);
         var lang;
@@ -68,23 +81,24 @@ FirstStart.prototype.showDialog = function() {
         } else {
             lang = found[1];
         }
-        flags = new Qt.MatchFlags(Qt.MatchContains);
+        flags = makeQtMatchFlags(Qt.MatchContains);
         index = langCombo.findData(lang, Qt.UserRole, flags);
     }
-    if (index != -1) {
+    if (index!==-1) {
         langCombo.setCurrentIndex(index);
     }
     code = langCombo.itemData(langCombo.currentIndex);
     langCombo.model().sort(0);
-    langCombo["currentIndexChanged(int)"].connect(this, function(index) {
+    var self = this;
+    langCombo["currentIndexChanged(int)"].connect(function(index) {
         var code = langCombo.itemData(index);
-        this.changeLanguage(code);
+        self.changeLanguage(code);
     });
 
     this.translators = [];
     this.changeLanguage(code);
 
-    if (QCoreApplication.arguments().contains("-no-initial-dialog") || this.dialog.exec()) {
+    if (RSettings.getOriginalArguments().contains("-no-initial-dialog") || this.dialog.exec()) {
         // save settings
 
         // language:
@@ -108,6 +122,7 @@ FirstStart.prototype.showDialog = function() {
         RSettings.setValue("DimensionSettings/DIMEXO", dimtxt/4);
         RSettings.setValue("DimensionSettings/DIMGAP", dimtxt/4);
         RSettings.setValue("DimensionSettings/DIMASZ", dimtxt);
+        RSettings.setValue("DimensionSettings/DIMDLI", dimtxt*2);
 
         var paperUnit;
         if (!RUnit.isMetric(drawingUnit)) {
@@ -165,24 +180,23 @@ FirstStart.prototype.showDialog = function() {
         settings.sync();
     }
 
-    this.dialog.destroy();
+    destr(this.dialog);
     EAction.activateMainWindow();
 };
 
 FirstStart.prototype.changeLanguage = function(code) {
     var i;
-    for (i = 0; i < this.translators.length; ++i) {
+    for (i=0; i<this.translators.length; ++i) {
         QCoreApplication.removeTranslator(this.translators[i]);
     }
     
     if (code !== "en") {
         var translators = [
-            [ "FirstStart", this.path + "/ts" ],
-            [ "UnitSettings", "scripts/Edit/DrawingPreferences/UnitSettings/ts" ],
-            [ "InputPreferences", "scripts/Edit/AppPreferences/InputPreferences/ts" ]
+            [ "scripts", "ts" ],
+            [ "scripts", ":/ts" ]
         ];
 
-        for (var i=0; i<translators.length; i++) {
+        for (i=0; i<translators.length; i++) {
             var translator = new QTranslator(qApp);
             if (translator.load(translators[i][0] + "_" + code, translators[i][1])) {
                 QCoreApplication.installTranslator(translator);
@@ -204,10 +218,10 @@ FirstStart.prototype.changeLanguage = function(code) {
     var msys = systemLocale.measurementSystem();
     if (msys.valueOf() != QLocale.MetricSystem.valueOf()) {
         // imperial system:
-        this.widgets["Unit"].currentIndex = 1;
+        this.widgets["Unit"].setCurrentIndex(1);
     } else {
         // metrics system (fall back):
-        this.widgets["Unit"].currentIndex = 4;
+        this.widgets["Unit"].setCurrentIndex(4);
     }
 
     // paper size combo
@@ -216,11 +230,25 @@ FirstStart.prototype.changeLanguage = function(code) {
 
     // default paper size
     var paperSizeOverride = qApp.property("FirstStartPaperSizeOverride");
+    if (isNull(paperSizeOverride)) {
+        paperSizeOverride = "";
+    }
     var index = paperSizeCombo.findText(paperSizeOverride);
     if (index===-1) {
         var defaultPrinter = new QPrinter();
-        var paperSize = defaultPrinter.paperSize(QPrinter.Millimeter);
-        defaultPrinter.destroy();
+        var paperSize;
+        if (isFunction(defaultPrinter.paperSize)) {
+            /// Qt 4, 5:
+            paperSize = defaultPrinter.paperSize(QPrinter.Millimeter);
+        }
+        else {
+            // Qt 6:
+            var pageLayout = defaultPrinter.pageLayout();
+            var pageSize = pageLayout.pageSize();
+            paperSize = pageSize.id();
+        }
+
+        destr(defaultPrinter);
         index = paperSizeCombo.findData(paperSize, Qt.UserRole + 1);
         if (index===-1) {
             index = paperSizeCombo.findText("ISO A4");
@@ -229,7 +257,7 @@ FirstStart.prototype.changeLanguage = function(code) {
     if (index===-1) {
         index = 0;
     }
-    paperSizeCombo.currentIndex = index;
+    paperSizeCombo.setCurrentIndex(index);
 
     // decimal point combo
     var dpCombo = this.widgets["DecimalPoint"];
@@ -238,7 +266,7 @@ FirstStart.prototype.changeLanguage = function(code) {
     for (i = 0; i < dpCombo.count; ++i) {
         var data = dpCombo.itemData(i);
         if (dp == data) {
-            dpCombo.currentIndex = i;
+            dpCombo.setCurrentIndex(i);
         }
     }
 
@@ -250,12 +278,14 @@ FirstStart.prototype.changeLanguage = function(code) {
 };
 
 FirstStart.prototype.retranslateStrings = function() {
-    this.dialog.windowTitle = qsTr("%1 First Start").arg(qApp.applicationName);
-    this.widgets["LanguageLabel"].text = qsTr("Language:");
+    this.dialog.setWindowTitle(qsTr("%1 First Start").arg(qApp.applicationName));
+
+    this.widgets["LanguageLabel"].setText(qsTr("Language:"));
     var title = qsTr("Welcome to %1").arg(qApp.applicationName);
     var text = qsTr("Please choose the settings used for new drawings. "
             + "All these settings can be changed later in the Preference Dialog.");
-    this.widgets["Text"].html = "<html><head><meta name=\"qrichtext\" content=\"1\" />"
+
+    this.widgets["Text"].setHtml("<html><head><meta name=\"qrichtext\" content=\"1\" />"
             + "<style type=\"text/css\">p, li { white-space: pre-wrap; }</style></head>"
             + "<body style=\" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;\">"
             + "\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
@@ -266,9 +296,9 @@ FirstStart.prototype.retranslateStrings = function() {
             + "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">"
             + text
             + "</p><p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>"
-            + "</body></html>";
-    this.widgets["UnitLabel"].text = qsTr("Unit:");
-    this.widgets["DefaultPaperSizeLabel"].text = qsTr("Default Paper Size:");
-    this.widgets["DecimalPointLabel"].text = qsTr("Decimal Point:");
-    this.widgets["BackgroundColorLabel"].text = qsTr("Background Color:");
+            + "</body></html>");
+    this.widgets["UnitLabel"].setText(qsTr("Unit:"));
+    this.widgets["DefaultPaperSizeLabel"].setText(qsTr("Default Paper Size:"));
+    this.widgets["DecimalPointLabel"].setText(qsTr("Decimal Point:"));
+    this.widgets["BackgroundColorLabel"].setText(qsTr("Background Color:"));
 };

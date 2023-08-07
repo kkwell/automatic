@@ -5,8 +5,9 @@ SUBDIRS = \
     MiscDevelopment \
     MiscDraw \
     MiscIO \
+    MiscInformation \
     MiscModify \
     MiscSelect \
     Screencast \
     Tutorials \
-    ts
+    dir

@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Block.js");
+include("scripts/Block/Block.js");
 include("scripts/Widgets/BlockList/BlockList.js");
 
 /**
@@ -43,7 +43,7 @@ DeselectBlockReferences.prototype.beginEvent = function() {
         return;
     }
 
-    var item = blockList.currentItem();
+    var item = BlockList.getActiveItem();
     if (isNull(item)) {
         this.terminate();
         return;

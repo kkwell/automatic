@@ -53,6 +53,9 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getStaticPropertyTypeIds
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -117,6 +120,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setReferencedBlockId
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setReferencedBlockName
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getReferencedBlockId

@@ -57,7 +57,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       </variant>
     </method>
     <method name="getDocument" cppName="getDocument"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="false">
       <variant returnType="RDocument &amp;"
       isPureVirtual="false" />
@@ -122,6 +122,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     </method>
     <method name="getColor" cppName="getColor" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="RColor" isPureVirtual="false">
+        <arg type="RColor &amp;" typeName="RColor"
+        name="unresolvedColor" isConst="true" />
+      </variant>
       <variant returnType="RColor" isPureVirtual="false">
         <arg type="bool" typeName="bool" name="resolve"
         isConst="false" />
@@ -244,6 +248,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
     </method>
+    <method name="isPatternContinuous"
+    cppName="isPatternContinuous" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="RLinetypePattern &amp;"
+        typeName="RLinetypePattern" name="p" isConst="true" />
+      </variant>
+    </method>
     <method name="startExport" cppName="startExport"
     specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
@@ -296,6 +308,11 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="exportLayerStates" cppName="exportLayerStates"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false" />
+    </method>
     <method name="exportBlocks" cppName="exportBlocks"
     specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
@@ -321,6 +338,14 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="void" isPureVirtual="false">
         <arg type="RLayer::Id" typeName="RLayer::Id" name="layerId"
         isConst="false" />
+      </variant>
+    </method>
+    <method name="exportLayerState" cppName="exportLayerState"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RLayerState &amp;" typeName="RLayerState"
+        name="" isConst="false" />
       </variant>
     </method>
     <method name="exportBlock" cppName="exportBlock"
@@ -363,6 +388,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="true" isConst="false" />
         <arg type="bool" typeName="bool" name="undone"
         hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="invisible"
+        hasDefault="true" default="false" isConst="false" />
       </variant>
       <variant returnType="void" isPureVirtual="false">
         <arg type="RBox &amp;" typeName="RBox" name="box"
@@ -387,6 +414,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="allBlocks"
         hasDefault="true" default="true" isConst="false" />
         <arg type="bool" typeName="bool" name="forceSelected"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="invisible"
         hasDefault="true" default="false" isConst="false" />
       </variant>
       <variant returnType="void" isPureVirtual="false">
@@ -589,6 +618,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="QList &lt; RPainterPath &gt; &amp;"
         typeName="QList &lt; RPainterPath &gt;" name="paths"
         isConst="true" />
+        <arg type="double" typeName="double" name="z"
+        hasDefault="true" default="0.0" isConst="false" />
       </variant>
       <variant returnType="void" isPureVirtual="false">
         <arg type="QList &lt; RPainterPath &gt; &amp;"
@@ -639,6 +670,19 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="forceSelected"
         hasDefault="true" default="false" isConst="false" />
       </variant>
+    </method>
+    <method name="exportTransform" cppName="exportTransform"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RTransform &amp;" typeName="RTransform" name="t"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="exportEndTransform" cppName="exportEndTransform"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false" />
     </method>
     <method name="exportThickPolyline"
     cppName="exportThickPolyline" specifier="public"
@@ -792,9 +836,27 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
+    <method name="getExportInvisible" cppName="getExportInvisible"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setExportInvisible" cppName="setExportInvisible"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
     <method name="getPixelSizeHint" cppName="getPixelSizeHint"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
+      <variant returnType="double" isPureVirtual="false" />
+    </method>
+    <method name="getCurrentPixelSizeHint"
+    cppName="getCurrentPixelSizeHint" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="double" isPureVirtual="false" />
     </method>
     <method name="setPixelSizeHint" cppName="setPixelSizeHint"
@@ -824,6 +886,14 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="bool" isPureVirtual="false" />
     </method>
     <method name="setPixelWidth" cppName="setPixelWidth"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="setEnablePatterns" cppName="setEnablePatterns"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">

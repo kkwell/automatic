@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Snap.js");
+include("scripts/Snap/Snap.js");
 
 /**
  * \class SnapSelectionCenter
@@ -50,7 +50,7 @@ SnapSelectionCenter.prototype.beginEvent = function() {
     var selectionBox = doc.getSelectionBox();
     var pos = selectionBox.getCenter();
 
-    var ce = new RCoordinateEvent(pos, scene, view.getRGraphicsView());
+    var ce = new RCoordinateEvent(pos, scene, getRGraphicsView(view));
     var base = this.getOverrideBase();
     if (!isNull(base)) {
         base.coordinateEvent(ce);

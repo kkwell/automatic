@@ -86,7 +86,7 @@
         
     
     
-      QSet < REntity::Id > getEntityIds(
+      QList < REntity::Id > getEntityIds(
                 
             );
         
@@ -94,6 +94,12 @@
     
       RSnap::Status getStatus(
                 
+            );
+        
+    
+    
+      void setStatus(
+                RSnap::Status s
             );
         
     

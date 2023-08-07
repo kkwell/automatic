@@ -112,9 +112,9 @@
 <context>
     <name>RColor</name>
     <message>
-        <location filename="../src/core/RColor.cpp" line="+287"/>
+        <location filename="../src/core/RColor.cpp" line="+340"/>
         <source>By Layer</source>
-        <translation> По слою</translation>
+        <translation>По слою</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -129,7 +129,7 @@
     <message>
         <location line="+1"/>
         <source>Green</source>
-        <translation>Зеленый</translation>
+        <translation>Зелёный</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -149,7 +149,7 @@
     <message>
         <location line="+1"/>
         <source>Yellow</source>
-        <translation>Желтый</translation>
+        <translation>Жёлтый</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -189,7 +189,7 @@
     <message>
         <location line="+1"/>
         <source>Black</source>
-        <translation>Черный</translation>
+        <translation>Чёрный</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -199,7 +199,7 @@
     <message>
         <location line="+1"/>
         <source>Light Gray</source>
-        <translation>Светлосерый</translation>
+        <translation>Светло-серый</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -207,7 +207,7 @@
         <translation>Белый</translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+2"/>
         <source>Others...</source>
         <translation>Другие...</translation>
     </message>
@@ -215,7 +215,7 @@
 <context>
     <name>RDocumentVariables</name>
     <message>
-        <location filename="../src/core/RDocumentVariables.cpp" line="+45"/>
+        <location filename="../src/core/RDocumentVariables.cpp" line="+48"/>
         <source>Current Layer ID</source>
         <translation>Идентификатор текущего слоя</translation>
     </message>
@@ -232,18 +232,18 @@
     <message>
         <location line="+1"/>
         <source>Dimension Font</source>
-        <translation>Шрифт размера</translation>
+        <translation>Размер шрифта</translation>
     </message>
 </context>
 <context>
     <name>REntity</name>
     <message>
-        <location filename="../src/core/RBlockReferenceEntity.cpp" line="+92"/>
+        <location filename="../src/core/REntity.cpp" line="+97"/>
         <source>Block</source>
         <translation>Блок</translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location filename="../src/core/RBlockReferenceEntity.cpp" line="+95"/>
         <location line="+1"/>
         <location line="+1"/>
         <location filename="../src/core/RViewportEntity.cpp" line="+73"/>
@@ -255,18 +255,18 @@
     <message>
         <location filename="../src/core/RBlock.cpp" line="+65"/>
         <source>Pixel Unit</source>
-        <translation type="unfinished"></translation>
+        <translation>Единицы измерения точек</translation>
     </message>
     <message>
         <location line="+1"/>
         <location filename="../src/core/RBlockReferenceEntity.cpp" line="-2"/>
         <location line="+3"/>
-        <location filename="../src/core/RLayout.cpp" line="+82"/>
+        <location filename="../src/core/RLayout.cpp" line="+84"/>
         <location line="+3"/>
         <location line="+3"/>
         <location line="+3"/>
         <location line="+3"/>
-        <location filename="../src/core/RTextBasedEntity.cpp" line="+72"/>
+        <location filename="../src/core/RTextBasedEntity.cpp" line="+75"/>
         <location filename="../src/core/RViewportEntity.cpp" line="-2"/>
         <location line="+8"/>
         <location line="+2"/>
@@ -317,12 +317,17 @@
         <translation>Расположение</translation>
     </message>
     <message>
-        <location filename="../src/core/RBlockReferenceEntity.cpp" line="-2"/>
+        <location filename="../src/core/RBlockReferenceEntity.cpp" line="-6"/>
+        <source>Referenced Block</source>
+        <translation>Блок, на который дана ссылка</translation>
+    </message>
+    <message>
+        <location line="+4"/>
         <location line="+1"/>
         <location line="+1"/>
         <location filename="../src/core/RViewportEntity.cpp" line="-7"/>
         <source>Scale</source>
-        <translation>Масшабировать</translation>
+        <translation>Масштаб</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -332,7 +337,7 @@
     <message>
         <location line="+1"/>
         <source>Columns</source>
-        <translation>Колонки</translation>
+        <translation>Столбцы</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -350,24 +355,24 @@
         <translation>Расстояние между строками</translation>
     </message>
     <message>
-        <location filename="../src/core/REntity.cpp" line="+86"/>
-        <location filename="../src/core/RObject.cpp" line="+62"/>
+        <location line="+3"/>
+        <source>Attributes</source>
+        <translation>Атрибуты</translation>
+    </message>
+    <message>
+        <location filename="../src/core/REntity.cpp" line="-1"/>
+        <location filename="../src/core/RObject.cpp" line="+69"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location line="+1"/>
-        <source>Block ID</source>
-        <translation>Идентификатор блока</translation>
-    </message>
-    <message>
-        <location line="+1"/>
+        <location line="+2"/>
         <source>Layer</source>
         <translation>Слой</translation>
     </message>
     <message>
         <location line="+1"/>
-        <location filename="../src/core/RLayer.cpp" line="+99"/>
+        <location filename="../src/core/RLayer.cpp" line="+102"/>
         <source>Linetype</source>
         <translation>Тип линии</translation>
     </message>
@@ -396,7 +401,12 @@
     <message>
         <location line="+1"/>
         <source>Draw Order</source>
-        <translation>Порядок отрисовки</translation>
+        <translation>Порядок черчения</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Parent Id</source>
+        <translation>Идентификатор родительского объекта</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -410,29 +420,29 @@
         <location line="-3"/>
         <location filename="../src/core/RLayout.cpp" line="+3"/>
         <source>Left</source>
-        <translation>Левая</translation>
+        <translation>Слева</translation>
     </message>
     <message>
         <location line="+1"/>
         <location filename="../src/core/RLayout.cpp" line="+1"/>
         <source>Bottom</source>
-        <translation>Низ</translation>
+        <translation>Снизу</translation>
     </message>
     <message>
         <location line="+1"/>
         <location filename="../src/core/RLayout.cpp" line="+1"/>
         <source>Right</source>
-        <translation>Правая</translation>
+        <translation>Справа</translation>
     </message>
     <message>
         <location line="+1"/>
         <location filename="../src/core/RLayout.cpp" line="+1"/>
         <source>Top</source>
-        <translation>Верх</translation>
+        <translation>Сверху</translation>
     </message>
     <message>
         <location filename="../src/core/RObject.cpp" line="-1"/>
-        <location filename="../src/core/RPropertyTypeId.cpp" line="+108"/>
+        <location filename="../src/core/RPropertyTypeId.cpp" line="+161"/>
         <source>Custom</source>
         <translation>Пользовательский</translation>
     </message>
@@ -447,11 +457,26 @@
         <translation>Защищённый</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>Selected</source>
+        <translation>Выбран</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Object Invisible</source>
+        <translation>Объект невидим</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Working Set</source>
+        <translation>Рабочий набор</translation>
+    </message>
+    <message>
         <location filename="../src/core/REntity.cpp" line="+2"/>
         <location filename="../src/core/RLayout.cpp" line="+1"/>
         <location filename="../src/core/RViewportEntity.cpp" line="-2"/>
         <source>Width</source>
-        <translation>ширину</translation>
+        <translation>Ширина</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -464,7 +489,7 @@
         <location filename="../src/core/RLayout.cpp" line="+1"/>
         <location filename="../src/core/RViewportEntity.cpp" line="+1"/>
         <source>Height</source>
-        <translation>высоту</translation>
+        <translation>Высота</translation>
     </message>
     <message>
         <location filename="../src/core/RTextBasedEntity.cpp" line="-3"/>
@@ -486,7 +511,7 @@
     <message>
         <location line="+1"/>
         <source>Plain Text</source>
-        <translation>Просто текст</translation>
+        <translation>Простой текст</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -497,6 +522,11 @@
         <location line="+1"/>
         <source>Text Height</source>
         <translation>Высота текста</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text Width</source>
+        <translation>Ширина текста</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -516,7 +546,7 @@
     <message>
         <location line="+1"/>
         <source>Italic</source>
-        <translation>Наклонное начертание</translation>
+        <translation>Курсив</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -540,27 +570,37 @@
         <translation>Вертикальный</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>Backward</source>
+        <translation>Обратный</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Upside Down</source>
+        <translation>Перевёрнутый</translation>
+    </message>
+    <message>
         <location filename="../src/core/RViewportEntity.cpp" line="+2"/>
         <source>Rotation</source>
-        <translation>вращение</translation>
+        <translation>Вращение</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>On</source>
-        <translation>вкл</translation>
+        <translation>Вкл</translation>
     </message>
     <message>
         <location line="+1"/>
         <location line="+1"/>
         <source>View Center</source>
-        <translation>Посмотреть Центр</translation>
+        <translation>Просмотр центра</translation>
     </message>
     <message>
         <location line="+1"/>
         <location line="+1"/>
         <location line="+1"/>
         <source>View Target</source>
-        <translation>Посмотреть Цель</translation>
+        <translation>Просмотр цели</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -570,6 +610,7 @@
     <message>
         <location filename="../src/core/RBlock.cpp" line="-6"/>
         <location filename="../src/core/RLayer.cpp" line="-8"/>
+        <location filename="../src/core/RLayerState.cpp" line="+46"/>
         <location filename="../src/core/RLayout.cpp" line="-24"/>
         <source>Name</source>
         <translation>Имя</translation>
@@ -582,37 +623,37 @@
     <message>
         <location filename="../src/core/RLayer.cpp" line="+1"/>
         <source>Off</source>
-        <translation>выкл</translation>
+        <translation>Выкл</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Frozen</source>
-        <translation type="unfinished"></translation>
+        <translation>Заморожен</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Locked</source>
-        <translation>Запертый</translation>
+        <translation>Заперт</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Collapsed</source>
-        <translation type="unfinished"></translation>
+        <translation>Свёрнут</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Plottable</source>
-        <translation type="unfinished"></translation>
+        <translation>Начертаемый</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Snappable</source>
-        <translation type="unfinished"></translation>
+        <translation>Хватаемый</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Off is Freeze</source>
-        <translation type="unfinished"></translation>
+        <translation>Выкл заморожено</translation>
     </message>
     <message>
         <location filename="../src/core/RLayout.cpp" line="+1"/>
@@ -624,86 +665,179 @@
         <location line="+1"/>
         <location line="+1"/>
         <source>Min Limits</source>
-        <translation type="unfinished"></translation>
+        <translation>Минимальные лимиты</translation>
     </message>
     <message>
         <location line="+1"/>
         <location line="+1"/>
         <location line="+1"/>
         <source>Max Limits</source>
-        <translation type="unfinished"></translation>
+        <translation>Максимальные лимиты</translation>
     </message>
     <message>
         <location line="+1"/>
         <location line="+1"/>
         <location line="+1"/>
         <source>Insertion Base</source>
-        <translation type="unfinished"></translation>
+        <translation>База вставки</translation>
     </message>
     <message>
         <location line="+1"/>
         <location line="+1"/>
         <location line="+1"/>
         <source>Min Extents</source>
-        <translation type="unfinished"></translation>
+        <translation>Минимальные степени</translation>
     </message>
     <message>
         <location line="+1"/>
         <location line="+1"/>
         <location line="+1"/>
         <source>Max Extents</source>
-        <translation type="unfinished"></translation>
+        <translation>Максимальные степени</translation>
     </message>
     <message>
-        <location filename="../src/core/RBlockReferenceData.cpp" line="+627"/>
+        <location filename="../src/core/RBlockReferenceData.cpp" line="+856"/>
         <source>Circular (recursive) block referencing detected:</source>
-        <translation type="unfinished"></translation>
+        <translation>Обнаружена круговая (рекурсивная) ссылка на блок:</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Block name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя блока:</translation>
+    </message>
+    <message>
+        <location filename="../src/core/RDimStyle.cpp" line="+71"/>
+        <source>Style</source>
+        <translation>Стиль</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Overall scale</source>
+        <translation>Общий масштаб</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Linear measurement factor</source>
+        <translation>Коэффициент измерения длины</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text height</source>
+        <translation>Высота текста</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dimension line gap</source>
+        <translation>Интервал размерной линии</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow size</source>
+        <translation>Размер стрелки</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dimension line increment</source>
+        <translation>Приращение размерной линии</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Extension line extension</source>
+        <translation>Удлинение удлинительной линии</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Extension line offset</source>
+        <translation>Смещение удлинительной линии</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text position vertical</source>
+        <translation>Вертикальное положение текста</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text horizontal</source>
+        <translation>Горизонтальный текст</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Tick size</source>
+        <translation>Размер галочки</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Linear format</source>
+        <translation>Линейный формат</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Decimal places</source>
+        <translation>Десятичные разряды</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Decimal separator</source>
+        <translation>Десятичный разделитель</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Zero suppression</source>
+        <translation>Подавление нулей</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular format</source>
+        <translation>Угловой формат</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular decimal places</source>
+        <translation>Угловые десятичные разряды</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular zero suppression</source>
+        <translation>Угловое подавление нулей</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Architectur tick</source>
+        <translation>Архитектурная галочка</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text color</source>
+        <translation>Цвет текста</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block</source>
+        <translation>Блок стрелки</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block 1</source>
+        <translation>Блок стрелки 1</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block 2</source>
+        <translation>Блок стрелки 2</translation>
     </message>
 </context>
 <context>
     <name>RGuiAction</name>
     <message>
-        <location filename="../src/core/RGuiAction.cpp" line="+184"/>
+        <location filename="../src/core/RGuiAction.cpp" line="+202"/>
         <source>Requires selection</source>
-        <translation>Выделение требований</translation>
-    </message>
-</context>
-<context>
-    <name>RLayer</name>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Имя</translation>
-    </message>
-    <message>
-        <source>Hidden</source>
-        <translation type="vanished">Скрыть</translation>
-    </message>
-    <message>
-        <source>Locked</source>
-        <translation type="vanished">Запертый</translation>
-    </message>
-    <message>
-        <source>Color</source>
-        <translation type="vanished">Цвет</translation>
-    </message>
-    <message>
-        <source>Linetype</source>
-        <translation type="vanished">Тип линии</translation>
-    </message>
-    <message>
-        <source>Lineweight</source>
-        <translation type="vanished">Толщина линий</translation>
+        <translation>Требуется выделение</translation>
     </message>
 </context>
 <context>
     <name>RLinetype</name>
     <message>
-        <location filename="../src/core/RLinetype.cpp" line="+48"/>
+        <location filename="../src/core/RLinetype.cpp" line="+54"/>
         <source>Name</source>
         <translation>Имя</translation>
     </message>
@@ -726,9 +860,9 @@
 <context>
     <name>RLinetypePattern</name>
     <message>
-        <location filename="../src/core/RLinetypePattern.cpp" line="+856"/>
+        <location filename="../src/core/RLinetypePattern.cpp" line="+912"/>
         <source>By Layer</source>
-        <translation> По слою</translation>
+        <translation>По слою</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -773,21 +907,21 @@
         <location line="+1"/>
         <location line="+1"/>
         <source>Divide</source>
-        <translation>Пунктир 2</translation>
+        <translation>Разделённая</translation>
     </message>
     <message>
         <location line="+2"/>
         <location line="+1"/>
         <location line="+1"/>
         <source>Dot</source>
-        <translation>Пунктирная</translation>
+        <translation>Пунктирная точечная</translation>
     </message>
     <message>
         <location line="+2"/>
         <location line="+1"/>
         <location line="+1"/>
         <source>Hidden</source>
-        <translation>Скрыть</translation>
+        <translation>Скрыт</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -908,6 +1042,11 @@
     </message>
     <message>
         <location line="+2"/>
+        <source>Water</source>
+        <translation type="unfinished">Вода</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>Drainage</source>
         <translation>Дренаж</translation>
     </message>
@@ -916,13 +1055,48 @@
         <source>Drainage Reversed</source>
         <translation>Обратный дренаж</translation>
     </message>
+    <message>
+        <location line="+2"/>
+        <source>Communication</source>
+        <translation type="unfinished">Общение</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Electric</source>
+        <translation type="unfinished">Электрический</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Low Voltage</source>
+        <translation type="unfinished">Низкое напряжение</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>High Voltage</source>
+        <translation type="unfinished">Высокое напряжение</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Overhead Power</source>
+        <translation type="unfinished">Накладная мощность</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Foul</source>
+        <translation type="unfinished">Foul</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Foul Rising</source>
+        <translation type="unfinished">Восстание фолов</translation>
+    </message>
 </context>
 <context>
     <name>RLineweight</name>
     <message>
         <location filename="../src/core/RLineweight.cpp" line="+35"/>
         <source>By Layer</source>
-        <translation> По слою</translation>
+        <translation>По слою</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -1053,25 +1227,6 @@
         <location line="+1"/>
         <source>2.11mm</source>
         <translation>2.11мм</translation>
-    </message>
-</context>
-<context>
-    <name>RObject</name>
-    <message>
-        <source>Custom</source>
-        <translation type="vanished">Пользовательский</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation type="vanished">Тип</translation>
-    </message>
-    <message>
-        <source>Handle</source>
-        <translation type="vanished">Обработчик</translation>
-    </message>
-    <message>
-        <source>Protected</source>
-        <translation type="vanished">Защищённый</translation>
     </message>
 </context>
 </TS>

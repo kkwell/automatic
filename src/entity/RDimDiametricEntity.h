@@ -43,6 +43,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -62,11 +63,37 @@ public:
     static RPropertyTypeId PropertyLowerTolerance;
     static RPropertyTypeId PropertyMeasuredValue;
 
-    static RPropertyTypeId PropertyLinearFactor;
-    static RPropertyTypeId PropertyDimScale;
+    static RPropertyTypeId PropertyDimscale;
+    static RPropertyTypeId PropertyDimlfac;
+    static RPropertyTypeId PropertyDimtxt;
+    static RPropertyTypeId PropertyDimgap;
+    static RPropertyTypeId PropertyDimasz;
+    //static RPropertyTypeId PropertyDimdli;
+    static RPropertyTypeId PropertyDimexe;
+    static RPropertyTypeId PropertyDimexo;
+    static RPropertyTypeId PropertyDimtad;
+    static RPropertyTypeId PropertyDimtih;
+    static RPropertyTypeId PropertyDimtsz;
+    static RPropertyTypeId PropertyDimlunit;
+    static RPropertyTypeId PropertyDimdec;
+    static RPropertyTypeId PropertyDimdsep;
+    static RPropertyTypeId PropertyDimzin;
+//    static RPropertyTypeId PropertyDimaunit;
+//    static RPropertyTypeId PropertyDimadec;
+//    static RPropertyTypeId PropertyDimazin;
+    static RPropertyTypeId PropertyArchTick;
+    static RPropertyTypeId PropertyDimclrt;
+
+//    static RPropertyTypeId PropertyLinearFactor;
+//    static RPropertyTypeId PropertyDimScale;
     static RPropertyTypeId PropertyDimBlockName;
     static RPropertyTypeId PropertyAutoTextPos;
     static RPropertyTypeId PropertyFontName;
+    static RPropertyTypeId PropertyArrow1Flipped;
+    static RPropertyTypeId PropertyArrow2Flipped;
+
+    static RPropertyTypeId PropertyExtLineFix;
+    static RPropertyTypeId PropertyExtLineFixLength;
 
     static RPropertyTypeId PropertyChordPointX;
     static RPropertyTypeId PropertyChordPointY;
@@ -82,19 +109,23 @@ public:
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityDimDiametric;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RDimDiametricEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RDimDiametricEntity::getRtti());
     }
 
     virtual RDimDiametricEntity* clone() const {
         return new RDimDiametricEntity(*this);
     }
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual RDimDiametricData& getData() {
         return data;

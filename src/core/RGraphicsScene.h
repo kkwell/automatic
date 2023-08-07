@@ -74,7 +74,7 @@ public:
      */
     virtual bool exportDocumentSettings() { return true; }
 
-    virtual void regenerate(bool undone = false);
+    virtual void regenerate(bool undone = false, bool invisible = false);
     virtual void regenerate(QSet<REntity::Id>& affectedEntities, bool updateViews);
     virtual void updateSelectionStatus(QSet<REntity::Id>& affectedEntities, bool updateViews);
     virtual void regenerateViews(bool force=false);
@@ -112,6 +112,10 @@ public:
         Q_UNUSED(entityId)
         Q_UNUSED(drawable)
     }
+    virtual void addToPreview(REntity::Id entityId, RPainterPath& pp) {
+        Q_UNUSED(entityId)
+        Q_UNUSED(pp)
+    }
 
     void beginNoColorMode() {
         colorMode = false;
@@ -131,18 +135,23 @@ public:
      */
     virtual void highlightEntity(REntity& entity) = 0;
 
-    /**
-     * Highlights the reference point at the given position. This is typically
-     * used to highlight reference point when the mouse hovers over them.
-     */
     virtual void highlightReferencePoint(const RRefPoint& position);
+
+    virtual void selectReferencePoints(const RBox& box, bool add);
 
     virtual void exportCurrentEntity(bool preview = false, bool forceSelected = false);
     virtual void unexportEntity(REntity::Id entityId);
 
-    QMultiMap<REntity::Id, RRefPoint>& getReferencePoints() {
+    int countReferencePoints() const;
+
+    /**
+     * \nonscriptable
+     */
+    QMap<REntity::Id, QList<RRefPoint> >& getReferencePoints() {
         return referencePoints;
     }
+
+    bool hasSelectedReferencePoints() const;
 
 //    virtual bool isVisualExporter() const {
 //        return true;
@@ -172,9 +181,8 @@ protected:
     /**
      * Internal map of reference points for every selected entity in the scene.
      * Used for drawing reference points.
-     * TODO: store selection status of reference points.
      */
-    QMultiMap<REntity::Id, RRefPoint> referencePoints;
+    QMap<REntity::Id, QList<RRefPoint> > referencePoints;
 
 private:
     bool deleting;

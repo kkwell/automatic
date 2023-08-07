@@ -39,6 +39,7 @@
  *
  * \ingroup core
  * \scriptable
+ * \copyable
  * \hasStreamOperator
  */</comment>
 <class>class <macro><name>QCADCORE_EXPORT</name></macro> <name>RPattern</name> <block>{<private type="default">
@@ -70,6 +71,11 @@
     <comment type="block">/** \return the name of this pattern. */</comment>
     <function><type><name>const</name> <name>QString</name></type> <name>getName</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><name>name</name></expr>;</return>
+    }</block></function>
+
+    <comment type="block">/** \return the description of this pattern. */</comment>
+    <function><type><name>const</name> <name>QString</name></type> <name>getDescription</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>description</name></expr>;</return>
     }</block></function>
 
     <comment type="block">/**

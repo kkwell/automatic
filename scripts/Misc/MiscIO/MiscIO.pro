@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-    ts \
+    dir \
+    DrawFromCSV \
     ImportPoints \
     MolImport

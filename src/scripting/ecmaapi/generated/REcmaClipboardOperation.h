@@ -53,6 +53,12 @@
         apply
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        copy
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        copyEntity
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         copyEntityBlock
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -69,6 +75,15 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         copyLinetype
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setCopyEmptyBlocks
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setCopyAllLayers
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setKeepSelection
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

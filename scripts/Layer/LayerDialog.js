@@ -37,7 +37,8 @@ function LayerDialog(documentInterface, layer) {
     }
     this.layer = layer;
     this.prefix = undefined;
-    this.defaultName = "layer %1";
+    this.defaultName = qsTr("layer", "default layer name prefix") + " %1";
+    this.defaultColor = RSettings.getColor("Layer/DefaultColor", new RColor("black"));
 }
 
 /**
@@ -65,15 +66,20 @@ LayerDialog.prototype.getLayerName = function(dialog) {
 
 LayerDialog.prototype.show = function() {
     this.dialog = WidgetFactory.createDialog("scripts/Layer", "LayerDialog.ui");
-    //this.dialog.windowIcon = new QIcon(autoPath("scripts/Layer/EditLayer/EditLayer.svg"));
 
     var widgets = getWidgets(this.dialog);
     var leLayerName = widgets["LayerName"];
     var rx = new RegExp("[^<>/\\\\\":;\?\*|,=`]{1,255}");
-    this.validator = new QRegExpValidator(rx, leLayerName);
+    if (RSettings.getQtVersion()>=0x060000) {
+        this.validator = new QRegularExpressionValidator(rx, leLayerName);
+    }
+    else {
+        this.validator = new QRegExpValidator(rx, leLayerName);
+    }
+
     leLayerName.setValidator(this.validator);
     var cbColor = widgets["Color"];
-    cbColor.setColor(RSettings.getColor("Layer/DefaultColor", new RColor("black")));
+    cbColor.setColor(this.defaultColor);
     var cbLineweight = widgets["Lineweight"];
     cbLineweight.setLineweight(RSettings.getIntValue("Layer/DefaultLineweight", RLineweight.Weight025));
     var cbLinetype = widgets["Linetype"];
@@ -111,7 +117,7 @@ LayerDialog.prototype.show = function() {
         lLayerName.text = lLayerName.text + " " + this.prefix;
     }
 
-    leLayerName.textChanged.connect(this, "validate");
+    leLayerName.textChanged.connect(this, this.validate);
 
     this.initDialog(this.dialog, this.layer);
 
@@ -131,7 +137,7 @@ LayerDialog.prototype.show = function() {
     leLayerName.selectAll();
 
     if (!this.dialog.exec()) {
-        this.dialog.destroy();
+        destr(this.dialog);
         EAction.activateMainWindow();
         return undefined;
     }
@@ -155,7 +161,7 @@ LayerDialog.prototype.show = function() {
 
     var layer = new RLayer(this.document, text, false, false, clr, ltId, lw);
     this.initLayer(this.dialog, layer);
-    this.dialog.destroy();
+    destr(this.dialog);
     EAction.activateMainWindow();
 
     return layer;

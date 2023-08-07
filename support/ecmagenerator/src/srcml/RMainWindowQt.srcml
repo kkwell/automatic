@@ -24,6 +24,7 @@
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"gui_global.h"</cpp:file></cpp:include>
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QDockWidget&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QElapsedTimer&gt;</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QMainWindow&gt;</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QKeyEvent&gt;</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;QToolBar&gt;</cpp:file></cpp:include>
@@ -46,6 +47,7 @@
 <class_decl>class <name>RMdiArea</name>;</class_decl>
 <class_decl>class <name>RMdiChildQt</name>;</class_decl>
 <class_decl>class <name>RNewDocumentListener</name>;</class_decl>
+<class_decl>class <name>RPaletteListener</name>;</class_decl>
 <class_decl>class <name>RPenListener</name>;</class_decl>
 <class_decl>class <name>RPreferencesListener</name>;</class_decl>
 <class_decl>class <name>RPropertyListener</name>;</class_decl>
@@ -89,6 +91,10 @@
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>postTransactionEvent</name><parameter_list>(
         <param><decl><type><name>RTransaction</name>&amp;</type> <name>t</name></decl></param>,
         <param><decl><type><name>bool</name></type> <name>onlyChanges</name>=<init><expr><name>false</name></expr></init></decl></param>,
+        <param><decl><type><name><name>RS</name>::<name>EntityType</name></name></type> <name>entityTypeFilter</name> =<init> <expr><name><name>RS</name>::<name>EntityAll</name></name></expr></init></decl></param>
+    )</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>postPropertyEvent</name><parameter_list>(<param><decl><type><name>RPropertyTypeId</name></type> <name>propertyTypeId</name></decl></param>,
+        <param><decl><type><name>const</name> <name>QVariant</name>&amp;</type> <name>value</name></decl></param>,
         <param><decl><type><name><name>RS</name>::<name>EntityType</name></name></type> <name>entityTypeFilter</name> =<init> <expr><name><name>RS</name>::<name>EntityAll</name></name></expr></init></decl></param>
     )</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>postCloseEvent</name><parameter_list>()</parameter_list>;</function_decl>
@@ -139,17 +145,17 @@
 
 <label><name>signals</name>:</label>
     <comment type="block">/**
-     * Emmitted when the command prompt is requested to change.
+     * Emitted when the command prompt is requested to change.
      */</comment>
     <function_decl><type><name>void</name></type> <name>commandPrompt</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>text</name></decl></param>)</parameter_list>;</function_decl>
 
     <comment type="block">/**
-     * Emmitted when the left mouse button tip is requested to change.
+     * Emitted when the left mouse button tip is requested to change.
      */</comment>
     <function_decl><type><name>void</name></type> <name>leftMouseTip</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>message</name></decl></param>)</parameter_list>;</function_decl>
 
     <comment type="block">/**
-     * Emmitted when the right mouse button tip is requested to change.
+     * Emitted when the right mouse button tip is requested to change.
      */</comment>
     <function_decl><type><name>void</name></type> <name>rightMouseTip</name><parameter_list>(<param><decl><type><name>const</name> <name>QString</name>&amp;</type> <name>message</name></decl></param>)</parameter_list>;</function_decl>
 
@@ -185,20 +191,20 @@
 
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>event</name><parameter_list>(<param><decl><type><name>QEvent</name>*</type> <name>e</name></decl></param>)</parameter_list>;</function_decl>
 
-</protected><protected>protected slots:
+</protected><public>public slots:
     <function_decl><type><name>void</name></type> <name>updateGuiActions</name><parameter_list>(<param><decl><type><name>QMdiSubWindow</name>*</type> <name>mdiChild</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>initGuiActions</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>updateScenes</name><parameter_list>(<param><decl><type><name>QMdiSubWindow</name>*</type> <name>mdiChild</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>notifyListenersSlot</name><parameter_list>(<param><decl><type><name>QMdiSubWindow</name>*</type> <name>mdiChild</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>suspendAndResume</name><parameter_list>(<param><decl><type><name>QMdiSubWindow</name>*</type> <name>mdiChild</name></decl></param>)</parameter_list>;</function_decl>
 
-</protected><protected>protected:
+</public><protected>protected:
     <decl_stmt><decl><type><name>RMdiArea</name>*</type> <name>mdiArea</name></decl>;</decl_stmt>
 
     <decl_stmt><decl><type><name>int</name></type> <name>disableCounter</name></decl>;</decl_stmt>
 
     <decl_stmt><decl><type><name>QString</name></type> <name>keyLog</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>QTime</name></type> <name>keyTimeOut</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>QElapsedTimer</name></type> <name>keyTimeOut</name></decl>;</decl_stmt>
 
 <comment type="line">//private:</comment>
 <comment type="line">//    bool objectWasDestroyed;</comment>

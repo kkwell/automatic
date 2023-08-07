@@ -43,6 +43,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -59,6 +60,7 @@ public:
     static RPropertyTypeId PropertyFontName;
     static RPropertyTypeId PropertyHAlign;
     static RPropertyTypeId PropertyHeight;
+    static RPropertyTypeId PropertyWidth;
     static RPropertyTypeId PropertyItalic;
     static RPropertyTypeId PropertyLineSpacingFactor;
     static RPropertyTypeId PropertyPositionX;
@@ -69,6 +71,7 @@ public:
     static RPropertyTypeId PropertyText;
     static RPropertyTypeId PropertyPlainText;
     static RPropertyTypeId PropertyVAlign;
+    static RPropertyTypeId PropertyInvisible;
 
 public:
     RAttributeDefinitionEntity(RDocument* document, const RAttributeDefinitionData& data);
@@ -76,8 +79,12 @@ public:
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityAttributeDefinition;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RAttributeDefinitionEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RAttributeDefinitionEntity::getRtti());
     }
 
     virtual RAttributeDefinitionEntity* clone() const {
@@ -96,13 +103,13 @@ public:
         data = d;
     }
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
-   // void exportEntity(RExporter& e, bool preview) const;
+    //virtual void exportEntity(RExporter& e, bool preview=false, bool forceSelected=false) const;
 
     QString getTag() const {
         return data.getTag();
@@ -118,6 +125,14 @@ public:
 
     void setPrompt(const QString& p) {
         data.setPrompt(p);
+    }
+
+    bool isInvisible() const {
+        return data.isInvisible();
+    }
+
+    void setInvisible(bool i) {
+        data.setInvisible(i);
     }
 
 protected:

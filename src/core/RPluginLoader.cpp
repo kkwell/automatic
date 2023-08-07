@@ -73,7 +73,15 @@ QStringList RPluginLoader::getPluginFiles() {
         pluginFiles.append(pluginsDir.absoluteFilePath(fileName));
     }
 
-    //qSort();
+    // make sure plugins which depend on other plugins are loaded last:
+    pluginFiles.sort();
+    for (int i=0; i<pluginFiles.length(); i++) {
+        if (pluginFiles[i].contains("nest")) {
+            QString pf = pluginFiles.takeAt(i);
+            pluginFiles.append(pf);
+            break;
+        }
+    }
 
     return pluginFiles;
 }
@@ -82,8 +90,17 @@ QStringList RPluginLoader::getPluginFiles() {
  * Tries to loads all QCAD plugins located in ./plugins.
  */
 void RPluginLoader::loadPlugins(bool init) {
+    QString theme = RSettings::getStringValue("Theme/ThemeName", "");
+
     pluginFiles.clear();
     pluginsInfo.clear();
+
+
+#ifndef Q_OS_MAC
+    // disable OpenGL plugin if not explicitly enabled:
+    //bool loadOpenGL = RSettings::getBoolValue("PluginLoader/qcadgles3d", false);
+    //RSettings::setValue("PluginLoader/qcadgles3d", loadOpenGL);
+#endif
 
     // plugin settings are always stored in a file with base name "QCAD3":
     // this happens before RSettings is initialized:
@@ -103,17 +120,37 @@ void RPluginLoader::loadPlugins(bool init) {
 
 //    QStringList disabledPluginsList = disabledPlugins.split(',');
 
+    qDebug() << "loading plugins...";
     foreach (QString fileName, getPluginFiles()) {
 //        QString fn = QFileInfo(fileName).fileName();
 //        if (disabledPluginsList.contains(fn, Qt::CaseInsensitive)) {
 //            continue;
 //        }
+
+        QString baseName = QFileInfo(fileName).baseName();
+        baseName = baseName.replace("_debug", "");
+        baseName = baseName.replace("lib", "");
+        if (baseName.startsWith("qcad") && baseName.endsWith("style")) {
+            // plugin is a theme / style:
+            QString styleName = baseName.mid(4, baseName.length()-4-5);
+            if (theme.toLower()!=styleName.toLower()) {
+                // only load style plugin if name matched theme:
+                continue;
+            }
+        }
+
+        if (RSettings::getBoolValue("PluginLoader/" + baseName, true)!=true) {
+            // plugin disabled in configuration file:
+            continue;
+        }
+
         QPluginLoader loader(fileName);
         QObject* plugin = loader.instance();
         loadPlugin(plugin, init, fileName, loader.errorString());
     }
 
     // load statically compiled in plugins:
+    qDebug() << "loading static plugins...";
     QObjectList staticPlugins = QPluginLoader::staticInstances();
     for (int i=0; i<staticPlugins.size(); i++) {
         QObject* plugin = staticPlugins[i];
@@ -147,7 +184,7 @@ void RPluginLoader::loadPlugin(QObject* plugin, bool init, const QString& fileNa
         }
         else {
             // ignore other Qt plugins
-            qDebug() << "Plugin does not implement RPluginInterface";
+            qDebug() << "Plugin does not implement RPluginInterface:" << fileName;
             return;
         }
     }
@@ -171,8 +208,8 @@ void RPluginLoader::unloadPlugin(const QString& fileName, bool remove) {
     loader.unload();
 }
 
-void RPluginLoader::unloadPlugin(const QObject* plugin, bool remove) {
-    RPluginInterface* p = qobject_cast<RPluginInterface*>(plugin);
+void RPluginLoader::unloadPlugin(QObject* plugin, bool remove) {
+    RPluginInterface* p = dynamic_cast<RPluginInterface*>(plugin);
     if (p) {
         p->uninit(remove);
     }
@@ -200,6 +237,7 @@ void RPluginLoader::postInitPlugin(QObject* plugin, RPluginInterface::InitStatus
     }
 }
 
+#if QT_VERSION < 0x060000
 void RPluginLoader::initScriptExtensions(QScriptEngine& engine) {
     foreach (QString fileName, getPluginFiles()) {
         QPluginLoader loader(fileName);
@@ -218,6 +256,49 @@ void RPluginLoader::initScriptExtensions(QObject* plugin, QScriptEngine& engine)
     RPluginInterface* p = qobject_cast<RPluginInterface*>(plugin);
     if (p) {
         p->initScriptExtensions(engine);
+    }
+}
+#else
+void RPluginLoader::initScriptExtensions(RScriptHandler& handler) {
+    foreach (QString fileName, getPluginFiles()) {
+        QPluginLoader loader(fileName);
+        QObject* plugin = loader.instance();
+        initScriptExtensions(plugin, handler);
+    }
+
+    QObjectList staticPlugins = QPluginLoader::staticInstances();
+    for (int i=0; i<staticPlugins.size(); i++) {
+        QObject* plugin = staticPlugins[i];
+        initScriptExtensions(plugin, handler);
+    }
+}
+
+void RPluginLoader::initScriptExtensions(QObject* plugin, RScriptHandler& handler) {
+    RPluginInterface* p = qobject_cast<RPluginInterface*>(plugin);
+    if (p) {
+        p->initScriptExtensions(handler);
+    }
+}
+#endif
+
+void RPluginLoader::initTranslations() {
+    foreach (QString fileName, getPluginFiles()) {
+        QPluginLoader loader(fileName);
+        QObject* plugin = loader.instance();
+        initTranslations(plugin);
+    }
+
+    QObjectList staticPlugins = QPluginLoader::staticInstances();
+    for (int i=0; i<staticPlugins.size(); i++) {
+        QObject* plugin = staticPlugins[i];
+        initTranslations(plugin);
+    }
+}
+
+void RPluginLoader::initTranslations(QObject* plugin) {
+    RPluginInterface* p = qobject_cast<RPluginInterface*>(plugin);
+    if (p) {
+        p->initTranslations();
     }
 }
 
@@ -260,4 +341,36 @@ bool RPluginLoader::hasPlugin(const QString& id) {
         }
     }
     return false;
+}
+
+bool RPluginLoader::checkPluginLicenses() {
+    bool ret = true;
+
+    foreach (QString fileName, getPluginFiles()) {
+        QPluginLoader loader(fileName);
+        QObject* plugin = loader.instance();
+        ret = ret && checkPluginLicense(plugin);
+    }
+
+    // check license of statically compiled in plugins:
+    QObjectList staticPlugins = QPluginLoader::staticInstances();
+    for (int i=0; i<staticPlugins.size(); i++) {
+        QObject* plugin = staticPlugins[i];
+        ret = ret && checkPluginLicense(plugin);
+    }
+
+    return ret;
+}
+
+bool RPluginLoader::checkPluginLicense(QObject* plugin) {
+    bool ret = true;
+
+    if (plugin) {
+        RPluginInterface* p = qobject_cast<RPluginInterface*>(plugin);
+        if (p) {
+            ret = p->checkLicense();
+        }
+    }
+
+    return ret;
 }

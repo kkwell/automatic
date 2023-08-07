@@ -18,7 +18,7 @@ ToggleLayerVisibilityTest00.prototype.test00 = function() {
     var doc = di.getDocument();
     var layer;
 
-    addLayer("Layer1", "white", "CONTINOUS", RLineweight.Weight025);
+    addLayer("Layer1", "white", "CONTINUOUS", RLineweight.Weight025);
     doc.setCurrentLayer("Layer1");
 
     //               showFrozen, freezeLayer,    frozen, off,      frozenRes, offRes
@@ -54,6 +54,13 @@ ToggleLayerVisibilityTest00.prototype.testToggle = function(showFrozen, freezeLa
     var toggleLayerVisibilityAction = RGuiAction.getByScriptFile("scripts/Layer/ToggleLayerVisibility/ToggleLayerVisibility.js");
     var di = EAction.getDocumentInterface();
     var doc = di.getDocument();
+
+//    qDebug("showFrozen: ", showFrozen);
+//    qDebug("freezeLayer: ", freezeLayer);
+//    qDebug("frozen: ", frozen);
+//    qDebug("off: ", off);
+//    qDebug("frozenRes: ", frozenRes);
+//    qDebug("offRes: ", offRes);
 
     RSettings.setValue("LayerListPro/ShowFrozen", showFrozen);
     RSettings.setValue("LayerListPro/FreezeLayer", freezeLayer);

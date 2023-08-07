@@ -38,6 +38,7 @@
  *
  * \ingroup core
  * \scriptable
+ * \copyable
  * \hasStreamOperator
  */
 class QCADCORE_EXPORT RPattern {
@@ -69,6 +70,11 @@ public:
     /** \return the name of this pattern. */
     const QString getName() const {
         return name;
+    }
+
+    /** \return the description of this pattern. */
+    const QString getDescription() const {
+        return description;
     }
 
     /**

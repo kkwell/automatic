@@ -20,7 +20,7 @@
  * along with QCAD.
  */
 
-include("../Information.js");
+include("scripts/Information/Information.js");
 
 /**
  * \class InfoArcCircleArea
@@ -70,7 +70,7 @@ InfoArcCircleArea.prototype.setState = function(state) {
     var trSelectEntity = qsTr("Choose arc, circle, ellipse or elliptical arc");
     this.setCommandPrompt(trSelectEntity);
     this.setLeftMouseTip(trSelectEntity);
-    this.setRightMouseTip(qsTr("Done"));
+    this.setRightMouseTip(EAction.trDone);
 
     EAction.showSnapTools();
 };
@@ -124,7 +124,7 @@ InfoArcCircleArea.prototype.getOperation = function(preview) {
     }
 
     var view = di.getLastKnownViewWithFocus();
-    view = view.getRGraphicsView();
+    view = getRGraphicsView(view);
 
     if (isArcShape(this.shape) || isEllipseArcShape(this.shape)) {
         if (this.segmentMode) {
@@ -207,7 +207,7 @@ InfoArcCircleArea.prototype.getSegmentArea = function() {
         var remainAngle = RMath.deg2rad(360 - sweep);
         var remainSliceArea = (this.radius1 * this.radius2 * remainAngle) / 2.0;
         var remainSegmentArea = (this.radius1 * this.radius2 * (remainAngle - Math.sin(remainAngle))) / 2.0;
-        segmentArea = this.getSectorArea() + (remainSliceArea - remainSectorArea);
+        segmentArea = this.getSectorArea() + (remainSliceArea - remainSegmentArea);
     }
 
     return segmentArea;

@@ -24,7 +24,7 @@
  * \brief This module contains ECMAScript implementations of the
  * tools in the file menu.
  */
-include("../EAction.js");
+include("scripts/EAction.js");
 
 /**
  * \class File
@@ -67,7 +67,7 @@ File.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(false);
         action.setIcon(File.includeBasePath + "/File.svg");
-        action.setStatusTip(qsTr("Show file tools"));
+        //action.setStatusTip(qsTr("Show file tools"));
         action.setNoState();
         action.setDefaultCommands(["filemenu"]);
         action.setGroupSortOrder(10);
@@ -108,7 +108,7 @@ File.init = function() {
  * a file related to the given file.
  *
  * \param filePath Typically the path and file name of the drawing file.
- * \param extension File extension to use for exported file (bmd, pdf, dxf, etc).
+ * \param extension File extension to use for exported file (bmp, pdf, dxf, etc).
  */
 File.getInitialSaveAsPath = function(filePath, extension) {
     var ret = "";
@@ -141,13 +141,13 @@ File.getInitialSaveAsPath = function(filePath, extension) {
  *
  * \param parentWidget Parent widget or null
  * \param caption Dialog caption
- * \param path Initial path of the dialog
+ * \param path Initial path with file name of the dialog
  * \param fileName Initial file name to suggest to user
  * \param filterStrings Array of filter strings in the format 'My File Type (*.mft *.mftype)'
  *
  * \return Array with complete file path and selected name filter or undefined.
  */
-File.getSaveFileName = function(parentWidget, caption, path, filterStrings) {
+File.getSaveFileName = function(parentWidget, caption, path, filterStrings, defaultNameFilter) {
     var fileDialog = new QFileDialog(parentWidget);
     
     // use native dialog:
@@ -166,22 +166,34 @@ File.getSaveFileName = function(parentWidget, caption, path, filterStrings) {
     fileDialog.fileMode = QFileDialog.AnyFile;
     fileDialog.acceptMode = QFileDialog.AcceptSave;
 
+    filterStrings = translateFilterStrings(filterStrings);
     fileDialog.setNameFilters(filterStrings);
-    
-    //if (!isNull(fileName)) {
-        //var fileInfo = new QFileInfo(fileName);
-        fileDialog.selectFile(fiDir.completeBaseName());
 
-        if (fiDir.suffix().length!==0) {
-            // preselect first name filter that matches current extension:
-            for (var i=0; i<filterStrings.length; ++i) {
-                if (filterStrings[i].contains("*." + fiDir.suffix().toLowerCase())) {
-                    fileDialog.selectNameFilter(filterStrings[i]);
-                    break;
-                }
+    // preselect configured name filter:
+    if (isNull(defaultNameFilter) || defaultNameFilter.length===0) {
+        // preselect default name filter DXF R27:
+        for (var i=0; i<filterStrings.length; ++i) {
+            if (filterStrings[i].contains("R27") && filterStrings[i].contains("*.dxf")) {
+                fileDialog.selectNameFilter(filterStrings[i]);
+                break;
             }
         }
-    //}
+    }
+    else {
+        fileDialog.selectNameFilter(defaultNameFilter);
+    }
+    
+    fileDialog.selectFile(fiDir.completeBaseName());
+
+    if (fiDir.suffix().length!==0) {
+        // preselect first name filter that matches current extension:
+        for (var i=0; i<filterStrings.length; ++i) {
+            if (filterStrings[i].contains("*." + fiDir.suffix().toLowerCase())) {
+                fileDialog.selectNameFilter(filterStrings[i]);
+                break;
+            }
+        }
+    }
 
     fileDialog.setLabelText(QFileDialog.FileType, qsTr("Format:"));
 
@@ -191,7 +203,7 @@ File.getSaveFileName = function(parentWidget, caption, path, filterStrings) {
         done = true;
 
         if (!fileDialog.exec()) {
-            fileDialog.destroy();
+            destr(fileDialog);
             EAction.activateMainWindow();
             return undefined;
         }
@@ -218,10 +230,10 @@ File.getSaveFileName = function(parentWidget, caption, path, filterStrings) {
         // file with suffix:
         fi = new QFileInfo(fileToSave);
         if (fi.exists()) {
-            var buttons = new QMessageBox.StandardButtons(QMessageBox.Yes, QMessageBox.No);
+            var buttons = makeQMessageBoxStandardButtons(QMessageBox.Yes, QMessageBox.No);
             var ret = QMessageBox.warning(parentWidget, 
                 qsTr("Overwrite File?"), 
-                qsTr("The file '%1' already exists. Do you wish to overwrite it?").arg(fileToSave),
+                qsTr("The file \"%1\" already exists. Do you wish to overwrite it?").arg(fileToSave),
                 buttons);
             if (ret!=QMessageBox.Yes) {
                 done = false;
@@ -235,13 +247,20 @@ File.getSaveFileName = function(parentWidget, caption, path, filterStrings) {
 /**
  * Show file dialog and let user choose a file to open.
  *
- * \return path and file name chosen by the user
+ * \return Array with [path and file name chosen by the user] and [filter chosen by user]
  */
-File.getOpenFileName = function(parentWidget, caption, dir, filterStrings) {
+File.getOpenFileName = function(parentWidget, caption, dir, filterStrings, noAllFiles) {
     if (isNull(filterStrings)) {
         filterStrings = RFileImporterRegistry.getFilterStrings();
+        filterStrings = translateFilterStrings(filterStrings);
     }
-    filterStrings = new Array(qsTr("All Files") + " (*)").concat(filterStrings);
+    if (isNull(noAllFiles)) {
+        noAllFiles = false;
+    }
+
+    if (!noAllFiles) {
+        filterStrings = new Array(qsTr("All Files") + " (*)").concat(filterStrings);
+    }
 
     var fileDialog = new QFileDialog(parentWidget, caption, dir, "");
     var allFilter = filterStrings[0];
@@ -254,14 +273,14 @@ File.getOpenFileName = function(parentWidget, caption, dir, filterStrings) {
     fileDialog.fileMode = QFileDialog.ExistingFiles;
     fileDialog.setLabelText(QFileDialog.FileType, qsTr("Format:"));
     if (!fileDialog.exec()) {
-        fileDialog.destroy();
+        destr(fileDialog);
         EAction.activateMainWindow();
         return undefined;
     }
 
     var fileNames = fileDialog.selectedFiles();
     if (fileNames.length===0) {
-        fileDialog.destroy();
+        destr(fileDialog);
         EAction.activateMainWindow();
         return undefined;
     }
@@ -273,7 +292,7 @@ File.getOpenFileName = function(parentWidget, caption, dir, filterStrings) {
 
     var nameFilter = fileDialog.selectedNameFilter();
 
-    fileDialog.destroy();
+    destr(fileDialog);
     EAction.activateMainWindow();
 
     return [ fileNames[0], nameFilter ];

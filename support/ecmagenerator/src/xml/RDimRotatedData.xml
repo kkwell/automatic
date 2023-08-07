@@ -71,6 +71,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         name="referencePoint" isConst="true" />
         <arg type="RVector &amp;" typeName="RVector"
         name="targetPoint" isConst="true" />
+        <arg type="Qt::KeyboardModifiers"
+        typeName="Qt::KeyboardModifiers" name="modifiers"
+        hasDefault="true" default="Qt :: NoModifier"
+        isConst="false" />
       </variant>
     </method>
     <method name="getDimPoints" cppName="getDimPoints"
@@ -107,18 +111,6 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="bool" isPureVirtual="false">
         <arg type="RLine &amp;" typeName="RLine" name="axis"
         isConst="true" />
-      </variant>
-    </method>
-    <method name="getShapes" cppName="getShapes" specifier="public"
-    isStatic="false" isVirtual="true" isScriptOverwritable="true">
-      <variant returnType="QList &lt; QSharedPointer &lt; RShape &gt; &gt;"
-      isPureVirtual="false">
-        <arg type="RBox &amp;" typeName="RBox" name="queryBox"
-        hasDefault="true" default="RDEFAULT_RBOX" isConst="true" />
-        <arg type="bool" typeName="bool" name="ignoreComplex"
-        hasDefault="true" default="false" isConst="false" />
-        <arg type="bool" typeName="bool" name="segment"
-        hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
     <method name="getMeasuredValue" cppName="getMeasuredValue"

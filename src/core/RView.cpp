@@ -38,10 +38,10 @@ RView::~RView() {
 }
 
 void RView::init() {
-    RView::PropertyName.generateId(typeid(RView), "", "Name");
-    RView::PropertyCenterPoint.generateId(typeid(RView), "", "Center Point");
-    RView::PropertyWidth.generateId(typeid(RView), "", "Width");
-    RView::PropertyHeight.generateId(typeid(RView), "", "Height");
+    RView::PropertyName.generateId(RView::getRtti(), "", "Name");
+    RView::PropertyCenterPoint.generateId(RView::getRtti(), "", "Center Point");
+    RView::PropertyWidth.generateId(RView::getRtti(), "", "Width");
+    RView::PropertyHeight.generateId(RView::getRtti(), "", "Height");
 }
 
 RView* RView::clone() const {
@@ -60,10 +60,7 @@ bool RView::setProperty(RPropertyTypeId propertyTypeId,
 
 QPair<QVariant, RPropertyAttributes> RView::getProperty(
         RPropertyTypeId& propertyTypeId, bool humanReadable,
-        bool noAttributes) {
-
-    Q_UNUSED(humanReadable)
-    Q_UNUSED(noAttributes)
+        bool noAttributes, bool showOnRequest) {
 
     if (propertyTypeId == PropertyName) {
         return qMakePair(QVariant(name), RPropertyAttributes());
@@ -78,13 +75,8 @@ QPair<QVariant, RPropertyAttributes> RView::getProperty(
         return qMakePair(QVariant(height), RPropertyAttributes());
     }
 
-    return RObject::getProperty(propertyTypeId, humanReadable, noAttributes);
+    return RObject::getProperty(propertyTypeId, humanReadable, noAttributes, showOnRequest);
 }
-
-bool RView::isSelectedForPropertyEditing() {
-    return false;
-}
-
 
 /**
  * Stream operator for QDebug

@@ -41,6 +41,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -54,6 +55,9 @@ public:
     static RPropertyTypeId PropertyStartPointX;
     static RPropertyTypeId PropertyStartPointY;
     static RPropertyTypeId PropertyStartPointZ;
+    static RPropertyTypeId PropertyMiddlePointX;
+    static RPropertyTypeId PropertyMiddlePointY;
+    static RPropertyTypeId PropertyMiddlePointZ;
     static RPropertyTypeId PropertyEndPointX;
     static RPropertyTypeId PropertyEndPointY;
     static RPropertyTypeId PropertyEndPointZ;
@@ -69,19 +73,23 @@ public:
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityLine;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RLineEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RLineEntity::getRtti());
     }
 
     virtual RLineEntity* clone() const {
         return new RLineEntity(*this);
     }
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual void exportEntity(RExporter& e, bool preview=false, bool forceSelected=false) const;
 

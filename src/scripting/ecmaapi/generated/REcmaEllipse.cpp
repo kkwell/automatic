@@ -144,6 +144,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, getPointsWithDistanceToEnd, "getPointsWithDistanceToEnd");
             
+            REcmaHelper::registerFunction(&engine, proto, getPointCloud, "getPointCloud");
+            
             REcmaHelper::registerFunction(&engine, proto, getVectorTo, "getVectorTo");
             
             REcmaHelper::registerFunction(&engine, proto, moveStartPoint, "moveStartPoint");
@@ -286,6 +288,8 @@
     
     // static methods:
     
+            REcmaHelper::registerFunction(&engine, &ctor, createInscribed, "createInscribed");
+            
             REcmaHelper::registerFunction(&engine, &ctor, hasProxy, "hasProxy");
             
 
@@ -765,6 +769,143 @@
 
     // public methods:
      QScriptValue
+        REcmaEllipse::createInscribed
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaEllipse::createInscribed", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaEllipse::createInscribed";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(2).isVariant() || 
+            context->argument(2).isQObject() || 
+            context->argument(2).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(3).isVariant() || 
+            context->argument(3).isQObject() || 
+            context->argument(3).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("REllipse: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("REllipse: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap2 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        2
+                        )
+                    );
+                    if (ap2 == NULL) {
+                           return REcmaHelper::throwError("REllipse: Argument 2 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a2 = 
+                    *ap2;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap3 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        3
+                        )
+                    );
+                    if (ap3 == NULL) {
+                           return REcmaHelper::throwError("REllipse: Argument 3 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a3 = 
+                    *ap3;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'REllipse'
+    REllipse cppResult =
+        REllipse::
+       createInscribed(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: REllipse
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for REllipse.createInscribed().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaEllipse::createInscribed", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaEllipse::getShapeType
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -1461,6 +1602,66 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaEllipse::getPointsWithDistanceToEnd", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaEllipse::getPointCloud
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaEllipse::getPointCloud", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaEllipse::getPointCloud";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    REllipse* self = 
+                        getSelf("getPointCloud", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getPointCloud(a0);
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for REllipse.getPointCloud().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaEllipse::getPointCloud", context, engine);
             return result;
         }
          QScriptValue
@@ -6061,7 +6262,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(

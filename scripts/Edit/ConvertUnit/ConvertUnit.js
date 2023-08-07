@@ -71,7 +71,7 @@ ConvertUnit.prototype.doConvert = function() {
     mdiChild.setFocus();
 
     this.terminate();
-}
+};
 
 ConvertUnit.convert = function(di, fromUnit, toUnit) {
     if (isNull(di)) {
@@ -86,20 +86,33 @@ ConvertUnit.convert = function(di, fromUnit, toUnit) {
         return [1, qsTr("Nothing to be done.")];
     }
     if (fromUnit === RS.None || toUnit === RS.None) {
-        return [1, qsTr("Unit '%1' selected - Nothing to be done").arg(RUnit.unitToName(RS.None))];
+        return [1, qsTr("Unit \"%1\" selected. Nothing to be done").arg(RUnit.unitToName(RS.None))];
     }
 
     var factor = RUnit.convert(1.0, fromUnit, toUnit);
 
     doc.startTransactionGroup();
 
+    var dimStyle = doc.queryDimStyle();
     var docVars = doc.queryDocumentVariables();
+
+    // make sure we don't end up with a metric document with imperial dimension format:
+    if (doc.getLinearFormat()===RS.Engineering || doc.getLinearFormat()===RS.ArchitecturalStacked || doc.getLinearFormat()===RS.Architectural) {
+        if (!RUnit.isMetric(doc.getUnit()) && RUnit.isMetric(toUnit)) {
+            dimStyle.setInt(RS.DIMLUNIT, RS.Decimal);
+        }
+    }
+
     docVars.setUnit(toUnit);
-    docVars.setKnownVariable(RS.DIMSCALE, doc.getKnownVariable(RS.DIMSCALE, 1.0) * factor);
+
+    // scale dimension sizes:
+    var dimscale = dimStyle.getDouble(RS.DIMSCALE);
+    dimStyle.setDouble(RS.DIMSCALE, dimscale*factor);
 
     var op = new RAddObjectsOperation();
     op.setTransactionGroup(doc.getTransactionGroup());
     op.addObject(docVars);
+    op.addObject(dimStyle);
     di.applyOperation(op);
 
     op = new RAddObjectsOperation();
@@ -128,6 +141,10 @@ ConvertUnit.convert = function(di, fromUnit, toUnit) {
         if (isBlockReferenceEntity(entity)) {
             var p = entity.getPosition();
             entity.setPosition(p.operator_multiply(factor));
+            var cs = entity.getColumnSpacing();
+            entity.setColumnSpacing(cs*factor);
+            var rs = entity.getRowSpacing();
+            entity.setRowSpacing(rs*factor);
         } else if (isViewportEntity(entity)) {
             var s = entity.getScale();
             entity.scale(factor);
@@ -139,11 +156,12 @@ ConvertUnit.convert = function(di, fromUnit, toUnit) {
             tc.scale(factor);
             entity.setViewTarget(tc);
         } else if (isDimensionEntity(entity)) {
-            var s = entity.getDimScale(false);
             entity.scale(factor);
-            if (!RMath.fuzzyCompare(0.0, s)) {
+
+            var s = entity.getDimscale();
+            if (entity.hasOverride(RS.DIMSCALE)) {
                 // dimension has individual scale factor (property, override):
-                entity.setDimScale(s*factor);
+                entity.setDimscale(s*factor);
             }
         } else {
             entity.scale(factor);
@@ -226,12 +244,12 @@ ConvertUnit.initUnitCombo = function(unitCombo) {
 
 ConvertUnit.prototype.slotFromChanged = function(value) {
     this.fromUnit = value;
-}
+};
 
 ConvertUnit.prototype.slotToChanged = function(value) {
     this.toUnit = value;
-}
+};
 
 ConvertUnit.prototype.slotConvert = function() {
     this.doConvert();
-}
+};

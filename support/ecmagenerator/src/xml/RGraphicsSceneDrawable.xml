@@ -8,13 +8,18 @@ xmlns:rs="http://www.ribbonsoft.com">
     <enum name="Type">
       <value name="Invalid" />
       <value name="PainterPath" />
+      <value name="PainterPathRay" />
+      <value name="PainterPathXLine" />
       <value name="Image" />
       <value name="Text" />
+      <value name="Transform" />
+      <value name="EndTransform" />
     </enum>
     <enum name="Mode">
       <value name="NoMode" />
       <value name="NoPlot" />
       <value name="PixelUnit" />
+      <value name="WorkingSet" />
     </enum>
     <constructor>
       <variant />
@@ -60,6 +65,27 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="true" />
       </variant>
     </method>
+    <method name="createFromTransform"
+    cppName="createFromTransform" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RGraphicsSceneDrawable"
+      isPureVirtual="false">
+        <arg type="RTransform &amp;" typeName="RTransform"
+        name="transform" isConst="true" />
+        <arg type="RVector &amp;" typeName="RVector" name="offset"
+        hasDefault="true" default="RVector :: nullVector"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="createEndTransform" cppName="createEndTransform"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="RGraphicsSceneDrawable"
+      isPureVirtual="false">
+        <arg type="RVector &amp;" typeName="RVector" name="offset"
+        isConst="true" />
+      </variant>
+    </method>
     <method name="uninit" cppName="uninit" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
@@ -68,6 +94,19 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="RGraphicsSceneDrawable::Type"
       isPureVirtual="false" />
+    </method>
+    <method name="isPainterPath" cppName="isPainterPath"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="isText" cppName="isText" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="isImage" cppName="isImage" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
     </method>
     <method name="setMode" cppName="setMode" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
@@ -111,6 +150,19 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
     </method>
+    <method name="setWorkingSet" cppName="setWorkingSet"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="isWorkingSet" cppName="isWorkingSet"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
     <method name="getPainterPath" cppName="getPainterPath"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -127,6 +179,12 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="RTextBasedData &amp;"
       isPureVirtual="false" />
     </method>
+    <method name="getTransform" cppName="getTransform"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="RTransform &amp;"
+      isPureVirtual="false" />
+    </method>
     <method name="getOffset" cppName="getOffset" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="RVector" isPureVirtual="false" />
@@ -137,6 +195,11 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="RVector &amp;" typeName="RVector" name="o"
         isConst="true" />
       </variant>
+    </method>
+    <method name="getDocument" cppName="getDocument"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="RDocument *" isPureVirtual="false" />
     </method>
     <method name="setSelected" cppName="setSelected"
     specifier="public" isStatic="false" isVirtual="false"

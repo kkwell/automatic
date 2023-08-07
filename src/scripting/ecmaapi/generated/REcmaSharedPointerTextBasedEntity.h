@@ -70,6 +70,9 @@
         exportEntity
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        scaleNonUniform
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getPainterPaths
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -92,6 +95,18 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setItalic
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isBackward
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setBackward
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isUpsideDown
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setUpsideDown
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getPosition

@@ -19,8 +19,6 @@
             
                 #include "RPropertyEvent.h"
             
-                #include "RSnap.h"
-            
                 #include "RSnapRestriction.h"
             
                 #include "RScriptHandler.h"
@@ -79,6 +77,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, getGraphicsViewWithFocus, "getGraphicsViewWithFocus");
             
+            REcmaHelper::registerFunction(&engine, proto, getGraphicsSceneWithFocus, "getGraphicsSceneWithFocus");
+            
             REcmaHelper::registerFunction(&engine, proto, addCoordinateListener, "addCoordinateListener");
             
             REcmaHelper::registerFunction(&engine, proto, notifyCoordinateListeners, "notifyCoordinateListeners");
@@ -89,7 +89,15 @@
             
             REcmaHelper::registerFunction(&engine, proto, notifyLayerListeners, "notifyLayerListeners");
             
+            REcmaHelper::registerFunction(&engine, proto, addTransactionListener, "addTransactionListener");
+            
+            REcmaHelper::registerFunction(&engine, proto, removeTransactionListener, "removeTransactionListener");
+            
+            REcmaHelper::registerFunction(&engine, proto, notifyTransactionListeners, "notifyTransactionListeners");
+            
             REcmaHelper::registerFunction(&engine, proto, clear, "clear");
+            
+            REcmaHelper::registerFunction(&engine, proto, deleteScriptHandler, "deleteScriptHandler");
             
             REcmaHelper::registerFunction(&engine, proto, getScriptHandler, "getScriptHandler");
             
@@ -173,6 +181,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, disableMouseTracking, "disableMouseTracking");
             
+            REcmaHelper::registerFunction(&engine, proto, setAllowSnapInterruption, "setAllowSnapInterruption");
+            
             REcmaHelper::registerFunction(&engine, proto, updateAllEntities, "updateAllEntities");
             
             REcmaHelper::registerFunction(&engine, proto, regenerateScenes, "regenerateScenes");
@@ -197,6 +207,10 @@
             
             REcmaHelper::registerFunction(&engine, proto, exportFile, "exportFile");
             
+            REcmaHelper::registerFunction(&engine, proto, tagState, "tagState");
+            
+            REcmaHelper::registerFunction(&engine, proto, undoToTag, "undoToTag");
+            
             REcmaHelper::registerFunction(&engine, proto, undo, "undo");
             
             REcmaHelper::registerFunction(&engine, proto, redo, "redo");
@@ -209,11 +223,15 @@
             
             REcmaHelper::registerFunction(&engine, proto, getSnap, "getSnap");
             
+            REcmaHelper::registerFunction(&engine, proto, getSnapStatus, "getSnapStatus");
+            
             REcmaHelper::registerFunction(&engine, proto, setSnapRestriction, "setSnapRestriction");
             
             REcmaHelper::registerFunction(&engine, proto, getSnapRestriction, "getSnapRestriction");
             
             REcmaHelper::registerFunction(&engine, proto, snap, "snap");
+            
+            REcmaHelper::registerFunction(&engine, proto, restrictOrtho, "restrictOrtho");
             
             REcmaHelper::registerFunction(&engine, proto, getClosestEntity, "getClosestEntity");
             
@@ -783,6 +801,55 @@
             return result;
         }
          QScriptValue
+        REcmaDocumentInterface::getGraphicsSceneWithFocus
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDocumentInterface::getGraphicsSceneWithFocus", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDocumentInterface::getGraphicsSceneWithFocus";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDocumentInterface* self = 
+                        getSelf("getGraphicsSceneWithFocus", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RGraphicsScene *'
+    RGraphicsScene * cppResult =
+        
+               self->getGraphicsSceneWithFocus();
+        // return type: RGraphicsScene *
+                // RGraphicsScene:
+                result = REcmaHelper::toScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.getGraphicsSceneWithFocus().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDocumentInterface::getGraphicsSceneWithFocus", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaDocumentInterface::addCoordinateListener
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -1035,16 +1102,28 @@
                 
     
     if( context->argumentCount() ==
-    0
+    1 && (
+            context->argument(0).isArray()
+        ) /* type: QList < RLayer::Id > */
+    
     ){
     // prepare arguments:
     
+                    // argument isArray or QVariantMap
+                    QList < RLayer::Id >
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
     // end of arguments
 
     // call C++ function:
     // return type 'void'
     
-               self->notifyLayerListeners();
+               self->notifyLayerListeners(a0);
     } else
 
 
@@ -1054,6 +1133,224 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaDocumentInterface::notifyLayerListeners", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaDocumentInterface::addTransactionListener
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDocumentInterface::addTransactionListener", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDocumentInterface::addTransactionListener";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDocumentInterface* self = 
+                        getSelf("addTransactionListener", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RTransactionListener * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    RTransactionListener * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<RTransactionListener >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RDocumentInterface: Argument 0 is not of type RTransactionListener *RTransactionListener *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        
+               self->addTransactionListener(a0);
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.addTransactionListener().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDocumentInterface::addTransactionListener", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaDocumentInterface::removeTransactionListener
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDocumentInterface::removeTransactionListener", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDocumentInterface::removeTransactionListener";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDocumentInterface* self = 
+                        getSelf("removeTransactionListener", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->removeTransactionListener(a0);
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RTransactionListener * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    RTransactionListener * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<RTransactionListener >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RDocumentInterface: Argument 0 is not of type RTransactionListener *RTransactionListener *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->removeTransactionListener(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.removeTransactionListener().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDocumentInterface::removeTransactionListener", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaDocumentInterface::notifyTransactionListeners
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDocumentInterface::notifyTransactionListeners", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDocumentInterface::notifyTransactionListeners";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDocumentInterface* self = 
+                        getSelf("notifyTransactionListeners", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RTransaction * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    RTransaction * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<RTransaction >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RDocumentInterface: Argument 0 is not of type RTransaction *RTransaction *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->notifyTransactionListeners(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.notifyTransactionListeners().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDocumentInterface::notifyTransactionListeners", context, engine);
             return result;
         }
          QScriptValue
@@ -1125,6 +1422,61 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaDocumentInterface::clear", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaDocumentInterface::deleteScriptHandler
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDocumentInterface::deleteScriptHandler", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDocumentInterface::deleteScriptHandler";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDocumentInterface* self = 
+                        getSelf("deleteScriptHandler", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->deleteScriptHandler(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.deleteScriptHandler().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDocumentInterface::deleteScriptHandler", context, engine);
             return result;
         }
          QScriptValue
@@ -3435,6 +3787,61 @@
             return result;
         }
          QScriptValue
+        REcmaDocumentInterface::setAllowSnapInterruption
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDocumentInterface::setAllowSnapInterruption", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDocumentInterface::setAllowSnapInterruption";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDocumentInterface* self = 
+                        getSelf("setAllowSnapInterruption", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setAllowSnapInterruption(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.setAllowSnapInterruption().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDocumentInterface::setAllowSnapInterruption", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaDocumentInterface::updateAllEntities
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -3545,6 +3952,46 @@
     
     if( context->argumentCount() ==
     2 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->regenerateScenes(a0
+        ,
+    a1);
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
             context->argument(0).isArray()
         ) /* type: QSet < REntity::Id > */
      && (
@@ -3554,7 +4001,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QSet < REntity::Id >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -3663,7 +4110,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QSet < REntity::Id >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -3812,7 +4259,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QSet < REntity::Id >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -4313,6 +4760,89 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QUrl */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(3).isObject() || 
+            context->argument(3).isNull()
+        ) /* type: QVariantMap */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    QUrl*
+                    ap0 =
+                    qscriptvalue_cast<
+                    QUrl*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RDocumentInterface: Argument 0 is not of type QUrl*.",
+                               context);                    
+                    }
+                    QUrl& a0 = *ap0;
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+                    // argument isArray or QVariantMap
+                    QVariantMap
+                    a3;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(3),
+                        a3
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RDocumentInterface::IoErrorCode'
+    RDocumentInterface::IoErrorCode cppResult =
+        
+               self->importUrl(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: RDocumentInterface::IoErrorCode
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.importUrl().",
                    context);
@@ -4468,6 +4998,79 @@
     a1
         ,
     a2);
+        // return type: RDocumentInterface::IoErrorCode
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(3).isObject() || 
+            context->argument(3).isNull()
+        ) /* type: QVariantMap */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+                    // argument isArray or QVariantMap
+                    QVariantMap
+                    a3;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(3),
+                        a3
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RDocumentInterface::IoErrorCode'
+    RDocumentInterface::IoErrorCode cppResult =
+        
+               self->importFile(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
         // return type: RDocumentInterface::IoErrorCode
                 // standard Type
                 result = QScriptValue(cppResult);
@@ -4717,6 +5320,148 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaDocumentInterface::exportFile", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaDocumentInterface::tagState
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDocumentInterface::tagState", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDocumentInterface::tagState";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDocumentInterface* self = 
+                        getSelf("tagState", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->tagState();
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->tagState(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.tagState().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDocumentInterface::tagState", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaDocumentInterface::undoToTag
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDocumentInterface::undoToTag", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDocumentInterface::undoToTag";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDocumentInterface* self = 
+                        getSelf("undoToTag", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->undoToTag();
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->undoToTag(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.undoToTag().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDocumentInterface::undoToTag", context, engine);
             return result;
         }
          QScriptValue
@@ -5007,6 +5752,55 @@
             return result;
         }
          QScriptValue
+        REcmaDocumentInterface::getSnapStatus
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDocumentInterface::getSnapStatus", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDocumentInterface::getSnapStatus";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDocumentInterface* self = 
+                        getSelf("getSnapStatus", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RSnap::Status'
+    RSnap::Status cppResult =
+        
+               self->getSnapStatus();
+        // return type: RSnap::Status
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.getSnapStatus().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDocumentInterface::getSnapStatus", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaDocumentInterface::setSnapRestriction
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -5240,6 +6034,195 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaDocumentInterface::snap", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaDocumentInterface::restrictOrtho
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDocumentInterface::restrictOrtho", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDocumentInterface::restrictOrtho";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDocumentInterface* self = 
+                        getSelf("restrictOrtho", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RDocumentInterface: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RDocumentInterface: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        
+               self->restrictOrtho(a0
+        ,
+    a1);
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(2).isVariant() || 
+            context->argument(2).isQObject() || 
+            context->argument(2).isNull()
+        ) /* type: RS::OrthoMode */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RDocumentInterface: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RDocumentInterface: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+                    // argument is reference
+                    RS::OrthoMode*
+                    ap2 =
+                    qscriptvalue_cast<
+                    RS::OrthoMode*
+                        >(
+                        context->argument(
+                        2
+                        )
+                    );
+                    if( ap2 == NULL ){
+                           return REcmaHelper::throwError("RDocumentInterface: Argument 2 is not of type RS::OrthoMode*.",
+                               context);                    
+                    }
+                    RS::OrthoMode& a2 = *ap2;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        
+               self->restrictOrtho(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDocumentInterface.restrictOrtho().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDocumentInterface::restrictOrtho", context, engine);
             return result;
         }
          QScriptValue
@@ -5770,7 +6753,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QSet < REntity::Id >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5806,7 +6789,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QSet < REntity::Id >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -5972,7 +6955,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QSet < REntity::Id >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -6653,7 +7636,7 @@
                     context->argument( 4 ).
                     toNumber();
                 
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < qreal >
                     a5;
                     REcmaHelper::fromScriptValue(
@@ -7744,20 +8727,31 @@
     
     if( context->argumentCount() ==
     1 && (
-            context->argument(0).isArray()
-        ) /* type: QList < RObject::Id > */
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RTransaction */
     
     ){
     // prepare arguments:
     
-                    // argument isArray
-                    QList < RObject::Id >
-                    a0;
-                    REcmaHelper::fromScriptValue(
-                        engine,
-                        context->argument(0),
-                        a0
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RTransaction*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RTransaction*
+                        >(
+                        context->argument(
+                        0
+                        )
                     );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RDocumentInterface: Argument 0 is not of type RTransaction.",
+                               context);                    
+                    }
+                    RTransaction 
+                    a0 = 
+                    *ap0;
                 
     // end of arguments
 

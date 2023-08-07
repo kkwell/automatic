@@ -60,7 +60,12 @@ PrintPreview.isRunning = function() {
  * Starts the print preview.
  */
 PrintPreview.start = function(initialAction, instance) {
+    var appWin = RMainWindowQt.getMainWindow();
+//    appWin.enabled = false;
+
     var di = EAction.getDocumentInterface();
+    var doc = di.getDocument();
+
     var a = di.getDefaultAction();
     a.finishEvent();
     if (isNull(instance)) {
@@ -72,18 +77,86 @@ PrintPreview.start = function(initialAction, instance) {
     if (!isNull(initialAction)) {
         PrintPreview.instance.initialAction = initialAction;
     }
+
+    // auto setup:
+    var buttons = makeQMessageBoxStandardButtons(QMessageBox.Yes, QMessageBox.No);
+
+    var paperSizeMM = Print.getPaperSizeMM(doc);
+    var paperSizeName = Print.getPaperSizeNameFromSize(paperSizeMM);
+    var paperSizeAccepted = doc.getVariable("PageSettings/PaperSizeAccepted");
+
+    if (paperSizeName==="" && paperSizeAccepted!==true) {
+        // custom paper size:
+        // ask user to adjust to default paper size:
+        var defaultPaperSizeName = Print.getDefaultPaperSizeName(doc);
+        var ret = QMessageBox.warning(
+            appWin,
+            qsTr("Auto Paper Size"),
+            qsTr("The paper size is set to a custom size (%1x%2mm). Do you want to change it to the default paper size of your printer (%3)?").arg(paperSizeMM.width()).arg(paperSizeMM.height()).arg(defaultPaperSizeName),
+            buttons
+        );
+        if (ret===QMessageBox.Yes) {
+            var paperUnit = Print.getPaperUnit(doc);
+            var defPaperSize = Print.getDefaultPaperSizeMM();
+            var w = RUnit.convert(defPaperSize.width(), RS.Millimeter, paperUnit);
+            doc.setVariable("PageSettings/PaperWidth", w);
+            var h = RUnit.convert(defPaperSize.height(), RS.Millimeter, paperUnit);
+            doc.setVariable("PageSettings/PaperHeight", h);
+            doc.setVariable("MultiPageSettings/Columns", 1);
+            doc.setVariable("MultiPageSettings/Rows", 1);
+
+            // 10mm margin:
+            var m = RUnit.convert(10, RS.Millimeter, paperUnit);
+            doc.setVariable("MultiPageSettings/GlueMarginsLeft", m);
+            doc.setVariable("MultiPageSettings/GlueMarginsTop", m);
+            doc.setVariable("MultiPageSettings/GlueMarginsRight", m);
+            doc.setVariable("MultiPageSettings/GlueMarginsBottom", m);
+        }
+        else {
+            // store information that paper size was accepted as is (don't show dialog again):
+            doc.setVariable("PageSettings/PaperSizeAccepted", true);
+        }
+    }
+
+    var bbPaper = Print.getPaperBox(doc);
+    bbPaper.growXY(bbPaper.getWidth()/100, bbPaper.getHeight()/100);
+    var bbDoc = doc.getBoundingBox();
+    var positionAccepted = doc.getVariable("PageSettings/PositionAccepted");
+    // check if paper contains drawing:
+    if (!bbPaper.containsBox(bbDoc) && !positionAccepted) {
+        var initialZoom = appWin.property("PrintPreview/InitialZoom");
+        if (initialZoom!=="View") {
+            var ret = QMessageBox.warning(appWin,
+                qsTr("Auto fit"),
+                qsTr("Auto fit drawing to paper?"),
+                buttons);
+            if (ret===QMessageBox.Yes) {
+                appWin.setProperty("PrintPreview/InitialZoom", "Auto");
+            }
+            else {
+                doc.setVariable("PageSettings/PositionAccepted", true);
+            }
+        }
+    }
+
     di.setDefaultAction(PrintPreview.instance);
 
     var ga = RGuiAction.getByScriptFile("scripts/File/PrintPreview/PrintPreview.js")
     if (!isNull(ga)) {
         ga.setChecked(true);
     }
+
+    //appWin.enabled = true;
+
 };
 
 /**
  * Exits the print preview.
  */
 PrintPreview.exit = function() {
+    //var appWin = RMainWindowQt.getMainWindow();
+    //appWin.enabled = false;
+
     var di = EAction.getDocumentInterface();
     var a = di.getDefaultAction();
     a.finishEvent();
@@ -93,6 +166,8 @@ PrintPreview.exit = function() {
     if (!isNull(ga)) {
         ga.setChecked(false);
     }
+
+    //appWin.enabled = true;
 };
 
 PrintPreview.prototype.beginEvent = function() {
@@ -131,13 +206,22 @@ function PrintPreviewImpl(guiAction) {
 
     this.updateDisabled = false;
 
-    var bitmap = new QBitmap(PrintPreviewImpl.includeBasePath + "/PrintPreviewOffsetCursor.png", "PNG");
-    var mask = new QBitmap(PrintPreviewImpl.includeBasePath + "/PrintPreviewOffsetCursorMask.png", "PNG");
-    this.cursor = new QCursor(bitmap, mask, 15, 13);
+    if (RSettings.getBoolValue("GraphicsView/SystemCursors", false)===true) {
+        this.cursor = new QCursor(Qt.OpenHandCursor);
+    }
+    else {
+        var bitmap = new QBitmap(PrintPreviewImpl.includeBasePath + "/PrintPreviewOffsetCursor.png", "PNG");
+        var mask = new QBitmap(PrintPreviewImpl.includeBasePath + "/PrintPreviewOffsetCursorMask.png", "PNG");
+        this.cursor = new QCursor(bitmap, mask, 15, 13);
+    }
     this.view = undefined;
     this.saveView = false;
     this.savedScale = undefined;
     this.savedOffset = undefined;
+    this.savedColumns = undefined;
+    this.savedRows = undefined;
+
+    this.optOutRelativeZeroResume = true;
 }
 
 PrintPreviewImpl.prototype = NewFile.getDefaultAction(false);
@@ -150,9 +234,15 @@ PrintPreviewImpl.State = {
 PrintPreviewImpl.prototype.beginEvent = function() {
     var di = this.getDocumentInterface();
 
-    if (this.saveView===true) {
+    var appWin = RMainWindowQt.getMainWindow();
+    var initialZoom = appWin.property("PrintPreview/InitialZoom");
+
+    if (initialZoom==="View") {
         this.savedScale = Print.getScale(this.getDocument());
         this.savedOffset = Print.getOffset(this.getDocument());
+        this.savedColumns = Print.getColumns(this.getDocument());
+        this.savedRows = Print.getRows(this.getDocument());
+        this.saveView = true;
     }
 
 //    if (!isNull(this.guiAction)) {
@@ -166,7 +256,9 @@ PrintPreviewImpl.prototype.beginEvent = function() {
     var mdiChild = EAction.getMdiChild();
     this.view = mdiChild.getLastKnownViewWithFocus();
 
+    di.disableUpdates();
     this.parentClass.prototype.beginEvent.call(this);
+    di.enableUpdates();
 
     if (!isNull(this.view)) {
         var document = this.getDocument();
@@ -183,20 +275,25 @@ PrintPreviewImpl.prototype.beginEvent = function() {
             }
         }
 
-        // needed to update pattern scaling according to drawing scale:
+        // needed to update linetype pattern scaling according to drawing scale:
         di.regenerateScenes();
     }
 
     var action = RGuiAction.getByScriptFile("scripts/Edit/DrawingPreferences/DrawingPreferences.js");
-    action.triggered.connect(this, "updateBackgroundDecoration");
+    action.triggered.connect(this, this.updateBackgroundDecoration);
 
-    var appWin = RMainWindowQt.getMainWindow();
-    var initialZoom = appWin.property("PrintPreview/InitialZoom");
     if (initialZoom==="Auto") {
-        this.slotAutoFitDrawing();
+        // auto fit drawing and auto set orientation:
+        this.slotAutoFitDrawing(true);
+
+        appWin.setProperty("PrintPreview/InitialZoom", "Stored");
     }
     else if (initialZoom==="View") {
+        Print.setColumns(di, 1);
+        Print.setRows(di, 1);
         this.slotAutoFitBox(this.view.getBox());
+
+        appWin.setProperty("PrintPreview/InitialZoom", "Stored");
     }
 
     if (this.initialAction==="Print") {
@@ -209,14 +306,14 @@ PrintPreviewImpl.prototype.beginEvent = function() {
     // create listener to update preview when preferences changed:
     this.pAdapter = new RPreferencesListenerAdapter();
     appWin.addPreferencesListener(this.pAdapter);
-    this.pAdapter.preferencesUpdated.connect(this, "updateFromPreferences");
+    this.pAdapter.preferencesUpdated.connect(this, this.updateFromPreferences);
 
     this.bAdapter = new RBlockListenerAdapter();
     appWin.addBlockListener(this.bAdapter);
-    this.bAdapter.blocksUpdated.connect(this, "updateBackgroundTransform");
-    this.bAdapter.currentBlockSet.connect(this, "updateBackgroundTransform");
-    this.bAdapter.blocksUpdated.connect(this, "updateBackgroundDecoration");
-    this.bAdapter.currentBlockSet.connect(this, "updateBackgroundDecoration");
+    this.bAdapter.blocksUpdated.connect(this, this.updateBackgroundTransform);
+    this.bAdapter.currentBlockSet.connect(this, this.updateBackgroundTransform);
+    this.bAdapter.blocksUpdated.connect(this, this.updateBackgroundDecoration);
+    this.bAdapter.currentBlockSet.connect(this, this.updateBackgroundDecoration);
 };
 
 /**
@@ -248,6 +345,9 @@ PrintPreviewImpl.prototype.finishEvent = function() {
     this.parentClass.prototype.finishEvent.call(this);
     var di = this.getDocumentInterface();
 
+    var appWin = RMainWindowQt.getMainWindow();
+    var initialZoom = appWin.property("PrintPreview/InitialZoom");
+
     if (!isNull(this.view)) {
         this.view.setPrintPreview(false);
         this.view.setBackgroundColor(this.bgColor);
@@ -268,7 +368,7 @@ PrintPreviewImpl.prototype.finishEvent = function() {
         }
 
         var action = RGuiAction.getByScriptFile("scripts/Edit/DrawingPreferences/DrawingPreferences.js");
-        action.triggered.disconnect(this, "updateBackgroundDecoration");
+        action.triggered.disconnect(this, this.updateBackgroundDecoration);
     }
 
     //PrintPreviewImpl.setRunning(false);
@@ -281,14 +381,21 @@ PrintPreviewImpl.prototype.finishEvent = function() {
         if (!isNull(this.savedOffset)) {
             Print.setOffset(di, this.savedOffset);
         }
+        if (!isNull(this.savedColumns)) {
+            Print.setColumns(di, this.savedColumns);
+        }
+        if (!isNull(this.savedRows)) {
+            Print.setRows(di, this.savedRows);
+        }
     }
 
-    var appWin = RMainWindowQt.getMainWindow();
     if (!isNull(this.pAdapter)) {
         appWin.removePreferencesListener(this.pAdapter);
+        destr(this.pAdapter);
     }
     if (!isNull(this.bAdapter)) {
         appWin.removeBlockListener(this.bAdapter);
+        destr(this.bAdapter);
     }
 };
 
@@ -377,8 +484,12 @@ PrintPreviewImpl.prototype.showUiOptions = function(resume) {
     var widgets = getWidgets(optionsToolBar);
 
     var document = this.getDocument();
+    var di = this.getDocumentInterface();
     var scaleString = Print.getScaleString(document);
 
+    var mod = document.isModified();
+
+    // note: this modifies the document:
     this.initScaleCombo();
 
     // update option toolbar widgets
@@ -393,7 +504,9 @@ PrintPreviewImpl.prototype.showUiOptions = function(resume) {
     var scaleCombo = widgets["Scale"];
     scaleCombo.blockSignals(true);
     scaleCombo.setEditText(scaleString);
+    di.disableUpdates();
     this.slotScaleChanged(scaleString);
+    di.enableUpdates();
     scaleCombo.blockSignals(false);
 
     var action = RGuiAction.getByScriptFile("scripts/Edit/DrawingPreferences/DrawingPreferences.js");
@@ -418,20 +531,25 @@ PrintPreviewImpl.prototype.showUiOptions = function(resume) {
     }
 
     if (Print.getHairlineMode(document)) {
-        widgets["Hairline"].blockSignals(true);
-        widgets["Hairline"].checked=true;
-        widgets["Hairline"].blockSignals(false);
+        if (!isNull(widgets["Hairline"])) {
+            widgets["Hairline"].blockSignals(true);
+            widgets["Hairline"].checked=true;
+            widgets["Hairline"].blockSignals(false);
+        }
     }
 
     widgets["Portrait"].blockSignals(true);
     widgets["Landscape"].blockSignals(true);
-    if (Print.getPageOrientationEnum(document).valueOf() === QPrinter.Portrait.valueOf()) {
+    if (Print.getPageOrientationEnum(document) === RS.Portrait) {
         widgets["Portrait"].checked=true;
     } else {
         widgets["Landscape"].checked=true;
     }
     widgets["Landscape"].blockSignals(false);
     widgets["Portrait"].blockSignals(false);
+
+    // workaround for FS#2356 - File > Close: Closing dialog stays open after clicking Save
+    document.setModified(mod);
 };
 
 /**
@@ -442,15 +560,23 @@ PrintPreviewImpl.prototype.initUiOptions = function(resume, optionsToolBar) {
 };
 
 PrintPreviewImpl.prototype.initScaleCombo = function() {
+    var document = this.getDocument();
+    if (isNull(document)) {
+        return;
+    }
+
     var optionsToolBar = EAction.getOptionsToolBar();
     var scaleCombo = optionsToolBar.findChild("Scale");
     scaleCombo.blockSignals(true);
     var prev = scaleCombo.currentText;
     scaleCombo.clear();
-    var scales = this.getScales();
-    for (var i=0; i<scales.length; ++i) {
-        scaleCombo.addItem(scales[i]);
-    }
+
+    scaleCombo.setScale(true, document.getUnit())
+
+//    var scales = this.getScales();
+//    for (var i=0; i<scales.length; ++i) {
+//        scaleCombo.addItem(scales[i]);
+//    }
     scaleCombo.setEditText(prev);
     scaleCombo.blockSignals(false);
 };
@@ -487,11 +613,26 @@ PrintPreviewImpl.prototype.updateBackgroundDecoration = function() {
         return;
     }
 
+    var colBg;
+    var colShadow;
+    var colBorder;
+
+    if (RSettings.hasDarkGuiBackground()) {
+        colBg = "#888888";
+        colShadow = "#333333";
+        colBorder = "black";
+    }
+    else {
+        colBg = "lightgray";
+        colShadow = "gray";
+        colBorder = "#c8c8c8";
+    }
+
     path = new RPainterPath();
     path.setPen(new QPen(Qt.NoPen));
-    path.setBrush(new QBrush(new QColor("lightgray")));
+    path.setBrush(new QBrush(new QColor(colBg)));
     path.addRect(new QRectF(-1.0e8, -1.0e8, 2.0e8, 2.0e8));
-    this.view.addToBackground(path);
+    this.view.addToBackground(RGraphicsSceneDrawable.createFromPainterPath(path));
 
     // page border with shadow
     if (Print.getShowPaperBorders(document)) {
@@ -499,9 +640,9 @@ PrintPreviewImpl.prototype.updateBackgroundDecoration = function() {
         for (i = 0; i < pages.length; ++i) {
             path = new RPainterPath();
             path.setPen(new QPen(Qt.NoPen));
-            path.setBrush(new QBrush(new QColor("gray")));
+            path.setBrush(new QBrush(new QColor(colShadow)));
             this.drawShadow(path, pages[i]);
-            this.view.addToBackground(path);
+            this.view.addToBackground(RGraphicsSceneDrawable.createFromPainterPath(path));
         }
 
         // paper background
@@ -512,16 +653,16 @@ PrintPreviewImpl.prototype.updateBackgroundDecoration = function() {
                     backgroundColor.blue());
             path.setBrush(new QBrush(color));
             this.drawPaper(path, pages[i]);
-            this.view.addToBackground(path);
+            this.view.addToBackground(RGraphicsSceneDrawable.createFromPainterPath(path));
         }
 
         // paper border
         for (i = 0; i < pages.length; ++i) {
             path = new RPainterPath();
-            path.setPen(new QPen(new QColor(0xc8, 0xc8, 0xc8)));
+            path.setPen(new QPen(new QColor(colBorder)));
             path.setBrush(new QBrush(Qt.NoBrush));
             this.drawPaper(path, pages[i]);
-            this.view.addToBackground(path);
+            this.view.addToBackground(RGraphicsSceneDrawable.createFromPainterPath(path));
         }
     }
 
@@ -529,8 +670,7 @@ PrintPreviewImpl.prototype.updateBackgroundDecoration = function() {
     path = new RPainterPath();
     path.setPen(new QPen(new QColor(0x84, 0x84, 0xff)));
     if (!Print.getShowPaperBorders(document)) {
-        color = new QColor(backgroundColor.red(), backgroundColor.green(),
-                backgroundColor.blue());
+        color = new QColor(backgroundColor.red(), backgroundColor.green(), backgroundColor.blue());
         path.setBrush(new QBrush(color));
     } else {
         path.setBrush(new QBrush(Qt.NoBrush));
@@ -543,17 +683,17 @@ PrintPreviewImpl.prototype.updateBackgroundDecoration = function() {
     for (i = 0; i < pages.length; ++i) {
         this.drawGlueMargins(path, pages[i]);
     }
-    this.view.addToBackground(path);
+    this.view.addToBackground(RGraphicsSceneDrawable.createFromPainterPath(path));
 
-    // TODO: hook for page tags
+    // hook for page tags, footer, etc.:
     this.addDecorations(pages);
 
-    // crop marks
+    // crop marks:
     if (Print.getPrintCropMarks(document)) {
         for ( i = 0; i < pages.length; ++i) {
             path = new RPainterPath();
             Print.drawCropMarks(document, path, pages[i], false);
-            this.view.addToBackground(path);
+            this.view.addToBackground(RGraphicsSceneDrawable.createFromPainterPath(path));
         }
     }
 
@@ -633,20 +773,29 @@ PrintPreviewImpl.prototype.slotPdfExport = function() {
         initialFileName = fileInfo.absoluteFilePath();
     }
 
-    var filters = [ "PDF File (*.pdf)" ];
+    var filterStrings = [ "PDF File (*.pdf)",  "PDF/A-1B File (*.pdf)"];
+    if (RSettings.getQtVersion()<0x050A00) {
+        filterStrings = [ "PDF File (*.pdf)" ];
+    }
+
+    filterStrings = translateFilterStrings(filterStrings);
 
     var ret = File.getSaveFileName(appWin, qsTr("Export to PDF"),
-                   initialFileName, filters);
+                   initialFileName, filterStrings);
 
     if (isNull(ret)) {
         return;
     }
 
     var pdfFile = ret[0];
+    var pdfVersion = undefined;
+    if (ret[1].indexOf("PDF/A")!==-1) {
+        pdfVersion = "A-1B";
+    }
 
     appWin.handleUserMessage(qsTr("Exporting to %1...").arg(pdfFile));
 
-    var success = this.slotPrint(pdfFile);
+    var success = this.slotPrint(pdfFile, pdfVersion);
 
     if (success) {
         appWin.handleUserMessage(qsTr("Export complete: %1").arg(pdfFile));
@@ -664,18 +813,18 @@ PrintPreviewImpl.slotPdfExport = function() {
     pp.slotPdfExport();
 };
 
-PrintPreviewImpl.prototype.slotPrint = function(pdfFile) {
-    return PrintPreviewImpl.slotPrint(pdfFile);
+PrintPreviewImpl.prototype.slotPrint = function(pdfFile, pdfVersion) {
+    return PrintPreviewImpl.slotPrint(pdfFile, pdfVersion);
 };
 
 /**
  * Prints the drawing or exports it to the given PDF file.
  */
-PrintPreviewImpl.slotPrint = function(pdfFile) {
+PrintPreviewImpl.slotPrint = function(pdfFile, pdfVersion) {
     var mdiChild = EAction.getMdiChild();
     var view = mdiChild.getLastKnownViewWithFocus();
     var print = new Print(undefined, EAction.getDocument(), view);
-    return print.print(pdfFile);
+    return print.print(pdfFile, undefined, pdfVersion);
 };
 
 /**
@@ -695,7 +844,7 @@ PrintPreviewImpl.prototype.slotScaleChanged = function(scaleString) {
 
     this.updateBackgroundTransform();
 
-    // update pattern scale accordint to drawing scale:
+    // update pattern scale according to drawing scale:
     di.regenerateScenes();
 };
 
@@ -845,10 +994,10 @@ PrintPreviewImpl.prototype.slotAutoFitBox = function(box) {
 /**
  * Auto fit drawing button clicked in options toolbar.
  */
-PrintPreviewImpl.prototype.slotAutoFitDrawing = function() {
+PrintPreviewImpl.prototype.slotAutoFitDrawing = function(ori) {
     var di = this.getDocumentInterface();
     var document = di.getDocument();
-    Print.autoFitDrawing(di);
+    Print.autoFitDrawing(di, ori);
     PrintPreviewImpl.updateScaleString(document);
 
     // needed to update pattern scaling according to drawing scale:
@@ -873,7 +1022,7 @@ PrintPreviewImpl.prototype.slotPortraitChanged = function() {
         return;
     }
     var di = this.getDocumentInterface();
-    Print.setPageOrientationEnum(di, QPrinter.Portrait);
+    Print.setPageOrientationEnum(di, RS.Portrait);
 
     this.updateBackgroundDecoration();
     this.slotAutoZoomToPage();
@@ -884,7 +1033,7 @@ PrintPreviewImpl.prototype.slotLandscapeChanged = function() {
         return;
     }
     var di = this.getDocumentInterface();
-    Print.setPageOrientationEnum(di, QPrinter.Landscape);
+    Print.setPageOrientationEnum(di, RS.Landscape);
 
     this.updateBackgroundDecoration();
     this.slotAutoZoomToPage();

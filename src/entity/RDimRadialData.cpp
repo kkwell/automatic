@@ -56,14 +56,17 @@ QList<RRefPoint> RDimRadialData::getReferencePoints(RS::ProjectionRenderingHint 
     QList<RRefPoint> ret = RDimensionData::getReferencePoints(hint);
 
     ret.append(textPositionCenter);
+
+    if (arrow1Pos.isValid()) {
+        ret.append(RRefPoint(arrow1Pos, RRefPoint::Arrow));
+    }
+
     ret.append(chordPoint);
 
     return ret;
 }
 
-bool RDimRadialData::moveReferencePoint(const RVector& referencePoint,
-        const RVector& targetPoint) {
-
+bool RDimRadialData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers) {
     bool ret = false;
 
     if (referencePoint.equalsFuzzy(chordPoint)) {
@@ -91,7 +94,7 @@ bool RDimRadialData::moveReferencePoint(const RVector& referencePoint,
 //    }
 
     if (!ret) {
-        ret = RDimensionData::moveReferencePoint(referencePoint, targetPoint);
+        ret = RDimensionData::moveReferencePoint(referencePoint, targetPoint, modifiers);
     }
 
     if (ret) {
@@ -129,10 +132,12 @@ bool RDimRadialData::mirror(const RLine& axis) {
     return true;
 }
 
-QList<QSharedPointer<RShape> > RDimRadialData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment) const {
+/*
+QList<QSharedPointer<RShape> > RDimRadialData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment, QList<RObject::Id>* entityIds) const {
     Q_UNUSED(queryBox)
     Q_UNUSED(ignoreComplex)
     Q_UNUSED(segment)
+    Q_UNUSED(entityIds)
 
     QSharedPointer<RBlockReferenceEntity> dimBlockReference = getDimensionBlockReference();
     if (!dimBlockReference.isNull()) {
@@ -149,6 +154,7 @@ QList<QSharedPointer<RShape> > RDimRadialData::getShapes(const RBox& queryBox, b
     double dimgap = getDimgap();
     double dimtxt = getDimtxt();
     double dimasz = getDimasz();
+    bool archTick = useArchTick();
 
     // length of dimension line:
     double length = definitionPoint.getDistanceTo(chordPoint);
@@ -163,12 +169,27 @@ QList<QSharedPointer<RShape> > RDimRadialData::getShapes(const RBox& queryBox, b
 
     // do we have to put the arrow / text outside of the arc?
     bool outsideArrow = (length < dimasz*2+textWidth);
-    double arrowAngle;
+    bool outsideLabel = outsideArrow;
 
+    // force flipping arrows (against logic above):
+    if (isArrow1Flipped()) {
+        outsideArrow = !outsideArrow;
+        outsideLabel = outsideArrow;
+    }
+
+    double arrowAngle;
     if (outsideArrow) {
-        length += dimasz*2 + textWidth;
+        if (outsideLabel) {
+            length += dimasz*2 + textWidth;
+        }
+        else {
+            length += dimasz*2;
+        }
         arrowAngle = angle+M_PI;
     } else {
+        if (outsideLabel) {
+            length += dimasz*2 + textWidth;
+        }
         arrowAngle = angle;
     }
 
@@ -180,6 +201,10 @@ QList<QSharedPointer<RShape> > RDimRadialData::getShapes(const RBox& queryBox, b
 
     // create arrow:
     ret.append(getArrow(chordPoint, arrowAngle));
+
+    if (!archTick) {
+        arrow1Pos = chordPoint + RVector::createPolar(dimasz, arrowAngle + M_PI);
+    }
 
     RVector distV;
     double textAngle;
@@ -202,11 +227,21 @@ QList<QSharedPointer<RShape> > RDimRadialData::getShapes(const RBox& queryBox, b
     if (!autoTextPos) {
         textPos = textPositionCenter;
     } else {
-        if (outsideArrow) {
-            textPos.setPolar(length-textWidth/2.0-dimasz, angle);
+        if (outsideLabel) {
+            if (outsideArrow) {
+                textPos.setPolar(length-textWidth/2.0-dimasz, angle);
+            }
+            else {
+                textPos.setPolar(length-textWidth/2.0-dimasz, angle);
+            }
         }
         else {
-            textPos.setPolar(length/2.0, angle);
+            if (outsideArrow) {
+                textPos.setPolar((length-dimasz*2)/2.0, angle);
+            }
+            else {
+                textPos.setPolar(length/2.0, angle);
+            }
         }
         textPos += definitionPoint;
         // move text away from dimension line:
@@ -219,6 +254,7 @@ QList<QSharedPointer<RShape> > RDimRadialData::getShapes(const RBox& queryBox, b
 
     return ret;
 }
+*/
 
 double RDimRadialData::getMeasuredValue() const {
     return definitionPoint.getDistanceTo(chordPoint);
@@ -226,6 +262,6 @@ double RDimRadialData::getMeasuredValue() const {
 
 QString RDimRadialData::getAutoLabel() const {
     double distance = getMeasuredValue();
-    distance *= linearFactor;
+    distance *= getDimlfac();
     return formatLabel(distance);
 }

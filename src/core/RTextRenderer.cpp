@@ -20,6 +20,7 @@
 #include <QFontMetricsF>
 //#include <QTextBlock>
 #include <QTextDocument>
+#include <QMutex>
 
 #include "RColor.h"
 #include "RDxfServices.h"
@@ -35,94 +36,167 @@ QChar RTextRenderer::chPlusMinus = QChar(0x00b1);
 //QChar RTextRenderer::chDiameter = QChar(0x2300);
 QChar RTextRenderer::chDiameter = QChar(0x00f8);
 
-QString RTextRenderer::rxLineFeed = "\\\\p(?:x?i(\\d*\\.?\\d+);)?";
-QString RTextRenderer::rxAlignmentLeft = "\\\\pql;";
-QString RTextRenderer::rxAlignmentCenter = "\\\\pqc;";
-QString RTextRenderer::rxAlignmentRight = "\\\\pqr;";
-QString RTextRenderer::rxXAlignmentLeft = "\\\\pxql;";
-QString RTextRenderer::rxXAlignmentCenter = "\\\\pxqc;";
-QString RTextRenderer::rxXAlignmentRight = "\\\\pxqr;";
-QString RTextRenderer::rxParagraphFeed = "\\\\P";
-QString RTextRenderer::rxXFeed = "\\\\X";
-QString RTextRenderer::rxHeightChange = "\\\\H(\\d*\\.?\\d+)(x?);";
+QString RTextRenderer::rxLineFeedStr = "\\\\p(?:x?i(-?\\d*\\.?\\d*)(?:,l-?\\d*\\.?\\d*)(?:,t-?\\d*\\.?\\d*);)?";
+QRegularExpression RTextRenderer::rxLineFeed(rxLineFeedStr);
+QString RTextRenderer::rxAlignmentLeftStr = "\\\\pql;";
+QRegularExpression RTextRenderer::rxAlignmentLeft(rxAlignmentLeftStr);
+QString RTextRenderer::rxAlignmentCenterStr = "\\\\pqc;";
+QRegularExpression RTextRenderer::rxAlignmentCenter(rxAlignmentCenterStr);
+QString RTextRenderer::rxAlignmentRightStr = "\\\\pqr;";
+QRegularExpression RTextRenderer::rxAlignmentRight(rxAlignmentRightStr);
+QString RTextRenderer::rxXAlignmentLeftStr = "\\\\pxql;";
+QRegularExpression RTextRenderer::rxXAlignmentLeft(rxXAlignmentLeftStr);
+QString RTextRenderer::rxXAlignmentCenterStr = "\\\\pxqc;";
+QRegularExpression RTextRenderer::rxXAlignmentCenter(rxXAlignmentCenterStr);
+QString RTextRenderer::rxXAlignmentRightStr = "\\\\pxqr;";
+QRegularExpression RTextRenderer::rxXAlignmentRight(rxXAlignmentRightStr);
+QString RTextRenderer::rxXSpaceMTextStr = "\\\\pxsm(\\d*\\.?\\d*),?[a-z]*;";
+QRegularExpression RTextRenderer::rxXSpaceMText(rxXSpaceMTextStr);
+QString RTextRenderer::rxTabMMStr = "\\\\pt(\\d*\\.?\\d*,?)*;";
+QRegularExpression RTextRenderer::rxTabMM(rxTabMMStr);
+QString RTextRenderer::rxTabINStr = "\\\\pxt(\\d*\\.?\\d*,?)*;";
+QRegularExpression RTextRenderer::rxTabIN(rxTabINStr);
+QString RTextRenderer::rxParagraphFeedStr = "\\\\P";
+QRegularExpression RTextRenderer::rxParagraphFeed(rxParagraphFeedStr);
+QString RTextRenderer::rxXFeedStr = "\\\\X";
+QRegularExpression RTextRenderer::rxXFeed(rxXFeedStr);
+QString RTextRenderer::rxHeightChangeStr = "\\\\H(\\d*\\.?\\d*)(x?);";
+QRegularExpression RTextRenderer::rxHeightChange(rxHeightChangeStr);
+QString RTextRenderer::rxUnderlineChangeStr = "\\\\L|\\\\l";
+QRegularExpression RTextRenderer::rxUnderlineChange(rxUnderlineChangeStr);
 //QString RTextRenderer::rxRelativeHeightChange = "";
-QString RTextRenderer::rxStackedText = "\\\\S([^^]*)\\^([^;]*);";
-QString RTextRenderer::rxColorChangeIndex = "\\\\C(\\d+);";
-QString RTextRenderer::rxColorChangeCustom ="\\\\c(\\d+);";
-QString RTextRenderer::rxNonBreakingSpace = "\\\\~";
+QString RTextRenderer::rxStackedTextStr = "\\\\S([^^]*)\\^([^;]*);";
+QRegularExpression RTextRenderer::rxStackedText(rxStackedTextStr);
+QString RTextRenderer::rxColorChangeIndexStr = "\\\\C(\\d+);";
+QRegularExpression RTextRenderer::rxColorChangeIndex(rxColorChangeIndexStr);
+QString RTextRenderer::rxColorChangeCustomStr ="\\\\c(\\d+);";
+QRegularExpression RTextRenderer::rxColorChangeCustom(rxColorChangeCustomStr);
+QString RTextRenderer::rxNonBreakingSpaceStr = "\\\\~";
+QRegularExpression RTextRenderer::rxNonBreakingSpace(rxNonBreakingSpaceStr);
 // TODO: break at regular spaces for line breaking:
-//QString RTextRenderer::rxSpace = " ";
-QString RTextRenderer::rxOverlineOn = "\\\\O";
-QString RTextRenderer::rxOverlineOff = "\\\\o";
-QString RTextRenderer::rxUnderlineOn = "\\\\L";
-QString RTextRenderer::rxUnderlineOff = "\\\\l";
-QString RTextRenderer::rxStrikethroughOn = "\\\\K";
-QString RTextRenderer::rxStrikethroughOff = "\\\\k";
-QString RTextRenderer::rxWidthChange = "\\\\W(\\d*\\.?\\d+)x?;";
-QString RTextRenderer::rxObliqueAngleChange = "\\\\Q(\\d*\\.?\\d+);";
-QString RTextRenderer::rxTrackChange = "\\\\T(\\d*\\.?\\d+);";
-QString RTextRenderer::rxAlignmentChange = "\\\\A(\\d+);";
-QString RTextRenderer::rxFontChangeCad = "(?:\\\\F([^|]*)\\|c(\\d+);|\\\\F([^|;]*);)";
-//QString RTextRenderer::rxFontChangeTtf = "\\\\f([^|]*)\\|b(\\d+)\\|i(\\d+)\\|c(\\d+)\\|p(\\d+);";
-QString RTextRenderer::rxFontChangeTtf = "\\\\f([^|]*)"
-                                         "(?:\\|([bicp])(\\d+))?"
-                                         "(?:\\|([bicp])(\\d+))?"
-                                         "(?:\\|([bicp])(\\d+))?"
-                                         "(?:\\|([bicp])(\\d+))?"
+//QString RTextRenderer::rxSpaceStr = " ";
+QString RTextRenderer::rxOverlineOnStr = "\\\\O";
+QRegularExpression RTextRenderer::rxOverlineOn(rxOverlineOnStr);
+QString RTextRenderer::rxOverlineOffStr = "\\\\o";
+QRegularExpression RTextRenderer::rxOverlineOff(rxOverlineOffStr);
+QString RTextRenderer::rxUnderlineOnStr = "\\\\L";
+QRegularExpression RTextRenderer::rxUnderlineOn(rxUnderlineOnStr);
+QString RTextRenderer::rxUnderlineOffStr = "\\\\l";
+QRegularExpression RTextRenderer::rxUnderlineOff(rxUnderlineOffStr);
+QString RTextRenderer::rxStrikethroughOnStr = "\\\\K";
+QRegularExpression RTextRenderer::rxStrikethroughOn(rxStrikethroughOnStr);
+QString RTextRenderer::rxStrikethroughOffStr = "\\\\k";
+QRegularExpression RTextRenderer::rxStrikethroughOff(rxStrikethroughOffStr);
+QString RTextRenderer::rxWidthChangeStr = "\\\\W(\\d*\\.?\\d*)x?;";
+QRegularExpression RTextRenderer::rxWidthChange(rxWidthChangeStr);
+QString RTextRenderer::rxObliqueAngleChangeStr = "\\\\Q(\\d*\\.?\\d*);";
+QRegularExpression RTextRenderer::rxObliqueAngleChange(rxObliqueAngleChangeStr);
+QString RTextRenderer::rxTrackChangeStr = "\\\\T(\\d*\\.?\\d*);";
+QRegularExpression RTextRenderer::rxTrackChange(rxTrackChangeStr);
+QString RTextRenderer::rxAlignmentChangeStr = "\\\\A(\\d+);";
+QRegularExpression RTextRenderer::rxAlignmentChange(rxAlignmentChangeStr);
+QString RTextRenderer::rxFontChangeCadStr = "\\\\F([^|;]*)"    // \Ffont
+                                         "[^;]*"            // ignore anything except ";"
+                                         ";";               // require ";"
+QRegularExpression RTextRenderer::rxFontChangeCad(rxFontChangeCadStr);
+QString RTextRenderer::rxFontChangeTtfStr = "\\\\f([^|;]*)"
+                                         "(?:\\|+([bicp])(\\d+))?"
+                                         "(?:\\|+([bicp])(\\d+))?"
+                                         "(?:\\|+([bicp])(\\d+))?"
+                                         "(?:\\|+([bicp])(\\d+))?"
+                                         //"\\|*" // optional "|" at end, see FS#1882
+                                         "([^;]*)"            // ignore anything except ";"
                                          ";";
-QString RTextRenderer::rxBeginBlock = "\\{";
-QString RTextRenderer::rxEndBlock = "\\}";
-QString RTextRenderer::rxBackslash = "\\\\\\\\";
-QString RTextRenderer::rxCurlyOpen = "\\\\\\{";
-QString RTextRenderer::rxCurlyClose = "\\\\\\}";
-QString RTextRenderer::rxDegree = "%%[dD]";
-QString RTextRenderer::escDegree = "%%d";
-QString RTextRenderer::rxPlusMinus = "%%[pP]";
-QString RTextRenderer::escPlusMinus = "%%p";
-QString RTextRenderer::rxDiameter = "%%[cC]";
-QString RTextRenderer::escDiameter = "%%c";
-QString RTextRenderer::rxUnderlined = "%%[uU]";
-QString RTextRenderer::rxUnicode = "\\\\[Uu]\\+([0-9a-fA-F]{4})";
+QRegularExpression RTextRenderer::rxFontChangeTtf(rxFontChangeTtfStr);
+QString RTextRenderer::rxBeginBlockStr = "\\{";
+QRegularExpression RTextRenderer::rxBeginBlock(rxBeginBlockStr);
+QString RTextRenderer::rxEndBlockStr = "\\}";
+QRegularExpression RTextRenderer::rxEndBlock(rxEndBlockStr);
+QString RTextRenderer::rxBackslashStr = "\\\\\\\\";
+QRegularExpression RTextRenderer::rxBackslash(rxBackslashStr);
+QString RTextRenderer::rxCurlyOpenStr = "\\\\\\{";
+QRegularExpression RTextRenderer::rxCurlyOpen(rxCurlyOpenStr);
+QString RTextRenderer::rxCurlyCloseStr = "\\\\\\}";
+QRegularExpression RTextRenderer::rxCurlyClose(rxCurlyCloseStr);
+QString RTextRenderer::rxDegreeStr = "%%[dD]";
+QRegularExpression RTextRenderer::rxDegree(rxDegreeStr);
+QString RTextRenderer::escDegreeStr = "%%d";
+QRegularExpression RTextRenderer::escDegree(escDegreeStr);
+QString RTextRenderer::rxPlusMinusStr = "%%[pP]";
+QRegularExpression RTextRenderer::rxPlusMinus(rxPlusMinusStr);
+QString RTextRenderer::escPlusMinusStr = "%%p";
+QRegularExpression RTextRenderer::escPlusMinus(escPlusMinusStr);
+QString RTextRenderer::rxDiameterStr = "%%[cC]";
+QRegularExpression RTextRenderer::rxDiameter(rxDiameterStr);
+QString RTextRenderer::escDiameterStr = "%%c";
+QRegularExpression RTextRenderer::escDiameter(escDiameterStr);
+QString RTextRenderer::rxUnderlineStr = "%%[uU]";
+QRegularExpression RTextRenderer::rxUnderline(rxUnderlineStr);
+QString RTextRenderer::escUnderlineStr = "%%u";
+QRegularExpression RTextRenderer::escUnderline(escUnderlineStr);
+// invalid escape sequence (to replace %%x with "x"):
+QString RTextRenderer::rxNoOpStr = "%%([^uUcCpPdD])";
+QRegularExpression RTextRenderer::rxNoOp(rxNoOpStr);
+QString RTextRenderer::rxNoOpEndStr = "%%$";
+QRegularExpression RTextRenderer::rxNoOpEnd(rxNoOpEndStr);
+QString RTextRenderer::escNoOpStr = "%%";
+QRegularExpression RTextRenderer::escNoOp(escNoOpStr);
+QString RTextRenderer::rxUnicodeStr = "\\\\[Uu]\\+([0-9a-fA-F]{4})";
+QRegularExpression RTextRenderer::rxUnicode(rxUnicodeStr);
+// optional break at space for wrapping text:
+// TODO: add tabs and other whitespace:
+QString RTextRenderer::rxOptionalBreakStr = "[ ]+";
+//QString RTextRenderer::rxOptionalBreakStr = "[_]+";
+QRegularExpression RTextRenderer::rxOptionalBreak(rxOptionalBreakStr);
 
-QString RTextRenderer::rxAll = "("
-    + RTextRenderer::rxLineFeed + "|"
-    + RTextRenderer::rxAlignmentLeft + "|"
-    + RTextRenderer::rxAlignmentCenter + "|"
-    + RTextRenderer::rxAlignmentRight + "|"
-    + RTextRenderer::rxXAlignmentLeft + "|"
-    + RTextRenderer::rxXAlignmentCenter + "|"
-    + RTextRenderer::rxXAlignmentRight + "|"
-    + RTextRenderer::rxParagraphFeed + "|"
-    + RTextRenderer::rxXFeed + "|"
-    + RTextRenderer::rxHeightChange + "|"
-    + RTextRenderer::rxStackedText + "|"
-    + RTextRenderer::rxColorChangeIndex + "|"
-    + RTextRenderer::rxColorChangeCustom + "|"
-    + RTextRenderer::rxNonBreakingSpace + "|"
-    + RTextRenderer::rxOverlineOn + "|"
-    + RTextRenderer::rxOverlineOff + "|"
-    + RTextRenderer::rxUnderlineOn + "|"
-    + RTextRenderer::rxUnderlineOff + "|"
-    + RTextRenderer::rxStrikethroughOn + "|"
-    + RTextRenderer::rxStrikethroughOff + "|"
-    + RTextRenderer::rxWidthChange + "|"
-    + RTextRenderer::rxObliqueAngleChange + "|"
-    + RTextRenderer::rxTrackChange + "|"
-    + RTextRenderer::rxAlignmentChange + "|"
-    + RTextRenderer::rxFontChangeCad + "|"
-    + RTextRenderer::rxFontChangeTtf + "|"
-    + RTextRenderer::rxBeginBlock + "|"
-    + RTextRenderer::rxEndBlock + "|"
-    + RTextRenderer::rxBackslash + "|"
-    + RTextRenderer::rxCurlyOpen + "|"
-    + RTextRenderer::rxCurlyClose + "|"
-    + RTextRenderer::rxDegree + "|"
-    + RTextRenderer::rxPlusMinus + "|"
-    + RTextRenderer::rxDiameter + "|"
-    + RTextRenderer::rxUnderlined + "|"
-    + RTextRenderer::rxUnicode
-    + ")";
+QString rxAllTmp =
+    RTextRenderer::rxAlignmentLeftStr + "|"
+    + RTextRenderer::rxAlignmentCenterStr + "|"
+    + RTextRenderer::rxAlignmentRightStr + "|"
+    + RTextRenderer::rxXAlignmentLeftStr + "|"
+    + RTextRenderer::rxXAlignmentCenterStr + "|"
+    + RTextRenderer::rxXAlignmentRightStr + "|"
+    + RTextRenderer::rxXSpaceMTextStr + "|"
+    + RTextRenderer::rxTabMMStr + "|"
+    + RTextRenderer::rxTabINStr + "|"
+    + RTextRenderer::rxParagraphFeedStr + "|"
+    + RTextRenderer::rxXFeedStr + "|"
+    + RTextRenderer::rxHeightChangeStr + "|"
+    + RTextRenderer::rxStackedTextStr + "|"
+    + RTextRenderer::rxColorChangeIndexStr + "|"
+    + RTextRenderer::rxColorChangeCustomStr + "|"
+    + RTextRenderer::rxNonBreakingSpaceStr + "|"
+    + RTextRenderer::rxOverlineOnStr + "|"
+    + RTextRenderer::rxOverlineOffStr + "|"
+    + RTextRenderer::rxUnderlineOnStr + "|"
+    + RTextRenderer::rxUnderlineOffStr + "|"
+    + RTextRenderer::rxStrikethroughOnStr + "|"
+    + RTextRenderer::rxStrikethroughOffStr + "|"
+    + RTextRenderer::rxWidthChangeStr + "|"
+    + RTextRenderer::rxObliqueAngleChangeStr + "|"
+    + RTextRenderer::rxTrackChangeStr + "|"
+    + RTextRenderer::rxAlignmentChangeStr + "|"
+    + RTextRenderer::rxFontChangeCadStr + "|"
+    + RTextRenderer::rxFontChangeTtfStr + "|"
+    + RTextRenderer::rxBeginBlockStr + "|"
+    + RTextRenderer::rxEndBlockStr + "|"
+    + RTextRenderer::rxBackslashStr + "|"
+    + RTextRenderer::rxCurlyOpenStr + "|"
+    + RTextRenderer::rxCurlyCloseStr + "|"
+    + RTextRenderer::rxDegreeStr + "|"
+    + RTextRenderer::rxPlusMinusStr + "|"
+    + RTextRenderer::rxDiameterStr + "|"
+    + RTextRenderer::rxUnderlineStr + "|"
+    + RTextRenderer::rxUnicodeStr + "|"
+      // keep at the end as replacing \p first will break \pqc;, etc.
+    + RTextRenderer::rxLineFeedStr;
 
+QString RTextRenderer::rxAllStr = "(" + rxAllTmp + ")";
+QString RTextRenderer::rxAllBreakStr = "(" + rxAllTmp + "|" + RTextRenderer::rxOptionalBreakStr + ")";
+QRegularExpression RTextRenderer::rxAll(RTextRenderer::rxAllStr);
+QRegularExpression RTextRenderer::rxAllBreak(RTextRenderer::rxAllBreakStr);
+
+QMutex RTextRenderer::m;
 
 
 RTextRenderer::RTextRenderer(const RTextBasedData& textData, bool draft, Target target, double fontHeightFactor)
@@ -147,7 +221,7 @@ void RTextRenderer::renderSimple() {
     textLayouts.clear();
     richText = "";
 
-    if (textData.getText().isEmpty()) {
+    if (textData.getRenderedText().isEmpty()) {
         return;
     }
 
@@ -163,16 +237,21 @@ void RTextRenderer::renderSimple() {
     QString fontFile = textData.getFontFile();
     bool bold = textData.isBold();
     bool italic = textData.isItalic();
+    bool underline = false;
     double angle = textData.getAngle();
 
     // degree:
-    text.replace(QRegExp(RTextRenderer::rxDegree), RTextRenderer::chDegree);
+    text.replace(RTextRenderer::rxDegree, RTextRenderer::chDegree);
     // plus minus:
-    text.replace(QRegExp(RTextRenderer::rxPlusMinus), RTextRenderer::chPlusMinus);
+    text.replace(RTextRenderer::rxPlusMinus, RTextRenderer::chPlusMinus);
     // diameter:
-    text.replace(QRegExp(RTextRenderer::rxDiameter), RTextRenderer::chDiameter);
+    text.replace(RTextRenderer::rxDiameter, RTextRenderer::chDiameter);
     // underlined:
-    //text.replace(QRegExp(RTextRenderer::rxUnderlined), "");
+    //text.replace(QRegExp(RTextRenderer::rxUnderline), "");
+    // no op (%%x -> x):
+    text.replace(RTextRenderer::rxNoOp, "\\1");
+    // no op at end of string (%% -> ""):
+    text.replace(RTextRenderer::rxNoOpEnd, "");
     // unicode:
     text = RDxfServices::parseUnicode(text);
 //    QRegExp reg;
@@ -215,11 +294,13 @@ void RTextRenderer::renderSimple() {
     blockFontFile.push(fontFile);
     blockBold.push(bold);
     blockItalic.push(italic);
+    blockUnderline.push(underline);
     useCadFont.push(RFontList::isCadFont(getBlockFont(), getBlockFontFile()));
     openTags.push(QStringList());
 
     double horizontalAdvance = 0.0;
     double horizontalAdvanceNoSpacing = 0.0;
+    double horizontalAdvanceNoTrailingSpace = 0.0;
     double ascent = 0.0;
     double descent = 0.0;
     double usedHeight = 0.0;
@@ -227,8 +308,22 @@ void RTextRenderer::renderSimple() {
     {
         // handle underlining formats:
         bool found = true;
-        QList<int> underlinedOnOff;
-        QRegExp rx(RTextRenderer::rxUnderlined);
+        QList<int> underlineOnOff;
+        QRegularExpression rx(RTextRenderer::rxUnderline);
+#if QT_VERSION >= 0x050000
+        QRegularExpressionMatch match;
+        while (found) {
+            found = false;
+            int i = RS::indexIn(rx, match, text);
+            int len = RS::matchedLength(rx, match);
+
+            if (i!=-1) {
+                found = true;
+                underlineOnOff.append(i);
+                text.replace(i, len, "");
+            }
+        }
+#else
         while (found) {
             found = false;
             int i = rx.indexIn(text);
@@ -236,18 +331,19 @@ void RTextRenderer::renderSimple() {
 
             if (i!=-1) {
                 found = true;
-                underlinedOnOff.append(i);
+                underlineOnOff.append(i);
                 text.replace(i, len, "");
             }
         }
+#endif
 
         int maxI = text.length()-1;
         QTextCharFormat fUnderlined;
         fUnderlined.setUnderlineStyle(QTextCharFormat::SingleUnderline);
-        for (int i=0; i<underlinedOnOff.length(); i+=2) {
+        for (int i=0; i<underlineOnOff.length(); i+=2) {
             QTextLayout::FormatRange fr;
-            fr.start = underlinedOnOff[i];
-            int end = i+1<underlinedOnOff.length() ? underlinedOnOff[i+1] : maxI + 1;
+            fr.start = underlineOnOff[i];
+            int end = i+1<underlineOnOff.length() ? underlineOnOff[i+1] : maxI + 1;
             fr.length = end - fr.start;
             fr.format = fUnderlined;
             formats.append(fr);
@@ -259,6 +355,7 @@ void RTextRenderer::renderSimple() {
                 text, formats,
                 horizontalAdvance,
                 horizontalAdvanceNoSpacing,
+                horizontalAdvanceNoTrailingSpace,
                 ascent, descent,
                 usedHeight);
 
@@ -311,6 +408,8 @@ void RTextRenderer::renderSimple() {
         painterPaths[i].setFeatureSize(featureSize);
     }
 
+    // add bounding box with negative feature size:
+    // only shown when text is smaller than threshold:
     RPainterPath bbPath;
     bbPath.addBox(boundingBox);
     bbPath.setFeatureSize(-featureSize);
@@ -350,8 +449,11 @@ void RTextRenderer::renderSimple() {
     case RS::HAlignFit:
     case RS::HAlignLeft:
         if (!leadingSpaces) {
-            // move completely to the left (left border is 0.0):
-            xOffset = -boundingBox.getMinimum().x;
+            if (RSettings::getSimpleTextAlignLeft()) {
+                // move completely to the left (left border is 0.0):
+                // backwards compatibility:
+                xOffset = -boundingBox.getMinimum().x;
+            }
         }
         else {
             xOffset = 0.0;
@@ -382,6 +484,18 @@ void RTextRenderer::renderSimple() {
     QTransform globalTransform;
     globalTransform.translate(pos.x, pos.y);
     globalTransform.rotate(RMath::rad2deg(angle));
+
+    // TODO: mirror in X / Y:
+    if (textData.isBackward() && textData.isUpsideDown()) {
+        globalTransform.scale(-1, -1);
+    }
+    else if (textData.isBackward()) {
+        globalTransform.scale(-1, 1);
+    }
+    else if (textData.isUpsideDown()) {
+        globalTransform.scale(1, -1);
+    }
+
     globalTransform.translate(xOffset, yOffset);
 
     // apply global transform for position, angle and vertical alignment:
@@ -401,6 +515,13 @@ void RTextRenderer::renderSimple() {
  * Renders the text data into painter paths.
  */
 void RTextRenderer::render() {
+    //qDebug() << "=========================================================";
+    bool wrap = textData.getTextWidth()>0.0;
+    //qDebug() << "wrap:" << wrap;
+    //wrap = false;
+
+    //qDebug() << "rxAllStr:" << rxAllStr;
+
     boundingBox = RBox();
     painterPaths.clear();
     textLayouts.clear();
@@ -417,23 +538,44 @@ void RTextRenderer::render() {
     QString fontFile = textData.getFontFile();
     bool bold = textData.isBold();
     bool italic = textData.isItalic();
+    bool underline = false;
     double angle = textData.getAngle();
     //RColor color = textData.getColor(true);
 
     // split up text where separation is required due to line feed,
-    // or any type of height change (\P, \H[0-9]*.?[0-9]+;, \S*/*;)
+    // or any type of height change, color change, or other formatting change
+    // (\P, \H[0-9]*.?[0-9]+;, \S*/*;, ...)
 
     // split up text at every formatting change:
-    QRegExp regExpAll(rxAll);
-    QStringList literals = text.split(regExpAll);
+    QRegularExpression rxAllLocal = rxAll;
+    if (wrap) {
+        rxAllLocal = rxAllBreak;
+    }
+    QStringList literals = text.split(rxAllLocal);
 
-    // collect formatting change information for every literal:
+    // collect formatting change information for after every literal:
     QStringList formattings;
     int pos = 0;
-    while ((pos = regExpAll.indexIn(text, pos)) != -1) {
-        formattings << regExpAll.cap(1);
-        pos += regExpAll.matchedLength();
+    int i=1;
+    QRegularExpressionMatch match;
+    while ((pos = RS::indexIn(rxAllLocal, match, text, pos)) != -1) {
+        QString formatting = RS::captured(rxAllLocal, match, 1);
+        //qDebug() << "formatting:" << formatting;
+
+        // space is literal and also formatting (optional line break):
+        if (RS::exactMatch(rxOptionalBreak, formatting)) {
+            literals.insert(i++, formatting);
+            formattings.append(formatting);
+        }
+
+        formattings.append(formatting);
+        pos += RS::matchedLength(rxAllLocal, match);
+        i++;
     }
+
+//    qDebug() << "literals with space:" << literals;
+//    qDebug() << "formattings (after block):" << formattings;
+    Q_ASSERT(formattings.length()==literals.length()-1);
 
     // x position in real units:
     double xCursor = 0.0;
@@ -479,14 +621,69 @@ void RTextRenderer::render() {
     blockFontFile.push(fontFile);
     blockBold.push(bold);
     blockItalic.push(italic);
+    blockUnderline.push(underline);
     useCadFont.push(RFontList::isCadFont(fontName, fontFile));
     openTags.push(QStringList());
 
     width = 0.0;
     height = 0.0;
 
+    bool insertLineBreak = false;
+    // don't wrap first block in line:
+    bool noBreakFirstBlock = true;
+
+    QList<QTextLayout::FormatRange> breakPointFormats = formats;
+    QStack<QTextCharFormat> breakPointCurrentFormat = currentFormat;
+    int breakPointTextLayoutsLength = -1;
+    int breakPointI = -1;
+    int breakPointLinePathsLength = -1;
+    int breakPointLineBlockTransformsLength = -1;
+    //int breakPointPainterPathsLength = -1;
+
     // iterate through all text blocks:
-    for (int i=0; i<literals.size(); ++i) {
+    for (int i=0; i<literals.size() || insertLineBreak; ++i) {
+//        qDebug() << "------------------------------------------------------------------------------------------------- rendering literal:" << i;
+
+        // insert auto line wrap and render same block again but on new line:
+        // remove already rendered block that extends over width of text box:
+        if (insertLineBreak) {
+            //qDebug() << "break and rollback";
+            insertLineBreak = false;
+
+            if (breakPointI>0) {
+
+//                qDebug() << "roll back to literal:" << breakPointI;
+                // roll back to previous potential break point:
+                formats = breakPointFormats;
+                currentFormat = breakPointCurrentFormat;
+                //lineBlockTransforms = breakPointLineBlockTransforms;
+                i = breakPointI;
+//                while (textLayouts.length() > breakPointTextLayoutsLength && breakPointTextLayoutsLength>0) {
+//                    textLayouts.removeLast();
+//                }
+//                while (lineBlockTransforms.length() > breakPointLineBlockTransformsLength && breakPointLineBlockTransformsLength>0) {
+//                    lineBlockTransforms.removeLast();
+//                }
+//                while (painterPaths.length() > breakPointPainterPathsLength && breakPointPainterPathsLength>0) {
+//                    painterPaths.removeLast();
+//                }
+//                while (linePaths.length() > breakPointLinePathsLength && breakPointLinePathsLength>0) {
+//                    linePaths.removeLast();
+//                }
+
+                //qDebug() << "after rb: tls:" << textLayouts.length();
+                //qDebug() << "after rb: pps:" << painterPaths.length();
+
+                breakPointI = -1;
+                breakPointTextLayoutsLength = -1;
+                breakPointLinePathsLength = -1;
+                breakPointLineBlockTransformsLength = -1;
+                //breakPointPainterPathsLength = -1;
+            }
+        }
+
+//        formatsPrev = formats;
+//        currentFormatPrev = currentFormat;
 
         // the literal text, e.g. "ABC":
         QString literal = literals.at(i);
@@ -500,7 +697,7 @@ void RTextRenderer::render() {
 //        qDebug() << "block: " << i;
 //        qDebug() << "  literal: " << literal;
 //        qDebug() << "  literal length: " << literal.length();
-//        qDebug() << "  formatting: " << formatting;
+//        qDebug() << "  formatting _after_ text block: " << formatting;
 //        qDebug() << "  font: " << blockFont.top();
 //        qDebug() << "  height: " << blockHeight.top();
 //        qDebug() << "  cad font: " << useCadFont.top();
@@ -512,11 +709,13 @@ void RTextRenderer::render() {
         if (firstBlockInLine) {
             if (!literal.isEmpty()) {
                 if (literal.at(0).isSpace()) {
+//                    qDebug() << "got leading space";
                     leadingSpaces = true;
                 }
             }
             else {
-                if (formatting=="\\~") {
+                if (formatting=="\\~" || (!formatting.isEmpty() && formatting.at(0).isSpace())) {
+//                    qDebug() << "got leading space";
                     leadingSpaces = true;
                 }
             }
@@ -529,24 +728,31 @@ void RTextRenderer::render() {
         bool heightChange = false;
         bool stackedText = false;
         bool fontChange = false;
+        bool underlineChange = false;
         bool colorChange = false;
         bool blockEnd = false;
+        bool optionalBreak = false;
+        bool optionalBreakText = false;
 
         // detect formatting that ends the current text block:
         if (!formatting.isEmpty()) {
-            fontChange = QRegExp(rxFontChangeTtf).exactMatch(formatting) ||
-                QRegExp(rxFontChangeCad).exactMatch(formatting);
-            colorChange = QRegExp(rxColorChangeCustom).exactMatch(formatting) ||
-                QRegExp(rxColorChangeIndex).exactMatch(formatting);
-            heightChange = QRegExp(rxHeightChange).exactMatch(formatting);
-            stackedText = QRegExp(rxStackedText).exactMatch(formatting);
-            lineFeed = QRegExp(rxLineFeed).exactMatch(formatting);
-            paragraphFeed = QRegExp(rxParagraphFeed).exactMatch(formatting);
+            fontChange = RS::exactMatch(rxFontChangeTtf, formatting) ||
+                RS::exactMatch(rxFontChangeCad, formatting);
+            underlineChange = RS::exactMatch(rxUnderlineChange, formatting);
+            colorChange = RS::exactMatch(rxColorChangeCustom, formatting) ||
+                RS::exactMatch(rxColorChangeIndex, formatting);
+            heightChange = RS::exactMatch(rxHeightChange, formatting);
+            stackedText = RS::exactMatch(rxStackedText, formatting);
+            lineFeed = RS::exactMatch(rxLineFeed, formatting);
+            paragraphFeed = RS::exactMatch(rxParagraphFeed, formatting);
             if (textData.isDimensionLabel()) {
-                xFeed = QRegExp(rxXFeed).exactMatch(formatting);
+                xFeed = RS::exactMatch(rxXFeed, formatting);
             }
-            blockEnd = QRegExp(rxEndBlock).exactMatch(formatting);
+            blockEnd = RS::exactMatch(rxEndBlock, formatting);
+            optionalBreak = RS::exactMatch(rxOptionalBreak, formatting);
         }
+
+        optionalBreakText = RS::exactMatch(rxOptionalBreak, textBlock);
 
         bool start = (i==0);
         bool end = (i==literals.size()-1);
@@ -564,24 +770,26 @@ void RTextRenderer::render() {
         // reached a new text block that needs to be rendered separately
         // due to line feed, height change, font change, ...:
         if (target==RichText ||
-            lineFeed || paragraphFeed || xFeed || heightChange || stackedText ||
-            fontChange || colorChange || end
-            || (blockEnd && blockChangedHeightOrFont)) {
+            lineFeed || paragraphFeed || xFeed || heightChange || underlineChange || stackedText ||
+            fontChange || colorChange || end ||
+            (blockEnd && blockChangedHeightOrFont) ||
+            optionalBreak) {
 
             // render block _before_ format change that requires new block:
             if (textBlock!="") {
+
                 // fix format lengths to match up. each format stops where
                 // the next one starts. formatting that is carried over is set
                 // again for the new format.
-                for (int i=0; i<formats.size(); i++) {
+                for (int k=0; k<formats.size(); k++) {
                     int nextStart;
-                    if (i<formats.size()-1) {
-                        nextStart = formats[i+1].start;
+                    if (k<formats.size()-1) {
+                        nextStart = formats[k+1].start;
                     }
                     else {
                         nextStart = textBlock.length();
                     }
-                    formats[i].length = nextStart - formats[i].start;
+                    formats[k].length = nextStart - formats[k].start;
                 }
 
                 if (target==RichText) {
@@ -589,19 +797,75 @@ void RTextRenderer::render() {
                 }
 
                 if (target==PainterPaths) {
+
+                    // potential line break:
+                    // back up various data to roll back in case of line wrap:
+                    if (RS::exactMatch(rxOptionalBreak, textBlock)) {
+//                        qDebug() << "potential break at:" << textBlock << i;
+//                        //qDebug() << "painterPaths:" << painterPaths.length();
+//                        qDebug() << "textLayouts:" << textLayouts.length();
+
+//                        // potential future line break:
+//                        // remember state at this point:
+//                        breakPointFormats = formats;
+//                        breakPointCurrentFormat = currentFormat;
+//                        // start new line _after_ white space and skip whitespace in case of break:
+//                        breakPointI = i+1;
+                        breakPointTextLayoutsLength = textLayouts.length();
+                        breakPointLineBlockTransformsLength = lineBlockTransforms.length();
+                        breakPointLinePathsLength = linePaths.length();
+//                        //breakPointPainterPathsLength = painterPaths.length();
+                    }
+
                     double horizontalAdvance = 0.0;
                     double horizontalAdvanceNoSpacing = 0.0;
+                    double horizontalAdvanceNoTrailingSpace = 0.0;
                     double ascent = 0.0;
                     double descent = 0.0;
                     QList<RPainterPath> paths;
+
+                    /*
+                    qDebug() << "== render: " << textBlock << "==";
+                    qDebug() << "formatting after:" << formatting;
+                    qDebug() << "formats:" << formats.length();
+                    for (int k=0; k<formats.length(); k++) {
+                        QTextLayout::FormatRange f = formats[k];
+                        qDebug() << "  start:" << f.start;
+                        qDebug() << "  length:" << f.length;
+                        qDebug() << "  fmt:" << f.format;
+                        qDebug() << "  col:" << f.format.foreground();
+                    }
+                    */
 
                     // get painter paths for current text block at height 1.0, position 0,0:
                     paths = getPainterPathsForBlock(
                                 textBlock, formats,
                                 horizontalAdvance,
                                 horizontalAdvanceNoSpacing,
+                                horizontalAdvanceNoTrailingSpace,
                                 ascent, descent,
                                 usedHeight);
+
+//                    qDebug() << "horizontalAdvance" << horizontalAdvance * getBlockHeight();
+//                    qDebug() << "horizontalAdvanceNoSpacing" << horizontalAdvanceNoSpacing * getBlockHeight();
+//                    qDebug() << "horizontalAdvanceNoTrailingSpace" << horizontalAdvanceNoTrailingSpace * getBlockHeight();
+
+                    // detected wrap:
+//                    qDebug() << "detect wrap";
+                    if (!noBreakFirstBlock && breakPointI>=0) {
+//                        qDebug() << "detect wrap: 001";
+//                        qDebug() << "detect wrap cur: " << xCursor + horizontalAdvanceNoTrailingSpace * getBlockHeight() * textData.getXScale();
+//                        qDebug() << "detect wrap text w: " << textData.getTextWidth();
+                        // line break needed:
+                        if (wrap && xCursor + horizontalAdvanceNoTrailingSpace * getBlockHeight() * textData.getXScale() > textData.getTextWidth()) {
+//                            qDebug() << "insert wrap before:" << textBlock;
+
+                            insertLineBreak = true;
+                        }
+                    }
+                    else {
+                        noBreakFirstBlock = false;
+                    }
 
                     // transform to scale text from 1.0 to current text height:
                     QTransform sizeTransform;
@@ -610,6 +874,7 @@ void RTextRenderer::render() {
                     // transform for current block due to xCursor position:
                     QTransform blockTransform;
                     blockTransform.translate(xCursor, 0);
+//                    qDebug() << "blockTransform: xCursor:" << xCursor;
 
                     // combine transforms for current text block:
                     QTransform allTransforms = sizeTransform;
@@ -628,8 +893,8 @@ void RTextRenderer::render() {
 
                     // transform paths of current block and append to paths
                     // of current text line:
-                    for (int i=0; i<paths.size(); ++i) {
-                        RPainterPath p = paths.at(i);
+                    for (int k=0; k<paths.size(); ++k) {
+                        RPainterPath p = paths.at(k);
                         // ### TODO ###:
                         p.transform(allTransforms);
                         linePaths.append(p);
@@ -647,6 +912,7 @@ void RTextRenderer::render() {
                 if (target==PainterPaths) {
                     double horizontalAdvance = 0.0;
                     double horizontalAdvanceNoSpacing = 0.0;
+                    double horizontalAdvanceNoTrailingSpace = 0.0;
                     double ascent = 0.0;
                     double descent = 0.0;
                     double usedHeight = 0.0;
@@ -656,6 +922,7 @@ void RTextRenderer::render() {
                                 "A", QList<QTextLayout::FormatRange>(),
                                 horizontalAdvance,
                                 horizontalAdvanceNoSpacing,
+                                horizontalAdvanceNoTrailingSpace,
                                 ascent, descent,
                                 usedHeight);
 
@@ -670,9 +937,16 @@ void RTextRenderer::render() {
 
             // handle stacked text:
             if (stackedText) {
-                QRegExp reg;
-                reg.setPattern(rxStackedText);
-                reg.exactMatch(formatting);
+//                qDebug() << "stacked text";
+
+                //QRegExp reg(rxStackedText);
+                //reg.setPattern(rxStackedText);
+                QRegularExpressionMatch match;
+                RS::exactMatch(rxStackedText, match, formatting);
+
+//                qDebug() << "before: textLayouts.length:" << textLayouts.length();
+//                qDebug() << "before: linePaths.length:" << linePaths.length();
+//                qDebug() << "before: lineBlockTransforms.length:" << lineBlockTransforms.length();
 
                 if (target==PainterPaths) {
                     double horizontalAdvance[2];
@@ -681,17 +955,22 @@ void RTextRenderer::render() {
                     double horizontalAdvanceNoSpacing[2];
                     horizontalAdvanceNoSpacing[0] = 0.0;
                     horizontalAdvanceNoSpacing[1] = 0.0;
+                    // TODO: make adjustable:
                     double heightFactor = 0.4;
 
                     // s==0: superscript, s==1: subscript:
                     for (int s=0; s<=1; ++s) {
-                        QString script = reg.cap(s+1);
+                        QString script = RS::captured(rxStackedText, match, s+1);
+                        if (script.isEmpty()) {
+                            continue;
+                        }
 
                         QList<RPainterPath> paths;
 
                         double ascent = 0.0;
                         double descent = 0.0;
                         double usedHeight = 0.0;
+                        double horizontalAdvanceNoTrailingSpace = 0.0;
 
                         QList<QTextLayout::FormatRange> localFormats;
 
@@ -706,6 +985,7 @@ void RTextRenderer::render() {
                                     script, localFormats,
                                     horizontalAdvance[s],
                                     horizontalAdvanceNoSpacing[s],
+                                    horizontalAdvanceNoTrailingSpace,
                                     ascent, descent,
                                     usedHeight);
 
@@ -747,8 +1027,8 @@ void RTextRenderer::render() {
 
                         // transform paths of current block and append to paths
                         // of current text line:
-                        for (int i=0; i<paths.size(); ++i) {
-                            RPainterPath p = paths.at(i);
+                        for (int k=0; k<paths.size(); ++k) {
+                            RPainterPath p = paths.at(k);
                             // ### TODO ###:
                             p.transform(allTransforms);
                             linePaths.append(p);
@@ -759,12 +1039,29 @@ void RTextRenderer::render() {
                         }
                     }
 
+                    // detected wrap:
+                    if (!noBreakFirstBlock && breakPointI>=0) {
+                        // line break needed:
+                        if (wrap && xCursor + qMax(horizontalAdvance[0], horizontalAdvance[1]) * getBlockHeight() * heightFactor > textData.getTextWidth()) {
+//                            qDebug() << "insert wrap before stacked text:" << textBlock;
+
+                            insertLineBreak = true;
+                        }
+                    }
+                    else {
+                        noBreakFirstBlock = false;
+                    }
+
                     xCursor += qMax(horizontalAdvance[0], horizontalAdvance[1]) * getBlockHeight() * heightFactor;
                 }
 
+//                qDebug() << "after: textLayouts.length:" << textLayouts.length();
+//                qDebug() << "after: linePaths.length:" << linePaths.length();
+//                qDebug() << "after: lineBlockTransforms.length:" << lineBlockTransforms.length();
+
                 if (target==RichText) {
-                    QString super = reg.cap(1);
-                    QString sub = reg.cap(2);
+                    QString super = RS::captured(rxStackedText, match, 1);
+                    QString sub = RS::captured(rxStackedText, match, 2);
                     if (!super.isEmpty()) {
                         richText += QString("<span style=\"vertical-align:super;\">%1</span>").arg(super);
                     }
@@ -797,18 +1094,20 @@ void RTextRenderer::render() {
             if (!currentFormat.isEmpty()) {
                 fr.format = currentFormat.top();
             }
+            //qDebug() << "appending format:" << fr.format.foreground();
             formats.append(fr);
 
             // handle text line.
             // add all painter paths of the current line to result set of
             // painter paths. apply line feed transformations.
-            if (lineFeed || paragraphFeed || xFeed || end) {
+            if (insertLineBreak || lineFeed || paragraphFeed || xFeed || end) {
 //                qDebug() << "lineFeed: adding text line:";
 //                qDebug() << "  maxAscent: " << maxAscent;
 //                qDebug() << "  minDescent: " << minDescent;
 //                qDebug() << "  minDescentPrevious: " << minDescentPrevious;
 //                qDebug() << "got line feed or end";
 //                qDebug() << "  trailingSpaces: " << trailingSpaces;
+//                qDebug() << "  leadingSpaces: " << leadingSpaces;
 
                 if (target==RichText) {
                     if (lineFeed || paragraphFeed || xFeed) {
@@ -820,10 +1119,30 @@ void RTextRenderer::render() {
                     yCursor += (minDescentPrevious - maxAscent) * lineSpacingFactor;
                 }
 
+                if (insertLineBreak) {
+//                    qDebug() << "got line break: roll back last rendered block";
+                    //qDebug() << "linePaths:" << linePaths.length();
+
+                    // remove paths of blocks that are wrapped to next line:
+                    // this is done here to make sure alignments and bounding boxes are correct:
+                    while (linePaths.length() > breakPointLinePathsLength && (breakPointLinePathsLength>0 || leadingSpaces)) {
+                        linePaths.removeLast();
+                    }
+//                    qDebug() << "breakPointTextLayoutsLength:" << breakPointTextLayoutsLength;
+//                    qDebug() << "textLayouts.length():" << textLayouts.length();
+                    while (textLayouts.length() > breakPointTextLayoutsLength && (breakPointTextLayoutsLength>0 || leadingSpaces)) {
+//                        qDebug() << "remove last text layout";
+                        textLayouts.removeLast();
+                    }
+                    while (lineBlockTransforms.length() > breakPointLineBlockTransformsLength && (breakPointLineBlockTransformsLength>0 || leadingSpaces)) {
+                        lineBlockTransforms.removeLast();
+                    }
+                }
+
                 // calculate line bounding box for alignment without spaces at borders:
                 RBox lineBoundingBox;
-                for (int i=0; i<linePaths.size(); ++i) {
-                    RPainterPath p = linePaths.at(i);
+                for (int k=0; k<linePaths.size(); ++k) {
+                    RPainterPath p = linePaths.at(k);
                     lineBoundingBox.growToInclude(p.getBoundingBox());
                 }
 
@@ -833,6 +1152,7 @@ void RTextRenderer::render() {
 
                 // make sure bounding box includes actually used text height:
                 boundingBox.growToInclude(lineBoundingBox);
+//                qDebug() << "bb of line:" << boundingBox;
 
                 double featureSize = lineBoundingBox.getHeight();
 
@@ -877,15 +1197,21 @@ void RTextRenderer::render() {
                 width = qMax(width, lineBoundingBox.getMaximum().x - qMin(0.0, lineBoundingBox.getMinimum().x));
 
                 // apply transforms of current text line to all text layouts of current line:
-                for (int i=0; i<lineBlockTransforms.length(); ++i) {
-                    lineBlockTransforms[i] *= lineTransform;
+                //qDebug() << "{{{";
+                //qDebug() << "apply line transforms...:" << lineBlockTransforms.length();
+                for (int n=0; n<lineBlockTransforms.length(); ++n) {
+                    //qDebug() << " line transforms:" << lineTransform;
+                    lineBlockTransforms[n] *= lineTransform;
                     if (!textLayouts.isEmpty()) {
-                        int k = textLayouts.length()-lineBlockTransforms.length()+i;
+                        int k = textLayouts.length()-lineBlockTransforms.length()+n;
                         if (k>=0 && k<textLayouts.length()) {
-                            textLayouts[k].transform *= lineBlockTransforms[i];
+                            //qDebug() << "tl for:" << textLayouts[k].getText();
+                            textLayouts[k].transform *= lineBlockTransforms[n];
+                            //qDebug() << "tl trans:" << textLayouts[k].transform;
                         }
                     }
                 }
+                //qDebug() << "}}}";
                 //textTransforms.append(lineBlockTransforms);
                 //if (!textLayouts.isEmpty()) {
                 //    textLayouts.last().second = lineBlockTransforms;
@@ -895,9 +1221,9 @@ void RTextRenderer::render() {
                 // add current text line to result set:
                 // one painter path per text block:
                 QPen pen;
-                for (int i=0; i<linePaths.size(); ++i) {
-                    RPainterPath p = linePaths[i];
-                    if (i==0) {
+                for (int k=0; k<linePaths.size(); ++k) {
+                    RPainterPath p = linePaths[k];
+                    if (k==0) {
                         pen = p.getPen();
                         if (pen.style()==Qt::NoPen) {
                            pen = QPen(p.getBrush().color());
@@ -909,17 +1235,24 @@ void RTextRenderer::render() {
                     //if (!xFeed) {
                         // TODO: don't count line after xfeed for vertical alignment:
                     //}
-                    boundingBox.growToInclude(p.getBoundingBox());
+                    RBox bb = p.getBoundingBox();
+                    if (bb.isSane() && !bb.getSize().isZero()) {
+                        boundingBox.growToInclude(bb);
+                    }
                 }
 
                 // add bounding box painter path for whole line for speedy rendering of very small texts:
+                //qDebug() << "adding bb";
+                //qDebug() << "got tls before:" << textLayouts.length();
                 RPainterPath bbPath;
                 bbPath.addBox(lineBoundingBox);
                 bbPath.transform(lineTransform);
                 bbPath.setFeatureSize(-featureSize);
                 bbPath.setPen(pen);
                 painterPaths.append(bbPath);
-                textLayouts.append(RTextLayout());
+                RTextLayout tl;
+                //tl.correspondingPainterPaths = 1;
+                textLayouts.append(tl);
 
                 lineCounter++;
                 xCursor = 0.0;
@@ -931,7 +1264,36 @@ void RTextRenderer::render() {
                 leadingSpaces = false;
                 trailingSpaces = false;
                 usedHeight = 0.0;
+                noBreakFirstBlock = true;
+
+                //breakPointFormats = formats;
+                //breakPointCurrentFormat = currentFormat;
+
+                if (!insertLineBreak) {
+                    // starting new line, not due to auto wrap:
+                    breakPointI = -1;
+//                    breakPointTextLayoutsLength = -1;
+                    breakPointLineBlockTransformsLength = -1;
+                }
             }
+        }
+
+        // optional break: backup data for roll back in case of auto wrap:
+        if (optionalBreakText) {
+//            qDebug() << "optional break found";
+//            qDebug() << "back up roll back point:" << i+1;
+            breakPointFormats = formats;
+            breakPointCurrentFormat = currentFormat;
+            // start new line _after_ white space and skip whitespace in case of break:
+            breakPointI = i+1;
+            //breakPointLineBlockTransformsLength = lineBlockTransforms.length();
+            //breakPointLinePathsLength = linePaths.length();
+
+            //breakPointTextLayoutsLength = textLayouts.length();
+            //breakPointPainterPathsLength = painterPaths.length();
+
+            //qDebug() << "breakPointTextLayoutsLength:" << breakPointTextLayoutsLength;
+            //qDebug() << "breakPointPainterPathsLength:" << breakPointPainterPathsLength;
         }
 
         // handle formatting after text block, that applies either
@@ -940,18 +1302,21 @@ void RTextRenderer::render() {
             continue;
         }
 
-        QRegExp reg;
+        //QRegExp reg;
 
         // unicode:
-        reg.setPattern(rxUnicode);
-        if (reg.exactMatch(formatting)) {
-            textBlock += QChar(reg.cap(1).toInt(0, 16));
-            continue;
+        //reg = rxUnicode;
+        {
+            QRegularExpressionMatch match;
+            if (RS::exactMatch(rxUnicode, match, formatting)) {
+                textBlock += QChar(RS::captured(rxUnicode, match, 1).toInt(0, 16));
+                continue;
+            }
         }
 
 //        // unicode (5 hex digits):
 //        reg.setPattern(rxUnicodeM);
-//        if (reg.exactMatch(formatting)) {
+//        if (RS::exactMatch(reg, formatting)) {
 //            uint code = reg.cap(1).toInt(0, 16);
 //            qDebug() << QString("M code: %1").arg(code, 0, 16);
 //            QString c = QString::fromUcs4(&code, 1);
@@ -961,56 +1326,94 @@ void RTextRenderer::render() {
 //        }
 
         // curly braket open:
-        reg.setPattern(rxCurlyOpen);
-        if (reg.exactMatch(formatting)) {
+        //reg = rxCurlyOpen;
+        if (RS::exactMatch(rxCurlyOpen, formatting)) {
             textBlock += "{";
             continue;
         }
 
         // curly braket close:
-        reg.setPattern(rxCurlyClose);
-        if (reg.exactMatch(formatting)) {
+        //reg.setPattern(rxCurlyClose);
+        if (RS::exactMatch(rxCurlyClose, formatting)) {
             textBlock += "}";
             continue;
         }
 
         // degree:
-        reg.setPattern(rxDegree);
-        if (reg.exactMatch(formatting)) {
+        //reg.setPattern(rxDegree);
+        if (RS::exactMatch(rxDegree, formatting)) {
             textBlock += chDegree;
             continue;
         }
 
         // plus/minus:
-        reg.setPattern(rxPlusMinus);
-        if (reg.exactMatch(formatting)) {
+        //reg.setPattern(rxPlusMinus);
+        if (RS::exactMatch(rxPlusMinus, formatting)) {
             textBlock += chPlusMinus;
             continue;
         }
 
         // diameter:
-        reg.setPattern(rxDiameter);
-        if (reg.exactMatch(formatting)) {
+        //reg.setPattern(rxDiameter);
+        if (RS::exactMatch(rxDiameter, formatting)) {
             textBlock += chDiameter;
             continue;
         }
 
         // underlined:
-        reg.setPattern(rxUnderlined);
-        if (reg.exactMatch(formatting)) {
+        //reg.setPattern(rxUnderline);
+        if (RS::exactMatch(rxUnderline, formatting)) {
+            if (target==RichText) {
+                if (!underline) {
+                    richText += QString("<span style=\"text-decoration:underline;\">");
+                    openTags.top().append("span");
+                    underline = true;
+                }
+                else {
+                    richText += QString("<span style=\"text-decoration:none;\">");
+                    openTags.top().append("span");
+                    underline = false;
+                }
+            }
+            continue;
+        }
+
+        // underline on:
+        //reg.setPattern(rxUnderlineOn);
+        if (RS::exactMatch(rxUnderlineOn, formatting)) {
+            setBlockUnderline(true);
+
+            if (target==RichText) {
+                richText += QString("<span style=\"text-decoration:underline;\">");
+                openTags.top().append("span");
+                underline = true;
+            }
+            continue;
+        }
+
+        // underline off:
+        //reg.setPattern(rxUnderlineOff);
+        if (RS::exactMatch(rxUnderlineOff, formatting)) {
+            setBlockUnderline(false);
+
+            if (target==RichText) {
+                richText += QString("<span style=\"text-decoration:none;\">");
+                openTags.top().append("span");
+                underline = false;
+            }
             continue;
         }
 
         // backslash:
-        reg.setPattern(rxBackslash);
-        if (reg.exactMatch(formatting)) {
+        //reg.setPattern(rxBackslash);
+        if (RS::exactMatch(rxBackslash, formatting)) {
             textBlock += "\\";
             continue;
         }
 
         // non-breaking space:
-        reg.setPattern(rxNonBreakingSpace);
-        if (reg.exactMatch(formatting)) {
+        //reg.setPattern(rxNonBreakingSpace);
+        if (RS::exactMatch(rxNonBreakingSpace, formatting)) {
             if (target==PainterPaths) {
                 textBlock += QChar(QChar::Nbsp);
             }
@@ -1021,83 +1424,102 @@ void RTextRenderer::render() {
             continue;
         }
 
-        // font change (TTF):
-        reg.setPattern(rxFontChangeTtf);
-        if (reg.exactMatch(formatting)) {
-            setBlockFont(reg.cap(1));
-            for (int k=2; k<reg.captureCount()-1; k+=2) {
-                // code: i, b, c, p
-                QString code = reg.cap(k);
-                // value: 0/1
-                int value = reg.cap(k+1).toInt();
+        {
+            // font change (TTF):
+            //reg.setPattern(rxFontChangeTtf);
+            QRegularExpressionMatch match;
+            if (RS::exactMatch(rxFontChangeTtf, match, formatting)) {
+                setBlockFont(RS::captured(rxFontChangeTtf, match, 1));
+                for (int k=2; k<rxFontChangeTtf.captureCount()-1; k+=2) {
+                    // code: i, b, c, p
+                    QString code = RS::captured(rxFontChangeTtf, match, k);
+                    // value: 0/1
+                    int value = RS::captured(rxFontChangeTtf, match, k+1).toInt();
 
-                if (code.toLower()=="b") {
-                    setBlockBold(value!=0);
+                    if (code.toLower()=="b") {
+                        setBlockBold(value!=0);
+                    }
+                    else if (code.toLower()=="i") {
+                        setBlockItalic(value!=0);
+                    }
                 }
-                else if (code.toLower()=="i") {
-                    setBlockItalic(value!=0);
+                if (getBlockFont()=="gdt") {
+                    setUseCadFont(true);
                 }
-            }
-            setUseCadFont(false);
-            blockChangedHeightOrFont = true;
+                else {
+                    setUseCadFont(false);
+                }
+                blockChangedHeightOrFont = true;
 
-            if (target==RichText) {
-                QString style;
-                style += QString("font-family:%1;").arg(getBlockFont());
-                style += QString("font-weight:%1;").arg(getBlockBold() ? "bold" : "normal");
-                style += QString("font-style:%1;").arg(getBlockItalic() ? "italic" : "normal");
-                richText += QString("<span style=\"%1\">").arg(style);
-                openTags.top().append("span");
+                if (target==RichText) {
+                    QString style;
+                    style += QString("font-family:%1;").arg(getBlockFont());
+                    if (!useCadFont.top()) {
+                        style += QString("font-weight:%1;").arg(getBlockBold() ? "bold" : "normal");
+                        style += QString("font-style:%1;").arg(getBlockItalic() ? "italic" : "normal");
+                    }
+                    richText += QString("<span style=\"%1\">").arg(style);
+                    openTags.top().append("span");
+                }
+                continue;
             }
-            continue;
         }
 
-        // font change (CAD):
-        reg.setPattern(rxFontChangeCad);
-        if (reg.exactMatch(formatting)) {
-            setBlockFont(reg.cap(1));
-            setUseCadFont(true);
-            if (xCursor>RS::PointTolerance) {
-                RFont* f = RFontList::get(getBlockFont());
-                if (f!=NULL && f->isValid()) {
-                    xCursor += f->getLetterSpacing() / 9.0;
+        {
+            // font change (CAD):
+            //reg.setPattern(rxFontChangeCad);
+            QRegularExpressionMatch match;
+            if (RS::exactMatch(rxFontChangeCad, match, formatting)) {
+                setBlockFont(RS::captured(rxFontChangeCad, match, 1));
+                bool prevTtf = !getUseCadFont();
+                setUseCadFont(true);
+                if (xCursor>RS::PointTolerance) {
+                    RFont* f = RFontList::get(getBlockFont());
+                    if (f!=NULL && f->isValid()) {
+                        if (prevTtf) {
+                            xCursor += f->getLetterSpacing() / 9.0 * getBlockHeight() * textData.getXScale();
+                        }
+                    }
                 }
-            }
-            blockChangedHeightOrFont = true;
+                blockChangedHeightOrFont = true;
 
-            if (target==RichText) {
-                QString style;
-                style += QString("font-family:%1;").arg(getBlockFont());
-                richText += QString("<span style=\"%1\">").arg(style);
-                openTags.top().append("span");
+                if (target==RichText) {
+                    QString style;
+                    style += QString("font-family:%1;").arg(getBlockFont());
+                    richText += QString("<span style=\"%1\">").arg(style);
+                    openTags.top().append("span");
+                }
+                continue;
             }
-            continue;
         }
 
-        // height change:
-        reg.setPattern(rxHeightChange);
-        if (reg.exactMatch(formatting)) {
-            bool factor = reg.cap(2)=="x";
+        {
+            // height change:
+            //reg.setPattern(rxHeightChange);
+            QRegularExpressionMatch match;
+            if (RS::exactMatch(rxHeightChange, match, formatting)) {
+                bool factor = RS::captured(rxHeightChange, match, 2)=="x";
 
-            if (factor) {
-                if (!blockHeight.isEmpty()) {
-                    setBlockHeight(getBlockHeight() * reg.cap(1).toDouble());
+                if (factor) {
+                    if (!blockHeight.isEmpty()) {
+                        setBlockHeight(getBlockHeight() * RS::captured(rxHeightChange, match, 1).toDouble());
+                    }
                 }
-            }
-            else {
-                if (!blockHeight.isEmpty()) {
-                    setBlockHeight(reg.cap(1).toDouble());
+                else {
+                    if (!blockHeight.isEmpty()) {
+                        setBlockHeight(RS::captured(rxHeightChange, match, 1).toDouble());
+                    }
                 }
-            }
-            blockChangedHeightOrFont = true;
+                blockChangedHeightOrFont = true;
 
-            if (target==RichText && !blockHeight.isEmpty() && !openTags.isEmpty()) {
-                QString style;
-                style += QString("font-size:%1pt;").arg(getBlockHeight() * fontHeightFactor);
-                richText += QString("<span style=\"%1\">").arg(style);
-                openTags.top().append("span");
+                if (target==RichText && !blockHeight.isEmpty() && !openTags.isEmpty()) {
+                    QString style;
+                    style += QString("font-size:%1pt;").arg(getBlockHeight() * fontHeightFactor);
+                    richText += QString("<span style=\"%1\">").arg(style);
+                    openTags.top().append("span");
+                }
+                continue;
             }
-            continue;
         }
 
         QTextLayout::FormatRange fr;
@@ -1105,12 +1527,13 @@ void RTextRenderer::render() {
         fr.length = 0;
 
         // start format block:
-        reg.setPattern(rxBeginBlock);
-        if (reg.exactMatch(formatting)) {
+        //reg.setPattern(rxBeginBlock);
+        if (RS::exactMatch(rxBeginBlock, formatting)) {
             currentFormat.push(getCurrentFormat());
             blockFont.push(getBlockFont());
             blockBold.push(getBlockBold());
             blockItalic.push(getBlockItalic());
+            blockUnderline.push(getBlockUnderline());
             blockHeight.push(getBlockHeight());
             useCadFont.push(getUseCadFont());
             if (target==RichText) {
@@ -1121,8 +1544,14 @@ void RTextRenderer::render() {
         }
 
         // end format block:
-        reg.setPattern(rxEndBlock);
-        if (reg.exactMatch(formatting)) {
+        //reg.setPattern(rxEndBlock);
+        if (RS::exactMatch(rxEndBlock, formatting)) {
+            if (insertLineBreak) {
+                // we're inserting an automatic line break before this
+                // block, so don't pop formatting yet
+                // block will be repeated after line break:
+                continue;
+            }
             if (!currentFormat.isEmpty()) {
                 currentFormat.pop();
             }
@@ -1139,6 +1568,9 @@ void RTextRenderer::render() {
             if (!blockItalic.isEmpty()) {
                 blockItalic.pop();
             }
+            if (!blockUnderline.isEmpty()) {
+                blockUnderline.pop();
+            }
             if (!blockHeight.isEmpty()) {
                 blockHeight.pop();
             }
@@ -1150,8 +1582,8 @@ void RTextRenderer::render() {
             if (target==RichText) {
                 // close all tags that were opened in this block:
                 if (!openTags.isEmpty()) {
-                    for (int i=openTags.top().size()-1; i>=0; --i) {
-                        QString tag = openTags.top().at(i);
+                    for (int k=openTags.top().size()-1; k>=0; --k) {
+                        QString tag = openTags.top().at(k);
                         richText += QString("</%1>").arg(tag);
                     }
                     openTags.pop();
@@ -1161,50 +1593,67 @@ void RTextRenderer::render() {
             continue;
         }
 
-        // color change (indexed):
-        reg.setPattern(rxColorChangeIndex);
-        if (reg.exactMatch(formatting)) {
-            RColor blockColor = RColor::createFromCadIndex(reg.cap(1));
-            if (!currentFormat.isEmpty()) {
-                if (blockColor.isByLayer()) {
-                    currentFormat.top().setForeground(RColor::CompatByLayer);
-                } else if (blockColor.isByBlock()) {
-                    currentFormat.top().setForeground(RColor::CompatByBlock);
+        {
+            // color change (indexed):
+            //reg.setPattern(rxColorChangeIndex);
+            QRegularExpressionMatch match;
+            if (RS::exactMatch(rxColorChangeIndex, match, formatting)) {
+                RColor blockColor = RColor::createFromCadIndex(RS::captured(rxColorChangeIndex, match, 1));
+                //qDebug() << "block color:" << blockColor;
+                if (!currentFormat.isEmpty()) {
+                    //qDebug() << "001";
+                    if (blockColor.isByLayer()) {
+                        currentFormat.top().setForeground(RColor::CompatByLayer);
+                    } else if (blockColor.isByBlock()) {
+                        currentFormat.top().setForeground(RColor::CompatByBlock);
+                    }
+                    else {
+                        currentFormat.top().setForeground(blockColor);
+                    }
+                    fr.format = currentFormat.top();
+                    formats.append(fr);
+                    //qDebug() << "appending format 2:" << fr.format.foreground();
                 }
-                else {
+
+                if (target==RichText && !openTags.isEmpty()) {
+                    QString style;
+                    style += QString("color:%1;").arg(blockColor.name());
+                    richText += QString("<span style=\"%1\">").arg(style);
+                    openTags.top().append("span");
+                }
+                continue;
+            }
+        }
+
+        {
+            // color change (custom):
+            //reg.setPattern(rxColorChangeCustom);
+            QRegularExpressionMatch match;
+            if (RS::exactMatch(rxColorChangeCustom, match, formatting)) {
+                RColor blockColor = RColor::createFromCadCustom(RS::captured(rxColorChangeCustom, match, 1));
+                if (!currentFormat.isEmpty()) {
                     currentFormat.top().setForeground(blockColor);
+                    fr.format = currentFormat.top();
+                    formats.append(fr);
+                    //qDebug() << "formatting:" << formatting;
+                    //qDebug() << "appending format 3:" << fr.format.foreground();
                 }
-                fr.format = currentFormat.top();
-                formats.append(fr);
-            }
 
-            if (target==RichText && !openTags.isEmpty()) {
-                QString style;
-                style += QString("color:%1;").arg(blockColor.name());
-                richText += QString("<span style=\"%1\">").arg(style);
-                openTags.top().append("span");
+                if (target==RichText && !openTags.isEmpty()) {
+                    QString style;
+                    style += QString("color:%1;").arg(blockColor.name());
+                    richText += QString("<span style=\"%1\">").arg(style);
+                    openTags.top().append("span");
+                }
+                continue;
             }
-            continue;
         }
 
-        // color change (custom):
-        reg.setPattern(rxColorChangeCustom);
-        if (reg.exactMatch(formatting)) {
-            RColor blockColor = RColor::createFromCadCustom(reg.cap(1));
-            if (!currentFormat.isEmpty()) {
-                currentFormat.top().setForeground(blockColor);
-                fr.format = currentFormat.top();
-                formats.append(fr);
-            }
-
-            if (target==RichText && !openTags.isEmpty()) {
-                QString style;
-                style += QString("color:%1;").arg(blockColor.name());
-                richText += QString("<span style=\"%1\">").arg(style);
-                openTags.top().append("span");
-            }
-            continue;
-        }
+//        if (RS::exactMatch(rxOptionalBreak, textBlock)) {
+//            qDebug() << "potential break at:" << textBlock << i;
+//            qDebug() << "painterPaths:" << painterPaths.length();
+//            //breakPointPainterPathsLength = painterPaths.length();
+//        }
     }
 
     if (target==PainterPaths) {
@@ -1249,31 +1698,61 @@ void RTextRenderer::render() {
         //qDebug() << "painterPaths: " << painterPaths.length();
         //qDebug() << "textLayouts: " << textLayouts.length();
 
-        // apply global transform for position, angle and vertical alignment:
+        // apply global transform for position, angle and vertical alignment
+        // to painter paths:
         boundingBox = RBox();
         for (int i=0; i<painterPaths.length(); ++i) {
             painterPaths[i].transform(globalTransform);
-            boundingBox.growToInclude(painterPaths[i].getBoundingBox());
+            RBox bb = painterPaths[i].getBoundingBox();
+            if (bb.isSane() && !bb.getSize().isZero()) {
+                boundingBox.growToInclude(bb);
+            }
         }
 
+        // apply global transform for position, angle and vertical alignment
+        // to layouts:
         int k=0;
+        //qDebug() << "text layout bbs...";
         for (int i=0; i<textLayouts.length(); ++i) {
             textLayouts[i].transform *= globalTransform;
+
+            //qDebug() << "tl for: " << textLayouts[i].getText();
+
+            // compute bounding box of layout based on corresponding painter paths:
             textLayouts[i].boundingBox = RBox();
             if (textLayouts[i].correspondingPainterPaths==0) {
-                if (k<painterPaths.length()) {
-                    textLayouts[i].boundingBox.growToInclude(painterPaths[k].getBoundingBox());
+//                qDebug() << "no corr pps";
+//                qDebug() << "layout empty:" << textLayouts[i].isEmpty();
+//                qDebug() << "txt:" << textLayouts[i].getText();
+
+                //if (textLayouts[i].getText()!=" ") {
+                //if (textLayouts[i].getLayout().isNull() && textLayouts[i].getText()!=" ") {
+                if (!textLayouts[i].isTTF()) {
+                    // CAD font text block with only one painter path:
+                    if (k<painterPaths.length()) {
+                        RBox bb = painterPaths[k].getBoundingBox();
+                        if (bb.isSane() && !bb.getSize().isZero()) {
+                            textLayouts[i].boundingBox.growToInclude(bb);
+                        }
+                    }
+                    k++;
                 }
-                k++;
             }
             else {
+                // TTF:
+                //qDebug() << "tl has " << textLayouts[i].correspondingPainterPaths << " pps";
                 for (int n=0; n<textLayouts[i].correspondingPainterPaths; n++) {
                     if (k<painterPaths.length()) {
-                        textLayouts[i].boundingBox.growToInclude(painterPaths[k].getBoundingBox());
+                        RBox bb = painterPaths[k].getBoundingBox();
+                        if (bb.isSane() && !bb.getSize().isZero()) {
+                            textLayouts[i].boundingBox.growToInclude(bb);
+                        }
                         k++;
                     }
                 }
             }
+
+            //qDebug() << "tl bb: " << textLayouts[i].boundingBox;
         }
     }
 
@@ -1293,6 +1772,7 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlock(
     const QList<QTextLayout::FormatRange>& formats,
     double& horizontalAdvance,
     double& horizontalAdvanceNoSpacing,
+    double& horizontalAdvanceNoTrailingSpace,
     double& ascent,
     double& descent,
     double& usedHeight) {
@@ -1303,6 +1783,7 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlock(
                     formats,
                     horizontalAdvance,
                     horizontalAdvanceNoSpacing,
+                    horizontalAdvanceNoTrailingSpace,
                     ascent, descent,
                     usedHeight);
     }
@@ -1312,6 +1793,7 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlock(
                     formats,
                     horizontalAdvance,
                     horizontalAdvanceNoSpacing,
+                    horizontalAdvanceNoTrailingSpace,
                     ascent, descent,
                     usedHeight);
     }
@@ -1327,6 +1809,7 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlockTtf(
     const QList<QTextLayout::FormatRange>& formats,
     double& horizontalAdvance,
     double& horizontalAdvanceNoSpacing,
+    double& horizontalAdvanceNoTrailingSpace,
     double& ascent,
     double& descent,
     double& usedHeight) {
@@ -1367,6 +1850,7 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlockTtf(
     font.setPointSizeF(100.0);
     font.setBold(getBlockBold());
     font.setItalic(getBlockItalic());
+    font.setUnderline(getBlockUnderline());
 
     // bounding boxes for 1.0 height font:
     QRectF boxA = getCharacterRect(font, 'A');
@@ -1402,26 +1886,66 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlockTtf(
 
     layout->setFont(font);
     layout->setText(blockText);
+#if (QT_VERSION >= QT_VERSION_CHECK(5,6,0))
+    layout->setFormats(formats.toVector());
+#else
     layout->setAdditionalFormats(formats);
+#endif
 
     layout->beginLayout();
     QTextLine line = layout->createLine();
     if (!line.isValid()) {
         horizontalAdvance = 0.0;
-        textLayouts.append(RTextLayout());
+        RTextLayout tl;
+        //tl.correspondingPainterPaths = 1;
+        textLayouts.append(tl);
         qWarning("RTextRenderer::getPainterPathsForBlock: got not a single line");
         return QList<RPainterPath>() << RPainterPath();
     }
     layout->endLayout();
-
     horizontalAdvance = line.horizontalAdvance() * ttfScale;
+
+    // same block without trailing spaces:
+//    QString blockTextNoTrailingSpace = blockText;
+//    blockTextNoTrailingSpace.replace(QRegExp("[ ]+$"), "");
+//    if (blockTextNoTrailingSpace!=blockText) {
+//        QTextLayout l;
+//        l.setCacheEnabled(true);
+//        l.setFont(font);
+//        l.setText(blockText);
+//#if (QT_VERSION >= QT_VERSION_CHECK(5,6,0))
+//        l.setFormats(formats.toVector());
+//#else
+//        l.setAdditionalFormats(formats);
+//#endif
+//        l.setText(blockTextNoTrailingSpace);
+//        l.beginLayout();
+//        line = l.createLine();
+//        l.endLayout();
+//        horizontalAdvanceNoTrailingSpace = line.horizontalAdvance() * ttfScale;
+//    }
+//    else {
+//        horizontalAdvanceNoTrailingSpace = horizontalAdvance;
+//    }
+
+    horizontalAdvanceNoTrailingSpace = horizontalAdvance;
+
+    //qDebug() << "horizontalAdvance:" << horizontalAdvance;
+    //qDebug() << "horizontalAdvanceNoTrailingSpace:" << horizontalAdvanceNoTrailingSpace;
 
     RPainterPathDevice ppd;
     QPainter ppPainter(&ppd);
-    layout->draw(&ppPainter, QPoint(0,0));
+    {
+        RTextRenderer::lockForDrawing();
+        layout->draw(&ppPainter, QPoint(0,0));
+        RTextRenderer::unlockForDrawing();
+    }
     ppPainter.end();
 
-    QColor currentColor = currentFormat.top().foreground().color();
+    QColor currentColor = Qt::white;
+    if (!currentFormat.isEmpty()) {
+        currentColor = currentFormat.top().foreground().color();
+    }
 
     // transform to exactly 1.0 height for an 'A',
     // reference point is bottom left (to make sure that texts of different
@@ -1469,6 +1993,7 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlockCad(
     const QList<QTextLayout::FormatRange>& formats,
     double& horizontalAdvance,
     double& horizontalAdvanceNoSpacing,
+    double& horizontalAdvanceNoTrailingSpace,
     double& ascent,
     double& descent,
     double& usedHeight) {
@@ -1483,9 +2008,15 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlockCad(
         }
 
         // 20120309: resort to standard font (better than nothing):
-        font = RFontList::get("standard");
+        // 20191009: no substitution
+        font = RFontList::get("Standard", false);
         if (font==NULL) {
             qWarning() << "standard font not found";
+            // make sure layout and transforms are always added:
+            lineBlockTransforms.append(QTransform());
+            RTextLayout tl;
+            //tl.correspondingPainterPaths = 1;
+            textLayouts.append(tl);
             return QList<RPainterPath>() << RPainterPath();
         }
     }
@@ -1494,7 +2025,7 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlockCad(
     // cxf fonts define glyphs at a scale of 9:1:
     double cxfScale = 1.0/9.0;
     // invalid color, default, means use color of entity:
-    QColor currentColor = currentFormat.top().foreground().color();;
+    QColor currentColor = currentFormat.top().foreground().color();
     bool gotLetterSpacing = false;
     QMap<int, double> indexToCursorStart;
     QMap<int, double> indexToCursorEnd;
@@ -1521,7 +2052,7 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlockCad(
             isSpace = true;
         }
 
-        // handle color and other formats
+        // handle color and other format changes within the same block:
         for (int fi=0; fi<formats.size(); ++fi) {
             QTextLayout::FormatRange format = formats.at(fi);
 
@@ -1566,6 +2097,14 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlockCad(
 
     //qDebug() << "indexToCursor: " << indexToCursorStart;
 
+    // whole block is underlined:
+    if (getBlockUnderline()) {
+        underlinedIndices.clear();
+        for (int i=0; i<blockText.length(); i++) {
+            underlinedIndices.append(i);
+        }
+    }
+
     if (!underlinedIndices.isEmpty()) {
         underlinedIndices.append(-1);
     }
@@ -1586,6 +2125,7 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlockCad(
                 RPainterPath path;
                 path.moveTo(line.getStartPoint());
                 path.lineTo(line.getEndPoint());
+                path.addOriginalShape(QSharedPointer<RShape>(line.clone()));
                 preparePathTransform(path, 0.0, 1.0);
                 ppBlock.addPath(path);
                 line = RLine();
@@ -1609,19 +2149,28 @@ QList<RPainterPath> RTextRenderer::getPainterPathsForBlockCad(
 
     horizontalAdvance = cursor;
     horizontalAdvanceNoSpacing = cursor - font->getLetterSpacing() * cxfScale;
+    horizontalAdvanceNoTrailingSpace = horizontalAdvanceNoSpacing;
     ascent = 1.08;
     descent = -0.36;
+
+    if (blockText==" ") {
+        horizontalAdvance = horizontalAdvanceNoTrailingSpace;
+    }
 
     // add text layout with paths to indicate we have to use painter paths for this text block:
     lineBlockTransforms.append(QTransform());
     RTextLayout tl(ret, currentColor);
-    tl.layout = QSharedPointer<QTextLayout>(new QTextLayout(blockText, QFont(getBlockFont())));
+    QFont font1 = getBlockFont();
+    font1.setUnderline(getBlockUnderline());
+    tl.layout = QSharedPointer<QTextLayout>(new QTextLayout(blockText, font1));
     tl.height = getBlockHeight();
     textLayouts.append(tl);
 
     if (!ret.isEmpty()) {
         usedHeight = qMax(usedHeight, getBlockHeight());
     }
+
+//    qDebug() << "horizontalAdvance:" << horizontalAdvance;
 
     return ret;
 }
@@ -1667,6 +2216,7 @@ QRectF RTextRenderer::getCharacterRect(const QString& fontName, const QChar& ch)
 QRectF RTextRenderer::getCharacterRect(const QFont& font, const QChar& ch) const {
     QFont font1(font);
     font1.setPointSizeF(100.0);
+    font1.setUnderline(false);
 
     QTextLayout layout;
     layout.setFont(font1);
@@ -1678,7 +2228,11 @@ QRectF RTextRenderer::getCharacterRect(const QFont& font, const QChar& ch) const
 
     RPainterPathDevice ppd;
     QPainter ppPainter(&ppd);
-    layout.draw(&ppPainter, QPoint(0,0));
+    {
+        RTextRenderer::lockForDrawing();
+        layout.draw(&ppPainter, QPoint(0,0));
+        RTextRenderer::unlockForDrawing();
+    }
     ppPainter.end();
 
     QPainterPath p;
@@ -1697,6 +2251,6 @@ QString RTextRenderer::getRichTextForBlock(
 
     Q_UNUSED(formats)
 
-    return Qt::escape(blockText).replace(' ', "&nbsp;");
+    return RS::escape(blockText).replace(' ', "&nbsp;");
     //return blockText;
 }

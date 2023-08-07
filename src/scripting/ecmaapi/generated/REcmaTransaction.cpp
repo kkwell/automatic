@@ -72,6 +72,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, setKeepHandles, "setKeepHandles");
             
+            REcmaHelper::registerFunction(&engine, proto, setKeepChildren, "setKeepChildren");
+            
             REcmaHelper::registerFunction(&engine, proto, isUndoing, "isUndoing");
             
             REcmaHelper::registerFunction(&engine, proto, isRedoing, "isRedoing");
@@ -124,6 +126,14 @@
             
             REcmaHelper::registerFunction(&engine, proto, isPreview, "isPreview");
             
+            REcmaHelper::registerFunction(&engine, proto, setTypes, "setTypes");
+            
+            REcmaHelper::registerFunction(&engine, proto, getTypes, "getTypes");
+            
+            REcmaHelper::registerFunction(&engine, proto, setType, "setType");
+            
+            REcmaHelper::registerFunction(&engine, proto, isType, "isType");
+            
         engine.setDefaultPrototype(
             qMetaTypeId<RTransaction*>(), *proto);
 
@@ -145,8 +155,60 @@
     // enum values:
     
 
+    ctor.setProperty("Generic",
+    QScriptValue(RTransaction::Generic),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("CurrentLayerChange",
+    QScriptValue(RTransaction::CurrentLayerChange),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("CurrentLayerSelectionChange",
+    QScriptValue(RTransaction::CurrentLayerSelectionChange),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("LayerLockStatusChange",
+    QScriptValue(RTransaction::LayerLockStatusChange),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("LayerVisibilityStatusChange",
+    QScriptValue(RTransaction::LayerVisibilityStatusChange),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("SaveWorkingSet",
+    QScriptValue(RTransaction::SaveWorkingSet),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("ChangeDocumentSetting",
+    QScriptValue(RTransaction::ChangeDocumentSetting),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Undo",
+    QScriptValue(RTransaction::Undo),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Redo",
+    QScriptValue(RTransaction::Redo),
+    QScriptValue::ReadOnly);
+
+
     // enum conversions:
     
+    qScriptRegisterMetaType<RTransaction::Type>(
+        &engine,
+        toScriptValueEnumType,
+        fromScriptValueEnumType,
+        ctor.property(QString::fromLatin1("prototype"))
+    );
+
         
     // init class:
     engine.globalObject().setProperty("RTransaction",
@@ -334,7 +396,7 @@
                     context->argument( 2 ).
                     toString();
                 
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RObject::Id >
                     a3;
                     REcmaHelper::fromScriptValue(
@@ -1068,6 +1130,61 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaTransaction::setKeepHandles", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaTransaction::setKeepChildren
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaTransaction::setKeepChildren", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaTransaction::setKeepChildren";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTransaction* self = 
+                        getSelf("setKeepChildren", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setKeepChildren(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTransaction.setKeepChildren().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaTransaction::setKeepChildren", context, engine);
             return result;
         }
          QScriptValue
@@ -2112,7 +2229,7 @@
                     context->argument( 2 ).
                     toBool();
                 
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QSet < RPropertyTypeId >
                     a3;
                     REcmaHelper::fromScriptValue(
@@ -2292,7 +2409,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QSet < RObject::Id >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -2968,6 +3085,275 @@
             //REcmaHelper::functionEnd("REcmaTransaction::isPreview", context, engine);
             return result;
         }
+         QScriptValue
+        REcmaTransaction::setTypes
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaTransaction::setTypes", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaTransaction::setTypes";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTransaction* self = 
+                        getSelf("setTypes", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RTransaction::Types */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    RTransaction::Types*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RTransaction::Types*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RTransaction: Argument 0 is not of type RTransaction::Types*.",
+                               context);                    
+                    }
+                    RTransaction::Types& a0 = *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setTypes(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTransaction.setTypes().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaTransaction::setTypes", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaTransaction::getTypes
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaTransaction::getTypes", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaTransaction::getTypes";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTransaction* self = 
+                        getSelf("getTypes", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RTransaction::Types'
+    RTransaction::Types cppResult =
+        
+               self->getTypes();
+        // return type: RTransaction::Types
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTransaction.getTypes().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaTransaction::getTypes", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaTransaction::setType
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaTransaction::setType", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaTransaction::setType";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTransaction* self = 
+                        getSelf("setType", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: RTransaction::Type */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    RTransaction::Type
+                    a0 =
+                    (RTransaction::Type)
+                    (int)
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setType(a0);
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isNumber()
+        ) /* type: RTransaction::Type */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    RTransaction::Type
+                    a0 =
+                    (RTransaction::Type)
+                    (int)
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setType(a0
+        ,
+    a1);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTransaction.setType().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaTransaction::setType", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaTransaction::isType
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaTransaction::isType", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaTransaction::isType";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RTransaction* self = 
+                        getSelf("isType", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: RTransaction::Type */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    RTransaction::Type
+                    a0 =
+                    (RTransaction::Type)
+                    (int)
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->isType(a0);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RTransaction.isType().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaTransaction::isType", context, engine);
+            return result;
+        }
          QScriptValue REcmaTransaction::toString
     (QScriptContext *context, QScriptEngine *engine)
     
@@ -3057,5 +3443,15 @@
             
 
 
+        }
+         QScriptValue REcmaTransaction::toScriptValueEnumType(QScriptEngine* engine, const RTransaction::Type& value)
+    
+        {
+            return QScriptValue(engine, (int)value);
+        }
+         void REcmaTransaction::fromScriptValueEnumType(const QScriptValue& value, RTransaction::Type& out)
+    
+        {
+            out = qvariant_cast<RTransaction::Type>(value.toVariant());
         }
         

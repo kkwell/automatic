@@ -74,6 +74,7 @@ public:
     virtual QList<RVector> getCenterPoints() const;
     virtual QList<RVector> getPointsWithDistanceToEnd(
         double distance, int from = RS::FromAny) const;
+    virtual QList<RVector> getPointCloud(double segmentLength) const;
 
     virtual double getAngleAt(double distance, RS::From from = RS::FromStart) const;
 
@@ -128,6 +129,16 @@ public:
     }
 
     virtual QList<QSharedPointer<RShape> > splitAt(const QList<RVector>& points) const;
+
+#if QT_VERSION >= 0x060000
+    /**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */
+    RXLine copy() const {
+        return *this;
+    }
+#endif
 
 protected:
     virtual void print(QDebug dbg) const;

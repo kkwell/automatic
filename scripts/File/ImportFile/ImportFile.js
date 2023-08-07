@@ -28,15 +28,20 @@ include("scripts/Edit/Paste/Paste.js");
 function ImportFile(guiAction, fileName) {
     Paste.call(this, guiAction);
 
-    this.sourceDocument = new RDocument(new RMemoryStorage(), new RSpatialIndexNavel());
+    this.sourceDocument = new RDocument(new RMemoryStorage(), createSpatialIndex());
     this.sourceDi = new RDocumentInterface(this.sourceDocument);
     this.sourceDi.setNotifyListeners(false);
 
     // unit tests pass file name directly to action:
     this.fileName = fileName;
+    this.blockName = undefined;
+    this.asBlock = false;
+
+    this.setUiOptions(ImportFile.includeBasePath + "/ImportFile.ui");
 }
 
 ImportFile.prototype = new Paste();
+ImportFile.includeBasePath = includeBasePath;
 
 ImportFile.prototype.beginEvent = function() {
     Paste.prototype.beginEvent.call(this);
@@ -58,7 +63,7 @@ ImportFile.prototype.beginEvent = function() {
     }
 
     if (isNull(fileDialogInfo)) {
-        this.sourceDi.destroy();
+        destr(this.sourceDi);
         this.sourceDi = undefined;
         this.terminate();
         return;
@@ -67,7 +72,7 @@ ImportFile.prototype.beginEvent = function() {
     if (this.sourceDi.importFile(fileDialogInfo[0], fileDialogInfo[1], false)!==RDocumentInterface.IoErrorNoError) {
         EAction.handleUserWarning(qsTr("Error while importing file %1").arg(fileDialogInfo[0]));
         if (!isNull(this.sourceDi)) {
-            this.sourceDi.destroy();
+            destr(this.sourceDi);
             this.sourceDi = undefined;
         }
         this.terminate();
@@ -77,27 +82,35 @@ ImportFile.prototype.beginEvent = function() {
 
 ImportFile.prototype.finishEvent = function() {
     if (!isNull(this.sourceDi)) {
-        this.sourceDi.destroy();
+        destr(this.sourceDi);
     }
     Paste.prototype.finishEvent.call(this);
 };
 
+ImportFile.prototype.initOperation = function(op) {
+    if (this.asBlock && !isNull(this.blockName) && this.blockName.length>0) {
+        op.setBlockName(this.blockName);
+    }
+    //op.setCopyAllLayers(true);
+    //op.setCopyEmptyBlocks(true);
+};
 
 ImportFile.prototype.getFileName = function() {
     var lastOpenFileDir = RSettings.getStringValue("ImportFile/Path", RSettings.getDocumentsLocation());
 
-    var filters = RFileImporterRegistry.getFilterStrings();
-    if (filters.length===0) {
+    var filterStrings = RFileImporterRegistry.getFilterStrings();
+    filterStrings = translateFilterStrings(filterStrings);
+    if (filterStrings.length===0) {
         EAction.handleUserWarning(qsTr("No import filters have been found. Aborting..."));
         return undefined;
     }
 
-    filters = new Array(qsTr("All Files") + " (*)").concat(filters);
+    filterStrings = new Array(qsTr("All Files") + " (*)").concat(filterStrings);
 
     var appWin = EAction.getMainWindow();
     var fileDialog = new QFileDialog(appWin, qsTr("Import Drawing"), lastOpenFileDir, "");
-    var allFilter = filters[0];
-    fileDialog.setNameFilters(filters);
+    var allFilter = filterStrings[0];
+    fileDialog.setNameFilters(filterStrings);
     fileDialog.selectNameFilter(allFilter);
     fileDialog.setOption(QFileDialog.DontUseNativeDialog, getDontUseNativeDialog());
     if (!isNull(QFileDialog.DontUseCustomDirectoryIcons)) {
@@ -106,14 +119,14 @@ ImportFile.prototype.getFileName = function() {
     fileDialog.fileMode = QFileDialog.ExistingFiles;
     fileDialog.setLabelText(QFileDialog.FileType, qsTr("Format:"));
     if (!fileDialog.exec()) {
-        fileDialog.destroy();
+        destr(fileDialog);
         EAction.activateMainWindow();
         return undefined;
     }
 
     var fileNames = fileDialog.selectedFiles();
     if (fileNames.length===0) {
-        fileDialog.destroy();
+        destr(fileDialog);
         EAction.activateMainWindow();
         return undefined;
     }
@@ -141,8 +154,30 @@ ImportFile.prototype.getFileName = function() {
 
     var nameFilter = fileDialog.selectedNameFilter();
 
-    fileDialog.destroy();
+    destr(fileDialog);
     EAction.activateMainWindow();
 
+    //this.blockName = new QFileInfo(fileNames[0]).baseName();
+    //RSettings.setValue("ImportFile/BlockName", new QFileInfo(fileNames[0]).baseName());
+    var optionsToolBar = EAction.getOptionsToolBar();
+    if (!isNull(optionsToolBar)) {
+        var leBlockName = optionsToolBar.findChild("BlockName");
+        if (!isNull(leBlockName)) {
+            var blockName = new QFileInfo(fileNames[0]).completeBaseName();
+            blockName = RDxfServices.getSafeBlockName(blockName);
+            leBlockName.text = blockName;
+        }
+    }
+
     return [ fileNames[0], nameFilter ];
+};
+
+ImportFile.prototype.slotAsBlockChanged = function(value) {
+    this.asBlock = value;
+    this.updatePreview(true);
+};
+
+ImportFile.prototype.slotBlockNameChanged = function(value) {
+    this.blockName = value;
+    this.updatePreview(true);
 };

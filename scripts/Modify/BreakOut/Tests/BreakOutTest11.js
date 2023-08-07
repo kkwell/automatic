@@ -15,9 +15,10 @@ BreakOutTest11.prototype.test00 = function() {
     qDebug('running BreakOutTest11.test00()...');
     this.setUp();
     this.importFile('scripts/Modify/BreakOut/Tests/data/closed_polyline.dxf');
-    TdbTest.clickOnWidget('MainWindow::CadQToolBar::CadToolBar::MainToolsPanel::ModifyToolsPanelButton');
-    TdbTest.clickOnWidget('MainWindow::CadQToolBar::CadToolBar::ModifyToolsPanel::BreakOutButton');
-    this.setToolOption('BreakOut/RemoveSegment', 'true');
+    TdbTest.clickOnWidget('MainWindow::CadToolBar::MainToolsPanel::ModifyToolsPanelButton');
+    TdbTest.clickOnWidget('MainWindow::CadToolBar::ModifyToolsPanel::BreakOutProButton');
+    this.setToolOption('BreakOutPro/RemoveSegment', 'true');
+    this.setToolOption('BreakOutPro/LineMode', 'false');
     this.updateToolOptions();
     this.setZoom(11.789473684210526, new RVector(-32.2321, -38.7545, 0, true));
     var p = new RVector(76, 55.464286);

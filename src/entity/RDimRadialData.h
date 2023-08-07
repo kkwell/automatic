@@ -68,17 +68,21 @@ public:
 
     virtual QList<RRefPoint> getReferencePoints(RS::ProjectionRenderingHint hint = RS::RenderTop) const;
 
-    virtual bool moveReferencePoint(const RVector& referencePoint, 
-        const RVector& targetPoint);
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
     virtual bool move(const RVector& offset);
     virtual bool rotate(double rotation, const RVector& center);
     virtual bool scale(const RVector& scaleFactors, const RVector& center);
     virtual bool mirror(const RLine& axis);
 
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const;
+    //virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const;
     virtual double getMeasuredValue() const;
     virtual QString getAutoLabel() const;
+
+    virtual void to2D() {
+        RDimensionData::to2D();
+        chordPoint.z = 0.0;
+    }
 
 private:
     /** Chord point. Definition point from RDimensionData is center. */

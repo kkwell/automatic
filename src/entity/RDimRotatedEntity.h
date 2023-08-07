@@ -22,20 +22,20 @@
 
 #include "entity_global.h"
 
-#include "RDimensionEntity.h"
+#include "RDimLinearEntity.h"
 #include "RDimRotatedData.h"
 
 class RDocument;
 class RExporter;
 
 /**
- * Linear dimension entity class.
+ * Rotated, linear dimension entity class.
  *
  * \scriptable
  * \sharedPointerSupport
  * \ingroup entity
  */
-class QCADENTITY_EXPORT RDimRotatedEntity: public RDimensionEntity {
+class QCADENTITY_EXPORT RDimRotatedEntity: public RDimLinearEntity {
 
     Q_DECLARE_TR_FUNCTIONS(RDimRotatedEntity)
 
@@ -43,6 +43,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -61,11 +62,37 @@ public:
     static RPropertyTypeId PropertyLowerTolerance;
     static RPropertyTypeId PropertyMeasuredValue;
 
-    static RPropertyTypeId PropertyLinearFactor;
-    static RPropertyTypeId PropertyDimScale;
+    static RPropertyTypeId PropertyDimscale;
+    static RPropertyTypeId PropertyDimlfac;
+    static RPropertyTypeId PropertyDimtxt;
+    static RPropertyTypeId PropertyDimgap;
+    static RPropertyTypeId PropertyDimasz;
+    //static RPropertyTypeId PropertyDimdli;
+    static RPropertyTypeId PropertyDimexe;
+    static RPropertyTypeId PropertyDimexo;
+    static RPropertyTypeId PropertyDimtad;
+    static RPropertyTypeId PropertyDimtih;
+    static RPropertyTypeId PropertyDimtsz;
+    static RPropertyTypeId PropertyDimlunit;
+    static RPropertyTypeId PropertyDimdec;
+    static RPropertyTypeId PropertyDimdsep;
+    static RPropertyTypeId PropertyDimzin;
+//    static RPropertyTypeId PropertyDimaunit;
+//    static RPropertyTypeId PropertyDimadec;
+//    static RPropertyTypeId PropertyDimazin;
+    static RPropertyTypeId PropertyArchTick;
+    static RPropertyTypeId PropertyDimclrt;
+
+//    static RPropertyTypeId PropertyLinearFactor;
+//    static RPropertyTypeId PropertyDimScale;
     static RPropertyTypeId PropertyDimBlockName;
     static RPropertyTypeId PropertyAutoTextPos;
     static RPropertyTypeId PropertyFontName;
+    static RPropertyTypeId PropertyArrow1Flipped;
+    static RPropertyTypeId PropertyArrow2Flipped;
+
+    static RPropertyTypeId PropertyExtLineFix;
+    static RPropertyTypeId PropertyExtLineFixLength;
 
     static RPropertyTypeId PropertyDimensionLinePosX;
     static RPropertyTypeId PropertyDimensionLinePosY;
@@ -87,19 +114,23 @@ public:
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityDimRotated;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RDimRotatedEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RDimRotatedEntity::getRtti());
     }
 
     virtual RDimRotatedEntity* clone() const {
         return new RDimRotatedEntity(*this);
     }
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual RDimRotatedData& getData() {
         return data;

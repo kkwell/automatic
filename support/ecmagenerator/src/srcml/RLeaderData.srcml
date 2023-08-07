@@ -25,8 +25,9 @@
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RDocument.h"</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RDimLinearData.h"</cpp:file></cpp:include>
-<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RVector.h"</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RPolyline.h"</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RTriangle.h"</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RVector.h"</cpp:file></cpp:include>
 
 <comment type="block">/**
  * Leader entity data class.
@@ -35,7 +36,7 @@
  * \copyable
  * \ingroup entity
  */</comment>
-<class>class <macro><name>QCADENTITY_EXPORT</name></macro> <name>RLeaderData</name><super>: <specifier>public</specifier> <name>REntityData</name>, <specifier>protected</specifier> <name>RPolyline</name></super> <block>{<private type="default">
+<class>class <macro><name>QCADENTITY_EXPORT</name></macro> <name>RLeaderData</name><super>: <specifier>public</specifier> <name>REntityData</name>, <specifier>public</specifier> <name>RPolyline</name></super> <block>{<private type="default">
     <decl_stmt><decl><type><name>friend</name> class</type> <name>RLeaderEntity</name></decl>;</decl_stmt>
 
 </private><protected>protected:
@@ -52,11 +53,125 @@
         <return>return <expr><name>this</name></expr>;</return>
     }</block></function>
 
-    <function_decl><type><name>double</name></type> <name>getDimasz</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>void</name></type> <name>setDimaszOverride</name><parameter_list>(<param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list>;</function_decl>
+    <function><type><name>bool</name></type> <name>isValid</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>RPolyline</name>::<name>isValid</name></name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getEndPoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>subEntityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>getEndPoints</name></name><argument_list>(<argument><expr><name>queryBox</name></expr></argument>, <argument><expr><name>subEntityIds</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>void</name></type> <name>setZ</name><parameter_list>(<param><decl><type><name>double</name></type> <name>z</name></decl></param>)</parameter_list> <block>{
+        <constructor_decl><name>RPolyline::setZ</name><parameter_list>(<param><decl><type><name>z</name></type></decl></param>)</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>virtual</name> <name>void</name></type> <name>to2D</name><parameter_list>()</parameter_list> <block>{
+        <constructor_decl><name>RPolyline::to2D</name><parameter_list>()</parameter_list>;</constructor_decl>
+    }</block></function>
+    <function><type><name>virtual</name> <name>RBox</name></type> <name>getBoundingBox</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>ignoreEmpty</name>=<init><expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>getBoundingBox</name></name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getMiddlePoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>subEntityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>getMiddlePoints</name></name><argument_list>(<argument><expr><name>queryBox</name></expr></argument>, <argument><expr><name>subEntityIds</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getCenterPoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>subEntityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>getCenterPoints</name></name><argument_list>(<argument><expr><name>queryBox</name></expr></argument>, <argument><expr><name>subEntityIds</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getArcReferencePoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>getArcReferencePoints</name></name><argument_list>(<argument><expr><name>queryBox</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getPointsWithDistanceToEnd</name><parameter_list>(<param><decl><type><name>double</name></type> <name>distance</name></decl></param>, <param><decl><type><name>int</name></type> <name>from</name> =<init> <expr><name><name>RS</name>::<name>FromAny</name></name></expr></init></decl></param>, <param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>subEntityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>getPointsWithDistanceToEnd</name></name><argument_list>(<argument><expr><name>distance</name></expr></argument>, <argument><expr><name>from</name></expr></argument>, <argument><expr><name>queryBox</name></expr></argument>, <argument><expr><name>subEntityIds</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getIntersectionPoints</name><parameter_list>(<param><decl><type><name>const</name> <name>REntityData</name>&amp;</type> <name>other</name></decl></param>, <param><decl><type><name>bool</name></type> <name>limited</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>same</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name>QPair<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>, <argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name>*</type> <name>entityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>getIntersectionPoints</name></name><argument_list>(<argument><expr><name>other</name></expr></argument>, <argument><expr><name>limited</name></expr></argument>, <argument><expr><name>same</name></expr></argument>, <argument><expr><name>queryBox</name></expr></argument>, <argument><expr><name>ignoreComplex</name></expr></argument>, <argument><expr><name>entityIds</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RVector</name></argument>&gt;</argument_list></name></type> <name>getIntersectionPoints</name><parameter_list>(<param><decl><type><name>const</name> <name>RShape</name>&amp;</type> <name>shape</name></decl></param>, <param><decl><type><name>bool</name></type> <name>limited</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>getIntersectionPoints</name></name><argument_list>(<argument><expr><name>shape</name></expr></argument>, <argument><expr><name>limited</name></expr></argument>, <argument><expr><name>queryBox</name></expr></argument>, <argument><expr><name>ignoreComplex</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>RVector</name></type> <name>getVectorTo</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>point</name></decl></param>, <param><decl><type><name>bool</name></type> <name>limited</name>=<init><expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>double</name></type> <name>strictRange</name> =<init> <expr><name>RMAXDOUBLE</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>getVectorTo</name></name><argument_list>(<argument><expr><name>point</name></expr></argument>, <argument><expr><name>limited</name></expr></argument>, <argument><expr><name>strictRange</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>double</name></type> <name>getDistanceTo</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>point</name></decl></param>, <param><decl><type><name>bool</name></type> <name>limited</name> =<init> <expr><name>true</name></expr></init></decl></param>, <param><decl><type><name>double</name></type> <name>range</name> =<init> <expr>0.0</expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>draft</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>double</name></type> <name>strictRange</name> =<init> <expr><name>RMAXDOUBLE</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>getDistanceTo</name></name><argument_list>(<argument><expr><name>point</name></expr></argument>, <argument><expr><name>limited</name></expr></argument>, <argument><expr><name>range</name></expr></argument>, <argument><expr><name>draft</name></expr></argument>, <argument><expr><name>strictRange</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>bool</name></type> <name>intersectsWith</name><parameter_list>(<param><decl><type><name>const</name> <name>RShape</name>&amp;</type> <name>shape</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>intersectsWith</name></name><argument_list>(<argument><expr><name>shape</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>bool</name></type> <name>move</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>offset</name></decl></param>)</parameter_list> <block>{
+        <return>return <expr><call><name><name>RPolyline</name>::<name>move</name></name><argument_list>(<argument><expr><name>offset</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>bool</name></type> <name>rotate</name><parameter_list>(<param><decl><type><name>double</name></type> <name>rotation</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name> =<init> <expr><name>RDEFAULT_RVECTOR</name></expr></init></decl></param>)</parameter_list> <block>{
+        <return>return <expr><call><name><name>RPolyline</name>::<name>rotate</name></name><argument_list>(<argument><expr><name>rotation</name></expr></argument>, <argument><expr><name>center</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>bool</name></type> <name>mirror</name><parameter_list>(<param><decl><type><name>const</name> <name>RLine</name>&amp;</type> <name>axis</name></decl></param>)</parameter_list> <block>{
+        <return>return <expr><call><name><name>RPolyline</name>::<name>mirror</name></name><argument_list>(<argument><expr><name>axis</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>bool</name></type> <name>mirror</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>axis1</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>axis2</name></decl></param>)</parameter_list> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>mirror</name></name><argument_list>(<argument><expr><name>axis1</name></expr></argument>, <argument><expr><name>axis2</name></expr></argument>)</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>bool</name></type> <name>flipHorizontal</name><parameter_list>()</parameter_list> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>flipHorizontal</name></name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>bool</name></type> <name>flipVertical</name><parameter_list>()</parameter_list> <block>{
+        <return>return <expr><call><name><name>REntityData</name>::<name>flipVertical</name></name><argument_list>()</argument_list></call></expr>;</return>
+    }</block></function>
 
-    <function_decl><type><name>double</name></type> <name>getDimScale</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>fromDocument</name>=<init><expr><name>true</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>void</name></type> <name>setDimScaleOverride</name><parameter_list>(<param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list>;</function_decl>
+    <function><type><name>double</name></type> <name>getDimasz</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>scale</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <decl_stmt><decl><type><name>double</name></type> <name>v</name> =<init> <expr>2.5</expr></init></decl>;</decl_stmt>
+
+        <comment type="line">// get value from override:</comment>
+        <if>if <condition>(<expr><name>dimasz</name>&gt;0.0</expr>)</condition><then> <block>{
+            <expr_stmt><expr><name>v</name> = <name>dimasz</name></expr>;</expr_stmt>
+        }</block></then>
+
+        <else>else <if>if <condition>(<expr><name>document</name>!=<name>NULL</name></expr>)</condition><then> <block>{
+            <decl_stmt><decl><type><name>QSharedPointer<argument_list>&lt;<argument><name>RDimStyle</name></argument>&gt;</argument_list></name></type> <name>dimStyle</name> =<init> <expr><name>document</name>-&gt;<call><name>queryDimStyleDirect</name><argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+            <if>if <condition>(<expr>!<name>dimStyle</name>.<call><name>isNull</name><argument_list>()</argument_list></call></expr>)</condition><then> <block>{
+                <comment type="line">// get value from dimension style:</comment>
+                <expr_stmt><expr><name>v</name> = <name>dimStyle</name>-&gt;<call><name>getDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMASZ</name></name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+            }</block></then>
+            <else>else <block>{
+                <comment type="line">// TODO: get value from document (should never happen):</comment>
+                <constructor_decl><name>Q_ASSERT</name><parameter_list>(<param><decl><type><name>false</name></type></decl></param>)</parameter_list>;</constructor_decl>
+            }</block></else></if>
+        }</block></then></if></else></if>
+
+        <if>if <condition>(<expr><name>scale</name></expr>)</condition><then> <block>{
+            <expr_stmt><expr><name>v</name> *= <call><name>getDimscale</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+        }</block></then></if>
+
+        <return>return <expr><name>v</name></expr>;</return>
+    }</block></function>
+
+    <function><type><name>void</name></type> <name>setDimasz</name><parameter_list>(<param><decl><type><name>double</name></type> <name>v</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>dimasz</name> = <name>v</name></expr>;</expr_stmt>
+        <constructor_decl><name>update</name><parameter_list>()</parameter_list>;</constructor_decl>
+    }</block></function>
+
+    <function><type><name>double</name></type> <name>getDimscale</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <comment type="line">// get value from override:</comment>
+        <if>if <condition>(<expr><name>dimscale</name>&gt;0.0</expr>)</condition><then> <block>{
+            <return>return <expr><name>dimscale</name></expr>;</return>
+        }</block></then></if>
+
+        <decl_stmt><decl><type><name>double</name></type> <name>v</name> =<init> <expr>1.0</expr></init></decl>;</decl_stmt>
+        <if>if <condition>(<expr><name>document</name>!=<name>NULL</name></expr>)</condition><then> <block>{
+            <decl_stmt><decl><type><name>QSharedPointer<argument_list>&lt;<argument><name>RDimStyle</name></argument>&gt;</argument_list></name></type> <name>dimStyle</name> =<init> <expr><name>document</name>-&gt;<call><name>queryDimStyleDirect</name><argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+            <if>if <condition>(<expr>!<name>dimStyle</name>.<call><name>isNull</name><argument_list>()</argument_list></call></expr>)</condition><then> <block>{
+                <comment type="line">// get value from dimension style:</comment>
+                <expr_stmt><expr><name>v</name> = <name>dimStyle</name>-&gt;<call><name>getDouble</name><argument_list>(<argument><expr><name><name>RS</name>::<name>DIMSCALE</name></name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+            }</block></then>
+            <else>else <block>{
+                <comment type="line">// TODO: get value from document (should never happen):</comment>
+                <constructor_decl><name>Q_ASSERT</name><parameter_list>(<param><decl><type><name>false</name></type></decl></param>)</parameter_list>;</constructor_decl>
+            }</block></else></if>
+        }</block></then></if>
+
+        <return>return <expr><name>v</name></expr>;</return>
+    }</block></function>
+
+    <function><type><name>void</name></type> <name>setDimscale</name><parameter_list>(<param><decl><type><name>double</name></type> <name>f</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>dimscale</name> = <name>f</name></expr>;</expr_stmt>
+        <constructor_decl><name>update</name><parameter_list>()</parameter_list>;</constructor_decl>
+    }</block></function>
 
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>scaleVisualProperties</name><parameter_list>(<param><decl><type><name>double</name></type> <name>scaleFactor</name></decl></param>)</parameter_list>;</function_decl>
 
@@ -66,7 +181,7 @@
     }</block></function>
 
     <function_decl><type><name>bool</name></type> <name>canHaveArrowHead</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
-    <function_decl><type><name>bool</name></type> <name>updateArrowHead</name><parameter_list>()</parameter_list>;</function_decl>
+    <function_decl><type><name>bool</name></type> <name>updateArrowHead</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
 <comment type="line">//    void setPolyline(const RPolyline&amp; polyline) {</comment>
 <comment type="line">//        *((RPolyline*)this) = polyline;</comment>
@@ -92,9 +207,17 @@
         <constructor_decl><name>RPolyline::appendVertex</name><parameter_list>(<param><decl><type><name>vertex</name></type></decl></param>)</parameter_list>;</constructor_decl>
     }</block></function>
 
+    <function><type><name>bool</name></type> <name>isSplineShaped</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>splineShaped</name></expr>;</return>
+    }</block></function>
+
+    <function><type><name>void</name></type> <name>setSplineShaped</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>splineShaped</name> = <name>on</name></expr>;</expr_stmt>
+    }</block></function>
+
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RRefPoint</name></argument>&gt;</argument_list></name></type> <name>getReferencePoints</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>ProjectionRenderingHint</name></name></type> <name>hint</name> =<init> <expr><name><name>RS</name>::<name>RenderTop</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
-    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>moveReferencePoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>targetPoint</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>moveReferencePoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>targetPoint</name></decl></param>, <param><decl><type><name><name>Qt</name>::<name>KeyboardModifiers</name></name></type> <name>modifiers</name> =<init> <expr><name><name>Qt</name>::<name>NoModifier</name></name></expr></init></decl></param>)</parameter_list>;</function_decl>
 
     <function><type><name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getExploded</name><parameter_list>(<param><decl><type><name>int</name></type> <name>segments</name> =<init> <expr><name>RDEFAULT_MIN1</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><call><name><name>RPolyline</name>::<name>getExploded</name></name><argument_list>(<argument><expr><name>segments</name></expr></argument>)</argument_list></call></expr>;</return>
@@ -103,33 +226,31 @@
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>scale</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>scaleFactors</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>stretch</name><parameter_list>(<param><decl><type><name>const</name> <name>RPolyline</name>&amp;</type> <name>area</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>offset</name></decl></param>)</parameter_list>;</function_decl>
 
-    <function><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getShapes</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>segment</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
-        <macro><name>Q_UNUSED</name><argument_list>(<argument>queryBox</argument>)</argument_list></macro>
-        <macro><name>Q_UNUSED</name><argument_list>(<argument>ignoreComplex</argument>)</argument_list></macro>
-        <macro><name>Q_UNUSED</name><argument_list>(<argument>segment</argument>)</argument_list></macro>
-
-        <decl_stmt><decl><type><name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>ret</name></decl>;</decl_stmt>
-        <expr_stmt><expr><name>ret</name> &lt;&lt; <call><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name><argument_list>(<argument><expr>new <call><name>RPolyline</name><argument_list>(<argument><expr>*<name>this</name></expr></argument>)</argument_list></call></expr></argument>)</argument_list></call></expr>;</expr_stmt>
-        <if>if <condition>(<expr><name>arrowHead</name></expr>)</condition><then> <block>{
-            <expr_stmt><expr><name>ret</name> &lt;&lt; <call><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name><argument_list>(<argument><expr>new <call><name>RTriangle</name><argument_list>(<argument><expr><call><name>getArrowShape</name><argument_list>()</argument_list></call></expr></argument>)</argument_list></call></expr></argument>)</argument_list></call></expr>;</expr_stmt>
-        }</block></then></if>
-        <return>return <expr><name>ret</name></expr>;</return>
-    }</block></function>
-
+    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getShapes</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>segment</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>entityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>RTriangle</name></type> <name>getArrowShape</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function_decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>getDimLeaderBlockId</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>void</name></type> <name>setDimLeaderBlockId</name><parameter_list>(<param><decl><type><name><name>REntity</name>::<name>Id</name></name></type> <name>id</name></decl></param>)</parameter_list>;</function_decl>
 
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>update</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function><type><name>void</name></type> <name>clearStyleOverrides</name><parameter_list>()</parameter_list> <block>{
+        <expr_stmt><expr><name>dimscale</name> = -1.0</expr>;</expr_stmt>
+        <expr_stmt><expr><name>dimasz</name> = -1.0</expr>;</expr_stmt>
+        <constructor_decl><name>update</name><parameter_list>()</parameter_list>;</constructor_decl>
+    }</block></function>
+
 </public><private>private:
     <comment type="block">/** Arrow head on / off */</comment>
-    <decl_stmt><decl><type><name>bool</name></type> <name>arrowHead</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>mutable</name> <name>bool</name></type> <name>arrowHead</name></decl>;</decl_stmt>
     <comment type="block">/** Arrow size */</comment>
-    <decl_stmt><decl><type><name>double</name></type> <name>dimaszOverride</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>double</name></type> <name>dimasz</name></decl>;</decl_stmt>
     <comment type="block">/** Dimension scale */</comment>
-    <decl_stmt><decl><type><name>double</name></type> <name>dimScaleOverride</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>double</name></type> <name>dimscale</name></decl>;</decl_stmt>
     <comment type="block">/** Block to use instead of arrow */</comment>
     <decl_stmt><decl><type><name><name>RBlock</name>::<name>Id</name></name></type> <name>dimLeaderBlockId</name></decl>;</decl_stmt>
+    <comment type="block">/** Spline shaped leader */</comment>
+    <decl_stmt><decl><type><name>bool</name></type> <name>splineShaped</name></decl>;</decl_stmt>
 </private>}</block>;</class>
 
 <macro><name>Q_DECLARE_METATYPE</name><argument_list>(<argument>RLeaderData</argument>)</argument_list></macro>

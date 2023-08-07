@@ -155,6 +155,10 @@ Circle3T.prototype.pickEntity = function(event, preview) {
     var shape = undefined;
 
     if (this.state!==Circle3T.State.ChoosingSolution) {
+        if (!this.isEntitySnappable(entity)) {
+            // entity not on a snappable layer:
+            return;
+        }
         if (isNull(entity)) {
             return;
         }
@@ -202,9 +206,10 @@ Circle3T.prototype.pickEntity = function(event, preview) {
         break;
 
     case Circle3T.State.ChoosingShape3:
-        if (entityId!==this.entity3Id) {
+        // optimization breaks when choosing three segments of the same polyline:
+        //if (entityId!==this.entity3Id) {
             this.candidates = undefined;
-        }
+        //}
 
         this.entity3 = entity;
         this.entity3Id = entityId;
@@ -216,15 +221,21 @@ Circle3T.prototype.pickEntity = function(event, preview) {
         }
         else {
             var op = this.getOperation(false);
-            if (!isNull(op) && !isNull(this.candidates)) {
-                // only one solution:
-                if (this.candidates.length===1) {
-                    di.applyOperation(op);
-                    this.setState(Circle3T.State.ChoosingShape1);
+            if (!isNull(op)) {
+                if (!isNull(this.candidates)) {
+                    // only one solution:
+                    if (this.candidates.length===1) {
+                        di.applyOperation(op);
+                        this.setState(Circle3T.State.ChoosingShape1);
+                    }
+                    // multiple solutions:
+                    else {
+                        destr(op);
+                        this.setState(Circle3T.State.ChoosingSolution);
+                    }
                 }
-                // multiple solutions:
                 else {
-                    this.setState(Circle3T.State.ChoosingSolution);
+                    destr(op);
                 }
             }
             // no solution:
@@ -267,7 +278,11 @@ Circle3T.prototype.getOperation = function(preview) {
     var op = new RAddObjectsOperation();
     op.setText(this.getToolTitle());
     for (var i=0; i<shapes.length; i++) {
-        var entity = new RCircleEntity(doc, new RCircleData(shapes[i]));
+        var s = shapes[i];
+        if  (isFunction(s.data)) {
+            s = s.data();
+        }
+        var entity = new RCircleEntity(doc, new RCircleData(s));
         op.addObject(entity);
     }
 
@@ -284,7 +299,28 @@ Circle3T.prototype.getShapes = function(preview) {
     if (isNull(this.candidates)) {
         Apollonius.constructionShapes = [];
 
-        this.candidates = Apollonius.getSolutions(this.shape1.data(), this.shape2.data(), this.shape3.data());
+        var s1;
+        if (isFunction(this.shape1.data)) {
+            s1 = this.shape1.data();
+        }
+        else {
+            s1 = this.shape1;
+        }
+        var s2;
+        if (isFunction(this.shape2.data)) {
+            s2 = this.shape2.data();
+        }
+        else {
+            s2 = this.shape2;
+        }
+        var s3;
+        if (isFunction(this.shape3.data)) {
+            s3 = this.shape3.data();
+        }
+        else {
+            s3 = this.shape3;
+        }
+        this.candidates = Apollonius.getSolutions(s1, s2, s3);
         // filter out lines:
         this.candidates = ShapeAlgorithms.getCircleShapes(this.candidates);
     }

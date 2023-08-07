@@ -23,7 +23,7 @@
  *
  * \brief This module contains ECMAScript implementations of various ellipse drawing tools.
  */
-include("../Draw.js");
+include("scripts/Draw/Draw.js");
 
 /**
  * \class Ellipse
@@ -36,6 +36,20 @@ function Ellipse(guiAction) {
 
 Ellipse.prototype = new Draw();
 Ellipse.includeBasePath = includeBasePath;
+
+/**
+ * Ellipse shape post processing.
+ * \return ellipseShape or, if configured polyline.
+ */
+Ellipse.postProcess = function(ellipseShape) {
+    if (RSettings.getBoolValue("Ellipse/CreatePolyline", false)!==true) {
+        return ellipseShape;
+    }
+
+    var ellipseSegments = RSettings.getIntValue("Explode/EllipseSegments", 32);
+
+    return ellipseShape.approximateWithArcs(ellipseSegments);
+};
 
 Ellipse.prototype.beginEvent = function() {
     Draw.prototype.beginEvent.call(this);
@@ -73,7 +87,7 @@ Ellipse.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(true);
         action.setIcon(Ellipse.includeBasePath + "/Ellipse.svg");
-        action.setStatusTip(qsTr("Show ellipse tools"));
+        //action.setStatusTip(qsTr("Show ellipse tools"));
         action.setDefaultShortcut(new QKeySequence("w,e"));
         action.setNoState();
         action.setDefaultCommands(["ellipsemenu"]);

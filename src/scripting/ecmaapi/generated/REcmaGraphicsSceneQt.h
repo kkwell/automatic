@@ -62,10 +62,22 @@
         clearPreview
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        exportEntities
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        exportEntitiesThread
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        exportEntityThread
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         beginPath
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         endPath
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        transformAndApplyPatternPath
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         unexportEntity
@@ -122,6 +134,12 @@
         exportClipRectangle
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        exportTransform
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        exportEndTransform
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getLineTypePatternScale
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -131,16 +149,10 @@
         deleteDrawables
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        getDrawables
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
         hasPreview
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getPreviewEntityIds
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
-        getPreviewDrawables
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         addToPreview

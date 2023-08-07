@@ -32,6 +32,7 @@
 
 #include "RDebug.h"
 #include "RS.h"
+#include "RPropertyAttributes.h"
 
 /**
  * Represents unique property type IDs. Every property type an object can have
@@ -73,6 +74,8 @@ public:
     RPropertyTypeId(const RPropertyTypeId& other);
     RPropertyTypeId(long int id = INVALID_ID);
 
+    RPropertyTypeId& operator=(const RPropertyTypeId& other);
+
     long int getId() const;
     void setId(long int id);
     QString getCustomPropertyTitle() const;
@@ -88,31 +91,28 @@ public:
 //    QString getBlockAttributePrompt() const;
 //    QString getBlockAttributeId() const;
 
-    /**
-     * \nonscriptable
-     */
-    void generateId(const std::type_info& classInfo, 
-        const QString& groupTitle, const QString& title, bool forceNew = false);
-    /**
-     * \nonscriptable
-     */
-    void generateId(const std::type_info& classInfo, 
-        const RPropertyTypeId& other);
+    void generateId(RS::EntityType type,
+        const QString& groupTitle, const QString& title, bool forceNew = false,
+        RPropertyAttributes::Options options = RPropertyAttributes::NoOptions);
 
     /**
      * \nonscriptable
      */
-    static QSet<RPropertyTypeId> getPropertyTypeIds(
-            const std::type_info& classInfo);
+    void generateId(RS::EntityType type, const RPropertyTypeId& other);
+
     /**
      * \nonscriptable
      */
-    static bool hasPropertyType(const std::type_info& classInfo,
-            RPropertyTypeId propertyTypeId);
+    static QSet<RPropertyTypeId> getPropertyTypeIds(RS::EntityType type, RPropertyAttributes::Option = RPropertyAttributes::NoOptions);
+
+    /**
+     * \nonscriptable
+     */
+    static bool hasPropertyType(RS::EntityType type, RPropertyTypeId propertyTypeId);
+
     QString getPropertyGroupTitle() const;
     QString getPropertyTitle() const;
-    static RPropertyTypeId getPropertyTypeId(const QString& groupTitle,
-            const QString& title);
+    static RPropertyTypeId getPropertyTypeId(const QString& groupTitle, const QString& title);
 
     bool operator ==(const RPropertyTypeId& other) const;
     bool operator !=(const RPropertyTypeId& other) const;
@@ -124,22 +124,37 @@ public:
 
 private:
     long int id;
+    RPropertyAttributes::Options options;
     QString customPropertyTitle;
     QString customPropertyName;
 
     static long int counter;
-    static QMap<QString, QSet<RPropertyTypeId> > propertyTypeByObjectMap;
-    static QMap<long int, QPair<QString, QString> > titleMap;
+
+    // maps class ID to set of property IDs:
+    static QMap<RS::EntityType, QSet<RPropertyTypeId> > propertyTypeByObjectMap;
+
+    // maps class ID / option combinations to set of property IDs:
+    static QMap<QPair<RS::EntityType, RPropertyAttributes::Option>, QSet<RPropertyTypeId> > propertyTypeByObjectOptionMap;
+
+    // maps property type IDs to group title / title:
+    static QMap<long int, QPair<QString, QString> > idToTitleMap;
+
+    // maps group title / title to property ID:
+    static QMap<QString, QMap<QString, RPropertyTypeId> > titleToIdMap;
+
+    static QList<RPropertyAttributes::Option> cachedOptionList;
 };
 
 QCADCORE_EXPORT QDebug operator<<(QDebug dbg, const RPropertyTypeId& p);
 
-QCADCORE_EXPORT uint qHash(RPropertyTypeId propertyTypeId);
+QCADCORE_EXPORT uint qHash(const RPropertyTypeId& propertyTypeId);
 
 Q_DECLARE_METATYPE(RPropertyTypeId)
 Q_DECLARE_METATYPE(RPropertyTypeId*)
 Q_DECLARE_METATYPE(const RPropertyTypeId*)
 Q_DECLARE_METATYPE(QSet<RPropertyTypeId>)
 Q_DECLARE_METATYPE(QList<RPropertyTypeId>)
+typedef QPair<RPropertyTypeId, RS::KnownVariable> _RPairRPropertyTypeIdRSKnownVariable;
+Q_DECLARE_METATYPE(_RPairRPropertyTypeIdRSKnownVariable)
 
 #endif /* RPROPERTYTYPEID_H_ */

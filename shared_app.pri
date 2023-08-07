@@ -1,7 +1,10 @@
 include($$PWD/shared.pri)
 
+lessThan(QT_MAJOR_VERSION, 6) {
+    LIBS += -l$${RLIBNAME}ecmaapi
+}
+
 LIBS += \
-    -l$${RLIBNAME}ecmaapi \
     -l$${RLIBNAME}gui \
     -l$${RLIBNAME}entity \
     -l$${RLIBNAME}operations \
@@ -11,9 +14,7 @@ LIBS += \
     -l$${RLIBNAME}snap \
     -l$${RLIBNAME}core \
     -l$${RLIBNAME}stemmer \
-    -lstemmer \
-    -l$${RLIBNAME}zip \
-    -lquazip
+    -lstemmer
 
 !r_no_opennurbs {
     LIBS += \

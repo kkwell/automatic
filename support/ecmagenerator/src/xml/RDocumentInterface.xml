@@ -7,7 +7,6 @@ xmlns:rs="http://www.ribbonsoft.com">
   <class_decl name="RMouseEvent" />
   <class_decl name="ROperation" />
   <class_decl name="RPropertyEvent" />
-  <class_decl name="RSnap" />
   <class_decl name="RSnapRestriction" />
   <class_decl name="RScriptHandler" />
   <class_decl name="RTransaction" />
@@ -59,6 +58,12 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="RGraphicsView *"
       isPureVirtual="false" />
     </method>
+    <method name="getGraphicsSceneWithFocus"
+    cppName="getGraphicsSceneWithFocus" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RGraphicsScene *"
+      isPureVirtual="false" />
+    </method>
     <method name="addCoordinateListener"
     cppName="addCoordinateListener" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
@@ -92,13 +97,55 @@ xmlns:rs="http://www.ribbonsoft.com">
     <method name="notifyLayerListeners"
     cppName="notifyLayerListeners" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
-      <variant returnType="void" isPureVirtual="false" />
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="QList &lt; RLayer::Id &gt; &amp;"
+        typeName="QList &lt; RLayer::Id &gt;" name="layerIds"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="addTransactionListener"
+    cppName="addTransactionListener" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="int" isPureVirtual="false">
+        <arg type="RTransactionListener *"
+        typeName="RTransactionListener *" name="l"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="removeTransactionListener"
+    cppName="removeTransactionListener" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="int" typeName="int" name="key"
+        isConst="false" />
+      </variant>
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RTransactionListener *"
+        typeName="RTransactionListener *" name="l"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="notifyTransactionListeners"
+    cppName="notifyTransactionListeners" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RTransaction *" typeName="RTransaction *"
+        name="t" isConst="false" />
+      </variant>
     </method>
     <method name="clear" cppName="clear" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
         <arg type="bool" typeName="bool" name="beforeLoad"
         hasDefault="true" default="false" isConst="false" />
+      </variant>
+    </method>
+    <method name="deleteScriptHandler"
+    cppName="deleteScriptHandler" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString"
+        name="extension" isConst="true" />
       </variant>
     </method>
     <method name="getScriptHandler" cppName="getScriptHandler"
@@ -377,6 +424,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="setAllowSnapInterruption"
+    cppName="setAllowSnapInterruption" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
     <method name="updateAllEntities" cppName="updateAllEntities"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -387,6 +442,8 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
         <arg type="bool" typeName="bool" name="undone"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="invisible"
         hasDefault="true" default="false" isConst="false" />
       </variant>
       <variant returnType="void" isPureVirtual="false">
@@ -474,6 +531,9 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="true" />
         <arg type="bool" typeName="bool" name="notify"
         hasDefault="true" default="true" isConst="false" />
+        <arg type="QVariantMap &amp;" typeName="QVariantMap"
+        name="params" hasDefault="true"
+        default="RDEFAULT_QVARIANTMAP" isConst="true" />
       </variant>
     </method>
     <method name="importFile" cppName="importFile"
@@ -488,6 +548,9 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="true" />
         <arg type="bool" typeName="bool" name="notify"
         hasDefault="true" default="true" isConst="false" />
+        <arg type="QVariantMap &amp;" typeName="QVariantMap"
+        name="params" hasDefault="true"
+        default="RDEFAULT_QVARIANTMAP" isConst="true" />
       </variant>
     </method>
     <method name="getCorrectedFileName"
@@ -511,6 +574,20 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="true" />
         <arg type="bool" typeName="bool" name="resetModified"
         hasDefault="true" default="true" isConst="false" />
+      </variant>
+    </method>
+    <method name="tagState" cppName="tagState" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString" name="tag"
+        hasDefault="true" default="&quot;&quot;" isConst="true" />
+      </variant>
+    </method>
+    <method name="undoToTag" cppName="undoToTag" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="QString &amp;" typeName="QString" name="tag"
+        hasDefault="true" default="&quot;&quot;" isConst="true" />
       </variant>
     </method>
     <method name="undo" cppName="undo" specifier="public"
@@ -541,6 +618,11 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="RSnap *" isPureVirtual="false" />
     </method>
+    <method name="getSnapStatus" cppName="getSnapStatus"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="RSnap::Status" isPureVirtual="false" />
+    </method>
     <method name="setSnapRestriction" cppName="setSnapRestriction"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -563,6 +645,19 @@ xmlns:rs="http://www.ribbonsoft.com">
         name="event" isConst="false" />
         <arg type="bool" typeName="bool" name="preview"
         hasDefault="true" default="false" isConst="false" />
+      </variant>
+    </method>
+    <method name="restrictOrtho" cppName="restrictOrtho"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="RVector" isPureVirtual="false">
+        <arg type="RVector &amp;" typeName="RVector"
+        name="position" isConst="true" />
+        <arg type="RVector &amp;" typeName="RVector"
+        name="relativeZero" isConst="true" />
+        <arg type="RS::OrthoMode" typeName="RS::OrthoMode"
+        name="mode" hasDefault="true" default="RS :: Orthogonal"
+        isConst="false" />
       </variant>
     </method>
     <method name="getClosestEntity" cppName="getClosestEntity"
@@ -815,9 +910,8 @@ xmlns:rs="http://www.ribbonsoft.com">
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
-        <arg type="QList &lt; RObject::Id &gt; &amp;"
-        typeName="QList &lt; RObject::Id &gt;" name="objectIds"
-        isConst="false" />
+        <arg type="RTransaction &amp;" typeName="RTransaction"
+        name="transaction" isConst="false" />
       </variant>
     </method>
     <method name="getRelativeZero" cppName="getRelativeZero"

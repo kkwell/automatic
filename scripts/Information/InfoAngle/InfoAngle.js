@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Information.js");
+include("scripts/Information/Information.js");
 
 /**
  * \class InfoAngle
@@ -76,7 +76,7 @@ InfoAngle.prototype.setState = function(state) {
         var trSecondLine = qsTr("Specify second line");
         this.setCommandPrompt(trSecondLine);
         this.setLeftMouseTip(trSecondLine);
-        this.setRightMouseTip(qsTr("Done"));
+        this.setRightMouseTip(EAction.trDone);
         break;
     }
 
@@ -91,6 +91,11 @@ InfoAngle.prototype.pickEntity = function(event, preview) {
     var entity = doc.queryEntity(entityId);
     var op;
 
+    if (!this.isEntitySnappable(entity)) {
+        // entity not on a snappable layer:
+        return;
+    }
+
     // keep showing preview after 2nd entity has been set:
     if (!this.addToDrawing) {
         op = this.getOperation(preview);
@@ -99,7 +104,7 @@ InfoAngle.prototype.pickEntity = function(event, preview) {
                 di.previewOperation(op);
             }
             else {
-                op.destroy();
+                destr(op);
             }
         }
     }
@@ -158,13 +163,26 @@ InfoAngle.prototype.pickEntity = function(event, preview) {
                 di.setRelativeZero(this.point2);
             }
             else {
-                op.destroy();
+                destr(op);
             }
 
-            this.setState(InfoAngle.State.SettingFirstShape);
             if (!isNull(this.arc)) {
-                var angleText = this.formatAngularResultCmd(this.arc.getAngleLength());
+                var value = this.arc.getAngleLength();
+                var angleText = this.formatAngularResultCmd(value);
                 EAction.getMainWindow().handleUserInfo(qsTr("Angle:") + " " + angleText);
+
+                if (this.autoTerminate) {
+                    this.updateLineEdit(RMath.rad2deg(value));
+                    this.setNoState(false);
+                    this.terminate();
+                    return;
+                }
+                else {
+                    this.setState(InfoAngle.State.SettingFirstShape);
+                }
+            }
+            else {
+                this.setState(InfoAngle.State.SettingFirstShape);
             }
         }
         break;
@@ -184,7 +202,7 @@ InfoAngle.prototype.addMeasuringArc = function(op, center, preview) {
 
     // add label:
     var view = di.getLastKnownViewWithFocus();
-    view = view.getRGraphicsView();
+    view = getRGraphicsView(view);
     var label = this.formatAngularResult(this.arc.getAngleLength());
     view.clearTextLabels();
     this.addTextLabel(op, view, this.point2, label, preview);
@@ -199,7 +217,8 @@ InfoAngle.prototype.getOperation = function(preview) {
     var op = new RAddObjectsOperation();
     op.setText(this.getToolTitle());
 
-    var sol = this.shape1.getIntersectionPoints(this.shape2.data(), false);
+
+    var sol = this.shape1.getIntersectionPoints(getPtr(this.shape2), false);
     if (!isNull(sol) && sol.length > 0) {
         var intersection = sol[0];
         if (intersection.isValid()) {

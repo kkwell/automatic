@@ -16,15 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with QCAD.
  */
+#include <QtGlobal>
+
 #ifdef Q_OS_WIN
 // for _isnan:
 #include <cfloat>
 #endif
 
 #include <complex>
+#include <QCryptographicHash>
 
-#include <QRegExp>
-#include <QScriptEngine>
+#if QT_VERSION >= 0x060000
+#  include <QJSEngine>
+#else
+#  include <QScriptEngine>
+#endif
 
 #include "RDebug.h"
 #include "RMath.h"
@@ -160,15 +166,16 @@ double RMath::eval(const QString& expression, bool* ok) {
 
     // 'correct' commas in numbers to points:
     if (RSettings::getNumberLocale().decimalPoint()==',') {
-        expr.replace(QRegExp("(\\d*),(\\d+)"), "\\1.\\2");
+        expr.replace(QRegularExpression("(\\d*),(\\d+)"), "\\1.\\2");
     }
 
     int idx = -1;
 
     // convert surveyor type angles (e.g. N10d30'12.5"E) to degrees:
-    if (expr.contains(QRegExp("[NESW]", Qt::CaseInsensitive))) {
+    QRegularExpression re = RS::createRegEpCI("[NESW]");
+    if (expr.contains(re)) {
         // \b(?:(?:([NS])(?:([+-]?)(?:(?:(\d*\.?\d*)[d°])?(?:(\d*\.?\d*)')?(?:(\d*\.?\d*)")?|(\d*))([EW]))?)|([EW]))\b
-        QRegExp re(
+        QRegularExpression re = RS::createRegEpCI(
             "\\b"                               // a word
             "(?:"
               "(?:"
@@ -189,10 +196,12 @@ double RMath::eval(const QString& expression, bool* ok) {
               "([EW])"                          // only east (0d) or west (180d)
             ")"
             "\\b",
-            Qt::CaseInsensitive, QRegExp::RegExp2);
+            true
+        );
+        QRegularExpressionMatch match;
 
         do {
-            idx = re.indexIn(expr);
+            idx = RS::indexIn(re, match, expr);
             if (idx==-1) {
                 break;
             }
@@ -200,11 +209,11 @@ double RMath::eval(const QString& expression, bool* ok) {
             QString sign;
 
             // "E" or "W":
-            if (!re.cap(8).isEmpty()) {
-                if (re.cap(8).toUpper()=="E") {
+            if (!RS::captured(re, match, 8).isEmpty()) {
+                if (RS::captured(re, match, 8).toUpper()=="E") {
                     angle = 0.0;
                 }
-                else if (re.cap(8).toUpper()=="W") {
+                else if (RS::captured(re, match, 8).toUpper()=="W") {
                     angle = 180.0;
                 }
                 else {
@@ -217,22 +226,22 @@ double RMath::eval(const QString& expression, bool* ok) {
             }
             // "[NS]...[EW]":
             else {
-                bool north = re.cap(1).toUpper()=="N";
-                bool south = re.cap(1).toUpper()=="S";
-                sign = re.cap(2);
+                bool north = RS::captured(re, match, 1).toUpper()=="N";
+                bool south = RS::captured(re, match, 1).toUpper()=="S";
+                sign = RS::captured(re, match, 2);
                 double degrees = 0.0;
                 double minutes = 0.0;
                 double seconds = 0.0;
-                if (!re.cap(6).isEmpty()) {
-                    degrees = re.cap(6).toDouble(ok);
+                if (!RS::captured(re, match, 6).isEmpty()) {
+                    degrees = RS::captured(re, match, 6).toDouble(ok);
                 }
                 else {
-                    degrees = re.cap(3).toDouble(ok);
-                    minutes = re.cap(4).toDouble(ok);
-                    seconds = re.cap(5).toDouble(ok);
+                    degrees = RS::captured(re, match, 3).toDouble(ok);
+                    minutes = RS::captured(re, match, 4).toDouble(ok);
+                    seconds = RS::captured(re, match, 5).toDouble(ok);
                 }
-                bool east = re.cap(7).toUpper()=="E";
-                bool west = re.cap(7).toUpper()=="W";
+                bool east = RS::captured(re, match, 7).toUpper()=="E";
+                bool west = RS::captured(re, match, 7).toUpper()=="W";
 
                 double base = (north ? 90.0 : 270.0);
                 int dir = ((north && west) || (south && east) ? 1 : -1);
@@ -240,7 +249,7 @@ double RMath::eval(const QString& expression, bool* ok) {
             }
 
             expr.replace(
-                re.cap(),
+                RS::captured(re, match),
                 QString("%1%2").arg(sign).arg(angle, 0, 'g', 16)
             );
         } while(idx!=-1);
@@ -250,19 +259,18 @@ double RMath::eval(const QString& expression, bool* ok) {
 
     // convert radiant angles (e.g. "1.2r") to degrees:
     {
-        QRegExp re("((?:\\.\\d+)|(?:\\d+\\.\\d*)|(?:\\d+))r\\b", Qt::CaseInsensitive, QRegExp::RegExp2);
+        QRegularExpression re = RS::createRegEpCI("((?:\\.\\d+)|(?:\\d+\\.\\d*)|(?:\\d+))r\\b", true);
+        QRegularExpressionMatch match;
         do {
-            idx = re.indexIn(expr);
+            idx = RS::indexIn(re, match, expr);
             if (idx==-1) {
                 break;
             }
-            QString match = re.cap(1);
-            //qDebug() << "RMath::eval: match 001a is: " << match;
+            QString m = RS::captured(re, match, 1);
             expr.replace(
                 re,
-                QString("%1").arg(rad2deg(match.toDouble(ok)), 0, 'g', 16)
+                QString("%1").arg(rad2deg(m.toDouble(ok)), 0, 'g', 16)
             );
-            //qDebug() << "RMath::eval: expression 001a is: " << expr;
         } while(idx!=-1);
     }
 
@@ -270,25 +278,26 @@ double RMath::eval(const QString& expression, bool* ok) {
 
     // convert grad angles (e.g. "100g") to degrees:
     {
-        QRegExp re("((?:\\.\\d+)|(?:\\d+\\.\\d*)|(?:\\d+))g\\b", Qt::CaseInsensitive, QRegExp::RegExp2);
+        QRegularExpression re = RS::createRegEpCI("((?:\\.\\d+)|(?:\\d+\\.\\d*)|(?:\\d+))g\\b", true);
+        QRegularExpressionMatch match;
         do {
-            idx = re.indexIn(expr);
+            idx = RS::indexIn(re, match, expr);
             if (idx==-1) {
                 break;
             }
-            QString match = re.cap(1);
+            QString m = RS::captured(re, match, 1);
             expr.replace(
                 re,
-                QString("%1").arg(gra2deg(match.toDouble(ok)), 0, 'g', 16)
+                QString("%1").arg(gra2deg(m.toDouble(ok)), 0, 'g', 16)
             );
         } while(idx!=-1);
     }
 
     //qDebug() << "RMath::eval: expression 003 is: " << expr;
 
-    // convert explicitely indicated degree angles (e.g. "90d30'5\"") to degrees:
+    // convert explicitly indicated degree angles (e.g. "90d30'5\"") to degrees:
     {
-        QRegExp re(
+        QRegularExpression re = RS::createRegEpCI(
             "(?:[^a-zA-Z0-9]|^)"                                // not preceded by letter or number (could be part of a function)
             "("
               "(?:((?:\\.\\d+)|(?:\\d+\\.\\d*)|(?:\\d+))[d°])"  // degrees
@@ -296,9 +305,10 @@ double RMath::eval(const QString& expression, bool* ok) {
               "(?:((?:\\.\\d+)|(?:\\d+\\.\\d*)|(?:\\d+))\")?"   // seconds
             ")"
             "(?:[^\\d]|$)",             // followed by not a number or end
-            Qt::CaseInsensitive, QRegExp::RegExp2);
+            true);
+        QRegularExpressionMatch match;
         do {
-            idx = re.indexIn(expr);
+            idx = RS::indexIn(re, match, expr);
             if (idx==-1) {
                 break;
             }
@@ -306,14 +316,52 @@ double RMath::eval(const QString& expression, bool* ok) {
             double degrees = 0.0;
             double minutes = 0.0;
             double seconds = 0.0;
-            degrees = re.cap(2).toDouble(ok);
-            minutes = re.cap(3).toDouble(ok);
-            seconds = re.cap(4).toDouble(ok);
+            degrees = RS::captured(re, match, 2).toDouble(ok);
+            minutes = RS::captured(re, match, 3).toDouble(ok);
+            seconds = RS::captured(re, match, 4).toDouble(ok);
 
             double angle = degrees + minutes/60.0 + seconds/3600.0;
 
             expr.replace(
-                re.cap(1),
+                RS::captured(re, match, 1),
+                QString("%1").arg(angle, 0, 'g', 16)
+            );
+        } while(idx!=-1);
+    }
+
+    //qDebug() << "RMath::eval: expression 004 is: " << expr;
+
+    // convert explicitly indicated bearing angles (e.g. "90b30'5\"") to degrees:
+    {
+        QRegularExpression re = RS::createRegEpCI(
+            "(?:[^a-zA-Z0-9]|^)"                                // not preceded by letter or number (could be part of a function)
+            "("
+              "(?:((?:\\.\\d+)|(?:\\d+\\.\\d*)|(?:\\d+))b)"  // degrees
+              "(?:((?:\\.\\d+)|(?:\\d+\\.\\d*)|(?:\\d+))')?"    // minutes
+              "(?:((?:\\.\\d+)|(?:\\d+\\.\\d*)|(?:\\d+))\")?"   // seconds
+            ")"
+            "(?:[^\\d]|$)",             // followed by not a number or end
+            true);
+        QRegularExpressionMatch match;
+        do {
+            idx = RS::indexIn(re, match, expr);
+            if (idx==-1) {
+                break;
+            }
+
+            double degrees = 0.0;
+            double minutes = 0.0;
+            double seconds = 0.0;
+            degrees = RS::captured(re, match, 2).toDouble(ok);
+            minutes = RS::captured(re, match, 3).toDouble(ok);
+            seconds = RS::captured(re, match, 4).toDouble(ok);
+
+            double angle = degrees + minutes/60.0 + seconds/3600.0;
+            angle = 90.0 - angle;
+            angle = fmod(angle,360.0);
+
+            expr.replace(
+                RS::captured(re, match, 1),
                 QString("%1").arg(angle, 0, 'g', 16)
             );
         } while(idx!=-1);
@@ -322,14 +370,15 @@ double RMath::eval(const QString& expression, bool* ok) {
     // convert fraction notation to formula:
     // e.g. 7 3/32 to (7+3/32)
     {
-        QRegExp re("(\\d+)[ ]+(\\d+/\\d+)", Qt::CaseInsensitive, QRegExp::RegExp2);
+        QRegularExpression re = RS::createRegEpCI("(\\d+)[ ]+(\\d+/\\d+)", true);
+        QRegularExpressionMatch match;
         do {
-            idx = re.indexIn(expr);
+            idx = RS::indexIn(re, match, expr);
             if (idx==-1) {
                 break;
             }
-            QString numberString = re.cap(1);
-            QString fractionString = re.cap(2);
+            QString numberString = RS::captured(re, match, 1);
+            QString fractionString = RS::captured(re, match, 2);
             expr.replace(
                 re,
                 QString("(%1+%2)").arg(numberString).arg(fractionString)
@@ -340,20 +389,21 @@ double RMath::eval(const QString& expression, bool* ok) {
     // advanced feet/inch entering:
     // e.g. 12'3/4" -> (12*12+3/4)
     {
-        QRegExp re("(\\d+)'\\s*([^+\\-\"][^\"]*)\"", Qt::CaseInsensitive, QRegExp::RegExp2);
+        QRegularExpression re = RS::createRegEpCI("(\\d+)'\\s*([^+\\-\"][^\"]*)\"", true);
+        QRegularExpressionMatch match;
         do {
-            idx = re.indexIn(expr);
+            idx = RS::indexIn(re, match, expr);
             if (idx==-1) {
                 break;
             }
-            QString feetString = re.cap(1);
-            qDebug() << "feetString:" << feetString;
+            QString feetString = RS::captured(re, match, 1);
+            //qDebug() << "feetString:" << feetString;
             if (feetString.isEmpty()) {
                 feetString="0";
-                qDebug() << "> feetString:" << feetString;
+                //qDebug() << "> feetString:" << feetString;
             }
-            QString inchString = re.cap(2);
-            qDebug() << "inchString:" << inchString;
+            QString inchString = RS::captured(re, match, 2);
+            //qDebug() << "inchString:" << inchString;
             expr.replace(
                         re,
                         //       ((FT)*12+(IN))
@@ -370,14 +420,15 @@ double RMath::eval(const QString& expression, bool* ok) {
     // 10'   -> 10*12
     // an optional " at the end may be present and is ignored
     {
-        QRegExp re("(\\d+)'[ ]*(\\d*)(\"?)", Qt::CaseInsensitive, QRegExp::RegExp2);
+        QRegularExpression re = RS::createRegEpCI("(\\d+)'[ ]*(\\d*)(\"?)", true);
+        QRegularExpressionMatch match;
         do {
-            idx = re.indexIn(expr);
+            idx = RS::indexIn(re, match, expr);
             if (idx==-1) {
                 break;
             }
-            QString feetString = re.cap(1);
-            QString inchString = re.cap(2);
+            QString feetString = RS::captured(re, match, 1);
+            QString inchString = RS::captured(re, match, 2);
             expr.replace(
                         re,
                         QString("(%1*12%2%3)")
@@ -392,13 +443,14 @@ double RMath::eval(const QString& expression, bool* ok) {
     // e.g. 3" -> (3)
     // e.g. 3/4" -> (3/4)
     {
-        QRegExp re("([^+\\-\"][^\"]*)\"", Qt::CaseInsensitive, QRegExp::RegExp2);
+        QRegularExpression re = RS::createRegEpCI("([^+\\-\"][^\"]*)\"", true);
+        QRegularExpressionMatch match;
         do {
-            idx = re.indexIn(expr);
+            idx = RS::indexIn(re, match, expr);
             if (idx==-1) {
                 break;
             }
-            QString inchString = re.cap(1);
+            QString inchString = RS::captured(re, match, 1);
             expr.replace(
                         re,
                         QString("(%1)")
@@ -407,7 +459,11 @@ double RMath::eval(const QString& expression, bool* ok) {
         } while(idx!=-1);
     }
 
+#if QT_VERSION >= 0x060000
+    static QJSEngine e;
+#else
     static QScriptEngine e;
+#endif
 
     if (mathExt.isNull()) {
         QString inputJs = "scripts/input.js";
@@ -427,7 +483,11 @@ double RMath::eval(const QString& expression, bool* ok) {
     }
     e.evaluate(mathExt);
 
+#if QT_VERSION >= 0x060000
+    QJSValue res = e.evaluate(expr);
+#else
     QScriptValue res = e.evaluate(expr);
+#endif
 
     if (res.isError()) {
         if (ok!=NULL) {
@@ -485,6 +545,10 @@ QString RMath::angleToString(double a) {
 }
 
 QString RMath::trimTrailingZeroes(const QString& s) {
+    if (!s.contains('.')) {
+        return s;
+    }
+
     QString ret = s;
 
     bool done = false;
@@ -526,6 +590,19 @@ double RMath::rad2deg(double a) {
  */
 double RMath::gra2deg(double a) {
     return a / 400.0 * 360.0;
+}
+
+/**
+ * \return True if the given value is between the given limits.
+ * \param inclusive True to accept values close to the limits within the given tolerance.
+ */
+bool RMath::isBetween(double value, double limit1, double limit2, bool inclusive, double tolerance) {
+    if (fuzzyCompare(value, limit1, tolerance) || fuzzyCompare(value, limit2, tolerance)) {
+        return inclusive;
+    }
+    double min = qMin(limit1, limit2);
+    double max = qMax(limit1, limit2);
+    return (value>=min && value<=max);
 }
 
 /**
@@ -727,7 +804,7 @@ double RMath::makeAngleReadable(double angle, bool readable, bool* corrected) {
 }
 
 /**
- * \param angle the angle in rad
+ * \param angle The text angle in rad
  *
  * \param tolerance The tolerance by which the angle still maybe
  * in the unreadable range.
@@ -737,8 +814,7 @@ double RMath::makeAngleReadable(double angle, bool readable, bool* corrected) {
  */
 bool RMath::isAngleReadable(double angle, double tolerance) {
     double angleCorrected = getNormalizedAngle(angle);
-    if (angleCorrected > M_PI / 2.0 * 3.0 + tolerance || angleCorrected < M_PI
-            / 2.0 + tolerance) {
+    if (angleCorrected > M_PI / 2.0 * 3.0 + tolerance || angleCorrected < M_PI / 2.0 + tolerance) {
         return true;
     } else {
         return false;
@@ -807,7 +883,7 @@ void RMath::toFraction(double v, int maxDenominator, int& number, int& numerator
 }
 
 /**
- * \return Simlified fraction for the given fraction (numerator/denomiator).
+ * \return Simplified fraction for the given fraction (numerator/denomiator).
  */
 void RMath::simplify(int numerator, int denominator, int& numeratorRes, int& denominatorRes) {
     int g = getGcd(numerator, denominator);
@@ -891,7 +967,16 @@ RVector RMath::parseCoordinate(const QString& coordinateString, const RVector& r
     QChar decimalPoint = RSettings::getCharValue("Input/DecimalPoint", '.');
     QChar cartCoordSep = RSettings::getCharValue("Input/CartesianCoordinateSeparator", ',');
     QChar polCoordSep = RSettings::getCharValue("Input/PolarCoordinateSeparator", '<');
-    QChar relCoordPre = RSettings::getCharValue( "Input/RelativeCoordinatePrefix", '@');
+    QChar relCoordPre = RSettings::getCharValue("Input/RelativeCoordinatePrefix", '@');
+    // space means no prefix:
+    QChar absCoordPre = RSettings::getCharValue("Input/AbsoluteCoordinatePrefix", ' ');
+
+    if (relCoordPre==' ') {
+        relCoordPre = QChar();
+    }
+    if (absCoordPre==' ') {
+        absCoordPre = QChar();
+    }
 
     if (str.count(cartCoordSep)!=1 && str.count(polCoordSep)!=1) {
         // not a coordinate (not an error, could be another value such as a radius):
@@ -905,10 +990,25 @@ RVector RMath::parseCoordinate(const QString& coordinateString, const RVector& r
         return RVector::nanVector;
     }
 
+    bool gotPrefix = (str[0]==relCoordPre || str[0]==absCoordPre);
+
+    // default to absolute coordinates:
     bool relative = false;
-    if (str[0]==relCoordPre) {
-        relative = true;
+
+    if (gotPrefix) {
+        // prefix given:
+        if (str[0]==relCoordPre) {
+            relative = true;
+        }
+
+        // strip prefix:
         str = str.mid(1);
+    }
+    else {
+        // no prefix: coordinate is relative if relative coordinate prefix is empty:
+        if (relCoordPre.isNull() && !absCoordPre.isNull()) {
+            relative = true;
+        }
     }
 
     QStringList sl;
@@ -958,6 +1058,18 @@ RVector RMath::parseCoordinate(const QString& coordinateString, const RVector& r
     }
 
     return pos;
+}
+
+/**
+ * \return MD5 hash of given string as hex encoded string.
+ */
+QString RMath::getMd5Hash(const QString& data) {
+    QByteArray ba = QCryptographicHash::hash(data.toUtf8(), QCryptographicHash::Md5);
+#if QT_VERSION >= 0x050900
+    return QString(ba.toHex(0));
+#else
+    return QString(ba.toHex());
+#endif
 }
 
 void RMath::getQuadRoots(double p[], double r[][5]) {

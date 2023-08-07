@@ -88,6 +88,8 @@ public:
     //void setDocumentInterface(RDocumentInterface* di);
     //RDocumentInterface* getDocumentInterface() const;
 
+    void addShortcut(const QKeySequence& shortcut);
+    void removeShortcuts();
     /**
      * Sets the shortcut(s) for this action.
      *
@@ -96,10 +98,13 @@ public:
     void setShortcut(const QKeySequence& shortcut);
     void setDefaultShortcut(const QKeySequence& shortcut);
     void setShortcuts(const QList<QKeySequence>& shortcuts);
+    void setShortcutsFromStrings(const QStringList& shortcuts);
+    QList<QKeySequence> getShortcuts() const;
     void setDefaultShortcuts(const QList<QKeySequence>& shortcuts);
     QList<QKeySequence> getDefaultShortcuts();
     void setShortcutText(const QString& oriText);
     QString getShortcutText() const;
+    QString getShortcutsString(const QString& separator = ",", QKeySequence::SequenceFormat format = QKeySequence::PortableText) const;
 
     static void setGroupSortOrderStatic(QAction* a, int sortOrder);
     static void setGroupSortOrderOverrideStatic(QAction* a, const QString& widgetName, int sortOrder);
@@ -124,6 +129,9 @@ public:
     static void addSeparatorToWidget(QAction* a, QWidget* w);
     static void addToWidget(QAction* a, QWidget* w);
     static void removeFromWidget(QAction* a, QWidget* w);
+
+    static void updateIcons();
+    void updateIcon();
 
     /**
      * Sets the action icon to the given icon file.
@@ -344,6 +352,9 @@ public:
     static void clear();
 
     virtual void updateTransactionListener(RDocument* document, RTransaction* transaction = NULL);
+    virtual void setCurrentBlock(RDocument* document) {
+        Q_UNUSED(document);
+    }
     virtual void updateSelectionListener(RDocumentInterface* documentInterface);
     virtual void updateFocus(RDocumentInterface* documentInterface);
 
@@ -361,7 +372,7 @@ public slots:
     /**
      * Called when the action is triggered (e.g. a button is pressed or a menu chosen).
      */
-    bool slotTrigger(const QString& command = QString::null);
+    bool slotTrigger(const QString& command = QString());
 
 signals:
     void postTriggered();
@@ -377,6 +388,7 @@ protected:
     FactoryFunction factory;
     QString oriText;
     QString scriptFile;
+    QString iconFile;
     QString mainCommand;
     QStringList commandList;
     QStringList defaultCommandList;
@@ -397,8 +409,9 @@ protected:
     QStringList arguments;
 
     QList<QKeySequence> defaultShortcuts;
+    QList<QKeySequence> multiKeyShortcuts;
     QString shortcutText;
-    QString toolTip;
+    QString oriToolTip;
     bool iconDisabled;
     int enabledOverride;
     //RDocumentInterface* documentInterface;

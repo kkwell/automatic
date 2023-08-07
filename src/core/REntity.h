@@ -42,6 +42,7 @@ class RDocument;
 class REntity;
 class RBlockReferenceEntity;
 class RExporter;
+class RViewportData;
 
 #ifndef RDEFAULT_QSET_INT
 #define RDEFAULT_QSET_INT QSet<int>()
@@ -71,6 +72,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -80,6 +82,8 @@ public:
     static RPropertyTypeId PropertyColor;
     static RPropertyTypeId PropertyDisplayedColor;
     static RPropertyTypeId PropertyDrawOrder;
+
+    static RPropertyTypeId PropertyParentId;
 
     static RPropertyTypeId PropertyMinX;
     static RPropertyTypeId PropertyMinY;
@@ -93,10 +97,14 @@ public:
     REntity(const REntity& other);
     virtual ~REntity();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityUnknown;
+    }
+
     static void init();
 
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(REntity));
+        return RPropertyTypeId::getPropertyTypeIds(REntity::getRtti());
     }
 
     void setDocument(RDocument* document) {
@@ -116,6 +124,7 @@ public:
 
     static bool isComplex(const RS::EntityType type);
     static bool isDimension(const RS::EntityType type);
+    static bool isTextBased(const RS::EntityType type);
 
     /**
      * \return Reference to the data object of the entity.
@@ -155,11 +164,24 @@ public:
     /**
      * \copydoc REntityData::isSelected
      */
-    bool isSelected() const {
+    virtual bool isSelected() const {
         return getData().isSelected();
     }
 
     virtual void setSelected(bool on);
+
+    /**
+     * \copydoc REntityData::isSelectedWorkingSet
+     */
+    virtual bool isSelectedWorkingSet() const {
+        return getData().isSelectedWorkingSet();
+    }
+
+    virtual void setSelectedWorkingSet(bool on) {
+        getData().setSelectedWorkingSet(on);
+    }
+
+    virtual bool isSelectable() const;
 
     virtual bool isUpdatesEnabled() const {
         return getData().isUpdatesEnabled();
@@ -278,9 +300,6 @@ public:
      * \copydoc REntityData::setLinetypeScale
      */
     void setLinetypeScale(double linetypeScale) {
-        if (linetypeScale<0.0) {
-            qDebug() << "setLinetypeScale to -1";
-        }
         getData().setLinetypeScale(linetypeScale);
     }
 
@@ -324,6 +343,7 @@ public:
         return getData().getColor();
     }
 
+    RColor getColor(const RColor& unresolvedColor, const QStack<REntity*>& blockRefStack);
     RColor getColor(bool resolve, const QStack<REntity*>& blockRefStack);
 
     RColor getDisplayColor() {
@@ -378,15 +398,22 @@ public:
     /**
      * \copydoc REntityData::getShapes
      */
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const {
-        return getData().getShapes(queryBox, ignoreComplex, segment);
+    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const {
+        return getData().getShapes(queryBox, ignoreComplex, segment, entityIds);
+    }
+
+    /**
+     * Convenience function for scripts.
+     */
+    RObject::Id getClosestSubEntityId(const RVector& pos, double range = RNANDOUBLE, bool ignoreComplex = false) const {
+        return getData().getClosestSubEntityId(pos, range, ignoreComplex);
     }
 
     /**
      * \copydoc REntityData::getClosestShape
      */
-    virtual QSharedPointer<RShape> getClosestShape(const RVector& pos, double range = RNANDOUBLE, bool ignoreComplex = false) const {
-        return getData().getClosestShape(pos, range, ignoreComplex);
+    virtual QSharedPointer<RShape> getClosestShape(const RVector& pos, double range = RNANDOUBLE, bool ignoreComplex = false, RObject::Id* subEntityId = NULL) const {
+        return getData().getClosestShape(pos, range, ignoreComplex, subEntityId);
     }
 
     /**
@@ -434,8 +461,8 @@ public:
     /**
      * \copydoc REntityData::getInternalReferencePoints
      */
-    virtual QList<RRefPoint> getInternalReferencePoints(RS::ProjectionRenderingHint hint=RS::RenderTop) const {
-        return getData().getInternalReferencePoints(hint);
+    virtual QList<RRefPoint> getInternalReferencePoints(RS::ProjectionRenderingHint hint=RS::RenderTop, QList<REntity::Id>* subEntityIds = NULL) const {
+        return getData().getInternalReferencePoints(hint, subEntityIds);
     }
 
     /**
@@ -455,31 +482,31 @@ public:
     /**
      * \copydoc REntityData::getEndPoints
      */
-    virtual QList<RVector> getEndPoints(const RBox& queryBox = RDEFAULT_RBOX) const {
-        return getData().getEndPoints(queryBox);
+    virtual QList<RVector> getEndPoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return getData().getEndPoints(queryBox, subEntityIds);
     }
 
     /**
      * \copydoc REntityData::getMiddlePoints
      */
-    virtual QList<RVector> getMiddlePoints(const RBox& queryBox = RDEFAULT_RBOX) const {
-        return getData().getMiddlePoints(queryBox);
+    virtual QList<RVector> getMiddlePoints(const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return getData().getMiddlePoints(queryBox, subEntityIds);
     }
 
     /**
      * \copydoc REntityData::getCenterPoints
      */
-    virtual QList<RVector> getCenterPoints(const RBox& queryBox = RDEFAULT_RBOX) const {
-        return getData().getCenterPoints(queryBox);
+    virtual QList<RVector> getCenterPoints(const RBox& queryBox = RDEFAULT_RBOX, QList<REntity::Id>* subEntityIds = NULL) const {
+        return getData().getCenterPoints(queryBox, subEntityIds);
     }
 
     /**
      * \copydoc REntityData::getClosestPointOnEntity
      */
     virtual RVector getClosestPointOnEntity(const RVector& point,
-        double range=RNANDOUBLE, bool limited=true) const {
+        double range=RNANDOUBLE, bool limited=true, REntity::Id* subEntityId = NULL) const {
 
-        return getData().getClosestPointOnEntity(point, range, limited);
+        return getData().getClosestPointOnEntity(point, range, limited, subEntityId);
     }
 
     /**
@@ -488,15 +515,14 @@ public:
     virtual QList<RVector> getPointsWithDistanceToEnd(
             double distance,
             int from = RS::FromAny,
-            const RBox& queryBox = RDEFAULT_RBOX) const {
-        return getData().getPointsWithDistanceToEnd(distance, from, queryBox);
+            const RBox& queryBox = RDEFAULT_RBOX, QList<RObject::Id>* subEntityIds = NULL) const {
+        return getData().getPointsWithDistanceToEnd(distance, from, queryBox, subEntityIds);
     }
 
     /**
      * \copydoc REntityData::getIntersectionPoints(const REntity&, bool)
      */
-    virtual QList<RVector> getIntersectionPoints(
-            const REntity& other, bool limited = true, const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = true) const;
+    virtual QList<RVector> getIntersectionPoints(const REntity& other, bool limited = true, const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = true, QList<QPair<REntity::Id, REntity::Id> >* entityIds = NULL) const;
 
     /**
      * \copydoc REntityData::getIntersectionPoints(const RShape&, bool)
@@ -511,11 +537,17 @@ public:
     }
 
     /**
+     * \copydoc REntityData::clickReferencePoint
+     */
+    virtual bool clickReferencePoint(const RVector& referencePoint) {
+        return getData().clickReferencePoint(referencePoint);
+    }
+
+    /**
      * \copydoc REntityData::moveReferencePoint
      */
-    virtual bool moveReferencePoint(
-        const RVector& referencePoint, const RVector& targetPoint) {
-        return getData().moveReferencePoint(referencePoint, targetPoint);
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier) {
+        return getData().moveReferencePoint(referencePoint, targetPoint, modifiers);
     }
 
     /**
@@ -535,23 +567,29 @@ public:
     /**
      * \copydoc REntityData::scale
      */
-    virtual bool scale(const RVector& scaleFactors,
-        const RVector& center = RDEFAULT_RVECTOR) {
-
+    virtual bool scale(const RVector& scaleFactors, const RVector& center = RDEFAULT_RVECTOR) {
         return getData().scale(scaleFactors, center);
     }
 
     /**
+     * \copydoc REntityData::scaleNonUniform
+     */
+    virtual QSharedPointer<REntity> scaleNonUniform(const RVector& scaleFactors, const RVector& center = RDEFAULT_RVECTOR);
+
+    /**
      * \copydoc REntityData::scale
      */
-    virtual bool scale(double scaleFactor,
-        const RVector& center = RDEFAULT_RVECTOR) {
-
+    virtual bool scale(double scaleFactor, const RVector& center = RDEFAULT_RVECTOR) {
         return getData().scale(scaleFactor, center);
     }
 
     virtual void scaleVisualProperties(double scaleFactor) {
         getData().scaleVisualProperties(scaleFactor);
+    }
+
+    virtual void setViewportContext(const RViewportData&) {
+        // MSVC does not compile this:
+        //Q_UNUSED(vp);
     }
 
     /**
@@ -617,24 +655,20 @@ public:
      */
     virtual void exportEntity(RExporter& e, bool preview = false, bool forceSelected=false) const = 0;
 
-    // from RObject:
-    virtual bool isSelectedForPropertyEditing() {
-        return isSelected();
-    }
-
     virtual void setAutoUpdatesBlocked(bool on) {
         getData().setAutoUpdatesBlocked(on);
     }
 
     virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual bool setProperty(RPropertyTypeId propertyTypeId,
             const QVariant& value, RTransaction* transaction=NULL);
 
-    virtual bool isVisible() const;
+    virtual bool isVisible(RBlock::Id blockId = RBlock::INVALID_ID) const;
     virtual bool isEditable(bool allowInvisible = false) const;
+    virtual bool isInWorkingSet() const;
 
     virtual int getComplexity() const {
         return 1;
@@ -643,6 +677,7 @@ public:
 protected:
     /**
      * \copydoc REntityData::setParentId
+     * Use RStorage::setEntityParentId instead.
      */
     void setParentId(REntity::Id parentId) {
         getData().setParentId(parentId);

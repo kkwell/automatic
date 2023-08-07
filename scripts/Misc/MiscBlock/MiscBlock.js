@@ -23,7 +23,7 @@
  *
  * \brief This module contains misc block tools..
  */
-include("../Misc.js");
+include("scripts/Misc/Misc.js");
 
 /**
  * \class MiscBlock
@@ -62,7 +62,7 @@ MiscBlock.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(true);
         //action.setIcon(MiscBlock.includeBasePath + "/MiscBlock.svg");
-        action.setStatusTip(qsTr("Show misc block tools"));
+        //action.setStatusTip(qsTr("Show misc block tools"));
         action.setNoState();
         action.setDefaultCommands(["miscblockmenu"]);
         action.setGroupSortOrder(90);

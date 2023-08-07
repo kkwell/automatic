@@ -70,6 +70,9 @@
         getCustomPattern
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        setCustomPattern
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         cloneOnChange
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -145,6 +148,18 @@
         setPatternName
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getTransparency
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setTransparency
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getLength
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getArea
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         clearCustomPattern
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -155,6 +170,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         addBoundary
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        addBoundaryShape
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getBoundaryPath
@@ -181,10 +199,16 @@
         getBoundaryAsPolylines
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        autoCloseLoops
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getComplexity
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setPattern
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getColor
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         hasProxy

@@ -25,9 +25,12 @@
 #include "RExplodable.h"
 #include "RShape.h"
 #include "RVector.h"
-#include "RLine.h"
+//#include "RLine.h"
+#include "RPolyline.h"
 
+//class RPolyline;
 class RBox;
+class RLine;
 
 #ifndef RDEFAULT_MIN1
 #define RDEFAULT_MIN1 -1
@@ -60,6 +63,9 @@ public:
     virtual void setZ(double z);
 
     virtual QList<RVector> getVectorProperties() const;
+    RPolyline getPolyline() const;
+    RS::Orientation getOrientation() const;
+    virtual bool reverse();
 
     static RTriangle createArrow(const RVector& position, double direction, double size);
 
@@ -68,12 +74,14 @@ public:
     double getArea() const;
     RVector getCorner(int i) const;
     void setCorner(int i, const RVector& p);
+    void setCorners(const RVector& c1, const RVector& c2, const RVector& c3);
 
     virtual QList<RVector> getEndPoints() const;
     virtual QList<RVector> getMiddlePoints() const;
     virtual QList<RVector> getCenterPoints() const;
     virtual QList<RVector> getPointsWithDistanceToEnd(
         double distance, int from = RS::FromAny) const;
+    virtual QList<RVector> getPointCloud(double segmentLength) const;
 
     virtual double getDistanceTo(const RVector& point, bool limited = true, double strictRange = RMAXDOUBLE) const;
     virtual RVector getVectorTo(const RVector& point, bool limited = true, double strictRange = RMAXDOUBLE) const;
@@ -105,8 +113,7 @@ public:
         corner[2].rotate(rotation, center);
         return true;
     }
-    virtual bool scale(const RVector& scaleFactors, const RVector& center =
-            RVector()) {
+    virtual bool scale(const RVector& scaleFactors, const RVector& center = RDEFAULT_RVECTOR) {
         corner[0].scale(scaleFactors, center);
         corner[1].scale(scaleFactors, center);
         corner[2].scale(scaleFactors, center);
@@ -140,6 +147,16 @@ public:
             )
         );
     }
+
+#if QT_VERSION >= 0x060000
+    /**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */
+    RTriangle copy() const {
+        return *this;
+    }
+#endif
 
 protected:
     virtual void print(QDebug dbg) const;

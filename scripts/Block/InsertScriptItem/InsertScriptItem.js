@@ -17,8 +17,8 @@
  * along with QCAD.
  */
 
-include("../Block.js");
-include("../InsertBlockItem/InsertBlockItem.js");
+include("scripts/Block/Block.js");
+include("scripts/Block/InsertBlockItem/InsertBlockItem.js");
 
 /**
  * \class InsertScriptItem
@@ -42,8 +42,10 @@ InsertScriptItem.prototype = new InsertBlockItem();
 
 InsertScriptItem.prototype.beginEvent = function() {
     var ms = new RMemoryStorage();
-    var si = new RSpatialIndexNavel();
+    var si = createSpatialIndex();
     this.docItem = new RDocument(ms, si);
+    // avoid unit conversion:
+    this.docItem.setUnit(RS.None);
     this.diItem = new RDocumentInterface(this.docItem);
     // this document does never update the layer list, block list, etc:
     this.diItem.setNotifyListeners(false);
@@ -56,6 +58,13 @@ InsertScriptItem.prototype.beginEvent = function() {
     }
 
     this.file = this.url.toLocalFile();
+
+    // sanity checks:
+    if (!InsertScriptItem.check(this.file)) {
+        this.terminate();
+        return;
+    }
+
     include(this.file);
     
     InsertScriptItem.evalInit(this.file);
@@ -65,13 +74,51 @@ InsertScriptItem.prototype.beginEvent = function() {
     this.setState(InsertBlockItem.State.SettingPosition);
 };
 
+/**
+ * Sanity check before including a script.
+ * \return true if this is very likely a part library script item.
+ */
+InsertScriptItem.check = function(fileName) {
+    var baseName = new QFileInfo(fileName).baseName();
+    var content = readTextFile(fileName);
+    if (isNull(content)) {
+        EAction.handleUserWarning(qsTr("Cannot read file:") + " " + fileName);
+        return false;
+    }
+
+    if (!content.contains("function " + baseName)) {
+        EAction.handleUserWarning(qsTr("No constructor found in file:") + " " + fileName);
+        return false;
+    }
+
+    if (!content.contains(baseName + ".init")) {
+        EAction.handleUserWarning(qsTr("No 'init' function found in file:") + " " + fileName);
+        return false;
+    }
+
+    if (!content.contains(baseName + ".generate")) {
+        EAction.handleUserWarning(qsTr("No 'generate' function found in file:") + " " + fileName);
+        return false;
+    }
+
+    if (!content.contains(baseName + ".generatePreview")) {
+        EAction.handleUserWarning(qsTr("No 'generatePreview' function found in file:") + " " + this.file);
+        return false;
+    }
+
+    return true;
+};
+
 InsertScriptItem.prototype.finishEvent = function() {
-    var dock = objectFromPath("MainWindow::"
-            + InsertScriptItem.getObjectName(this.file));
+    var dock = objectFromPath("MainWindow::" + InsertScriptItem.getObjectName(this.file));
     if (!isNull(dock)) {
         dock.hide();
-        dock.destroy();
+        destr(dock);
     }
+    if (!isNull(this.diItem)) {
+        destr(this.diItem);
+    }
+
     InsertBlockItem.prototype.finishEvent.call(this);
 };
 
@@ -147,7 +194,7 @@ InsertScriptItem.evalInit = function(file) {
             appWin.addDockWidget(Qt.RightDockWidgetArea, dock);
         } else {
             // show previously used and hidden script item UI again:
-            if (!QCoreApplication.arguments().contains("-no-show")) {
+            if (!RSettings.getOriginalArguments().contains("-no-show")) {
                 dock.visible = true;
             }
             formWidget = dock.widget();

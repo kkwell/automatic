@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Line.js");
+include("scripts/Draw/Line/Line.js");
 
 /**
  * \class LineRelativeAngle
@@ -31,7 +31,7 @@ function LineRelativeAngle(guiAction) {
     this.shape = undefined;
     this.pos = undefined;
     this.angle = Math.PI/2.0;
-    this.length = 100.0;
+    this.len = 100.0;
     this.referencePoint = undefined;
 
     if (!isNull(guiAction)) {
@@ -63,11 +63,14 @@ LineRelativeAngle.prototype.setState = function(state) {
 
     this.setCrosshairCursor();
 
+    var tr;
     var appWin = RMainWindowQt.getMainWindow();
     switch (this.state) {
     case LineRelativeAngle.State.ChoosingEntity:
         this.getDocumentInterface().setClickMode(RAction.PickEntity);
-        this.setLeftMouseTip(qsTr("Choose base line, arc, circle, ellipse or polyline"));
+        tr = qsTr("Choose base line, arc, circle, ellipse or polyline");
+        this.setCommandPrompt(tr);
+        this.setLeftMouseTip(tr);
         this.setRightMouseTip(EAction.trCancel);
         this.entity = undefined;
         this.shape = undefined;
@@ -75,7 +78,9 @@ LineRelativeAngle.prototype.setState = function(state) {
         break;
     case LineRelativeAngle.State.SettingPos:
         this.getDocumentInterface().setClickMode(RAction.PickCoordinate);
-        this.setLeftMouseTip(qsTr("Set position"));
+        tr = qsTr("Set position");
+        this.setCommandPrompt(tr);
+        this.setLeftMouseTip(tr);
         this.setRightMouseTip(EAction.trBack);
         EAction.showSnapTools();
         break;
@@ -103,6 +108,11 @@ LineRelativeAngle.prototype.pickEntity = function(event, preview) {
     var pos = event.getModelPosition();
 
     if (isNull(entity)) {
+        return;
+    }
+
+    if (!this.isEntitySnappable(entity)) {
+        // entity not on a snappable layer:
         return;
     }
 
@@ -200,7 +210,7 @@ LineRelativeAngle.prototype.getLine = function() {
     // for rays / xlines, always use start point as reference
     // with length = 1.0:
     var referencePoint = this.referencePoint;
-    var length = this.length;
+    var length = this.len;
     if (this.isRayOrXLine()) {
         referencePoint = LineRelativeAngle.ReferencePoint.Start;
         length = 1.0;
@@ -260,7 +270,7 @@ LineRelativeAngle.prototype.slotAngleChanged = function(value) {
 };
 
 LineRelativeAngle.prototype.slotLengthChanged  = function(value) {
-    this.length = value;
+    this.len = value;
     this.updatePreview(true);
 };
 

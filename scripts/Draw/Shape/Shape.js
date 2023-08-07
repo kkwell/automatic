@@ -24,7 +24,8 @@
  * \brief This module contains ECMAScript implementations of various
  * shape drawing tools.
  */
-include("../Draw.js");
+include("scripts/Draw/Draw.js");
+include("scripts/Modify/Round/Round.js");
 
 /**
  * \class Shape
@@ -36,6 +37,8 @@ function Shape(guiAction) {
 
     this.createPolyline = false;
     this.fill = false;
+    this.roundCorners = false;
+    this.radius = 1.0;
 }
 
 Shape.prototype = new Draw();
@@ -77,7 +80,7 @@ Shape.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(true);
         action.setIcon(Shape.includeBasePath + "/Shape.svg");
-        action.setStatusTip(qsTr("Show shape tools"));
+        //action.setStatusTip(qsTr("Show shape tools"));
         action.setDefaultShortcut(new QKeySequence("w,h"));
         action.setNoState();
         action.setDefaultCommands(["shapemenu"]);
@@ -118,8 +121,9 @@ Shape.prototype.initUiOptions = function(resume, optionsToolBar) {
 
     this.createPolyline = RSettings.getBoolValue(this.settingsGroup + "/CreatePolyline", false);
     this.fill = RSettings.getBoolValue(this.settingsGroup + "/Fill", false);
+    this.roundCorners = RSettings.getBoolValue(this.settingsGroup + "/RoundCorners", false);
+    this.radius = RSettings.getDoubleValue(this.settingsGroup + "/Radius", 1.0);
 
-    //var optionsToolBar = EAction.getOptionsToolBar();
     var w = optionsToolBar.findChild("CreatePolyline");
     if (!isNull(w)) {
         w.checked = this.createPolyline;
@@ -129,6 +133,16 @@ Shape.prototype.initUiOptions = function(resume, optionsToolBar) {
     if (!isNull(w)) {
         w.checked = this.fill;
     }
+
+    w = optionsToolBar.findChild("RoundCorners");
+    if (!isNull(w)) {
+        w.checked = this.roundCorners;
+    }
+
+    w = optionsToolBar.findChild("Radius");
+    if (!isNull(w)) {
+        w.setValue(this.radius);
+    }
 };
 
 Shape.prototype.hideUiOptions = function(saveToSettings) {
@@ -136,6 +150,8 @@ Shape.prototype.hideUiOptions = function(saveToSettings) {
 
     RSettings.setValue(this.settingsGroup + "/CreatePolyline", this.createPolyline);
     RSettings.setValue(this.settingsGroup + "/Fill", this.fill);
+    RSettings.setValue(this.settingsGroup + "/RoundCorners", this.roundCorners);
+    RSettings.setValue(this.settingsGroup + "/Radius", this.radius);
 };
 
 Shape.prototype.slotCreatePolylineChanged = function(checked) {
@@ -144,6 +160,7 @@ Shape.prototype.slotCreatePolylineChanged = function(checked) {
 
 Shape.slotCreatePolylineChanged = function(action, checked) {
     action.createPolyline = checked;
+    action.updatePreview(true);
 };
 
 Shape.prototype.slotFillChanged = function(checked) {
@@ -152,6 +169,25 @@ Shape.prototype.slotFillChanged = function(checked) {
 
 Shape.slotFillChanged = function(action, checked) {
     action.fill = checked;
+    action.updatePreview(true);
+};
+
+Shape.prototype.slotRoundCornersChanged = function(checked) {
+    Shape.slotRoundCornersChanged(this, checked);
+};
+
+Shape.slotRoundCornersChanged = function(action, checked) {
+    action.roundCorners = checked;
+    action.updatePreview(true);
+};
+
+Shape.prototype.slotRadiusChanged = function(v) {
+    Shape.slotRadiusChanged(this, v);
+};
+
+Shape.slotRadiusChanged = function(action, v) {
+    action.radius = v;
+    action.updatePreview(true);
 };
 
 Shape.prototype.getShapes = function(vertices) {
@@ -160,20 +196,54 @@ Shape.prototype.getShapes = function(vertices) {
 
 Shape.getShapes = function(action, vertices) {
     var i;
-    if (action.createPolyline) {
-        var pl = new RPolyline();
-        for (i=0; i<vertices.length; ++i) {
-            pl.appendVertex(vertices[i]);
+    var shapes = [];
+
+    for (i=0; i<vertices.length; ++i) {
+        shapes.push(new RLine(vertices[i], vertices[(i+1)%vertices.length]));
+    }
+
+    if (action.roundCorners===true && isNumberGreaterZero(action.radius)) {
+        var newShapes = [];
+        var cursor = undefined;
+        for (i=0; i<shapes.length; ++i) {
+            var s1 = shapes[i];
+            var clickPos1 = s1.getPointWithDistanceToEnd(s1.getLength()/3);
+            var s2 = shapes[(i+1)%shapes.length];
+            var clickPos2 = s2.getPointWithDistanceToStart(s2.getLength()/3);
+            var pos = RVector.getAverage(clickPos1, clickPos2);
+            var res;
+            //if (RSettings.getQtVersion()>=0x060000) {
+            //    s1 = s1.clone();
+            //    s2 = s2.clone();
+            //}
+            res = RShape.roundShapes(s1, clickPos1, s2, clickPos2, true, false, action.radius, pos);
+            if (res.length>2) {
+                if (!isNull(cursor)) {
+                    // line until arc:
+                    newShapes.push(new RLine(cursor, res[1].getStartPoint()));
+                }
+                // arc:
+                newShapes.push(res[1].clone());
+                // move cursor to end of arc:
+                cursor = res[1].getEndPoint();
+            }
         }
-        pl.setClosed(true);
+        if (newShapes.length>0) {
+            newShapes.unshift(new RLine(newShapes[newShapes.length-1].getEndPoint(), newShapes[0].getStartPoint()));
+        }
+        shapes = newShapes;
+    }
+
+    if (action.createPolyline===true) {
+        var pl = new RPolyline();
+        for (i=0; i<shapes.length; ++i) {
+            pl.appendShape(shapes[i]);
+        }
+        pl.autoClose();
         return [pl];
     }
     else {
-        var ret = [];
-        for (i=0; i<vertices.length; ++i) {
-            ret.push(new RLine(vertices[i], vertices[(i+1)%vertices.length]));
-        }
-        return ret;
+        return shapes;
     }
 };
 
@@ -191,7 +261,14 @@ Shape.complementOperation = function(action, doc, op, shapes) {
         hatchData.setPatternName("SOLID");
         hatchData.newLoop();
         for (var k=0; k<shapes.length; ++k) {
-            hatchData.addBoundary(shapes[k]);
+            if (RSettings.getQtVersion()>=0x060000) {
+                // cloning not necessary, handle in caller:
+                //hatchData.addBoundary(shapes[k].clone());
+                hatchData.addBoundary(shapes[k]);
+            }
+            else {
+                hatchData.addBoundary(shapes[k]);
+            }
         }
         op.addObject(new RHatchEntity(doc, hatchData));
     }

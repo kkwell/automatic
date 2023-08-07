@@ -49,21 +49,21 @@
      * to indicate what snap was used.
      */</comment>
     <enum>enum <name>Status</name> <block>{
-        <expr><name>Unknown</name></expr>,
-        <expr><name>Free</name></expr>,
-        <expr><name>Grid</name></expr>,
-        <expr><name>Endpoint</name></expr>,
-        <expr><name>OnEntity</name></expr>,
-        <expr><name>Center</name></expr>,
-        <expr><name>Middle</name></expr>,
-        <expr><name>Distance</name></expr>,
-        <expr><name>Intersection</name></expr>,
-        <expr><name>IntersectionManual</name></expr>,
-        <expr><name>Reference</name></expr>,
-        <expr><name>Perpendicular</name></expr>,
-        <expr><name>Tangential</name></expr>,
-        <expr><name>Coordinate</name></expr>,
-        <expr><name>CoordinatePolar</name></expr>
+        <expr><name>Unknown</name> = 0</expr>,
+        <expr><name>Free</name> = 1</expr>,
+        <expr><name>Grid</name> = 2</expr>,
+        <expr><name>Endpoint</name> = 3</expr>,
+        <expr><name>OnEntity</name> = 4</expr>,
+        <expr><name>Center</name> = 5</expr>,
+        <expr><name>Middle</name> = 6</expr>,
+        <expr><name>Distance</name> = 7</expr>,
+        <expr><name>Intersection</name> = 8</expr>,
+        <expr><name>IntersectionManual</name> = 9</expr>,
+        <expr><name>Reference</name> = 10</expr>,
+        <expr><name>Perpendicular</name> = 11</expr>,
+        <expr><name>Tangential</name> = 12</expr>,
+        <expr><name>Coordinate</name> = 13</expr>,
+        <expr><name>CoordinatePolar</name> = 14</expr>
     }</block>;</enum>
 
 </public><public>public:
@@ -74,10 +74,13 @@
      * \return The snapped position (closest relevant position)
      * for the given mouse position.
      */</comment>
-    <function_decl><type><name>virtual</name> <name>RVector</name></type> <name>snap</name><parameter_list>(
+    <function><type><name>virtual</name> <name>RVector</name></type> <name>snap</name><parameter_list>(
             <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>position</name></decl></param>,
             <param><decl><type><name>RGraphicsView</name>&amp;</type> <name>view</name></decl></param>,
-            <param><decl><type><name>double</name></type> <name>range</name>=<init><expr><name>RNANDOUBLE</name></expr></init></decl></param>)</parameter_list> <specifier>= 0</specifier>;</function_decl>
+            <param><decl><type><name>double</name></type> <name>range</name>=<init><expr><name>RNANDOUBLE</name></expr></init></decl></param>)</parameter_list> <block>{
+
+        <return>return <expr><name><name>RVector</name>::<name>invalid</name></name></expr>;</return>
+    }</block></function>
 
     <comment type="block">/**
      * \overload
@@ -101,7 +104,7 @@
      * \return Set of entity IDs that are relevant for the last performed
      * snap, usually used for highlighting.
      */</comment>
-    <function><type><name>QSet<argument_list>&lt;<argument><name><name>REntity</name>::<name>Id</name></name></argument>&gt;</argument_list></name></type> <name>getEntityIds</name><parameter_list>()</parameter_list> <block>{
+    <function><type><name>QList<argument_list>&lt;<argument><name><name>REntity</name>::<name>Id</name></name></argument>&gt;</argument_list></name></type> <name>getEntityIds</name><parameter_list>()</parameter_list> <block>{
         <return>return <expr><name>entityIds</name></expr>;</return>
     }</block></function>
 
@@ -109,18 +112,21 @@
         <return>return <expr><name>status</name></expr>;</return>
     }</block></function>
 
+    <function><type><name>void</name></type> <name>setStatus</name><parameter_list>(<param><decl><type><name><name>RSnap</name>::<name>Status</name></name></type> <name>s</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>status</name> = <name>s</name></expr>;</expr_stmt>
+    }</block></function>
+
     <function><type><name>RVector</name></type> <name>getLastSnap</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
         <return>return <expr><name>lastSnap</name></expr>;</return>
     }</block></function>
 
-    <function><type><name>void</name></type> <name>reset</name><parameter_list>()</parameter_list> <block>{
+    <function><type><name>virtual</name> <name>void</name></type> <name>reset</name><parameter_list>()</parameter_list> <block>{
         <expr_stmt><expr><name>entityIds</name>.<call><name>clear</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
-        <expr_stmt><expr><name>status</name> = <name><name>RSnap</name>::<name>Unknown</name></name></expr>;</expr_stmt>
         <expr_stmt><expr><name>lastSnap</name> = <name><name>RVector</name>::<name>invalid</name></name></expr>;</expr_stmt>
     }</block></function>
 
 </public><protected>protected:
-    <decl_stmt><decl><type><name>QSet<argument_list>&lt;<argument><name><name>REntity</name>::<name>Id</name></name></argument>&gt;</argument_list></name></type> <name>entityIds</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>QList<argument_list>&lt;<argument><name><name>REntity</name>::<name>Id</name></name></argument>&gt;</argument_list></name></type> <name>entityIds</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name><name>RSnap</name>::<name>Status</name></name></type> <name>status</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>RVector</name></type> <name>lastSnap</name></decl>;</decl_stmt>
 </protected>}</block>;</class>

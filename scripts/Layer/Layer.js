@@ -24,7 +24,7 @@
  * \brief This module contains ECMAScript implementations of various
  * layer related tools.
  */
-include("../EAction.js");
+include("scripts/EAction.js");
 
 /**
  * \class Layer
@@ -99,7 +99,7 @@ Layer.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(true);
         action.setIcon(Layer.includeBasePath + "/Layer.svg");
-        action.setStatusTip(qsTr("Show layer tools"));
+        //action.setStatusTip(qsTr("Show layer tools"));
         action.setDefaultShortcut(new QKeySequence("w,y"));
         action.setNoState();
         action.setDefaultCommands(["layermenu"]);
@@ -188,7 +188,9 @@ Layer.showHide = function(show, di, layerId, showProgress) {
                 layer.setOff(!show);
             }
             else {
-                layer.setFrozen(!show);
+                if (freezeLayer) {
+                    layer.setFrozen(!show);
+                }
                 layer.setOff(!show);
             }
         } else {
@@ -197,7 +199,9 @@ Layer.showHide = function(show, di, layerId, showProgress) {
             }
             else {
                 layer.setOff(false);
-                layer.setFrozen(false);
+                if (freezeLayer) {
+                    layer.setFrozen(false);
+                }
             }
         }
         operation.addObject(layer);
@@ -256,6 +260,7 @@ Layer.lockUnlock = function(lock, di, showProgress) {
     }
 
     var operation = new RModifyObjectsOperation();
+    operation.setTransactionType(RTransaction.LayerLockStatusChange);
     var layers = di.getDocument().queryAllLayers();
     for (var l = 0; l < layers.length; ++l) {
         if (showProgress===true) {

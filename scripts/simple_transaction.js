@@ -30,7 +30,7 @@ function startTransaction(d) {
     }
 
     if (!isNull(__simpleOp)) {
-        __simpleOp.destroy();
+        destr(__simpleOp);
         __simpleOp = undefined;
     }
 
@@ -84,6 +84,20 @@ function getTransactionDocument() {
     }
     else {
         return getDocument();
+    }
+}
+
+/**
+ * Returns the RDocumentInterface the current transaction applies to or
+ * the current document interface or undefined.
+ * \ingroup ecma_simple
+ */
+function getTransactionDocumentInterface() {
+    if (!isNull(__simpleDi)) {
+        return __simpleDi;
+    }
+    else {
+        return getDocumentInterface();
     }
 }
 

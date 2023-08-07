@@ -23,7 +23,7 @@
  *
  * \brief This module contains ECMAScript implementations of various spline drawing tools.
  */
-include("../Draw.js");
+include("scripts/Draw/Draw.js");
 
 /**
  * \class Spline
@@ -74,7 +74,7 @@ Spline.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(true);
         action.setIcon(Spline.includeBasePath + "/Spline.svg");
-        action.setStatusTip(qsTr("Show spline tools"));
+        //action.setStatusTip(qsTr("Show spline tools"));
         action.setDefaultShortcut(new QKeySequence("w,n"));
         action.setNoState();
         action.setDefaultCommands(["splinemenu"]);

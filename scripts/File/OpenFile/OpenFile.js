@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../NewFile/NewFile.js");
+include("scripts/File/NewFile/NewFile.js");
 
 if (exists("scripts/File/AutoSave/AutoSave.js")) {
     include("scripts/File/AutoSave/AutoSave.js");
@@ -41,8 +41,9 @@ OpenFile.prototype = new NewFile();
 OpenFile.prototype.beginEvent = function() {
     File.prototype.beginEvent.call(this);
 
-    var filters = RFileImporterRegistry.getFilterStrings();
-    if (filters.length===0) {
+    var filterStrings = RFileImporterRegistry.getFilterStrings();
+    filterStrings = translateFilterStrings(filterStrings);
+    if (filterStrings.length===0) {
         EAction.handleUserWarning(qsTr("No import filters have been found. Aborting..."));
         return;
     }
@@ -72,9 +73,9 @@ OpenFile.prototype.beginEvent = function() {
             RSettings.getDocumentsLocation());
     var appWin = EAction.getMainWindow();
     var fileDialog = new QFileDialog(appWin, qsTr("Open Drawing"), lastOpenFileDir, "");
-    var allFilter = filters[0];
-    filters = new Array(qsTr("All Files") + " (*)").concat(filters);
-    fileDialog.setNameFilters(filters);
+    var allFilter = filterStrings[0];
+    filterStrings = new Array(qsTr("All Files") + " (*)").concat(filterStrings);
+    fileDialog.setNameFilters(filterStrings);
     fileDialog.selectNameFilter(allFilter);
     fileDialog.setOption(QFileDialog.DontUseNativeDialog, getDontUseNativeDialog());
     if (!isNull(QFileDialog.DontUseCustomDirectoryIcons)) {
@@ -89,7 +90,7 @@ OpenFile.prototype.beginEvent = function() {
     }
 
     if (!fileDialog.exec()) {
-        fileDialog.destroy();
+        destr(fileDialog);
         EAction.activateMainWindow();
         return;
     }
@@ -101,7 +102,7 @@ OpenFile.prototype.beginEvent = function() {
     for ( var i = 0; i < fileNames.length; ++i) {
         NewFile.createMdiChild(fileNames[i], nameFilter);
     }
-    fileDialog.destroy();
+    destr(fileDialog);
     EAction.activateMainWindow();
 };
 

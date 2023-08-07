@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Widgets.js");
+include("scripts/Widgets/Widgets.js");
 include("scripts/WidgetFactory.js");
 
 /**
@@ -48,6 +48,7 @@ function RBlockListQt(parent, addListener, showHeader) {
 
     this.header().stretchLastSection = false;
     if (RSettings.isQt(5)) {
+        this.header().minimumSectionSize = 22;
         this.header().setSectionResizeMode(BlockList.colName, QHeaderView.Stretch);
         this.header().setSectionResizeMode(BlockList.colVisible, QHeaderView.Interactive);
         this.header().setSectionResizeMode(BlockList.colEdit, QHeaderView.Interactive);
@@ -61,19 +62,23 @@ function RBlockListQt(parent, addListener, showHeader) {
     this.setColumnWidth(BlockList.colVisible, 22);
     this.setColumnWidth(BlockList.colEdit, 22);
 
+    var self = this;
     if (addListener) {
         var appWin = EAction.getMainWindow();
         var adapter = new RBlockListenerAdapter();
         appWin.addBlockListener(adapter);
-        adapter.blocksUpdated.connect(this, "updateBlocks");
-        adapter.currentBlockSet.connect(this, "updateBlocks");
-        adapter.blocksCleared.connect(this, "clearBlocks");
+        adapter.blocksUpdated.connect(function(di) { self.updateBlocks(di); });
+        adapter.currentBlockSet.connect(function(di) { self.updateCurrentBlock(di); });
+        adapter.blocksCleared.connect(function() { self.clearBlocks(); });
     }
 
-    this.itemDoubleClicked.connect(this, "editBlock");
-    this.itemColumnClicked.connect(this, "itemColumnClickedSlot");
-    this.itemSelectionChanged.connect(this, "blockActivated");
+    this.itemDoubleClicked.connect(function(item, col) { self.editBlock(item, col); });
+    this.itemColumnClicked.connect(function(item, col) { self.itemColumnClickedSlot(item, col); });
+    this.itemSelectionChanged.connect(function() { self.blockActivated(); });
     this.basePath = includeBasePath;
+
+    this.currentBlockItem = undefined;
+
 }
 
 RBlockListQt.prototype = new RTreeWidget();
@@ -138,7 +143,7 @@ RBlockListQt.prototype.contextMenuEvent = function(e) {
 };
 
 RBlockListQt.complementContextMenu = function(menu, blockListWidget) {
-    // add addtional context menu actions provided by plugins:
+    // add additional context menu actions provided by plugins:
     var scriptFiles = RBlockListQt.getContextMenuScriptFiles(blockListWidget);
     for (var i=0; i<scriptFiles.length; i++) {
         var scriptFile = scriptFiles[i];
@@ -171,10 +176,36 @@ RBlockListQt.prototype.filter = function(block) {
     return true;
 };
 
+RBlockListQt.prototype.updateCurrentBlock = function(documentInterface) {
+    var doc = documentInterface.getDocument();
+
+    // find item which was representing the current block before:
+    if (!isNull(this.currentBlockItem)) {
+        // clear pen icon from item:
+        //var blockName = this.currentBlockItem.data(BlockList.colName, Qt.UserRole);
+        //var block = doc.queryBlock(blockName);
+        //this.updateItemIcons(this.currentBlockItem, block);
+        this.currentBlockItem.setIcon(BlockList.colEdit, BlockList.iconEdit[0]);
+    }
+
+    // find item of current block:
+    this.currentBlockItem = RBlockListQt.getItem(this, doc.getCurrentBlockName());
+    //for (var i=0; i<this.topLevelItemCount; i++) {
+    //    var item = this.topLevelItem(i);
+    //}
+
+    // add pen icon to item:
+    if (!isNull(this.currentBlockItem)) {
+        this.currentBlockItem.setIcon(BlockList.colEdit, BlockList.iconEdit[1]);
+    }
+};
+
 /**
- * Called when blocks are addded, edited or deleted. Updates the block list.
+ * Called when blocks are added, edited or deleted. Updates the block list.
  */
 RBlockListQt.prototype.updateBlocks = function(documentInterface) {
+    this.currentBlockItem = undefined;
+
     this.di = documentInterface;
 
     var pos = this.verticalScrollBar().sliderPosition;
@@ -200,7 +231,7 @@ RBlockListQt.prototype.updateBlocks = function(documentInterface) {
     for (i=0; i<blockCandidateIds.length; i++) {
         var blockCandidateId = blockCandidateIds[i];
         var blockCandidate = doc.queryBlockDirect(blockCandidateId);
-        if (blockCandidate.isNull()) {
+        if (isFunction(blockCandidate.isNull) && blockCandidate.isNull()) {
             continue;
         }
 
@@ -214,12 +245,11 @@ RBlockListQt.prototype.updateBlocks = function(documentInterface) {
     blockIds = this.sortBlocks(doc, blockIds);
 
     var currentBlockId = doc.getCurrentBlockId();
-    var currentItem = undefined;
     var selectedItem = undefined;
     for (i=0; i<blockIds.length; ++i) {
         var blockId = blockIds[i];
         var block = doc.queryBlockDirect(blockId);
-        if (block.isNull()) {
+        if (isFunction(block.isNull) && block.isNull()) {
             continue;
         }
 
@@ -232,7 +262,7 @@ RBlockListQt.prototype.updateBlocks = function(documentInterface) {
         }
 
         if (currentBlockId===block.getId()) {
-            currentItem = item;
+            this.currentBlockItem = item;
         }
     }
 
@@ -264,7 +294,7 @@ RBlockListQt.prototype.createBlockItem = function(block) {
     var item = new QTreeWidgetItem();
     var name = block.getName();
 
-    var flags = new Qt.ItemFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled);
+    var flags = makeQtItemFlags(Qt.ItemIsSelectable, Qt.ItemIsEnabled);
     item.setFlags(flags);
 
     var title = RBlockListQt.getBlockTitle(block);
@@ -279,13 +309,13 @@ RBlockListQt.prototype.createBlockItem = function(block) {
 };
 
 RBlockListQt.prototype.updateItemIcons = function(item, block) {
-    var iconName = autoIconPath(BlockList.includeBasePath + "/Visible%1.svg".arg(Number(!block.isFrozen())));
-    item.setIcon(BlockList.colVisible, new QIcon(iconName));
+    //var iconName = autoIconPath(BlockList.includeBasePath + "/Visible%1.svg".arg(Number(!block.isFrozen())));
+    item.setIcon(BlockList.colVisible, BlockList.iconVisible[Number(!block.isFrozen())]);
 
     var doc = this.di.getDocument();
     var currentBlockId = doc.getCurrentBlockId();
-    iconName = autoIconPath(BlockList.includeBasePath + "/Edit%1.svg".arg(Number(block.getId()===currentBlockId)));
-    item.setIcon(BlockList.colEdit, new QIcon(iconName));
+    //iconName = autoIconPath(BlockList.includeBasePath + "/Edit%1.svg".arg(Number(block.getId()===currentBlockId)));
+    item.setIcon(BlockList.colEdit, BlockList.iconEdit[Number(block.getId()===currentBlockId)]);
 };
 
 /**
@@ -306,7 +336,7 @@ RBlockListQt.prototype.itemColumnClickedSlot = function(item, column) {
 
     var doc = this.di.getDocument();
     var block = doc.queryBlock(this.getBlockName(item));
-    if (block.isNull()) {
+    if (isFunction(block.isNull) && block.isNull()) {
         return;
     }
 
@@ -314,11 +344,11 @@ RBlockListQt.prototype.itemColumnClickedSlot = function(item, column) {
         block.setFrozen(!block.isFrozen());
         var op = new RModifyObjectOperation(block, false);
         this.di.applyOperation(op);
-        this.updateBlocks(this.di);
+        //this.updateBlocks(this.di);
     } else if (column===BlockList.colEdit) {
         this.setCurrentItem(item);
         this.editBlock();
-        this.updateBlocks(this.di);
+        //this.updateBlocks(this.di);
     }
 
     this.blockActivated();
@@ -449,6 +479,16 @@ BlockList.colVisible=0;
 BlockList.colEdit=1;
 BlockList.colName=2;
 
+BlockList.iconVisible = [
+    new QIcon(autoIconPath(BlockList.includeBasePath + "/Visible0.svg")),
+    new QIcon(autoIconPath(BlockList.includeBasePath + "/Visible1.svg"))
+];
+
+BlockList.iconEdit = [
+    new QIcon(autoIconPath(BlockList.includeBasePath + "/Edit0.svg")),
+    new QIcon(autoIconPath(BlockList.includeBasePath + "/Edit1.svg"))
+];
+
 BlockList.getPreferencesCategory = function() {
     return [ qsTr("Widgets"), qsTr("Block List") ];
 };
@@ -461,6 +501,28 @@ BlockList.applyPreferences = function(doc, mdiChild) {
     WidgetFactory.initList(blockList, "BlockList");
 };
 
+/**
+ * \return Active item.
+ */
+BlockList.getActiveItem = function() {
+    var appWin = RMainWindowQt.getMainWindow();
+    var blockList = appWin.findChild("BlockList");
+    if (isNull(blockList)) {
+        return undefined;
+    }
+
+    return blockList.getActiveItem();
+};
+
+BlockList.getSelectedItems = function() {
+    var appWin = RMainWindowQt.getMainWindow();
+    var blockList = appWin.findChild("BlockList");
+    if (isNull(blockList)) {
+        return undefined;
+    }
+
+    return blockList.selectedItems();
+};
 
 /**
  * Shows / hides the block list.
@@ -470,7 +532,7 @@ BlockList.prototype.beginEvent = function() {
 
     var appWin = RMainWindowQt.getMainWindow();
     var dock = appWin.findChild("BlockListDock");
-    if (!QCoreApplication.arguments().contains("-no-show")) {
+    if (!RSettings.getOriginalArguments().contains("-no-show")) {
         dock.visible = !dock.visible;
         if (dock.visible) dock.raise();
     }
@@ -503,9 +565,14 @@ BlockList.init = function(basePath) {
 
     var formWidget = WidgetFactory.createWidget(basePath, "BlockList.ui");
     var layout = formWidget.findChild("verticalLayout");
-    var blockList = new RBlockListQt(layout);
+    var blockList = new RBlockListQt(formWidget);
     blockList.objectName = "BlockList";
-    layout.addWidget(blockList, 1, 0);
+    if (RSettings.getQtVersion()>0x060000) {
+        layout.addWidget(blockList);
+    }
+    else {
+        layout.addWidget(blockList, 1, 0);
+    }
 
     RSettings.setValue("BlockList/AlternatingRowColor", new RColor(230, 235, 250), false);
     WidgetFactory.initList(blockList, "BlockList");

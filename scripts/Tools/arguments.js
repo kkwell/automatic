@@ -25,11 +25,16 @@
  * \param longFlag E.g. "-output"
  */
 function getArgument(args, shortFlag, longFlag, def) {
-    var ret = getArguments(args, shortFlag, longFlag);
-    if (ret.length===0) {
-        return def;
+    // make sure undefined can be returned as default:
+    if (def===undefined) {
+        var ret = getArguments(args, shortFlag, longFlag);
+        if (ret.length===0) {
+            return def;
+        }
+        return RSettings.getArgument(args, shortFlag, longFlag);
     }
-    return ret[0];
+
+    return RSettings.getArgument(args, shortFlag, longFlag, def);
 }
 
 /**
@@ -40,122 +45,167 @@ function getArgument(args, shortFlag, longFlag, def) {
  * \param longFlag E.g. "-output"
  */
 function getArguments(args, shortFlag, longFlag) {
-    var ret = [];
+    return RSettings.getArguments(args, shortFlag, longFlag);
 
-    for (var k=0; k<args.length; k++) {
-        if (args[k]===shortFlag) {
-            if (k+1 < args.length) {
-                ret.push(args[k+1]);
-            }
-        }
+//    var ret = [];
 
-        if (args[k].indexOf(longFlag+"=")===0) {
-            var j=args[k].indexOf("=");
-            ret.push(args[k].substr(j+1));
-        }
-    }
+//    for (var k=0; k<args.length; k++) {
+//        if (args[k]===shortFlag) {
+//            if (k+1 < args.length) {
+//                ret.push(args[k+1]);
+//            }
+//        }
 
-    return ret;
+//        if (args[k].indexOf(longFlag+"=")===0) {
+//            var j=args[k].indexOf("=");
+//            ret.push(args[k].substr(j+1));
+//        }
+//    }
+
+//    return ret;
 }
 
 function getIntArgument(args, shortFlag, longFlag, def) {
-    var ret = getArgument(args, shortFlag, longFlag);
-    if (ret===undefined) {
-        return def;
+    // make sure undefined can be returned as default:
+    if (def===undefined) {
+        var ret = getArgument(args, shortFlag, longFlag);
+        if (ret===undefined) {
+            return def;
+        }
+        return RSettings.getIntArgument(args, shortFlag, longFlag, -1);
     }
-    return parseInt(ret, 10);
+
+    return RSettings.getIntArgument(args, shortFlag, longFlag, def);
 }
 
 function getIntListArgument(args, shortFlag, longFlag, def) {
-    var arg = getArgument(args, shortFlag, longFlag);
-    if (arg===undefined) {
-        return def;
+    // make sure undefined can be returned as default:
+    if (def===undefined) {
+        var ret = RSettings.getIntListArgument(args, shortFlag, longFlag, []);
+        if (ret.length===0) {
+            return def;
+        }
+        return ret;
     }
 
-    var ret = [];
-    var tokens = arg.split(",");
+    return RSettings.getIntListArgument(args, shortFlag, longFlag, def);
 
-    var singleInt = false;
-    if (tokens.length===1) {
-        singleInt = true;
-    }
+//    var arg = getArgument(args, shortFlag, longFlag);
+//    if (arg===undefined) {
+//        return def;
+//    }
 
-    for (var i=0; i<tokens.length; i++) {
-        var token = tokens[i];
-        var range = token.split("-");
-        var start, stop;
+//    var ret = [];
+//    var tokens = arg.split(",");
 
-        if (range.length===1) {
-            start = singleInt ? 0 : parseInt(range[0]);
-            stop = parseInt(range[0]);
-        }
-        else if (range.length===2) {
-            start = parseInt(range[0]);
-            stop = parseInt(range[1]);
-        }
-        else {
-            qWarning("invalid token in list: ", token);
-            continue;
-        }
+//    var singleInt = false;
+//    if (tokens.length===1) {
+//        singleInt = true;
+//    }
 
-        for (var k=start; k<=stop; k++) {
-            ret.push(k);
-        }
-    }
-    return ret;
+//    for (var i=0; i<tokens.length; i++) {
+//        var token = tokens[i];
+//        var range = token.split("-");
+//        var start, stop;
+
+//        if (range.length===1) {
+//            start = singleInt ? 0 : parseInt(range[0]);
+//            stop = parseInt(range[0]);
+//        }
+//        else if (range.length===2) {
+//            start = parseInt(range[0]);
+//            stop = parseInt(range[1]);
+//        }
+//        else {
+//            qWarning("invalid token in list: ", token);
+//            continue;
+//        }
+
+//        for (var k=start; k<=stop; k++) {
+//            ret.push(k);
+//        }
+//    }
+//    return ret;
 }
 
 function getFloatArgument(args, shortFlag, longFlag, def) {
-    var ret = getArgument(args, shortFlag, longFlag);
-    if (ret===undefined) {
-        return def;
+    // make sure undefined can be returned as default:
+    if (def===undefined) {
+        var ret = getArgument(args, shortFlag, longFlag);
+        if (ret===undefined) {
+            return def;
+        }
+        return RSettings.getFloatArgument(args, shortFlag, longFlag);
     }
-    return parseFloat(ret);
+    return RSettings.getFloatArgument(args, shortFlag, longFlag, def);
 }
 
 function getColorArgument(args, shortFlag, longFlag, def) {
-    var ret = getArgument(args, shortFlag, longFlag);
-    if (ret===undefined) {
-        return def;
+    // make sure undefined can be returned as default:
+    if (def===undefined) {
+        var ret = getArgument(args, shortFlag, longFlag);
+        if (ret===undefined) {
+            return def;
+        }
+        return RSettings.getColorArgument(args, shortFlag, longFlag);
     }
-    return new RColor(ret);
+    return RSettings.getColorArgument(args, shortFlag, longFlag, def);
+}
+
+function getVectorArgument(args, shortFlag, longFlag, def) {
+    // make sure undefined can be returned as default:
+    if (def===undefined) {
+        var ret = getArgument(args, shortFlag, longFlag);
+        if (ret===undefined) {
+            return def;
+        }
+        return RSettings.getVectorArgument(args, shortFlag, longFlag);
+    }
+    return RSettings.getVectorArgument(args, shortFlag, longFlag, def);
 }
 
 function getBoxArgument(args, shortFlag, longFlag, def) {
-    var ret = getArgument(args, shortFlag, longFlag);
-    if (ret===undefined) {
-        return def;
+    // make sure undefined can be returned as default:
+    if (def===undefined) {
+        var ret = getArgument(args, shortFlag, longFlag);
+        if (ret===undefined) {
+            return def;
+        }
+        return RSettings.getBoxArgument(args, shortFlag, longFlag);
     }
-    var parts = ret.split(',');
-    if (parts.length!==4) {
-        return def;
-    }
-    for (var i=0; i<parts.length; i++) {
-        parts[i] = parseFloat(parts[i]);
-    }
+    return RSettings.getBoxArgument(args, shortFlag, longFlag, def);
 
-    return new RBox(new RVector(parts[0], parts[1]), new RVector(parts[0] + parts[2], parts[1] + parts[3]));
+//    var parts = ret.split(',');
+//    if (parts.length!==4) {
+//        return def;
+//    }
+//    for (var i=0; i<parts.length; i++) {
+//        parts[i] = parseFloat(parts[i]);
+//    }
+
+//    return new RBox(new RVector(parts[0], parts[1]), new RVector(parts[0] + parts[2], parts[1] + parts[3]));
 }
 
 /**
  * \return True if the given arguments contain one of the given flags.
  */
 function testArgument(args, shortFlag, longFlag) {
-    if (shortFlag!=="" && args.indexOf(shortFlag)!==-1) {
-        return true;
-    }
-    if (longFlag!=="") {
-        if (args.indexOf(longFlag)!==-1) {
-            return true;
-        }
-        for (var k=0; k<args.length; k++) {
-            if (args[k].indexOf(longFlag+"=")===0) {
-                return true;
-            }
-        }
-    }
+    return RSettings.testArgument(args, shortFlag, longFlag);
+//    if (shortFlag!=="" && args.indexOf(shortFlag)!==-1) {
+//        return true;
+//    }
+//    if (longFlag!=="") {
+//        if (args.indexOf(longFlag)!==-1) {
+//            return true;
+//        }
+//        for (var k=0; k<args.length; k++) {
+//            if (args[k].indexOf(longFlag+"=")===0) {
+//                return true;
+//            }
+//        }
+//    }
 
-    return false;
+//    return false;
 }
 
 function printArgument(name, prop) {
@@ -170,7 +220,7 @@ function printArgument(name, prop) {
 function printGenericUsage() {
     if (RS.getSystemId()==="osx") {
         print();
-        print("Mac OS X specific options:\n");
+        print("macOS specific options:\n");
         print("  -no-dock-icon           Don't show icon in dock. This should only be used\n"
             + "                          in combination with -no-gui."  );
     }

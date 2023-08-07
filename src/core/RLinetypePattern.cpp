@@ -30,7 +30,7 @@ QMap<QString, QString> RLinetypePattern::nameMap;
 
 
 RLinetypePattern::RLinetypePattern(bool metric, const QString& name, const QString& description, int num...)
-    : metric(metric), name(name), description(description), screenScale(1.0) {
+    : metric(metric), name(name), description(description), screenScale(1.0), noOffset(false) {
 
     QList<double> dashes;
 
@@ -45,17 +45,17 @@ RLinetypePattern::RLinetypePattern(bool metric, const QString& name, const QStri
 }
 
 RLinetypePattern::RLinetypePattern(bool metric, const QString& name, const QString& description, const QList<double>& dashes)
-    : metric(metric), name(name), description(description), screenScale(1.0) {
+    : metric(metric), name(name), description(description), screenScale(1.0), noOffset(false) {
 
     set(dashes);
 }
 
 RLinetypePattern::RLinetypePattern() :
-    metric(true) {
+    metric(true), screenScale(1.0), noOffset(false) {
 }
 
 RLinetypePattern::RLinetypePattern(bool metric, const QString& name, const QString& description) :
-    metric(metric), name(name), description(description) {
+    metric(metric), name(name), description(description), screenScale(1.0), noOffset(false) {
 }
 
 RLinetypePattern::RLinetypePattern(const RLinetypePattern& other) {
@@ -133,6 +133,7 @@ RLinetypePattern& RLinetypePattern::operator=(const RLinetypePattern& other) {
     name = other.name;
     description = other.description;
     screenScale = other.screenScale;
+    noOffset = other.noOffset;
     patternString = other.patternString;
     pattern = other.pattern;
     shapes = other.shapes;
@@ -158,7 +159,7 @@ bool RLinetypePattern::operator==(const RLinetypePattern& other) const {
     }
 
     for (int i = 0; i < other.pattern.length(); ++i) {
-        if (pattern[i] != other.pattern[i]) {
+        if (!RMath::fuzzyCompare(pattern[i], other.pattern[i])) {
             return false;
         }
     }
@@ -241,6 +242,10 @@ QVector<qreal> RLinetypePattern::getScreenBasedLinetype() {
  *      given length that the pattern is symmetrical.
  */
 double RLinetypePattern::getPatternOffset(double length) {
+    if (noOffset) {
+        return 0.0;
+    }
+
     double optOffset = 0.0;
     double gap = 0.0;
     double maxGap = RMINDOUBLE;
@@ -349,11 +354,19 @@ void RLinetypePattern::setScreenScale(double s) {
     screenScale = s;
 }
 
+bool RLinetypePattern::getNoOffset() const {
+    return noOffset;
+}
+
+void RLinetypePattern::setNoOffset(bool n) {
+    noOffset = n;
+}
+
 QString RLinetypePattern::getLabel() const {
     QString desc = description;
     QString preview;
     if (!description.isEmpty()) {
-        int k = description.lastIndexOf(QRegExp("[^_\\. ]"));
+        int k = description.lastIndexOf(QRegularExpression("[^_\\. ]"));
         if (k!=-1) {
             desc = description.mid(0, k+1);
             preview = description.mid(k+1);
@@ -393,8 +406,20 @@ bool RLinetypePattern::setPatternString(const QString& patternString) {
     screenScale = 1.0;
 
     QStringList parts;
-    QRegExp rx("\\[[^\\]]*\\]|A|([+-]?\\d+\\.?\\d*)|([+-]?\\d*\\.?\\d+)");
+    QRegularExpression rx("\\[[^\\]]*\\]|A|([+-]?\\d+\\.?\\d*)|([+-]?\\d*\\.?\\d+)");
 
+#if QT_VERSION >= 0x050000
+    int pos = 0;
+    QRegularExpressionMatch match;
+    while ((pos = patternString.indexOf(rx, pos, &match))!=-1) {
+        parts.append(match.captured(0));
+        int l = match.capturedLength();
+        if (l==0) {
+            break;
+        }
+        pos += l;
+    }
+#else
     int pos = 0;
     while ((pos = rx.indexIn(patternString, pos))!=-1) {
         parts.append(rx.cap(0));
@@ -404,6 +429,7 @@ bool RLinetypePattern::setPatternString(const QString& patternString) {
         }
         pos += l;
     }
+#endif
 
     if (parts.isEmpty()) {
         return false;
@@ -421,7 +447,7 @@ bool RLinetypePattern::setPatternString(const QString& patternString) {
                 return false;
             }
 
-            QRegExp rx(
+            QRegularExpression rx(
                 "\\["
                 "([^, ]*)"   // text
                 "[, ]*"
@@ -432,20 +458,40 @@ bool RLinetypePattern::setPatternString(const QString& patternString) {
                 "(?:[, ]*([SRXYA])[^=]*=(?:([+-]?\\d+\\.?\\d*|[+-]?\\d*\\.\\d+)))?"
                 "\\]"
             );
-            rx.setCaseSensitivity(Qt::CaseInsensitive);
 
+#if QT_VERSION >= 0x050000
+            QRegularExpressionMatch match;
+            rx.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+            part.indexOf(rx, 0, &match);
+#else
+            rx.setCaseSensitivity(Qt::CaseInsensitive);
             rx.indexIn(part);
+#endif
 
             int idx = dashes.length()-1;
+#if QT_VERSION >= 0x050000
+            QString text = match.captured(1);
+#else
             QString text = rx.cap(1);
+#endif
             if (text.startsWith("\"") && text.endsWith("\"")) {
                 text = text.mid(1, text.length()-2);
             }
             shapeTexts.insert(idx, text);
+#if QT_VERSION >= 0x050000
+            shapeTextStyles.insert(idx, match.captured(2));
+#else
             shapeTextStyles.insert(idx, rx.cap(2));
+#endif
+
             for (int k=3; k+1<=rx.captureCount(); k+=2) {
+#if QT_VERSION >= 0x050000
+                QString c = match.captured(k).toUpper();
+                double val = match.captured(k+1).toDouble();
+#else
                 QString c = rx.cap(k).toUpper();
                 double val = rx.cap(k+1).toDouble();
+#endif
 
                 if (c=="S") {
                     shapeScales.insert(idx, val);
@@ -799,7 +845,9 @@ QList<QPair<QString, RLinetypePattern*> > RLinetypePattern::loadAllFrom(bool met
     }
 
     QTextStream ts(&file);
-    ts.setCodec("UTF-8");
+
+    RS::setUtf8Codec(ts);
+
     QString line;
     RLinetypePattern* ltPattern = NULL;;
 
@@ -824,10 +872,18 @@ QList<QPair<QString, RLinetypePattern*> > RLinetypePattern::loadAllFrom(bool met
 
         // name / description:
         if (line.at(0)=='*') {
+#if QT_VERSION >= 0x060000
+            QRegularExpression rx("\\*([^,]*)(?:,\\s*(.*))?", QRegularExpression::CaseInsensitiveOption);
+            QRegularExpressionMatch match;
+            line.indexOf(rx, 0, &match);
+            QString name = match.captured(1);
+            QString description = match.captured(2);
+#else
             QRegExp rx("\\*([^,]*)(?:,\\s*(.*))?", Qt::CaseSensitive, QRegExp::RegExp2);
             rx.indexIn(line);
             QString name = rx.cap(1);
             QString description = rx.cap(2);
+#endif
             ltPattern = new RLinetypePattern(metric, name, description);
 
             // some patterns in the imperial pattern file are actually metric:
@@ -913,8 +969,18 @@ void RLinetypePattern::initNameMap() {
     nameMap.insert("FENCELINE1", tr("Fenceline 1"));
     nameMap.insert("FENCELINE2", tr("Fenceline 2"));
 
+    nameMap.insert("WATER", tr("Water"));
     nameMap.insert("DRAINAGE", tr("Drainage"));
     nameMap.insert("DRAINAGE2", tr("Drainage Reversed"));
+
+    nameMap.insert("COMMUNICATION", tr("Communication"));
+    nameMap.insert("ELECTRIC", tr("Electric"));
+    nameMap.insert("LOW_VOLTAGE", tr("Low Voltage"));
+    nameMap.insert("HIGH_VOLTAGE", tr("High Voltage"));
+    nameMap.insert("OVERHEAD_POWER", tr("Overhead Power"));
+
+    nameMap.insert("FOUL", tr("Foul"));
+    nameMap.insert("FOUL_RISING", tr("Foul Rising"));
 }
 
 /**
@@ -927,12 +993,13 @@ QDebug operator<<(QDebug dbg, const RLinetypePattern& p) {
     << ", " << p.getDescription()
     << ", string: " << p.getPatternString() << ", "
     << ", length: " << p.getPatternLength() << ", "
-    << ", dashes: " << p.getNumDashes() << ", ";
+    << ", dashes: " << p.getNumDashes() << ":";
     for (int i=0; i<p.getNumDashes(); ++i) {
+        dbg.nospace() << "\ndash:";
         if (i!=0) {
             dbg.nospace() << ",";
         }
-        dbg.nospace() << p.getDashLengthAt(i);
+        dbg.nospace() << "\n  length: " << p.getDashLengthAt(i);
 
         bool gotShape = false;
         if (p.hasShapeNumberAt(i) || p.hasShapeTextAt(i)) {
@@ -940,7 +1007,7 @@ QDebug operator<<(QDebug dbg, const RLinetypePattern& p) {
         }
 
         if (gotShape) {
-            dbg.nospace() << "[";
+            dbg.nospace() << "\n[";
         }
         if (p.hasShapeTextAt(i)) {
             dbg.nospace() << "text: " << p.getShapeTextAt(i);
@@ -965,6 +1032,7 @@ QDebug operator<<(QDebug dbg, const RLinetypePattern& p) {
         }
     }
     dbg.nospace() << "\nsymmetries: " << p.getSymmetries();
+    dbg.nospace() << "\nvalid: " << p.isValid();
     dbg.nospace() << ")";
     return dbg.space();
 }

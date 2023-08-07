@@ -53,6 +53,9 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getStaticPropertyTypeIds
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -228,6 +231,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         simplify
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getBezierSegments
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

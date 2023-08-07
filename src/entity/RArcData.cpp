@@ -45,10 +45,10 @@ QList<RRefPoint> RArcData::getReferencePoints(RS::ProjectionRenderingHint hint) 
     ret.append(RRefPoint(getMiddlePoint(), RRefPoint::Secondary));
 
     QList<RRefPoint> p;
-    p.append(RRefPoint(center + RVector(radius, 0), RRefPoint::Secondary));
-    p.append(RRefPoint(center + RVector(0, radius), RRefPoint::Secondary));
-    p.append(RRefPoint(center - RVector(radius, 0), RRefPoint::Secondary));
-    p.append(RRefPoint(center - RVector(0, radius), RRefPoint::Secondary));
+    p.append(RRefPoint(center + RVector(radius, 0), RRefPoint::Tertiary));
+    p.append(RRefPoint(center + RVector(0, radius), RRefPoint::Tertiary));
+    p.append(RRefPoint(center - RVector(radius, 0), RRefPoint::Tertiary));
+    p.append(RRefPoint(center - RVector(0, radius), RRefPoint::Tertiary));
 
     for (int i=0; i<p.size(); i++) {
         if (RMath::isAngleBetween(center.getAngleTo(p[i]), startAngle, endAngle, reversed)) {
@@ -59,16 +59,20 @@ QList<RRefPoint> RArcData::getReferencePoints(RS::ProjectionRenderingHint hint) 
     return ret;
 }
 
-bool RArcData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint) {
+bool RArcData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers) {
+    Q_UNUSED(modifiers)
+
+    bool shift = (modifiers & Qt::ShiftModifier)>0;
+
     bool ret = false;
     if (referencePoint.equalsFuzzy(center)) {
         center = targetPoint;
         ret = true;
     } else if (referencePoint.equalsFuzzy(getStartPoint())) {
-        moveStartPoint(targetPoint);
+        moveStartPoint(targetPoint, shift);
         ret = true;
     } else if (referencePoint.equalsFuzzy(getEndPoint())) {
-        moveEndPoint(targetPoint);
+        moveEndPoint(targetPoint, shift);
         ret = true;
     }
     else if (referencePoint.equalsFuzzy(center + RVector(radius, 0)) ||

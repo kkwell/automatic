@@ -72,6 +72,9 @@ public:
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
+    static RPropertyTypeId PropertySelected;
+    static RPropertyTypeId PropertyInvisible;
 
     enum XYZ {
         X, Y, Z
@@ -81,7 +84,10 @@ public:
     enum ObjectFlag {
         NoFlags = 0x000,
         Undone = 0x001,           //!< object is undone
-        Protect = 0x002          //!< object is protected
+        Protect = 0x002,          //!< object is protected
+        Selected = 0x004,         //!< object is selected
+        Invisible = 0x008,        //!< object is invisible
+        WorkingSet = 0x010        //!< object is part of the current working set
     };
     Q_DECLARE_FLAGS(Flags, ObjectFlag)
 
@@ -92,9 +98,23 @@ public:
 
     static void init();
 
-    virtual RS::EntityType getType() const = 0;
+    static RS::EntityType getRtti() {
+        return RS::ObjectUnknown;
+    }
+
+    virtual RS::EntityType getType() const {
+        return RS::ObjectUnknown;
+    }
 
     virtual RObject* clone() const = 0;
+
+    /**
+     * \return True to always clone object instead of saving diff when object changes.
+     * This can be used for complex object types which cannot be modified using properties.
+     */
+    virtual bool mustAlwaysClone() const {
+        return false;
+    }
 
     RDocument* getDocument() {
         return document;
@@ -104,9 +124,7 @@ public:
         return document;
     }
 
-    void setDocument(RDocument* document) {
-        this->document = document;
-    }
+    void setDocument(RDocument* document);
 
     void setFlag(int flag, bool on = true) {
         if (on) {
@@ -116,7 +134,7 @@ public:
         }
     }
     bool getFlag(int flag) const {
-        return (flags & flag) == flag;
+        return (int)(flags & flag) == flag;
     }
 
     /**
@@ -152,11 +170,35 @@ public:
         setFlag(RObject::Protect, on);
     }
 
+    bool isInvisible() const {
+        return getFlag(RObject::Invisible);
+    }
+
+    void setInvisible(bool on) {
+        setFlag(RObject::Invisible, on);
+    }
+
+    virtual bool isSelected() const {
+        return getFlag(RObject::Selected);
+    }
+
+    virtual void setSelected(bool on) {
+        setFlag(RObject::Selected, on);
+    }
+
     bool isUndone() const {
         return getFlag(RObject::Undone);
     }
 
-    virtual QSet<RPropertyTypeId> getPropertyTypeIds() const;
+    virtual bool isWorkingSet() const {
+        return getFlag(RObject::WorkingSet);
+    }
+
+    virtual void setWorkingSet(bool on) {
+        setFlag(RObject::WorkingSet, on);
+    }
+
+    virtual QSet<RPropertyTypeId> getPropertyTypeIds(RPropertyAttributes::Option option = RPropertyAttributes::NoOptions) const;
     virtual QSet<RPropertyTypeId> getCustomPropertyTypeIds() const;
 
     /**
@@ -164,7 +206,7 @@ public:
      *      property if this property owner has no property with the given ID.
      */
     virtual QPair<QVariant, RPropertyAttributes> getProperty(RPropertyTypeId& propertyTypeId,
-        bool humanReadable = false, bool noAttributes = false);
+        bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     /**
      * Sets the given property to the given value. If this property owner
@@ -182,15 +224,8 @@ public:
      *      false otherwise.
      */
     virtual bool hasPropertyType(RPropertyTypeId propertyTypeId) {
-        return RPropertyTypeId::hasPropertyType(typeid(*this), propertyTypeId);
+        return RPropertyTypeId::hasPropertyType(getType(), propertyTypeId);
     }
-
-    /**
-     * \return True if this object is selected for editing. This means
-     *      that the properties of this object should for example
-     *      be shown in a property editor.
-     */
-    virtual bool isSelectedForPropertyEditing() = 0;
 
     bool hasCustomProperties() const;
     bool hasCustomProperty(const QString& title, const QString& key) const;
@@ -198,7 +233,7 @@ public:
     /**
      * \nonscriptable
      */
-    bool hasCustomProperty(const QString& title, const QRegExp& key) const;
+    bool hasCustomProperty(const QString& title, const QRegularExpression& key) const;
 
     virtual QVariant getCustomProperty(const QString& title, const QString& key, const QVariant& defaultValue = RDEFAULT_QVARIANT) const;
     virtual double getCustomDoubleProperty(const QString& title, const QString& key, double defaultValue) const;
@@ -239,6 +274,10 @@ public:
 
     void dump() const {
         qDebug() << *this;
+    }
+
+    virtual bool validate() {
+        return true;
     }
 
     /**

@@ -24,7 +24,7 @@
  * \brief This module contains ECMAScript implementations of various
  * view tools.
  */
-include("../EAction.js");
+include("scripts/EAction.js");
 
 /**
  * \class View
@@ -66,7 +66,7 @@ View.getCadToolBarPanel = function() {
         action.objectName = actionName;
         action.setRequiresDocument(false);
         action.setIcon(View.includeBasePath + "/View.svg");
-        action.setStatusTip(qsTr("Show view tools"));
+        //action.setStatusTip(qsTr("Show view tools"));
         action.setDefaultShortcut(new QKeySequence("w,v"));
         action.setNoState();
         action.setDefaultCommands(["viewmenu"]);
@@ -86,6 +86,10 @@ View.getCadToolBarPanel = function() {
 View.getToolMatrixPanel = function() {
     RSettings.setValue("View/VisibleInMatrixPanel", false, false);
     return EAction.getToolMatrixPanel(View.getTitle(), "ViewMatrixPanel", 30);
+};
+
+View.getContextMenuCategory = function() {
+    return [qsTr("View")];
 };
 
 View.getTitle = function() {

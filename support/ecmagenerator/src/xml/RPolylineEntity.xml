@@ -26,6 +26,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="getRtti" cppName="getRtti" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RS::EntityType" isPureVirtual="false" />
+    </method>
     <method name="getStaticPropertyTypeIds"
     cppName="getStaticPropertyTypeIds" specifier="public"
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
@@ -45,7 +49,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       </variant>
     </method>
     <method name="setProperty" cppName="setProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
         <arg type="RPropertyTypeId" typeName="RPropertyTypeId"
@@ -58,7 +62,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       </variant>
     </method>
     <method name="getProperty" cppName="getProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="QPair &lt; QVariant , RPropertyAttributes &gt;"
       isPureVirtual="false">
@@ -68,6 +72,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="humanReadable"
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="noAttributes"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
@@ -198,6 +204,11 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="int" typeName="int" name="i" isConst="false" />
       </variant>
     </method>
+    <method name="hasArcSegments" cppName="hasArcSegments"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
     <method name="getClosestSegment" cppName="getClosestSegment"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -230,6 +241,16 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
+    <method name="getVertexAngle" cppName="getVertexAngle"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="double" isPureVirtual="false">
+        <arg type="int" typeName="int" name="i" isConst="false" />
+        <arg type="RS::Orientation" typeName="RS::Orientation"
+        name="orientation" hasDefault="true"
+        default="RS :: UnknownOrientation" isConst="false" />
+      </variant>
+    </method>
     <method name="stripWidths" cppName="stripWidths"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -243,11 +264,37 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
+    <method name="setGlobalWidth" cppName="setGlobalWidth"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="double" typeName="double" name="w"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="setStartWidthAt" cppName="setStartWidthAt"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="int" typeName="int" name="i" isConst="false" />
+        <arg type="double" typeName="double" name="w"
+        isConst="false" />
+      </variant>
+    </method>
     <method name="getStartWidthAt" cppName="getStartWidthAt"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="double" isPureVirtual="false">
         <arg type="int" typeName="int" name="i" isConst="false" />
+      </variant>
+    </method>
+    <method name="setEndWidthAt" cppName="setEndWidthAt"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="int" typeName="int" name="i" isConst="false" />
+        <arg type="double" typeName="double" name="w"
+        isConst="false" />
       </variant>
     </method>
     <method name="getEndWidthAt" cppName="getEndWidthAt"
@@ -256,6 +303,40 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="double" isPureVirtual="false">
         <arg type="int" typeName="int" name="i" isConst="false" />
       </variant>
+    </method>
+    <method name="hasWidths" cppName="hasWidths" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setStartWidths" cppName="setStartWidths"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="QList &lt; double &gt; &amp;"
+        typeName="QList &lt; double &gt;" name="sw"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="getStartWidths" cppName="getStartWidths"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QList &lt; double &gt;"
+      isPureVirtual="false" />
+    </method>
+    <method name="setEndWidths" cppName="setEndWidths"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="QList &lt; double &gt; &amp;"
+        typeName="QList &lt; double &gt;" name="ew"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="getEndWidths" cppName="getEndWidths"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="QList &lt; double &gt;"
+      isPureVirtual="false" />
     </method>
     <method name="getDirection1" cppName="getDirection1"
     specifier="public" isStatic="false" isVirtual="false"
@@ -288,6 +369,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="RVector" isPureVirtual="false" />
+    </method>
+    <method name="relocateStartPoint" cppName="relocateStartPoint"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RVector &amp;" typeName="RVector" name="p"
+        isConst="true" />
+      </variant>
     </method>
     <method name="setClosed" cppName="setClosed" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
@@ -335,7 +424,11 @@ xmlns:rs="http://www.ribbonsoft.com">
     cppName="getSelfIntersectionPoints" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="QList &lt; RVector &gt;"
-      isPureVirtual="false" />
+      isPureVirtual="false">
+        <arg type="double" typeName="double" name="tolerance"
+        hasDefault="true" default="RS :: PointTolerance"
+        isConst="false" />
+      </variant>
     </method>
     <method name="getOrientation" cppName="getOrientation"
     specifier="public" isStatic="false" isVirtual="false"
@@ -411,6 +504,23 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
     </method>
+    <method name="setElevation" cppName="setElevation"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="double" typeName="double" name="v"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="getElevation" cppName="getElevation"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="double" isPureVirtual="false" />
+    </method>
+    <method name="isFlat" cppName="isFlat" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
     <method name="getTrimEnd" cppName="getTrimEnd"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -433,6 +543,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="extend"
         hasDefault="true" default="false" isConst="false" />
       </variant>
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="double" typeName="double" name="trimDist"
+        isConst="false" />
+      </variant>
     </method>
     <method name="trimEndPoint" cppName="trimEndPoint"
     specifier="public" isStatic="false" isVirtual="false"
@@ -446,6 +560,44 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="extend"
         hasDefault="true" default="false" isConst="false" />
       </variant>
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="double" typeName="double" name="trimDist"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="morph" cppName="morph" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="QList &lt; RPolyline &gt;"
+      isPureVirtual="false">
+        <arg type="RPolyline &amp;" typeName="RPolyline"
+        name="target" isConst="true" />
+        <arg type="int" typeName="int" name="steps"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="contains" cppName="contains" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="RVector &amp;" typeName="RVector" name="point"
+        isConst="true" />
+        <arg type="bool" typeName="bool" name="borderIsInside"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="double" typeName="double" name="tolerance"
+        hasDefault="true" default="RS :: PointTolerance"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="containsShape" cppName="containsShape"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="RShape &amp;" typeName="RShape" name="shape"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="validate" cppName="validate" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
     </method>
     <method name="print" cppName="print" specifier="protected"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
@@ -459,6 +611,8 @@ xmlns:rs="http://www.ribbonsoft.com">
     <property name="PropertyHandle" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyProtected" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyWorkingSet" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyType" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
@@ -510,13 +664,11 @@ xmlns:rs="http://www.ribbonsoft.com">
     isConst="false" isStatic="true" />
     <property name="PropertyBaseAngle" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
-    <property name="PropertyWidth" type="RPropertyTypeId"
+    <property name="PropertySize1" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
-    <property name="PropertyHeight" type="RPropertyTypeId"
+    <property name="PropertySize2" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
-    <property name="TrClockwise" type="QString" isConst="false"
-    isStatic="true" />
-    <property name="TrCounterclockwise" type="QString"
+    <property name="PropertyElevation" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
   </class>
 </unit>

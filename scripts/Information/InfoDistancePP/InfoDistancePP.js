@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Information.js");
+include("scripts/Information/Information.js");
 
 /**
  * \class InfoDistancePP
@@ -66,7 +66,7 @@ InfoDistancePP.prototype.setState = function(state) {
         var trSecondPoint = qsTr("Second point");
         this.setCommandPrompt(trSecondPoint);
         this.setLeftMouseTip(trSecondPoint);
-        this.setRightMouseTip(qsTr("Done"));
+        this.setRightMouseTip(EAction.trDone);
         break;
     }
 
@@ -123,10 +123,17 @@ InfoDistancePP.prototype.pickCoordinate = function(event, preview) {
             resultMessage += ",\n" + qsTr("Delta X:") + " " + this.formatLinearResultCmd(dx);
             resultMessage += ",\n" + qsTr("Delta Y:") + " " + this.formatLinearResultCmd(dy);
             resultMessage += ",\n" + qsTr("Angle:") + " " + this.formatAngularResultCmd(angle);
-            this.setState(InfoDistancePP.State.SettingFirstPoint);
+            if (this.autoTerminate) {
+                this.updateLineEdit(distance);
+                this.setNoState(false);
+                this.terminate();
+                return;
+            }
+            else {
+                this.setState(InfoDistancePP.State.SettingFirstPoint);
+            }
             appWin.handleUserInfo(resultMessage);
         }
-
         break;
     }
 
@@ -138,7 +145,7 @@ InfoDistancePP.prototype.pickCoordinate = function(event, preview) {
                 di.previewOperation(op);
             }
             else {
-                op.destroy();
+                destr(op);
             }
         }
     }

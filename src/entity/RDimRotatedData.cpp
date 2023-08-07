@@ -48,10 +48,14 @@ RDimRotatedData::RDimRotatedData(const RDimensionData& dimData,
 
 RBox RDimRotatedData::getBoundingBox(bool ignoreEmpty) const {
     boundingBox = RDimensionData::getBoundingBox(ignoreEmpty);
-    if (!hasDimensionBlockReference()) {
-        boundingBox.growToInclude(extensionPoint1);
-        boundingBox.growToInclude(extensionPoint2);
-    }
+
+    // 20200306: this breaks area selection of dimensions
+    // if extension points are far away from dimension shapes:
+    //if (!hasDimensionBlockReference()) {
+    //    boundingBox.growToInclude(extensionPoint1);
+    //    boundingBox.growToInclude(extensionPoint2);
+    //}
+
     return boundingBox;
 }
 
@@ -72,7 +76,7 @@ QList<RRefPoint> RDimRotatedData::getReferencePoints(RS::ProjectionRenderingHint
     return ret;
 }
 
-bool RDimRotatedData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint) {
+bool RDimRotatedData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers) {
     // if definition point and extension points are on one line,
     // move the extension points together with the definition point:
     bool moveExtensionPoints = false;
@@ -82,7 +86,7 @@ bool RDimRotatedData::moveReferencePoint(const RVector& referencePoint, const RV
         }
     }
 
-    bool ret = RDimLinearData::moveReferencePoint(referencePoint, targetPoint);
+    bool ret = RDimLinearData::moveReferencePoint(referencePoint, targetPoint, modifiers);
 
     if (moveExtensionPoints) {
         // move extension points with definition point:
@@ -139,24 +143,6 @@ void RDimRotatedData::recomputeDefinitionPoint(
     }
 }
 
-/**
- * Recompute definition point if
- */
-//void RDimRotatedData::recomputeDefinitionPoint(const RVector& oldDimLineGrip, const RVector& newDimLineGrip) {
-//    Q_UNUSED(oldDimLineGrip)
-
-//    RVector extDir = RVector::createPolar(1.0, rotation);
-
-//    // construction line for dimension line
-//    RLine extLine1(extensionPoint1, extensionPoint1 + extDir);
-
-//    RVector dimP1 = extLine1.getClosestPointOnShape(newDimLineGrip, false);
-
-//    if (dimP1.isValid()) {
-//        definitionPoint = dimP1;
-//    }
-//}
-
 bool RDimRotatedData::rotate(double rotation, const RVector& center) {
     RDimLinearData::rotate(rotation, center);
     //extensionPoint1.rotate(rotation, center);
@@ -181,10 +167,14 @@ bool RDimRotatedData::mirror(const RLine& axis) {
     return true;
 }
 
-QList<QSharedPointer<RShape> > RDimRotatedData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment) const {
-    Q_UNUSED(queryBox)
-    Q_UNUSED(ignoreComplex)
+/*
+QList<QSharedPointer<RShape> > RDimRotatedData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment, QList<RObject::Id>* entityIds) const {
+    //Q_UNUSED(queryBox)
+    //Q_UNUSED(ignoreComplex)
     Q_UNUSED(segment)
+    Q_UNUSED(entityIds)
+
+    // TODO: delegate to RDimStyle
 
     QSharedPointer<RBlockReferenceEntity> dimBlockReference = getDimensionBlockReference();
     if (!dimBlockReference.isNull()) {
@@ -207,6 +197,8 @@ QList<QSharedPointer<RShape> > RDimRotatedData::getShapes(const RBox& queryBox, 
     // definitive dimension line:
     ret += getDimensionLineShapes(dimP1, dimP2, true, true);
 
+    RLine extLine1, extLine2;
+
     // extension lines:
     RVector vDimexo1, vDimexe1, vDimexo2, vDimexe2;
     if (!extensionPoint1.equalsFuzzy(dimP1)) {
@@ -214,8 +206,7 @@ QList<QSharedPointer<RShape> > RDimRotatedData::getShapes(const RBox& queryBox, 
         vDimexe1.setPolar(dimexe, a1);
         vDimexo1.setPolar(dimexo, a1);
 
-        RLine line(extensionPoint1+vDimexo1, dimP1+vDimexe1);
-        ret.append(QSharedPointer<RLine>(new RLine(line)));
+        extLine1 = RLine(extensionPoint1+vDimexo1, dimP1+vDimexe1);
     }
 
     if (!extensionPoint2.equalsFuzzy(dimP2)) {
@@ -223,12 +214,21 @@ QList<QSharedPointer<RShape> > RDimRotatedData::getShapes(const RBox& queryBox, 
         vDimexe2.setPolar(dimexe, a2);
         vDimexo2.setPolar(dimexo, a2);
 
-        RLine line(extensionPoint2+vDimexo2, dimP2+vDimexe2);
-        ret.append(QSharedPointer<RLine>(new RLine(line)));
+        extLine2 = RLine(extensionPoint2+vDimexo2, dimP2+vDimexe2);
+    }
+
+    adjustExtensionLineFixLength(extLine1, extLine2);
+
+    if (extLine1.isValid()) {
+        ret.append(QSharedPointer<RLine>(new RLine(extLine1)));
+    }
+    if (extLine2.isValid()) {
+        ret.append(QSharedPointer<RLine>(new RLine(extLine2)));
     }
 
     return ret;
 }
+*/
 
 double RDimRotatedData::getMeasuredValue() const {
     // direction of dimension line
@@ -246,7 +246,7 @@ double RDimRotatedData::getMeasuredValue() const {
 
 QString RDimRotatedData::getAutoLabel() const {
     double distance = getMeasuredValue();
-    distance *= linearFactor;
+    distance *= getDimlfac();
 
     return formatLabel(distance);
 }

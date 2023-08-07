@@ -18,6 +18,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="getRtti" cppName="getRtti" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RS::EntityType" isPureVirtual="false" />
+    </method>
     <method name="getStaticPropertyTypeIds"
     cppName="getStaticPropertyTypeIds" specifier="public"
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
@@ -25,7 +29,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       isPureVirtual="false" />
     </method>
     <method name="setProperty" cppName="setProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
         <arg type="RPropertyTypeId" typeName="RPropertyTypeId"
@@ -38,7 +42,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       </variant>
     </method>
     <method name="getProperty" cppName="getProperty"
-    specifier="public" isStatic="false" isVirtual="false"
+    specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
       <variant returnType="QPair &lt; QVariant , RPropertyAttributes &gt;"
       isPureVirtual="false">
@@ -48,6 +52,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="bool" typeName="bool" name="humanReadable"
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="noAttributes"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
@@ -63,12 +69,33 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
+    <method name="renderDimensionText"
+    cppName="renderDimensionText" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RExporter &amp;" typeName="RExporter" name="e"
+        isConst="false" />
+        <arg type="RDocument *" typeName="RDocument *" name="doc"
+        isConst="true" />
+        <arg type="RTextData &amp;" typeName="RTextData"
+        name="textData" isConst="false" />
+        <arg type="bool" typeName="bool" name="isSelected"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="forceSelected"
+        hasDefault="true" default="false" isConst="false" />
+      </variant>
+    </method>
     <method name="getData" cppName="getData" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="RDimensionData &amp;"
       isPureVirtual="true" />
       <variant returnType="const RDimensionData &amp;"
       isPureVirtual="false" />
+    </method>
+    <method name="clearStyleOverrides"
+    cppName="clearStyleOverrides" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false" />
     </method>
     <method name="setDefinitionPoint" cppName="setDefinitionPoint"
     specifier="public" isStatic="false" isVirtual="false"
@@ -107,6 +134,39 @@ xmlns:rs="http://www.ribbonsoft.com">
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="RTextData" isPureVirtual="false" />
+    </method>
+    <method name="updateBoundingBox" cppName="updateBoundingBox"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RBox &amp;" typeName="RBox" name="b"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="updateTextPositionCenter"
+    cppName="updateTextPositionCenter" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RVector &amp;" typeName="RVector" name="p"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="updateTextData" cppName="updateTextData"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RTextData &amp;" typeName="RTextData" name="d"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="updateShapes" cppName="updateShapes"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="QList &lt; QSharedPointer &lt; RShape &gt; &gt; &amp;"
+        typeName="QList &lt; QSharedPointer &lt; RShape &gt; &gt;"
+        name="s" isConst="true" />
+      </variant>
     </method>
     <method name="setTextPosition" cppName="setTextPosition"
     specifier="public" isStatic="false" isVirtual="false"
@@ -176,15 +236,12 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </method>
-    <method name="getDimScale" cppName="getDimScale"
+    <method name="getDimscale" cppName="getDimscale"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
-      <variant returnType="double" isPureVirtual="false">
-        <arg type="bool" typeName="bool" name="fromDocument"
-        hasDefault="true" default="true" isConst="false" />
-      </variant>
+      <variant returnType="double" isPureVirtual="false" />
     </method>
-    <method name="setDimScale" cppName="setDimScale"
+    <method name="setDimscale" cppName="setDimscale"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
@@ -201,6 +258,66 @@ xmlns:rs="http://www.ribbonsoft.com">
     cppName="hasDimensionBlockReference" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="isArrow1Flipped" cppName="isArrow1Flipped"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setArrow1Flipped" cppName="setArrow1Flipped"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="isArrow2Flipped" cppName="isArrow2Flipped"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setArrow2Flipped" cppName="setArrow2Flipped"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="isExtLineFix" cppName="isExtLineFix"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setExtLineFix" cppName="setExtLineFix"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="getExtLineFixLength"
+    cppName="getExtLineFixLength" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="double" isPureVirtual="false" />
+    </method>
+    <method name="setExtLineFixLength"
+    cppName="setExtLineFixLength" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="double" typeName="double" name="v"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="hasOverride" cppName="hasOverride"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="RS::KnownVariable" typeName="RS::KnownVariable"
+        name="key" isConst="false" />
+      </variant>
     </method>
     <method name="getDimensionBlockNames"
     cppName="getDimensionBlockNames" specifier="public"
@@ -223,6 +340,8 @@ xmlns:rs="http://www.ribbonsoft.com">
     <property name="PropertyHandle" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyProtected" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyWorkingSet" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyType" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
@@ -260,19 +379,61 @@ xmlns:rs="http://www.ribbonsoft.com">
     isConst="false" isStatic="true" />
     <property name="PropertyLowerTolerance" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
-    <property name="PropertyLinearFactor" type="RPropertyTypeId"
-    isConst="false" isStatic="true" />
-    <property name="PropertyDimScale" type="RPropertyTypeId"
-    isConst="false" isStatic="true" />
     <property name="PropertyDimBlockName" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyAutoTextPos" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyFontName" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
+    <property name="PropertyArrow1Flipped" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyArrow2Flipped" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyExtLineFix" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyExtLineFixLength"
+    type="RPropertyTypeId" isConst="false" isStatic="true" />
     <property name="PropertyAutoLabel" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyMeasuredValue" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimscale" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimlfac" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimtxt" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimgap" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimasz" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimexe" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimexo" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimtad" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimtih" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimtsz" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimlunit" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimdec" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimdsep" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimzin" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimaunit" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimadec" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimazin" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyArchTick" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertyDimclrt" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
   </class>
 </unit>

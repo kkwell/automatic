@@ -24,6 +24,8 @@
 #include "RCircle.h"
 #include "RDebug.h"
 #include "RMath.h"
+#include "RPluginLoader.h"
+#include "RSettings.h"
 
 QColor RColor::CompatByLayer = QColor(1,1,1);
 QColor RColor::CompatByBlock = QColor(2,2,2);
@@ -133,6 +135,17 @@ RColor RColor::getHighlighted(const RColor& color, const QColor& bgColor, int mi
     return ret;
 }
 
+RColor RColor::getFaded(const RColor& color, const QColor& bgColor, double factor) {
+    RColor ret = color;
+
+    // mix color with background color:
+    ret.setRedF((color.redF() + bgColor.redF()*factor) / (factor+1));
+    ret.setGreenF((color.greenF() + bgColor.greenF()*factor) / (factor+1));
+    ret.setBlueF((color.blueF() + bgColor.blueF()*factor) / (factor+1));
+
+    return ret;
+}
+
 bool RColor::isValid() const {
     if (mode == RColor::ByBlock || mode == RColor::ByLayer) {
         return true;
@@ -199,6 +212,46 @@ QList<QPair<QString, RColor> > RColor::getList(bool onlyFixed) {
     // remove "By Block"
     name = RColor(RColor::ByBlock).getName();
     l.removeAll(QPair<QString, RColor> (name, RColor(RColor::ByBlock)));
+
+    return l;
+}
+
+QStringList RColor::getNameList(bool onlyFixed) {
+    init();
+    QStringList l;
+    for (int i=0; i<list.length(); i++) {
+        l.append(list[i].first);
+    }
+    if (!onlyFixed) {
+        return l;
+    }
+
+    // remove "By Layer"
+    QString name = RColor(RColor::ByLayer).getName();
+    l.removeAll(name);
+
+    // remove "By Block"
+    name = RColor(RColor::ByBlock).getName();
+    l.removeAll(name);
+
+    return l;
+}
+
+QList<RColor> RColor::getColorList(bool onlyFixed) {
+    init();
+    QList<RColor> l;
+    for (int i=0; i<list.length(); i++) {
+        l.append(list[i].second);
+    }
+    if (!onlyFixed) {
+        return l;
+    }
+
+    // remove "By Layer"
+    l.removeAll(RColor(RColor::ByLayer));
+
+    // remove "By Block"
+    l.removeAll(RColor(RColor::ByBlock));
 
     return l;
 }
@@ -303,7 +356,34 @@ void RColor::init() {
     init(tr("Gray"), RColor(Qt::gray));
     init(tr("Light Gray"), RColor(Qt::lightGray));
     init(tr("White"), RColor(Qt::white));
+    init("---", RColor());
     init(tr("Others..."), RColor());
+
+    if (RPluginLoader::hasPlugin("PROTOOLS")) {
+        QString palette = RSettings::getStringValue("UserPalette/Colors", "");
+        QStringList colorStrings = palette.split("\n");
+        bool first = true;
+        for (int i=0; i<colorStrings.length(); i++) {
+            QString colorString = colorStrings[i];
+            if (colorString.isEmpty()) {
+                continue;
+            }
+            //qDebug() << "color:" << colorString;
+            QStringList tuples = colorString.split(",");
+            if (tuples.length()<2) {
+                init("---", RColor());
+                continue;
+            }
+            QString title = colorString.left(colorString.length()-tuples.last().length()-1);
+            QString code = tuples.last();
+
+            if (first) {
+                init("---", RColor());
+                first = false;
+            }
+            init(title, RColor(code));
+        }
+    }
 }
 
 void RColor::init(const QString& cn, const RColor& c) {
@@ -368,7 +448,12 @@ QIcon RColor::getIcon(const RColor& color, const QSize& size) {
         opaqueBrush.setColor(col);
         painter.fillRect(w / 4, h / 4, w / 2, h / 2, opaqueBrush);
     }
-    painter.setPen(Qt::black);
+    if (RSettings::hasDarkGuiBackground()) {
+        painter.setPen(Qt::gray);
+    }
+    else {
+        painter.setPen(Qt::black);
+    }
     painter.drawRect(0, 0, w - 1, h - 1);
     painter.end();
     QIcon ret(QPixmap::fromImage(img));

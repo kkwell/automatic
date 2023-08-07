@@ -55,7 +55,16 @@
 
     // public methods:
     static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getType
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setFlag
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getFlag
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         isValid
@@ -196,6 +205,18 @@
         isSimple
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        setBackward
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isBackward
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setUpsideDown
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isUpsideDown
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         setDimensionLabel
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -288,6 +309,9 @@
         ;static  QScriptValue
         toRichText
         (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        to2D
+        (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)
     ;static  QScriptValue copy
@@ -295,6 +319,8 @@
     ;static  QScriptValue destroy(QScriptContext *context, QScriptEngine *engine)
     ;static RTextBasedData* getSelf(const QString& fName, QScriptContext* context)
     ;static RTextBasedData* getSelfShell(const QString& fName, QScriptContext* context)
+    ;static  QScriptValue toScriptValueEnumTextFlag(QScriptEngine* engine, const RTextBasedData::TextFlag& value)
+    ;static  void fromScriptValueEnumTextFlag(const QScriptValue& value, RTextBasedData::TextFlag& out)
     ;};
     #endif
     

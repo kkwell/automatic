@@ -60,6 +60,7 @@ public:
     static RPropertyTypeId PropertyPlainText;
     static RPropertyTypeId PropertyFontName;
     static RPropertyTypeId PropertyHeight;
+    static RPropertyTypeId PropertyWidth;
     static RPropertyTypeId PropertyAngle;
     static RPropertyTypeId PropertyXScale;
     static RPropertyTypeId PropertyBold;
@@ -67,6 +68,8 @@ public:
     static RPropertyTypeId PropertyLineSpacingFactor;
     static RPropertyTypeId PropertyHAlign;
     static RPropertyTypeId PropertyVAlign;
+    static RPropertyTypeId PropertyBackward;
+    static RPropertyTypeId PropertyUpsideDown;
 
 public:
     RTextBasedEntity(RDocument* document);
@@ -75,27 +78,29 @@ public:
     static void init();
 
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RTextBasedEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RTextBasedEntity::getRtti());
     }
 
     virtual RTextBasedData& getData() = 0;
 
     virtual const RTextBasedData& getData() const = 0;
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual void exportEntity(RExporter& e, bool preview=false, bool forceSelected=false) const;
+
+    virtual QSharedPointer<REntity> scaleNonUniform(const RVector& scaleFactors, const RVector& center);
 
     QList<RPainterPath> getPainterPaths(bool draft = false) const {
         return getData().getPainterPaths(draft);
     }
 
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const {
-        return getData().getShapes(queryBox, ignoreComplex, segment);
+    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const {
+        return getData().getShapes(queryBox, ignoreComplex, segment, entityIds);
     }
 
     virtual QList<QSharedPointer<RShape> > getExploded() const {
@@ -120,6 +125,22 @@ public:
 
     void setItalic(bool on) {
         getData().setItalic(on);
+    }
+
+    bool isBackward() const {
+        return getData().isBackward();
+    }
+
+    void setBackward(bool on) {
+        getData().setBackward(on);
+    }
+
+    bool isUpsideDown() const {
+        return getData().isUpsideDown();
+    }
+
+    void setUpsideDown(bool on) {
+        getData().setUpsideDown(on);
     }
 
     RVector getPosition() const {
@@ -253,7 +274,7 @@ public:
         getData().sync(other.getData());
     }
 
-    QList<RTextBasedData> getSimpleTextBlocks() const {
+    QList<RTextBasedData> getSimpleTextBlocks() {
         return getData().getSimpleTextBlocks();
     }
 

@@ -19,11 +19,13 @@
 #include "RExporter.h"
 #include "RLeaderEntity.h"
 #include "RMetaTypes.h"
+#include "RPluginLoader.h"
 #include "RStorage.h"
 
 RPropertyTypeId RLeaderEntity::PropertyCustom;
 RPropertyTypeId RLeaderEntity::PropertyHandle;
 RPropertyTypeId RLeaderEntity::PropertyProtected;
+RPropertyTypeId RLeaderEntity::PropertyWorkingSet;
 RPropertyTypeId RLeaderEntity::PropertyType;
 RPropertyTypeId RLeaderEntity::PropertyBlock;
 RPropertyTypeId RLeaderEntity::PropertyLayer;
@@ -35,12 +37,14 @@ RPropertyTypeId RLeaderEntity::PropertyDisplayedColor;
 RPropertyTypeId RLeaderEntity::PropertyDrawOrder;
 
 RPropertyTypeId RLeaderEntity::PropertyArrowHead;
+RPropertyTypeId RLeaderEntity::PropertySplineShaped;
 RPropertyTypeId RLeaderEntity::PropertyDimLeaderBlock;
 RPropertyTypeId RLeaderEntity::PropertyVertexNX;
 RPropertyTypeId RLeaderEntity::PropertyVertexNY;
 RPropertyTypeId RLeaderEntity::PropertyVertexNZ;
 
-RPropertyTypeId RLeaderEntity::PropertyDimScale;
+RPropertyTypeId RLeaderEntity::PropertyDimscale;
+RPropertyTypeId RLeaderEntity::PropertyDimasz;
 
 
 RLeaderEntity::RLeaderEntity(RDocument* document, const RLeaderData& data) :
@@ -58,26 +62,31 @@ RLeaderEntity::~RLeaderEntity() {
 }
 
 void RLeaderEntity::init() {
-    RLeaderEntity::PropertyCustom.generateId(typeid(RLeaderEntity), RObject::PropertyCustom);
-    RLeaderEntity::PropertyHandle.generateId(typeid(RLeaderEntity), RObject::PropertyHandle);
-    RLeaderEntity::PropertyProtected.generateId(typeid(RLeaderEntity), RObject::PropertyProtected);
-    RLeaderEntity::PropertyType.generateId(typeid(RLeaderEntity), REntity::PropertyType);
-    RLeaderEntity::PropertyBlock.generateId(typeid(RLeaderEntity), REntity::PropertyBlock);
-    RLeaderEntity::PropertyLayer.generateId(typeid(RLeaderEntity), REntity::PropertyLayer);
-    RLeaderEntity::PropertyLinetype.generateId(typeid(RLeaderEntity), REntity::PropertyLinetype);
-    RLeaderEntity::PropertyLinetypeScale.generateId(typeid(RLeaderEntity), REntity::PropertyLinetypeScale);
-    RLeaderEntity::PropertyLineweight.generateId(typeid(RLeaderEntity), REntity::PropertyLineweight);
-    RLeaderEntity::PropertyColor.generateId(typeid(RLeaderEntity), REntity::PropertyColor);
-    RLeaderEntity::PropertyDisplayedColor.generateId(typeid(RLeaderEntity), REntity::PropertyDisplayedColor);
-    RLeaderEntity::PropertyDrawOrder.generateId(typeid(RLeaderEntity), REntity::PropertyDrawOrder);
+    RLeaderEntity::PropertyCustom.generateId(RLeaderEntity::getRtti(), RObject::PropertyCustom);
+    RLeaderEntity::PropertyHandle.generateId(RLeaderEntity::getRtti(), RObject::PropertyHandle);
+    RLeaderEntity::PropertyProtected.generateId(RLeaderEntity::getRtti(), RObject::PropertyProtected);
+    RLeaderEntity::PropertyWorkingSet.generateId(RLeaderEntity::getRtti(), RObject::PropertyWorkingSet);
+    RLeaderEntity::PropertyType.generateId(RLeaderEntity::getRtti(), REntity::PropertyType);
+    RLeaderEntity::PropertyBlock.generateId(RLeaderEntity::getRtti(), REntity::PropertyBlock);
+    RLeaderEntity::PropertyLayer.generateId(RLeaderEntity::getRtti(), REntity::PropertyLayer);
+    RLeaderEntity::PropertyLinetype.generateId(RLeaderEntity::getRtti(), REntity::PropertyLinetype);
+    RLeaderEntity::PropertyLinetypeScale.generateId(RLeaderEntity::getRtti(), REntity::PropertyLinetypeScale);
+    RLeaderEntity::PropertyLineweight.generateId(RLeaderEntity::getRtti(), REntity::PropertyLineweight);
+    RLeaderEntity::PropertyColor.generateId(RLeaderEntity::getRtti(), REntity::PropertyColor);
+    RLeaderEntity::PropertyDisplayedColor.generateId(RLeaderEntity::getRtti(), REntity::PropertyDisplayedColor);
+    RLeaderEntity::PropertyDrawOrder.generateId(RLeaderEntity::getRtti(), REntity::PropertyDrawOrder);
 
-    RLeaderEntity::PropertyArrowHead.generateId(typeid(RLeaderEntity), "", QT_TRANSLATE_NOOP("REntity", "Arrow"));
-    RLeaderEntity::PropertyDimLeaderBlock.generateId(typeid(RLeaderEntity), "", QT_TRANSLATE_NOOP("REntity", "Arrow Block"));
-    RLeaderEntity::PropertyVertexNX.generateId(typeid(RLeaderEntity), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RLeaderEntity::PropertyVertexNY.generateId(typeid(RLeaderEntity), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RLeaderEntity::PropertyVertexNZ.generateId(typeid(RLeaderEntity), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "Z"));
+    RLeaderEntity::PropertyArrowHead.generateId(RLeaderEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Arrow"));
+    RLeaderEntity::PropertySplineShaped.generateId(RLeaderEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Spline"));
+    RLeaderEntity::PropertyDimLeaderBlock.generateId(RLeaderEntity::getRtti(), "", QT_TRANSLATE_NOOP("REntity", "Arrow Block"));
+    RLeaderEntity::PropertyVertexNX.generateId(RLeaderEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RLeaderEntity::PropertyVertexNY.generateId(RLeaderEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RLeaderEntity::PropertyVertexNZ.generateId(RLeaderEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Vertex"), QT_TRANSLATE_NOOP("REntity", "Z"), false, RPropertyAttributes::Geometry);
 
-    RLeaderEntity::PropertyDimScale.generateId(typeid(RLeaderEntity), "", QT_TRANSLATE_NOOP("REntity", "Scale"));
+    RLeaderEntity::PropertyDimscale.generateId(RLeaderEntity::getRtti(), RDimStyle::PropertyDimscale);
+    if (RPluginLoader::hasPlugin("DWG")) {
+        RLeaderEntity::PropertyDimasz.generateId(RLeaderEntity::getRtti(), RDimStyle::PropertyDimasz);
+    }
 }
 
 bool RLeaderEntity::setProperty(RPropertyTypeId propertyTypeId,
@@ -90,13 +99,17 @@ bool RLeaderEntity::setProperty(RPropertyTypeId propertyTypeId,
         }
     }
 
+    if (PropertySplineShaped == propertyTypeId) {
+        ret = ret || RObject::setMember(data.splineShaped, value);
+    }
+
     if (propertyTypeId == PropertyDimLeaderBlock) {
-        if (value.type() == QVariant::Int ||
-            value.type() == QVariant::LongLong) {
+        if (RS::getMetaType(value) == RS::Int ||
+            RS::getMetaType(value) == RS::LongLong) {
 
             ret = ret || RObject::setMember(
                 getData().dimLeaderBlockId, value.toInt(), true);
-        } else if (value.type() == QVariant::String) {
+        } else if (RS::getMetaType(value) == RS::String) {
             RDocument* document = getData().getDocument();
             if (document != NULL) {
                 ret = ret || RObject::setMember(getData().dimLeaderBlockId,
@@ -110,16 +123,25 @@ bool RLeaderEntity::setProperty(RPropertyTypeId propertyTypeId,
     ret = ret || RObject::setMemberY(data.vertices, value, PropertyVertexNY == propertyTypeId);
     ret = ret || RObject::setMemberZ(data.vertices, value, PropertyVertexNZ == propertyTypeId);
 
-    ret = ret || RObject::setMember(data.dimScaleOverride, value, PropertyDimScale == propertyTypeId);
+    ret = ret || RObject::setMember(getData().dimscale, value, PropertyDimscale == propertyTypeId);
+    ret = ret || RObject::setMember(getData().dimasz, value, PropertyDimasz == propertyTypeId);
+
+//    if (PropertyDimScale == propertyTypeId) {
+//        ret = ret || RObject::setMember(data.dimScaleOverride, value, PropertyDimScale == propertyTypeId);
+//        data.updateArrowHead();
+//    }
 
     return ret;
 }
 
 QPair<QVariant, RPropertyAttributes> RLeaderEntity::getProperty(
-        RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes) {
+        RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes, bool showOnRequest) {
 
     if (propertyTypeId == PropertyArrowHead) {
         return qMakePair(QVariant(data.arrowHead), RPropertyAttributes());
+    }
+    else if (propertyTypeId == PropertySplineShaped) {
+        return qMakePair(QVariant(data.splineShaped), RPropertyAttributes());
     }
     else if (propertyTypeId == PropertyDimLeaderBlock) {
         if (humanReadable) {
@@ -164,11 +186,36 @@ QPair<QVariant, RPropertyAttributes> RLeaderEntity::getProperty(
         v.setValue(RVector::getZList(data.vertices));
         return qMakePair(v, RPropertyAttributes(RPropertyAttributes::List));
     }
-    else if (propertyTypeId == PropertyDimScale) {
-        return qMakePair(QVariant(data.dimScaleOverride), RPropertyAttributes());
-    }
+    else if (propertyTypeId == PropertyDimscale || propertyTypeId == PropertyDimasz) {
+            double v;
+            if (propertyTypeId == PropertyDimscale) {
+                v = data.dimscale;
+            }
+            else {
+                v = data.dimasz;
+            }
+            if (v<0.0) {
+                RDocument* doc = getDocument();
+                if (doc!=NULL) {
+                    QSharedPointer<RDimStyle> dimStyle = getDocument()->queryDimStyleDirect();
+                    if (!dimStyle.isNull()) {
+                        if (propertyTypeId == PropertyDimscale) {
+                            v = dimStyle->getDouble(RS::DIMSCALE);
+                        }
+                        else {
+                            v = dimStyle->getDouble(RS::DIMASZ);
+                        }
+                    }
+                }
+            }
+            return qMakePair(QVariant(v), RPropertyAttributes());
+        }
 
-    return REntity::getProperty(propertyTypeId, humanReadable, noAttributes);
+//    else if (propertyTypeId == PropertyDimScale) {
+//        return qMakePair(QVariant(data.dimScaleOverride), RPropertyAttributes());
+//    }
+
+    return REntity::getProperty(propertyTypeId, humanReadable, noAttributes, showOnRequest);
 }
 
 
@@ -195,6 +242,8 @@ void RLeaderEntity::exportEntity(RExporter& e, bool preview, bool forceSelected)
                     getDirection1() + M_PI
                 )
             );
+            arrowBlock.setLayerId(getLayerId());
+            arrowBlock.setSelected(isSelected());
             arrowBlock.update();
             arrowBlock.exportEntity(e, preview, forceSelected);
         }

@@ -57,6 +57,9 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getStaticPropertyTypeIds
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -85,6 +88,12 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setPrompt
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isInvisible
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setInvisible
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

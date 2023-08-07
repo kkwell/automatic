@@ -42,6 +42,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -53,12 +54,15 @@ public:
     static RPropertyTypeId PropertyDrawOrder;
 
     static RPropertyTypeId PropertyArrowHead;
+    static RPropertyTypeId PropertySplineShaped;
     static RPropertyTypeId PropertyDimLeaderBlock;
     static RPropertyTypeId PropertyVertexNX;
     static RPropertyTypeId PropertyVertexNY;
     static RPropertyTypeId PropertyVertexNZ;
 
-    static RPropertyTypeId PropertyDimScale;
+    static RPropertyTypeId PropertyDimscale;
+    static RPropertyTypeId PropertyDimasz;
+
 
 public:
     RLeaderEntity(RDocument* document, const RLeaderData& data);
@@ -67,19 +71,23 @@ public:
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityLeader;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RLeaderEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RLeaderEntity::getRtti());
     }
 
     virtual RLeaderEntity* clone() const {
         return new RLeaderEntity(*this);
     }
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual RLeaderData& getData() {
         return data;
@@ -99,6 +107,14 @@ public:
 
     bool hasArrowHead() const {
         return data.hasArrowHead();
+    }
+
+    void setSplineShaped(bool on) {
+        data.setSplineShaped(on);
+    }
+
+    bool isSplineShaped() const {
+        return data.isSplineShaped();
     }
 
     void clear() {
@@ -183,12 +199,35 @@ public:
         return data.isClosed();
     }
 
-    double getDimScale(bool fromDocument=true) const {
-        return data.getDimScale(fromDocument);
+    double getDimscale() const {
+        return data.getDimscale();
+    }
+
+    void setDimscale(double v) {
+        data.setDimscale(v);
+    }
+
+    double getDimasz(bool scale=true) const {
+        return data.getDimasz(scale);
+    }
+
+    void setDimasz(double v) {
+        data.setDimasz(v);
     }
 
     QList<QSharedPointer<RShape> > getExploded() const {
         return data.getExploded();
+    }
+
+    REntity::Id getDimLeaderBlockId() const {
+        return data.getDimLeaderBlockId();
+    }
+    void setDimLeaderBlockId(REntity::Id id) {
+        data.setDimLeaderBlockId(id);
+    }
+
+    void clearStyleOverrides() {
+        data.clearStyleOverrides();
     }
 
     virtual void exportEntity(RExporter& e, bool preview=false, bool forceSelected=false) const;

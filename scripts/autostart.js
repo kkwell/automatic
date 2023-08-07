@@ -23,6 +23,15 @@ include("scripts/File/OpenFile/OpenFile.js");
 include("scripts/File/AutoSave/AutoSave.js");
 include("scripts/Tools/arguments.js");
 
+// allow plugins to extend autostart through autostart1.js, autostart2.js, ...:
+for (var i=1; i<10; i++) {
+    var fn = "scripts/autostart" + i + ".js";
+    if (new QFileInfo(fn).exists() || new QFileInfo(":/" + fn).exists()) {
+        include(fn);
+    }
+}
+
+
 /**
  * Prints version information.
  */
@@ -38,7 +47,7 @@ function version() {
  * Prints command line usage information on stdout.
  */
 function usage() {
-    print("\nUsage: " + QCoreApplication.arguments()[0] + " [Options] [Files to open]\n"
+    print("\nUsage: " + RSettings.getOriginalArguments()[0] + " [Options] [Files to open]\n"
           + "\n"
           + "-allow-multiple-instances        Don't try to avoid multiple instances from running\n"
           + "                                 simultaneously.\n"
@@ -55,14 +64,16 @@ function usage() {
           + "                                 implemented in the given script.\n"
           + "-config [path]                   Reads and stores settings in a configuration file\n"
           + "                                 at the given location instead of the default location.\n"
+          + "-debug-action-order              Print action order information in menus\n"
           + "-enable-script-debugger          Enables the script debugger.\n"
           + "                                 NOT recommended as this may cause unexpected\n"
           + "                                 behavior when using QCAD.\n"
-          + "-debug-action-order              Print action order information in menus\n"
           + "-exec [script file] [options]    Executes the given script file directly\n"
           + "                                 after staring QCAD. Options after the script\n"
           + "                                 file are passed on to the script.\n"
           + "-help                            Displays this help.\n"
+          + "-ignore-script-files             Ignore script files on disk.\n"
+          + "                                 Only load scripts from plugins if applicable.\n"
           + "-locale [locale]                 Sets the locale to be used (overrides\n"
           + "                                 the language set in the preferences).\n"
           + "                                 E.g. '-locale de' starts QCAD in German.\n"
@@ -81,132 +92,6 @@ function usage() {
     printGenericUsage();
 
     print("\n");
-}
-
-/**
- * Open files given as arguments args
- *
- * \param createNew Creates a new document if no files are given
- * \param close Closes existing open MDI widgets
- */
-function openFiles(args, createNew, close) {
-    var appWin = RMainWindowQt.getMainWindow();
-    if (isNull(appWin)) {
-        // application is shutting down..
-        return;
-    }
-    var mdiArea = appWin.getMdiArea();
-    var mdiChildren = mdiArea.subWindowList();
-    var foundFile = false;
-    var filter = undefined;
-
-    for (var i = 0; i < args.length; ++i) {
-        // arguments with one parameter:
-        if (args[i] === "-locale" || args[i] === "-autostart"
-            || args[i] === "-app-id" || args[i] === "-ignore"
-            || args[i] === "-config") {
-            // skip 2 arguments
-            i++;
-            if (i>=args.length) {
-                break;
-            }
-            continue;
-        }
-
-        // argument with two parameters
-        if (args[i] === "-font-substitution" || args[i] === "-fs") {
-            // skip 3 arguments
-            i+=2;
-            if (i>=args.length) {
-                break;
-            }
-            continue;
-        }
-
-        if (isNull(args[i])) {
-            continue;
-        }
-
-        // all arguments after -exec are script files or script arguments:
-        if (args[i] === "-exec") {
-            break;
-        }
-
-        if (args[i] === "-filter") {
-            if (++i>=args.length) {
-                break;
-            }
-            filter = args[i];
-            continue;
-        }
-
-
-        // skip other arguments without parameter:
-        if (args[i][0] === "-") {
-            continue;
-        }
-
-        foundFile = true;
-        var foundExisting = false;
-
-        var arg = args[i];
-        var isLocalFile = true;
-
-        if (isUrl(arg)) {
-            var url = new QUrl(arg);
-            if (url.isLocalFile()) {
-                // arg is now a path:
-                arg = url.toLocalFile();
-            }
-            else {
-                isLocalFile = false;
-            }
-        }
-
-        if (isLocalFile) {
-            // if the file is already open, activate that appropriate sub window instead
-            // of opening the file again:
-            var document = undefined;
-            var fileName = undefined;
-            var fileInfo = undefined;
-            var argFileInfo = undefined;
-            for (var k=0; k<mdiChildren.length; k++) {
-                document = mdiChildren[k].getDocument();
-                fileName = document.getFileName();
-                fileInfo = new QFileInfo(fileName);
-                argFileInfo = new QFileInfo(getAbsolutePathForArg(arg));
-
-                if (fileInfo.absoluteFilePath()===argFileInfo.absoluteFilePath()) {
-                    mdiArea.setActiveSubWindow(mdiChildren[k]);
-                    if (close) {
-                        mdiArea.closeActiveSubWindow();
-                    }
-                    else {
-                        foundExisting = true;
-                    }
-                    break;
-                }
-            }
-        }
-
-        // open the file if it is not already open:
-        if (!foundExisting) {
-            if (isLocalFile) {
-                NewFile.createMdiChild(getAbsolutePathForArg(arg), filter);
-            }
-            else {
-                NewFile.createMdiChild(arg, filter);
-            }
-        }
-    }
-
-    // create new document if no files were loaded:
-    if (!foundFile && createNew===true) {
-        var fileNewAction = RGuiAction.getByScriptFile("scripts/File/NewFile/NewFile.js");
-        if (!isNull(fileNewAction)) {
-            fileNewAction.slotTrigger();
-        }
-    }
 }
 
 /**
@@ -269,7 +154,7 @@ function execScripts(args) {
 }
 
 /**
- * Sets up drag and drop support (droping files on the application window
+ * Sets up drag and drop support (dropping files on the application window
  * opens them).
  */
 function setUpDragAndDrop(appWin) {
@@ -277,7 +162,7 @@ function setUpDragAndDrop(appWin) {
         event.acceptProposedAction();
     });
 
-    appWin.drop.connect(function(evt) {
+    appWin.drop.connect(function(event) {
         // workaround for Qt keyboard focus bug:
         var appWin = RMainWindowQt.getMainWindow();
         if (!isNull(appWin)) {
@@ -286,13 +171,15 @@ function setUpDragAndDrop(appWin) {
             appWin.setFocus(Qt.OtherFocusReason);
         }
 
-        var urls = getUrlsFromMimeData(evt.mimeData());
+        var urls = getUrlsFromMimeData(event.mimeData());
         var urlStrings = [];
         for (var i = 0; i < urls.length; ++i) {
             urlStrings.push(urls[i].toString());
         }
 
         openFiles(urlStrings, false);
+
+        event.acceptProposedAction();
     });
 }
 
@@ -309,26 +196,51 @@ function loadTranslations(addOns, splash) {
 
     // load C++ translations:
     var modules = ["qt", "assistant", "qt_help", "qcadcore", "qcadentity", "qcadgui"];
-    if (RSettings.isQt(5)) {
+    if (RSettings.isQt(5) || RSettings.isQt(6)) {
         modules.unshift("qtbase");
     }
 
+    var i;
+    var module;
+
     for (var mi=0; mi<modules.length; ++mi) {
-        var module = modules[mi];
+        module = modules[mi];
 
         RSettings.loadTranslations(module);
     }
 
+    //RSettings.loadTranslations("scripts_" + locale, [autoPath("scripts/ts")]);
 
-    // install one QTranslator for each script add-on:
+    // load translations from arguments:
+    var args = RSettings.getOriginalArguments();
+    for (i = 0; i < args.length; ++i) {
+        if (args[i] === "-ts") {
+            if (++i>=args.length) {
+                break;
+            }
+            module = args[i];
+            if (++i>=args.length) {
+                break;
+            }
+            var dir = args[i];
+
+            RSettings.loadTranslations(module, [autoPath(dir)]);
+        }
+    }
+
+//    RSettings.loadTranslations("scripts", [autoPath("ts")]);
+//    RSettings.loadTranslations("proscripts", [autoPath("../qcadpro/ts")]);
+//    RSettings.loadTranslations("camscripts", [autoPath("../qcadcam/ts")]);
+
+    // install one QTranslator for each script add-on if available:
     if (!isNull(splash)) {
         splash.showMessage(qsTr("Loading add-on translations...") + "\n", Qt.AlignBottom);
         QCoreApplication.processEvents();
     }
 
-    RSettings.loadTranslations("Scripts_" + locale, ["scripts/ts"]);
+    //RSettings.loadTranslations("Scripts_" + locale, [autoPath("scripts/ts")]);
 
-    for (var i = 0; i < addOns.length; ++i) {
+    for (i = 0; i < addOns.length; ++i) {
         var addOn = addOns[i];
         if (isNull(addOn)) {
             qWarning("Null add on found");
@@ -432,7 +344,7 @@ function main() {
     var i;
     var filesToOpen = [];
 
-    // open file that was clicked in Finder if application was not yet running (Mac OS X):
+    // open file that was clicked in Finder if application was not yet running (macOS):
     qApp.fileOpenRequestReceived.connect(function(fileName) {
         filesToOpen.push(fileName);
     });
@@ -445,7 +357,7 @@ function main() {
         execScripts(args);
     });
 
-    var args = QCoreApplication.arguments();
+    var args = RSettings.getOriginalArguments();
     if (args.contains("-help") || args.contains("-h")) {
         usage();
         return;
@@ -466,16 +378,6 @@ function main() {
     }
     // make sure settings file path is reinitialized:
     RSettings.uninit();
-
-    // alternative path for QCAD3.ini:
-    for (i=1; i<args.length; ++i) {
-        if (args[i] === "-config") {
-            ++i;
-            if (i < args.length) {
-                QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, getAbsolutePathForArg(args[i]));
-            }
-        }
-    }
 
     // ignore config file if it does not identify itself with a version
     // number or is known as being incompatible
@@ -526,7 +428,7 @@ function main() {
     }
 
     // detect very first start of this installation:
-    var fiSettings = new QFileInfo(RSettings.getQSettings().fileName());
+    var fiSettings = new QFileInfo(RSettings.getFileName());
     var isFirstStart = !fiSettings.exists();
 
     var numPlugins = RPluginLoader.countPlugins();
@@ -535,18 +437,20 @@ function main() {
     // look up app name override:
     for (i=0; i<numPlugins; i++) {
         pluginInfo = RPluginLoader.getPluginInfo(i);
-        var n = pluginInfo.get("NameOverride");
-        if (!isNull(n)) {
+        var n = pluginInfo.get("NameOverride", "");
+        if (n.length>0) {
             qApp.applicationName = n;
         }
     }
 
     // if locale is given, don't show first start dialog:
-    if (isFirstStart && !QCoreApplication.arguments().contains("-locale")) {
-        include("Widgets/FirstStart/FirstStart.js");
+    if (isFirstStart && !args.contains("-locale")) {
+        include("scripts/Widgets/FirstStart/FirstStart.js");
         var first = new FirstStart();
         first.showDialog();
     }
+
+    RPluginLoader.initTranslations();
 
     // correct library paths from 'library' to 'libraries':
     if (RSettings.getIntValue("Application/Version", 0)<=3000008) {
@@ -565,9 +469,14 @@ function main() {
     // theme:
     applyTheme();
 
+    // native / non-native menubar:
+    if (RSettings.getBoolValue("MenuBar/UseNativeMenuBar", true)===false) {
+        QCoreApplication.setAttribute(Qt.AA_DontUseNativeMenuBar);
+    }
+
     // splash:
     var splash = undefined;
-    if (RSettings.getBoolValue("Start/EnableSplashScreen", true)) {
+    if (RSettings.getBoolValue("Startup/EnableSplashScreen", true)) {
         var fn;
         var key;
         if (RSettings.getDevicePixelRatio()===2) {
@@ -580,19 +489,33 @@ function main() {
         }
 
         // look up slash screen override:
+        var maxPri = undefined;
         for (i=0; i<numPlugins; i++) {
             pluginInfo = RPluginLoader.getPluginInfo(i);
-            var s = pluginInfo.get(key);
-            if (!isNull(s)) {
-                fn = s;
-                //qDebug("splash override: ", fn);
+
+            // override priority:
+            var pri = pluginInfo.get("OverridePriority");
+            if (!isNull(pri)) {
+                pri = parseInt(pri);
+            }
+            else {
+                // default to lowest priority:
+                pri = 0;
+            }
+
+            if (isNull(maxPri) || pri>maxPri) {
+                var s = pluginInfo.get(key);
+                if (!isNull(s)) {
+                    fn = s;
+                    maxPri = pri;
+                }
             }
         }
 
         var pixmap = new QPixmap(fn);
         splash = new QSplashScreen(pixmap);
         splash.objectName = "Splash";
-        if (!QCoreApplication.arguments().contains("-no-show")) {
+        if (!args.contains("-no-show")) {
             splash.show();
         }
     }
@@ -616,8 +539,8 @@ function main() {
     var addOns;
     var addOnFilePaths = RSettings.getValue("AddOns/List", []);
     if (addOnFilePaths.length===0 || newVersion ||
-            QCoreApplication.arguments().contains("-rescan") ||
-            RSettings.getBoolValue("Scripting/Rescan", true)===true) {
+        args.contains("-rescan") ||
+        RSettings.getBoolValue("Scripting/Rescan", true)===true) {
 
         if (!isNull(splash)) {
             // no translations yet:
@@ -644,11 +567,14 @@ function main() {
 
     // create application window:
     var appWin = new RMainWindowQt();
-    if (!RSettings.getQtVersionString().startsWith("5.7")) {
-        // animated crashes sometimes (Qt 4.7.2, 5.6.0):
-        // Qt 5.7.0 will not allow tabifying dock widgets if animations are turned off:
+
+    // Note: animated MUST be true for Qt 5.7:
+    // Qt 5.7.0 will not allow tabifying dock widgets if animations are turned off:
+    if (RSettings.getQtVersion()<0x050600) {
+        // animated must be false for Qt 4.7.2, 5.6.0 (crashes):
         appWin.animated = false;
     }
+
     appWin.objectName = "MainWindow";
     appWin.windowTitle = qApp.applicationName;
 
@@ -669,7 +595,14 @@ function main() {
     //RDebug.stopTimer(0, "initializing add-ons");
 
     // auto load scripts in AutoLoad folders for global script engine:
-    var files = RAutoLoadEcma.getAutoLoadFiles();
+
+    var files;
+    if (RSettings.isQt(6)) {
+        files = RAutoLoadJs.getAutoLoadFiles();
+    }
+    else {
+        files = RAutoLoadEcma.getAutoLoadFiles();
+    }
     for (i=0; i<files.length; i++) {
         include(files[i]);
     }
@@ -688,9 +621,9 @@ function main() {
     appWin.setCorner(Qt.TopRightCorner, Qt.RightDockWidgetArea);
     appWin.setCorner(Qt.BottomRightCorner, Qt.RightDockWidgetArea);
     appWin.setTabPosition(Qt.RightDockWidgetArea, QTabWidget.West);
-    appWin.setTabPosition(Qt.LeftDockWidgetArea, QTabWidget.South);
+    appWin.setTabPosition(Qt.LeftDockWidgetArea, QTabWidget.East);
     appWin.setTabPosition(Qt.TopDockWidgetArea, QTabWidget.South);
-    appWin.setTabPosition(Qt.BottomDockWidgetArea, QTabWidget.West);
+    appWin.setTabPosition(Qt.BottomDockWidgetArea, QTabWidget.South);
 
     setUpDragAndDrop(appWin);
 
@@ -701,13 +634,13 @@ function main() {
 
     RPluginLoader.postInitPlugins(RPluginInterface.GotMainWindowBeforeShow);
 
-    if (!QCoreApplication.arguments().contains("-no-show")) {
+    if (!args.contains("-no-show")) {
         appWin.show();
     }
 
     if (!isNull(splash)) {
         splash.close();
-        splash.destroy();
+        destr(splash);
     }
 
     postInitAddOns(addOns);
@@ -735,7 +668,7 @@ function main() {
         }
     }
 
-    // open files clicked in Finder if application is alreay running (Mac):
+    // open files clicked in Finder if application is already running (Mac):
     qApp.fileOpenRequestReceived.connect(function(fileName) {
         openFiles([fileName], false);
     });
@@ -747,7 +680,11 @@ function main() {
     var clickedFilesAndArgs = filesToOpen.concat(args.slice(1));
     QCoreApplication.processEvents();
     appWin.setProperty("starting", true);
-    openFiles(clickedFilesAndArgs, !recovered);
+    var restored = false;
+    if (typeof(restoreFiles)=="function") {
+        restored = restoreFiles();
+    }
+    openFiles(clickedFilesAndArgs, !recovered && !restored);
     appWin.setProperty("starting", false);
 
     RPluginLoader.postInitPlugins(RPluginInterface.LoadedFiles);
@@ -780,7 +717,7 @@ function main() {
     // don't use RSettings below this point
 
     // and we're done:
-    appWin.destroy();
+    destr(appWin);
     qDebug("done");
 }
 

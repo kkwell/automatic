@@ -2,6 +2,7 @@
 <unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns:rs="http://www.ribbonsoft.com">
   <class_decl name="RGraphicsViewImage" />
+  <class_decl name="RTriangle" />
   <class name="RGraphicsSceneQt"
   xsi:noNamespaceSchemaLocation="../class.xsd" isCopyable="false"
   hasShell="false" sharedPointerSupport="false" isQObject="false"
@@ -40,6 +41,43 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="exportEntities" cppName="exportEntities"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="allBlocks"
+        hasDefault="true" default="true" isConst="false" />
+        <arg type="bool" typeName="bool" name="undone"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="invisible"
+        hasDefault="true" default="false" isConst="false" />
+      </variant>
+    </method>
+    <method name="exportEntitiesThread"
+    cppName="exportEntitiesThread" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="int" typeName="int" name="threadId"
+        isConst="false" />
+        <arg type="QList &lt; REntity::Id &gt; &amp;"
+        typeName="QList &lt; REntity::Id &gt;" name="list"
+        isConst="false" />
+        <arg type="int" typeName="int" name="start"
+        isConst="false" />
+        <arg type="int" typeName="int" name="end"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="exportEntityThread" cppName="exportEntityThread"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="int" typeName="int" name="threadId"
+        isConst="false" />
+        <arg type="REntity::Id" typeName="REntity::Id" name="id"
+        isConst="false" />
+      </variant>
+    </method>
     <method name="beginPath" cppName="beginPath" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
@@ -47,6 +85,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     <method name="endPath" cppName="endPath" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
+    </method>
+    <method name="transformAndApplyPatternPath"
+    cppName="transformAndApplyPatternPath" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RPainterPath &amp;" typeName="RPainterPath"
+        name="path" isConst="false" />
+      </variant>
     </method>
     <method name="unexportEntity" cppName="unexportEntity"
     specifier="public" isStatic="false" isVirtual="true"
@@ -181,6 +227,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="QList &lt; RPainterPath &gt; &amp;"
         typeName="QList &lt; RPainterPath &gt;" name="paths"
         isConst="true" />
+        <arg type="double" typeName="double" name="z"
+        hasDefault="true" default="0.0" isConst="false" />
       </variant>
     </method>
     <method name="exportImage" cppName="exportImage"
@@ -214,6 +262,19 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
+    <method name="exportTransform" cppName="exportTransform"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RTransform &amp;" typeName="RTransform" name="t"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="exportEndTransform" cppName="exportEndTransform"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false" />
+    </method>
     <method name="getLineTypePatternScale"
     cppName="getLineTypePatternScale" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
@@ -235,15 +296,6 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
-    <method name="getDrawables" cppName="getDrawables"
-    specifier="public" isStatic="false" isVirtual="false"
-    isScriptOverwritable="true">
-      <variant returnType="QList &lt; RGraphicsSceneDrawable &gt;"
-      isPureVirtual="false">
-        <arg type="REntity::Id" typeName="REntity::Id"
-        name="entityId" isConst="false" />
-      </variant>
-    </method>
     <method name="hasPreview" cppName="hasPreview"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -254,15 +306,6 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="QList &lt; REntity::Id &gt;"
       isPureVirtual="false" />
-    </method>
-    <method name="getPreviewDrawables"
-    cppName="getPreviewDrawables" specifier="public"
-    isStatic="false" isVirtual="false" isScriptOverwritable="true">
-      <variant returnType="QList &lt; RGraphicsSceneDrawable &gt;"
-      isPureVirtual="false">
-        <arg type="REntity::Id" typeName="REntity::Id"
-        name="entityId" isConst="false" />
-      </variant>
     </method>
     <method name="addToPreview" cppName="addToPreview"
     specifier="public" isStatic="false" isVirtual="true"

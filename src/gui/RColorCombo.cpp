@@ -27,7 +27,7 @@
 
 RColorCombo::RColorCombo(QWidget *parent) :
     QComboBox(parent), onlyFixed(false), showAlphaChannel(false) {
-    setIconSize(QSize(32, 16));
+    setIconSize(QSize(16, 10));
     init();
     connect(this, SIGNAL(currentIndexChanged(int)),
             this, SLOT(colorChanged(int)));
@@ -38,15 +38,46 @@ void RColorCombo::init() {
     setMaxVisibleItems(20);
     QVariant v;
     QListIterator<QPair<QString, RColor> > it(RColor::getList(onlyFixed));
+    QColor prev;
 
+    int i = 0;
+    bool lastIsSeparator = false;
     while (it.hasNext()) {
         QPair<QString, RColor> p = it.next();
+
         if (p.second.isValid()) {
-            v.setValue<RColor> (p.second);
-            addItem(RColor::getIcon(p.second), p.first, v);
+            v.setValue(p.second);
+            addItem(RColor::getIcon(p.second, iconSize()), p.first, v);
+            lastIsSeparator = false;
         } else {
-            addItem(RColor::getIcon(p.second), p.first);
+            // separator:
+            if (p.first=="---") {
+                if (!lastIsSeparator) {
+                    insertSeparator(count());
+                }
+                lastIsSeparator = true;
+                continue;
+            }
+            else {
+                // others...
+                if (!lastIsSeparator) {
+                    insertSeparator(count());
+                }
+                addItem(RColor::getIcon(p.second, iconSize()), p.first);
+                lastIsSeparator = false;
+                continue;
+            }
         }
+
+//        if (p.second==RColor(QString("#ffffff")) && prev==RColor(QString("#c0c0c0")) && i<25) {
+//            if (!lastIsSeparator) {
+//                insertSeparator(count());
+//            }
+//            lastIsSeparator = true;
+//        }
+
+        prev = p.second;
+        i++;
     }
 
     if (!onlyFixed) {
@@ -121,14 +152,14 @@ void RColorCombo::setColor(const RColor& col) {
     }
     currentColor = col;
     QVariant v;
-    v.setValue<RColor> (currentColor);
+    v.setValue(currentColor);
     blockSignals(true);
     QString custom = tr("Custom");
     int i = findText(custom, Qt::MatchExactly);
     if (i != -1) {
         removeItem(i);
     }
-    insertItem(count() - 1, RColor::getIcon(currentColor), custom, v);
+    insertItem(count() - 1, RColor::getIcon(currentColor, iconSize()), custom, v);
     setCurrentIndex(count() - 2);
     blockSignals(false);
 }

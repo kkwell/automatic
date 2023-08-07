@@ -34,9 +34,9 @@ AppPreferences.init = function(basePath) {
     var action;
     var gotPrefMenu = false;
 
-    // OS X also has a preferences menu under the application menu
-    // (only if OS X is configured to use the same language as the application):
-    if (RS.getSystemId() === "osx") {
+    // macOS also has a preferences menu under the application menu
+    // (only if macOS is configured to use the same language as the application):
+    if (RS.getSystemId() === "osx" && !RSettings.getOriginalArguments().contains("-no-pref-menu")) {
         var sysLang = QLocale.system().name();
         if (sysLang.length>=2) {
             sysLang = sysLang.substring(0,2);
@@ -49,7 +49,7 @@ AppPreferences.init = function(basePath) {
         if (sysLang===appLang) {
             action = new RGuiAction("Preferences", RMainWindowQt.getMainWindow());
             action.menuRole = QAction.PreferencesRole;
-            // preferences menu under Mac OS X has no icon:
+            // preferences menu under macOS has no icon:
             action.disableIcon();
             action.setDefaultShortcut(new QKeySequence(QKeySequence.Preferences));
             action.setRequiresDocument(false);
@@ -67,11 +67,12 @@ AppPreferences.init = function(basePath) {
         action.setDefaultShortcut(new QKeySequence(QKeySequence.Preferences));
     }
     else {
-        action.setDefaultShortcut(new QKeySequence(Qt.ControlModifier + Qt.Key_Comma));
+        action.setDefaultShortcut(new QKeySequence("Ctrl+,"));
     }
     action.setDefaultCommands(["preferences"]);
     action.setRequiresDocument(false);
     action.setScriptFile(basePath + "/AppPreferences.js");
+    action.setIcon(basePath + "/AppPreferences.svg");
     action.setNoState();
     action.setGroupSortOrder(2800);
     action.setSortOrder(200);

@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2011-2018 by Andrew Mustun. All rights reserved.
- * 
+ *
  * This file is part of the QCAD project.
  *
  * QCAD is free software: you can redistribute it and/or modify
@@ -24,8 +24,10 @@
 
 #include <QFrame>
 #include <QMetaType>
+#include <QPainterPath>
 
 #include "RCoordinateListener.h"
+#include "RPaletteListener.h"
 #include "RRuler.h"
 #include "RVector.h"
 
@@ -39,7 +41,7 @@ class RDocumentInterface;
  * \ingroup gui
  * \scriptable
  */
-class QCADGUI_EXPORT RRulerQt: public QFrame, public RRuler, public RCoordinateListener {
+class QCADGUI_EXPORT RRulerQt: public QFrame, public RRuler, public RCoordinateListener, public RPaletteListener {
 
 Q_OBJECT
 Q_PROPERTY(Qt::Orientation orientation READ getOrientation WRITE setOrientation);
@@ -56,9 +58,14 @@ public:
 
     virtual QFont getFont() const;
 
-    void updateViewport();
+    virtual void updateViewport();
 
     virtual void updateCoordinate(RDocumentInterface* documentInterface);
+
+    virtual void updatePalette() {
+        lastSize = QSize(0,0);
+        darkGuiBackground = -1;
+    }
 
 protected:
     void paintEvent(QPaintEvent *);

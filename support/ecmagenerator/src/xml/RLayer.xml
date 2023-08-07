@@ -4,7 +4,7 @@ xmlns:rs="http://www.ribbonsoft.com">
   <class_decl name="RDocument" />
   <class name="RLayer" xsi:noNamespaceSchemaLocation="../class.xsd"
   isCopyable="false" hasShell="false" sharedPointerSupport="true"
-  isQObject="false" hasStreamOperator="true" isAbstract="false"
+  isQObject="false" hasStreamOperator="false" isAbstract="false"
   isScriptable="true">
     <baseClass name="RObject" specifier="public" />
     <enum name="LayerFlag">
@@ -47,6 +47,10 @@ xmlns:rs="http://www.ribbonsoft.com">
     <method name="init" cppName="init" specifier="public"
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
+    </method>
+    <method name="getRtti" cppName="getRtti" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RS::EntityType" isPureVirtual="false" />
     </method>
     <method name="getType" cppName="getType" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
@@ -213,6 +217,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="noAttributes"
         hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
+        hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
     <method name="setProperty" cppName="setProperty"
@@ -227,11 +233,6 @@ xmlns:rs="http://www.ribbonsoft.com">
         name="transaction" hasDefault="true" default="NULL"
         isConst="false" />
       </variant>
-    </method>
-    <method name="isSelectedForPropertyEditing"
-    cppName="isSelectedForPropertyEditing" specifier="public"
-    isStatic="false" isVirtual="true" isScriptOverwritable="true">
-      <variant returnType="bool" isPureVirtual="false" />
     </method>
     <method name="hasChildLayers" cppName="hasChildLayers"
     specifier="public" isStatic="false" isVirtual="false"
@@ -338,6 +339,13 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
     </method>
+    <method name="print" cppName="print" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="QDebug" typeName="QDebug" name="dbg"
+        isConst="false" />
+      </variant>
+    </method>
     <property name="PropertyCustom" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyType" type="RPropertyTypeId"
@@ -345,6 +353,8 @@ xmlns:rs="http://www.ribbonsoft.com">
     <property name="PropertyHandle" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyProtected" type="RPropertyTypeId"
+    isConst="false" isStatic="true" />
+    <property name="PropertySelected" type="RPropertyTypeId"
     isConst="false" isStatic="true" />
     <property name="PropertyName" type="RPropertyTypeId"
     isConst="false" isStatic="true" />

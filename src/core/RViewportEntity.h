@@ -70,21 +70,25 @@ public:
     RViewportEntity(RDocument* document, const RViewportData& data);
     virtual ~RViewportEntity();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityViewport;
+    }
+
     static void init();
 
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RViewportEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RViewportEntity::getRtti());
     }
 
     virtual RViewportEntity* clone() const {
         return new RViewportEntity(*this);
     }
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual void exportEntity(RExporter& e, bool preview=false, bool forceSelected=false) const;
 

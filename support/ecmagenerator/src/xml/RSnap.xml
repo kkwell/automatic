@@ -4,7 +4,7 @@ xmlns:rs="http://www.ribbonsoft.com">
   <class_decl name="RGraphicsView" />
   <class name="RSnap" xsi:noNamespaceSchemaLocation="../class.xsd"
   isCopyable="false" hasShell="true" sharedPointerSupport="false"
-  isQObject="false" hasStreamOperator="false" isAbstract="true"
+  isQObject="false" hasStreamOperator="false" isAbstract="false"
   isScriptable="true">
     <enum name="Status">
       <value name="Unknown" />
@@ -32,7 +32,7 @@ xmlns:rs="http://www.ribbonsoft.com">
     </constructor>
     <method name="snap" cppName="snap" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
-      <variant returnType="RVector" isPureVirtual="true">
+      <variant returnType="RVector" isPureVirtual="false">
         <arg type="RVector &amp;" typeName="RVector"
         name="position" isConst="true" />
         <arg type="RGraphicsView &amp;" typeName="RGraphicsView"
@@ -64,12 +64,19 @@ xmlns:rs="http://www.ribbonsoft.com">
     <method name="getEntityIds" cppName="getEntityIds"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
-      <variant returnType="QSet &lt; REntity::Id &gt;"
+      <variant returnType="QList &lt; REntity::Id &gt;"
       isPureVirtual="false" />
     </method>
     <method name="getStatus" cppName="getStatus" specifier="public"
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="RSnap::Status" isPureVirtual="false" />
+    </method>
+    <method name="setStatus" cppName="setStatus" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RSnap::Status" typeName="RSnap::Status" name="s"
+        isConst="false" />
+      </variant>
     </method>
     <method name="getLastSnap" cppName="getLastSnap"
     specifier="public" isStatic="false" isVirtual="false"
@@ -77,7 +84,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="RVector" isPureVirtual="false" />
     </method>
     <method name="reset" cppName="reset" specifier="public"
-    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
   </class>

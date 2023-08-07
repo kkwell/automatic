@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Modify.js");
+include("scripts/Modify/Modify.js");
 include("scripts/ShapeAlgorithms.js");
 
 /**
@@ -124,6 +124,11 @@ Trim.prototype.pickEntity = function(event, preview) {
     var entity = doc.queryEntity(entityId);
     var pos = event.getModelPosition();
 
+    if (!this.isEntitySnappable(entity)) {
+        // entity not on a snappable layer:
+        return;
+    }
+
     switch (this.state) {
     case Trim.State.ChoosingLimitingEntity:
         if (isNull(entity) || (this.trimBoth && !EAction.assertEditable(entity, preview))) {
@@ -176,7 +181,7 @@ Trim.prototype.pickEntity = function(event, preview) {
         }
 
         // unsupported entity chosen:
-        if (!this.isSupportedTrimEntity(entity)) {
+        if (!Trim.isSupportedTrimEntity(entity)) {
             this.trimEntity = undefined;
             if (preview) {
                 this.updatePreview();
@@ -223,7 +228,7 @@ Trim.prototype.isSupportedLimitingShape = function(shape) {
            (RPolyline.hasProxy() && isPolylineShape(shape));
 };
 
-Trim.prototype.isSupportedTrimEntity = function(entity) {
+Trim.isSupportedTrimEntity = function(entity) {
     return isLineBasedEntity(entity) ||
            isArcEntity(entity) ||
            isCircleEntity(entity) ||
@@ -292,6 +297,7 @@ Trim.trim = function(op, limitingEntity, limitingClickPos, trimEntity, trimClick
         return false;
     }
 
+
     var trimShape = trimEntity.castToShape();
     if (isNull(trimShape)) {
         return false;
@@ -301,7 +307,7 @@ Trim.trim = function(op, limitingEntity, limitingClickPos, trimEntity, trimClick
     if (isNull(limitingShape)) {
         limitingShape = limitingEntity.getClosestSimpleShape(limitingClickPos);
         if (!isNull(limitingShape)) {
-            limitingShape = limitingShape.data();
+            limitingShape = getPtr(limitingShape);
         }
     }
     if (isNull(limitingShape)) {
@@ -316,12 +322,17 @@ Trim.trim = function(op, limitingEntity, limitingClickPos, trimEntity, trimClick
         }
     }
 
+    if (trimBoth && isClosedPolylineEntity(limitingEntity) && !samePolyline) {
+        // no trimming between two different closed polylines:
+        return false;
+    }
+
     var newShapes = Trim.trimShapes(trimShape, trimClickPos, limitingShape, limitingClickPos, trimBoth, samePolyline);
     if (newShapes.length===0) {
         return false;
     }
 
-    if (!modifyEntity(op, trimEntity.clone(), newShapes[0].data())) {
+    if (!modifyEntity(op, trimEntity.clone(), getPtr(newShapes[0]))) {
         if (!preview) {
             if (trimBoth) {
                 EAction.handleUserWarning(qsTr("First entity cannot be trimmed."));
@@ -338,7 +349,7 @@ Trim.trim = function(op, limitingEntity, limitingClickPos, trimEntity, trimClick
     }
 
     if (trimBoth) {
-        if (!modifyEntity(op, limitingEntity.clone(), newShapes[1].data())) {
+        if (!modifyEntity(op, limitingEntity.clone(), getPtr(newShapes[1]))) {
             if (!preview) {
                 EAction.handleUserWarning(qsTr("Second entity cannot be trimmed."));
             }

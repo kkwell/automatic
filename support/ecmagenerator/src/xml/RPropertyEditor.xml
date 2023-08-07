@@ -10,6 +10,12 @@ xmlns:rs="http://www.ribbonsoft.com">
     <constructor>
       <variant />
     </constructor>
+    <method name="getInstance" cppName="getInstance"
+    specifier="public" isStatic="true" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="RPropertyEditor *"
+      isPureVirtual="false" />
+    </method>
     <method name="updateFromDocument" cppName="updateFromDocument"
     specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
@@ -22,6 +28,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         name="filter" hasDefault="true"
         default="RS :: EntityUnknown" isConst="false" />
         <arg type="bool" typeName="bool" name="manual"
+        hasDefault="true" default="false" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
         hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
@@ -41,9 +49,26 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false" />
     </method>
+    <method name="getFixedCustomPropertyNames"
+    cppName="getFixedCustomPropertyNames" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="QStringList" isPureVirtual="false">
+        <arg type="QList &lt; RS::EntityType &gt; &amp;"
+        typeName="QList &lt; RS::EntityType &gt;"
+        name="objectTypes" isConst="true" />
+      </variant>
+    </method>
     <method name="updateLayers" cppName="updateLayers"
     specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RDocumentInterface *"
+        typeName="RDocumentInterface *" name="documentInterface"
+        isConst="false" />
+        <arg type="QList &lt; RLayer::Id &gt; &amp;"
+        typeName="QList &lt; RLayer::Id &gt;" name="layerIds"
+        isConst="false" />
+      </variant>
       <variant returnType="void" isPureVirtual="false">
         <arg type="RDocumentInterface *"
         typeName="RDocumentInterface *" name="documentInterface"
@@ -57,6 +82,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="RDocumentInterface *"
         typeName="RDocumentInterface *" name="documentInterface"
         isConst="false" />
+        <arg type="RLayer::Id" typeName="RLayer::Id"
+        name="previousLayerId" isConst="false" />
       </variant>
     </method>
     <method name="clearLayers" cppName="clearLayers"
@@ -72,9 +99,9 @@ xmlns:rs="http://www.ribbonsoft.com">
         name="propertyTypeId" isConst="false" />
         <arg type="QVariant" typeName="QVariant"
         name="propertyValue" isConst="false" />
-        <arg type="QVariant::Type" typeName="QVariant::Type"
+        <arg type="RS::MetaType" typeName="RS::MetaType"
         name="typeHint" hasDefault="true"
-        default="QVariant :: Invalid" isConst="false" />
+        default="RS :: UnknownType" isConst="false" />
       </variant>
     </method>
     <method name="listPropertyChanged"
@@ -171,6 +198,11 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="RS::EntityType" isPureVirtual="false" />
     </method>
+    <method name="getAppProperties" cppName="getAppProperties"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="QStringList" isPureVirtual="false" />
+    </method>
     <method name="checkType" cppName="checkType" specifier="public"
     isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false">
@@ -180,16 +212,13 @@ xmlns:rs="http://www.ribbonsoft.com">
         name="filter" isConst="false" />
       </variant>
     </method>
-    <method name="updateEditor" cppName="updateEditor"
-    specifier="protected" isStatic="false" isVirtual="true"
+    <method name="makeReadOnly" cppName="makeReadOnly"
+    specifier="public" isStatic="true" isVirtual="false"
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
-        <arg type="RObject &amp;" typeName="RObject" name="object"
+        <arg type="QWidget *" typeName="QWidget *" name="control"
         isConst="false" />
-        <arg type="bool" typeName="bool" name="doUpdateGui"
-        isConst="false" />
-        <arg type="RDocument *" typeName="RDocument *"
-        name="document" hasDefault="true" default="NULL"
+        <arg type="bool" typeName="bool" name="on"
         isConst="false" />
       </variant>
     </method>
@@ -212,17 +241,25 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
         <arg type="RDocument *" typeName="RDocument *"
         name="document" isConst="false" />
+        <arg type="bool" typeName="bool" name="showOnRequest"
+        hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
-    <method name="removeAllButThese" cppName="removeAllButThese"
-    specifier="protected" isStatic="false" isVirtual="false"
-    isScriptOverwritable="true">
+    <method name="showCustomAppProperties"
+    cppName="showCustomAppProperties" specifier="protected"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="RPropertyAttributes::Option"
+        typeName="RPropertyAttributes::Option" name="opt"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="computePropertyValue"
+    cppName="computePropertyValue" specifier="protected"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
-        <arg type="QMultiMap &lt; QString , QString &gt; &amp;"
-        typeName="QMultiMap &lt; QString , QString &gt;"
-        name="propertyTitles" isConst="true" />
-        <arg type="bool" typeName="bool" name="customOnly"
-        hasDefault="true" default="false" isConst="false" />
+        <arg type="RProperty &amp;" typeName="RProperty"
+        name="property" isConst="false" />
       </variant>
     </method>
   </class>

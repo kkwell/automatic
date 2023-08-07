@@ -10,14 +10,21 @@ SUBDIRS = \
     stemmer \
     spatialindex \
     gui \
-    io \
-    zip
+    io
+
+lessThan(QT_MAJOR_VERSION, 6) {
+    SUBDIRS += scripting
+}
 
 !r_mobile {
     SUBDIRS += \
         customwidgets \
-        scripting \
         run
+}
+
+win32 {
+    SUBDIRS += \
+        console
 }
 
 TEMPLATE = subdirs

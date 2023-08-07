@@ -46,11 +46,13 @@ public:
     ROperation(
         bool undoable=true,
         RS::EntityType entityTypeFilter = RS::EntityAll
-    ) : undoable(undoable), 
+    ) : transactionTypes(RTransaction::Generic),
+        undoable(undoable),
         recordAffectedObjects(true),
         spatialIndexDisabled(false),
         allowInvisible(false),
         allowAll(false),
+        keepChildren(false),
         entityTypeFilter(entityTypeFilter),
         transactionGroup(-1) {
         RDebug::incCounter("ROperation");
@@ -89,8 +91,19 @@ public:
         allowAll = on;
     }
 
+    /**
+     * Keep child entities (e.g. keep block attributes when deleting block references)
+     */
+    void setKeepChildren(bool on) {
+        keepChildren = on;
+    }
+
     void setTransactionGroup(int g) {
         transactionGroup = g;
+    }
+
+    int getTransactionGroup() const {
+        return transactionGroup;
     }
 
     void setText(const QString& t) {
@@ -101,12 +114,30 @@ public:
         return text;
     }
 
+    RTransaction::Types getTransactionTypes() const {
+        return transactionTypes;
+    }
+
+    void setTransactionType(RTransaction::Type t, bool on = true) {
+        if (on) {
+            transactionTypes |= t;
+        } else {
+            transactionTypes &= ~t;
+        }
+    }
+
+    bool getTransactionType(RTransaction::Type t) const {
+        return (transactionTypes & t) == t;
+    }
+
 protected:
+    RTransaction::Types transactionTypes;
     bool undoable;
     bool recordAffectedObjects;
     bool spatialIndexDisabled;
     bool allowInvisible;
     bool allowAll;
+    bool keepChildren;
     RS::EntityType entityTypeFilter;
     int transactionGroup;
     QString text;

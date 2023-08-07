@@ -19,75 +19,128 @@
 #include <QDebug>
 
 #include "RPropertyTypeId.h"
+#include "RPropertyAttributes.h"
 //#include "RObject.h"
 
 long int RPropertyTypeId::counter = 0;
 const long int RPropertyTypeId::INVALID_ID = -1;
 //const QString RPropertyTypeId::blockAttributePrefix = "[[QCAD BLOCK ATTRIBUTE]]";
 
-QMap<QString, QSet<RPropertyTypeId> > RPropertyTypeId::propertyTypeByObjectMap;
-QMap<long int, QPair<QString, QString> > RPropertyTypeId::titleMap;
+QMap<RS::EntityType, QSet<RPropertyTypeId> > RPropertyTypeId::propertyTypeByObjectMap;
+QMap<QPair<RS::EntityType, RPropertyAttributes::Option>, QSet<RPropertyTypeId> > RPropertyTypeId::propertyTypeByObjectOptionMap;
+QMap<long int, QPair<QString, QString> > RPropertyTypeId::idToTitleMap;
+QMap<QString, QMap<QString, RPropertyTypeId> > RPropertyTypeId::titleToIdMap;
 
+QList<RPropertyAttributes::Option> RPropertyTypeId::cachedOptionList;
 
 
 RPropertyTypeId::RPropertyTypeId(const QString& customPropertyTitle, const QString& customPropertyName) :
-    id(-1), customPropertyTitle(customPropertyTitle), customPropertyName(customPropertyName) {
+    id(-1), options(false), customPropertyTitle(customPropertyTitle), customPropertyName(customPropertyName) {
 
 }
 
 RPropertyTypeId::RPropertyTypeId(const QString& customPropertyName) :
-    id(-1), customPropertyName(customPropertyName) {
+    id(-1), options(false), customPropertyName(customPropertyName) {
 
 }
 
 RPropertyTypeId::RPropertyTypeId(const RPropertyTypeId& other) {
+    *this = other;
+}
+
+RPropertyTypeId::RPropertyTypeId(long int id) :
+    id(id), options(false) {
+}
+
+RPropertyTypeId& RPropertyTypeId::operator=(const RPropertyTypeId& other) {
     id = other.id;
+    options = other.options;
     customPropertyTitle = other.customPropertyTitle;
     customPropertyName = other.customPropertyName;
+
+    return *this;
 }
 
-RPropertyTypeId::RPropertyTypeId(long int id) {
-    this->id = id;
-}
+void RPropertyTypeId::generateId(RS::EntityType type,
+        const QString& groupTitle, const QString& title, bool forceNew, RPropertyAttributes::Options options) {
 
-void RPropertyTypeId::generateId(const std::type_info& classInfo,
-        const QString& groupTitle, const QString& title, bool forceNew) {
+    if (cachedOptionList.isEmpty()) {
+        cachedOptionList.append(RPropertyAttributes::Location);
+        cachedOptionList.append(RPropertyAttributes::RefPoint);
+        cachedOptionList.append(RPropertyAttributes::Geometry);
+        cachedOptionList.append(RPropertyAttributes::DimStyleOverride);
+    }
+
     if (id!=-1) {
-        qWarning() << "RPropertyTypeId::generateId: property already initialized: " << classInfo.name() << ":" << groupTitle << ":" << title;
+        qWarning() << "RPropertyTypeId::generateId: property already initialized: " << type << ":" << groupTitle << ":" << title;
         return;
     }
 
-    if (getPropertyTypeId(groupTitle, title).isValid() && !forceNew) {
-        generateId(classInfo, getPropertyTypeId(groupTitle, title));
+    if (!forceNew && getPropertyTypeId(groupTitle, title).isValid()) {
+        RPropertyTypeId pid = getPropertyTypeId(groupTitle, title);
+        pid.options = options;
+        generateId(type, pid);
         return;
     }
 
     id = counter++;
-    propertyTypeByObjectMap[classInfo.name()].insert(*this);
-    titleMap[id].first = groupTitle;
-    titleMap[id].second = title;
+    this->options = options;
+    propertyTypeByObjectMap[type].insert(*this);
+    if (this->options!=RPropertyAttributes::NoOptions) {
+        for (int i=0; i<cachedOptionList.length(); i++) {
+            if (this->options.testFlag(cachedOptionList[i])) {
+                propertyTypeByObjectOptionMap[QPair<RS::EntityType, RPropertyAttributes::Option>(type, cachedOptionList[i])].insert(*this);
+            }
+        }
+    }
+    idToTitleMap[id].first = groupTitle;
+    idToTitleMap[id].second = title;
+
+    if (!titleToIdMap.contains(groupTitle)) {
+        titleToIdMap.insert(groupTitle, QMap<QString, RPropertyTypeId>());
+    }
+
+    if (!titleToIdMap[groupTitle].contains(title)) {
+        titleToIdMap[groupTitle].insert(title, *this);
+    }
+//    else {
+//        qWarning() << "duplicate property ID: " << groupTitle << "/" << title
+//                   << " class: " << classInfo.name();
+//    }
 }
 
-void RPropertyTypeId::generateId(const std::type_info& classInfo,
-        const RPropertyTypeId& other) {
+void RPropertyTypeId::generateId(RS::EntityType type, const RPropertyTypeId& other) {
     if (id!=-1) {
         qWarning("RPropertyTypeId::generateId: property already initialized");
         return;
     }
 
     id = other.id;
-    propertyTypeByObjectMap[classInfo.name()].insert(*this);
-}
-
-RPropertyTypeId RPropertyTypeId::getPropertyTypeId(const QString& groupTitle,
-        const QString& title) {
-
-    QMap<long int, QPair<QString, QString> >::iterator i;
-    for (i = titleMap.begin(); i != titleMap.end(); ++i) {
-        if (i.value().first == groupTitle && i.value().second == title) {
-            return RPropertyTypeId(i.key());
+    options = other.options;
+    propertyTypeByObjectMap[type].insert(*this);
+    if (options!=RPropertyAttributes::NoOptions) {
+        for (int i=0; i<cachedOptionList.length(); i++) {
+            if (options.testFlag(cachedOptionList[i])) {
+                propertyTypeByObjectOptionMap[QPair<RS::EntityType, RPropertyAttributes::Option>(type, cachedOptionList[i])].insert(*this);
+            }
         }
     }
+}
+
+RPropertyTypeId RPropertyTypeId::getPropertyTypeId(const QString& groupTitle, const QString& title) {
+
+    if (titleToIdMap.contains(groupTitle)) {
+        if (titleToIdMap[groupTitle].contains(title)) {
+            return titleToIdMap[groupTitle][title];
+        }
+    }
+
+//    QMap<long int, QPair<QString, QString> >::iterator i;
+//    for (i = idToTitleMap.begin(); i != idToTitleMap.end(); ++i) {
+//        if (i.value().first == groupTitle && i.value().second == title) {
+//            return RPropertyTypeId(i.key());
+//        }
+//    }
 
     return RPropertyTypeId(-1);
 }
@@ -108,7 +161,7 @@ QString RPropertyTypeId::getPropertyGroupTitle() const {
         return QT_TRANSLATE_NOOP("REntity", "Custom");
     }
     else {
-        return titleMap[id].first;
+        return idToTitleMap[id].first;
     }
 }
 
@@ -120,7 +173,7 @@ QString RPropertyTypeId::getPropertyTitle() const {
         return customPropertyName;
     }
     else {
-        return titleMap[id].second;
+        return idToTitleMap[id].second;
     }
 }
 
@@ -208,13 +261,12 @@ void RPropertyTypeId::setCustomPropertyName(const QString& n) {
 /**
  * \retval true: if the given class has the given property
  */
-bool RPropertyTypeId::hasPropertyType(const std::type_info& classInfo,
-        RPropertyTypeId propertyTypeId) {
+bool RPropertyTypeId::hasPropertyType(RS::EntityType type, RPropertyTypeId propertyTypeId) {
 
-    if (!propertyTypeByObjectMap.contains(classInfo.name())) {
+    if (!propertyTypeByObjectMap.contains(type)) {
         return false;
     }
-    return propertyTypeByObjectMap[classInfo.name()].contains(propertyTypeId);
+    return propertyTypeByObjectMap[type].contains(propertyTypeId);
 }
 
 /**
@@ -222,19 +274,30 @@ bool RPropertyTypeId::hasPropertyType(const std::type_info& classInfo,
  * class.
  *
  * \param classInfo The class info, e.g. typeid(ObjectA)
+ * \param geometryOnly Only return geometric properties
  *
  * \return a set of property type ID pointers or an empty set if
  * the class has no registered property types.
  */
-QSet<RPropertyTypeId> RPropertyTypeId::getPropertyTypeIds(
-        const std::type_info& classInfo) {
-    if (propertyTypeByObjectMap.contains(classInfo.name())) {
-        return propertyTypeByObjectMap[classInfo.name()];
+QSet<RPropertyTypeId> RPropertyTypeId::getPropertyTypeIds(RS::EntityType type, RPropertyAttributes::Option option) {
+    if (option!=RPropertyAttributes::NoOptions) {
+        QPair<RS::EntityType, RPropertyAttributes::Option> pair(type, option);
+        if (propertyTypeByObjectOptionMap.contains(pair)) {
+            return propertyTypeByObjectOptionMap[pair];
+        }
+//        qWarning() << QString("RPropertyIdRegistry::getPropertyTypeIds: "
+//                              "no properties with option %1 registered for class %2")
+//                      .arg(option).arg(type);
+    }
+    else {
+        if (propertyTypeByObjectMap.contains(type)) {
+            return propertyTypeByObjectMap[type];
+        }
+//        qWarning() << QString("RPropertyIdRegistry::getPropertyTypeIds: "
+//                              "no properties registered for class %1")
+//                      .arg(type);
     }
 
-    qWarning() << QString("RPropertyIdRegistry::getPropertyTypeIds: "
-                          "no properties registered for class %1")
-                  .arg(classInfo.name());
     return QSet<RPropertyTypeId> ();
 }
 
@@ -274,7 +337,7 @@ bool RPropertyTypeId::operator <(const RPropertyTypeId& other) const {
     }
 }
 
-uint qHash(RPropertyTypeId propertyTypeId) {
+uint qHash(const RPropertyTypeId& propertyTypeId) {
     if (propertyTypeId.getId()!=RPropertyTypeId::INVALID_ID) {
         return qHash(propertyTypeId.getId());
     }

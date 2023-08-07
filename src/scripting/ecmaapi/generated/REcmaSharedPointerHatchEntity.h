@@ -55,6 +55,9 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getStaticPropertyTypeIds
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -68,6 +71,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getCustomPattern
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setCustomPattern
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setProperty
@@ -133,6 +139,12 @@
         setPatternName
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getTransparency
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setTransparency
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         clearCustomPattern
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -146,6 +158,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getExploded
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setViewportContext
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

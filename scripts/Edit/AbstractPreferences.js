@@ -36,11 +36,11 @@ AbstractPreferences.includeBasePath = includeBasePath;
 AbstractPreferences.prototype.beginEvent = function() {
     Edit.prototype.beginEvent.call(this);
     
-    this.dialog = this.createWidget(AbstractPreferences.includeBasePath + "/AbstractPreferences.ui");
+    this.dialog = this.createDialog(AbstractPreferences.includeBasePath + "/AbstractPreferences.ui");
     // TODO: Qt 5: add this flag (?)
     //var flags = new Qt.WindowFlags(Qt.WindowTitleHint);
     //this.dialog.setWindowFlags(flags);
-    this.treeWidget = this.dialog.findChild("twCategory");
+    this.treeWidget = this.dialog.findChild("Category");
     var title;
     if (this.appPreferences) {
         title = qsTr("Application Preferences");
@@ -49,20 +49,20 @@ AbstractPreferences.prototype.beginEvent = function() {
     }
     this.dialog.setWindowTitle(title);
     this.treeWidget.setHeaderLabel(title);
-    this.pageWidget = this.dialog.findChild("stwPage");
-    this.filterWidget = this.dialog.findChild("leFilter");
-    this.titleWidget = this.dialog.findChild("lbTitle");
+    this.pageWidget = this.dialog.findChild("Page");
+    this.filterWidget = this.dialog.findChild("Filter");
+    this.titleWidget = this.dialog.findChild("Title");
     
     var splitter = this.dialog.findChild("splitter");
     splitter.setStretchFactor(0, 1);
     splitter.setStretchFactor(1, 4);
     
     // connections:
-    this.treeWidget.itemSelectionChanged.connect(this, "showPage");
-    this.filterWidget.textChanged.connect(this, "filterTree");    
+    this.treeWidget.itemSelectionChanged.connect(this, this.showPage);
+    this.filterWidget.textChanged.connect(this, this.filterTree);
 
     var btApply = this.dialog.findChild("buttonBox").button(QDialogButtonBox.Apply);
-    btApply.clicked.connect(this, "apply");
+    btApply.clicked.connect(this, this.apply);
 
     this.addOns = AddOn.getAddOns();
 
@@ -78,7 +78,7 @@ AbstractPreferences.prototype.beginEvent = function() {
         this.apply();
     }
     this.uninit();
-    this.dialog.destroy();
+    destr(this.dialog);
     EAction.activateMainWindow();
     this.terminate();
 };
@@ -87,6 +87,10 @@ AbstractPreferences.prototype.beginEvent = function() {
  * Initializes the navigation tree based on available add-ons with preferences.
  */
 AbstractPreferences.fillTreeWidget = function(addOns, treeWidget, appPreferences) {
+
+    var appWin = EAction.getMainWindow();
+    var defaultPage = appWin.property("PreferencesPage");
+
     for (var i = 0; i < addOns.length; ++i) {
         var addOn = addOns[i];
         var className = addOn.getClassName();
@@ -144,23 +148,28 @@ AbstractPreferences.fillTreeWidget = function(addOns, treeWidget, appPreferences
         }
         var parent = item;
         for (var x = 1; x < cat.length; ++x) {
-            var subitem;
-            subitem = undefined;
+            var subItem;
+            subItem = undefined;
             for (var c = 0; c < parent.childCount(); ++c) {
                 var child = parent.child(c);
                 if (child.text(0) === cat[x]) {
-                    subitem = child;
+                    subItem = child;
                     break;
                 }
             }
-            if (isNull(subitem)) {
-                subitem = new QTreeWidgetItem(parent, [ cat[x] ]);
-                parent.addChild(subitem);
+            if (isNull(subItem)) {
+                subItem = new QTreeWidgetItem(parent, [ cat[x] ]);
+                parent.addChild(subItem);
                 if (x == cat.length - 1) {
-                    subitem.setData(0, Qt.UserRole, i);
+                    subItem.setData(0, Qt.UserRole, i);
+
+                    // select a default page:
+                    if (className===defaultPage) {
+                        subItem.setSelected(true);
+                    }
                 }
             }
-            parent = subitem;
+            parent = subItem;
         }
     }
     treeWidget.sortItems(0, Qt.AscendingOrder);
@@ -179,12 +188,16 @@ AbstractPreferences.prototype.apply = function() {
     
     this.save();
 
-    for (var i = 0; i < this.addOns.length; ++i) {
+    for (var i=0; i<this.addOns.length; ++i) {
         var addOn = this.addOns[i];
         var className = addOn.getClassName();
         
         var widget = addOn.getPreferenceWidget();
-        if (isNull(widget) || widget.hasChanged !== true) {
+        if (isNull(widget)) {
+            continue;
+        }
+        var hasChanged = widget.property("hasChanged");
+        if (hasChanged !== true) {
             continue;
         }
 
@@ -257,7 +270,15 @@ AbstractPreferences.prototype.uninit = function() {
         var className = addOn.getClassName();
 
         var widget = addOn.getPreferenceWidget();
-        if (isNull(widget) || widget.hasChanged !== true) {
+
+        // break link from add on to preference widget (preference widget is deleted with dialog):
+        addOn.setPreferenceWidget(undefined);
+
+        if (isNull(widget)) {
+            continue;
+        }
+        var hasChanged = widget.property("hasChanged");
+        if (hasChanged !== true) {
             continue;
         }
 
@@ -292,6 +313,7 @@ AbstractPreferences.prototype.uninit = function() {
                      .arg(e.message).arg(e.fileName).arg(e.lineNumber));
             continue;
         }
+
     }
 };
 
@@ -351,7 +373,11 @@ AbstractPreferences.prototype.save = function() {
     for (var i = 0; i < this.addOns.length; ++i) {
         var addOn = this.addOns[i];
         var widget = addOn.getPreferenceWidget();
-        if (isNull(widget) || widget.hasChanged !== true) {
+        if (isNull(widget)) {
+            continue;
+        }
+        var hasChanged = widget.property("hasChanged");
+        if (hasChanged !== true) {
             continue;
         }
         var className = addOn.getClassName();
@@ -370,10 +396,13 @@ AbstractPreferences.prototype.save = function() {
                 }
             }
             if (!isNull(document) && preferencesScope==="block") {
+                // saving to block:
                 store = document.queryCurrentBlock();
             }
         }
+
         WidgetFactory.saveState(widget, undefined, store);
+
         if (!this.appPreferences) {
             if (preferencesScope==="block") {
                 transaction.addObject(store);
@@ -477,8 +506,12 @@ AbstractPreferences.prototype.showPage = function() {
     warningLabel.text = "";
     warningLabel.visible = false;
     if (!isNull(parent)) {
-        if (parent.text(0).contains(qsTr("Defaults for "))) {
-            warningLabel.text = "<font color='red'>" +
+        if (parent.text(0).contains(qsTr("Defaults for"))) {
+            var col = "red";
+            if (RSettings.hasDarkGuiBackground()) {
+                col = "#C00000";
+            }
+            warningLabel.text = "<font color='" + col + "'>" +
                     qsTr("These are default preferences for new drawings.") + "<br/>" +
                     qsTr("Changes will affect new drawings but NOT the current drawing.") + "<br/>" +
                     qsTr("Preferences of the current drawing can be changed under<br/><i>Edit &gt; Drawing Preferences</i>.") +
@@ -507,20 +540,24 @@ AbstractPreferences.prototype.showPage = function() {
             widget = this.createWidget(prefFile);
             this.pageWidget.addWidget(widget);
             addOn.setPreferenceWidget(widget);
+
+            // loads (initializes) the page:
             this.load(addOn);
+
             var treeWidget = this.treeWidget;
             widget.settingChangedEvent = function() {
+                // mark changed category in bold:
                 var font = treeWidget.currentItem().font(0);
                 font.setBold(true);
                 treeWidget.currentItem().setFont(0, font);
             };
             var btReset = this.dialog.findChild("ResetToDefaults");
             try {
-                btReset.clicked.disconnect(this, "reset");
+                btReset.clicked.disconnect(this, this.reset);
             } catch (e) {
                 // ignored: signal might not be connected
             }
-            btReset.clicked.connect(this, "reset");
+            btReset.clicked.connect(this, this.reset);
         }
     } else {
         widget = this.pageWidget.findChild("empty");
@@ -530,7 +567,7 @@ AbstractPreferences.prototype.showPage = function() {
 };
 
 AbstractPreferences.prototype.showPageFor = function(className) {
-    var flags = new Qt.MatchFlags(Qt.MatchWildcard | Qt.MatchContains | Qt.MatchRecursive);
+    var flags = makeQtMatchFlags(Qt.MatchWildcard, Qt.MatchContains, Qt.MatchRecursive);
     var items = this.treeWidget.findItems("*", flags, 0);
     for (var i = 0; i < items.length; ++i) {
         var item = items[i];
@@ -551,8 +588,13 @@ AbstractPreferences.prototype.showPageFor = function(className) {
 AbstractPreferences.prototype.reset = function() {
     var widget = this.pageWidget.currentWidget();
     //qDebug("AbstractPreferences.js:", "reset(): widget.objectName:", widget.objectName);
-//    debugger;
     WidgetFactory.resetState(widget);
+
+    var treeWidget = this.treeWidget;
+    var font = treeWidget.currentItem().font(0);
+    font.setBold(true);
+    treeWidget.currentItem().setFont(0, font);
+    widget.setProperty("hasChanged", true);
 };
 
 /**

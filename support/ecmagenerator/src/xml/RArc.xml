@@ -2,6 +2,7 @@
 <unit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns:rs="http://www.ribbonsoft.com">
   <class_decl name="RBox" />
+  <class_decl name="RLine" />
   <class_decl name="RPolyline" />
   <class name="RArc" xsi:noNamespaceSchemaLocation="../class.xsd"
   isCopyable="true" hasShell="false" sharedPointerSupport="true"
@@ -77,7 +78,7 @@ xmlns:rs="http://www.ribbonsoft.com">
       isPureVirtual="false" />
     </method>
     <method name="isValid" cppName="isValid" specifier="public"
-    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
     </method>
     <method name="isFullCircle" cppName="isFullCircle"
@@ -167,6 +168,12 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="QList &lt; RVector &gt;"
       isPureVirtual="false" />
     </method>
+    <method name="getArcReferencePoints"
+    cppName="getArcReferencePoints" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="QList &lt; RVector &gt;"
+      isPureVirtual="false" />
+    </method>
     <method name="getPointsWithDistanceToEnd"
     cppName="getPointsWithDistanceToEnd" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
@@ -176,6 +183,15 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
         <arg type="int" typeName="int" name="from"
         hasDefault="true" default="RS :: FromAny"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="getPointCloud" cppName="getPointCloud"
+    specifier="public" isStatic="false" isVirtual="true"
+    isScriptOverwritable="true">
+      <variant returnType="QList &lt; RVector &gt;"
+      isPureVirtual="false">
+        <arg type="double" typeName="double" name="segmentLength"
         isConst="false" />
       </variant>
     </method>
@@ -377,6 +393,8 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="void" isPureVirtual="false">
         <arg type="RVector &amp;" typeName="RVector" name="pos"
         isConst="true" />
+        <arg type="bool" typeName="bool" name="keepRadius"
+        hasDefault="true" default="true" isConst="false" />
       </variant>
     </method>
     <method name="moveEndPoint" cppName="moveEndPoint"
@@ -385,6 +403,8 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="void" isPureVirtual="false">
         <arg type="RVector &amp;" typeName="RVector" name="pos"
         isConst="true" />
+        <arg type="bool" typeName="bool" name="keepRadius"
+        hasDefault="true" default="true" isConst="false" />
       </variant>
     </method>
     <method name="moveMiddlePoint" cppName="moveMiddlePoint"
@@ -513,6 +533,8 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="RPolyline" isPureVirtual="false">
         <arg type="double" typeName="double" name="segmentLength"
         isConst="false" />
+        <arg type="double" typeName="double" name="angle"
+        hasDefault="true" default="0.0" isConst="false" />
       </variant>
     </method>
     <method name="approximateWithLinesTan"
@@ -521,6 +543,8 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="RPolyline" isPureVirtual="false">
         <arg type="double" typeName="double" name="segmentLength"
         isConst="false" />
+        <arg type="double" typeName="double" name="angle"
+        hasDefault="true" default="0.0" isConst="false" />
       </variant>
     </method>
     <method name="getTangents" cppName="getTangents"

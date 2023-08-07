@@ -24,7 +24,7 @@
  * \brief This module contains the ECMAScript implementation of the image
  * drawing tool.
  */
-include("../Draw.js");
+include("scripts/Draw/Draw.js");
 
 /**
  * \class Image
@@ -40,6 +40,13 @@ function Image(guiAction) {
     this.height = undefined;
     this.angle = undefined;
     this.pos = undefined;
+
+    if (!isNull(guiAction)) {
+        var url = this.guiAction.data();
+        if (!isNull(url) && isFunction(url.isLocalFile) && url.isLocalFile()) {
+            this.fileName = url.toLocalFile();
+        }
+    }
 
     this.setUiOptions(Image.includeBasePath + "/Image.ui");
 }
@@ -89,15 +96,53 @@ Image.prototype.beginEvent = function() {
 Image.prototype.finishEvent = function() {
     Draw.prototype.finishEvent.call(this);
     if (!isNull(this.image)) {
-        this.image.destroy();
+        destr(this.image);
     }
 };
 
-Image.prototype.getFileName = function() {
-    var lastOpenFileDir = RSettings.getStringValue(
-            "Image/Path",
-            RSettings.getDocumentsLocation());
+Image.isSupportedBitmapFile = function(filePath) {
+    var formats = Image.getSupportedFormats(false);
+    var fi = new QFileInfo(filePath);
+    return formats.indexOf(fi.suffix().toLowerCase())!==-1;
+};
+
+Image.getSupportedFormats = function(noAlias) {
+    var ret = [];
     var formats = QImageReader.supportedImageFormats();
+
+    for (var i=0; i<formats.length; ++i) {
+        var format = formats[i].toString();
+        //var formatAlt = "";
+
+        // ignore format aliases:
+        if (noAlias && (format==="jpg" || format==="tif")) {
+            continue;
+        }
+
+        // ignore unsupported formats:
+        if (format==="ico" || format==="mng" ||
+            format==="pbm" || format==="pgm" || format==="ppm" ||
+            format==="svg" || format==="svgz" ||
+            format==="xbm" || format==="xpm") {
+            continue;
+        }
+
+//        if (format==="jpeg") {
+//            formatAlt = "jpg";
+//        }
+//        else if (format==="tiff") {
+//            formatAlt = "tif";
+//        }
+
+        ret.push(format);
+    }
+
+    return ret;
+};
+
+Image.prototype.getFileName = function() {
+    var lastOpenFileDir = RSettings.getStringValue("Image/Path", RSettings.getDocumentsLocation());
+    var formats = Image.getSupportedFormats(true);
     var filters = [];
 
     var filterAllImages = "";
@@ -106,23 +151,23 @@ Image.prototype.getFileName = function() {
         var formatAlt = "";
 
         // ignore format aliases:
-        if (format=="jpg" ||
-            format=="tif") {
-            continue;
-        }
+//        if (format=="jpg" ||
+//            format=="tif") {
+//            continue;
+//        }
 
         // ignore unsupported formats:
-        if (format=="ico" || format=="mng" ||
-            format=="pbm" || format=="pgm" || format=="ppm" ||
-            format=="svg" || format=="svgz" ||
-            format=="xbm" || format=="xpm") {
-            continue;
-        }
+//        if (format=="ico" || format=="mng" ||
+//            format=="pbm" || format=="pgm" || format=="ppm" ||
+//            format=="svg" || format=="svgz" ||
+//            format=="xbm" || format=="xpm") {
+//            continue;
+//        }
 
-        if (format=="jpeg") {
+        if (format==="jpeg") {
             formatAlt = "jpg";
         }
-        else if (format=="tiff") {
+        else if (format==="tiff") {
             formatAlt = "tif";
         }
 
@@ -130,7 +175,9 @@ Image.prototype.getFileName = function() {
 //            filters += ";;";
 //        }
 
-        var filter = format.toUpper() + " " + qsTr("Files") + " (";
+        var filter = format.toUpperCase();
+        filter += " " + qsTr("Files") + " (";
+
         filter += "*." + format;
 
         if (filterAllImages.length!==0) {
@@ -167,14 +214,14 @@ Image.prototype.getFileName = function() {
     fileDialog.fileMode = QFileDialog.ExistingFiles;
     fileDialog.setLabelText(QFileDialog.FileType, qsTr("Format:"));
     if (!fileDialog.exec()) {
-        fileDialog.destroy();
+        destr(fileDialog);
         EAction.activateMainWindow();
         return undefined;
     }
 
     var files = fileDialog.selectedFiles();
     if (files.length===0) {
-        fileDialog.destroy();
+        destr(fileDialog);
         EAction.activateMainWindow();
         return undefined;
     }
@@ -192,14 +239,15 @@ Image.prototype.setState = function(state) {
     this.getDocumentInterface().setClickMode(RAction.PickCoordinate);
 
     var appWin = RMainWindowQt.getMainWindow();
-    this.setLeftMouseTip(qsTr("Position"));
+    var tr = qsTr("Position");
+    this.setLeftMouseTip(tr);
+    this.setCommandPrompt(tr);
     this.setRightMouseTip(EAction.trCancel);
     EAction.showSnapTools();
 };
 
 Image.prototype.pickCoordinate = function(event, preview) {
     this.pos = event.getModelPosition();
-    this.getDocumentInterface().setRelativeZero(this.pos);
 
     var op = this.getOperation();
     if (!isNull(op)) {
@@ -207,6 +255,7 @@ Image.prototype.pickCoordinate = function(event, preview) {
             this.updatePreview();
         }
         else {
+            this.getDocumentInterface().setRelativeZero(this.pos);
             this.applyOperation();
         }
     }

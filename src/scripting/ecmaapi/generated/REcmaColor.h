@@ -72,6 +72,12 @@
         getList
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getNameList
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getColorList
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getIcon
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -102,6 +108,9 @@
         getHighlighted
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getFaded
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         equals
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -109,6 +118,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         operator_less
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        reinit
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

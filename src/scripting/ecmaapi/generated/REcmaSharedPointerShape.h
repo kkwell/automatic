@@ -48,6 +48,9 @@
 
     // public methods:
     static  QScriptValue
+        isValid
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getShapeType
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -85,6 +88,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         clone
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        cloneToSharedPointer
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         isInterpolated
@@ -126,6 +132,9 @@
         getDistanceTo
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getMaxDistanceTo
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         isOnShape
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -144,6 +153,15 @@
         getCenterPoints
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getArcReferencePoints
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getPointOnShape
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getPointCloud
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getPointsWithDistanceToEnd
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -160,6 +178,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getPointAtPercent
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getAngleAtPercent
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         intersectsWith
@@ -229,6 +250,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getTransformed
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getOrderedShapes
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         order
@@ -324,10 +348,31 @@
         trim
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        roundCorners
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        roundShapes
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        xLineToRay
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        rayToLine
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        scaleArc
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        ellipseToArcCircleEllipse
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getErrorCode
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         dump
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        hasProxy
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

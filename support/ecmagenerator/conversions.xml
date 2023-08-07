@@ -7,10 +7,12 @@
 	<entry key="int" value="toNumber()" testFunction="isNumber()" />
 	<entry key="char" value="toNumber()" testFunction="isNumber()" />
     <!--
-    causes ambigous calls:
+    causes ambiguous calls:
 	<entry key="qint64" value="toNumber()" testFunction="isNumber()" />
     -->
 	<entry key="uint" value="toNumber()" testFunction="isNumber()" />
+	<entry key="uint64" value="toNumber()" testFunction="isNumber()" />
+	<entry key="quint64" value="toNumber()" testFunction="isNumber()" />
 	<entry key="uint8_t" value="toNumber()" testFunction="isNumber()" />
 	<entry key="bool" value="toBool()" testFunction="isBool()" />
 
@@ -26,6 +28,8 @@
 	<entry key="RBlockReferenceEntity::Handle" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RLayer::Id" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RLayer::Handle" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="RLayerState::Id" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="RLayerState::Handle" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RLayout::Id" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RLayout::Handle" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RBlock::Id" value="toNumber()" testFunction="isNumber()" cast="int" />
@@ -35,8 +39,13 @@
 	<entry key="RUcs::Id" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RUcs::Handle" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RSnap::Status" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="RTransaction::Type" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RPluginInterface::InitStatus" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RRefPoint::Flags" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="RNester::Alignment" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="RNester::Strategy" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="RAddObjectsOperation::Flags" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="RSnapAuto::Modes" value="toNumber()" testFunction="isNumber()" cast="int" />
 
 	<entry key="RS::AngleFormat" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RS::AngleUnit" value="toNumber()" testFunction="isNumber()" cast="int" />
@@ -45,6 +54,7 @@
 	<entry key="RS::HAlign" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RS::IsoProjectionType" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RS::KnownVariable" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="RS::KnownVariableType" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RS::LinearFormat" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RS::MessageType" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RS::ProjectionRenderingHint" value="toNumber()" testFunction="isNumber()" cast="int" />
@@ -61,6 +71,8 @@
 	<entry key="RS::JoinType" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RS::EndType" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="RS::Ending" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="RS::Easing" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="RS::MetaType" value="toNumber()" testFunction="isNumber()" cast="int" />
 
 	<entry key="RDxfServices::Type" testFunction="isNumber()" cast="int" />
 	<entry key="RLineweight::Lineweight" value="toNumber()" testFunction="isNumber()" cast="int" />
@@ -83,8 +95,11 @@
 	<entry key="QVariant::Type" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="QFontDatabase::WritingSystem" value="toNumber()" testFunction="isNumber()" cast="int" />
 	<entry key="QAbstractItemView::ScrollHint" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="QEasingCurve::Type" value="toNumber()" testFunction="isNumber()" cast="int" />
+	<entry key="QMetaType::Type" value="toNumber()" testFunction="isNumber()" cast="int" />
 
 	<entry key="QString" value="toString()" testFunction="isString()" />
+	<entry key="QChar" value="toString().at(0)" testFunction="isString()" />
 	<entry key="QColor" value="toVariant()" testFunction="isVariant()" />
 	<entry key="QMouseEvent" value="toVariant()" testFunction="isVariant()" defaultConstructor="false"/>
 	<entry key="QKeyEvent" value="toVariant()" testFunction="isVariant()" defaultConstructor="false" copyable="false" />

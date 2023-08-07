@@ -44,6 +44,19 @@ class QTextDocument;
 class QCADCORE_EXPORT RTextBasedData: public REntityData, public RPainterPathSource {
     friend class RTextBasedEntity;
 
+public:
+    enum TextFlag {
+        NoFlags = 0x000,
+        Bold = 0x001,
+        Italic = 0x002,
+        Simple = 0x004,
+        DimensionLabel = 0x008,
+        Highlighted = 0x010,
+        Backward = 0x020,
+        UpsideDown = 0x040
+    };
+    Q_DECLARE_FLAGS(TextFlags, TextFlag)
+
 protected:
     RTextBasedData(RDocument* document, const RTextBasedData& data);
 
@@ -66,8 +79,23 @@ public:
               bool simple);
     virtual ~RTextBasedData() {}
 
+    static RS::EntityType getRtti() {
+        return RS::EntityTextBased;
+    }
+
     virtual RS::EntityType getType() const {
         return RS::EntityTextBased;
+    }
+
+    void setFlag(RTextBasedData::TextFlag flag, bool on = true) {
+        if (on) {
+            flags |= flag;
+        } else {
+            flags &= ~flag;
+        }
+    }
+    bool getFlag(RTextBasedData::TextFlag flag) const {
+        return (flags & flag) == flag;
     }
 
     virtual bool isValid() const {
@@ -136,10 +164,7 @@ public:
         return fontName;
     }
 
-    void setFontName(const QString& fontName) {
-        this->fontName = fontName;
-        update();
-    }
+    void setFontName(const QString& fontName);
 
     QString getFontFile() const {
         return fontFile;
@@ -150,20 +175,20 @@ public:
     }
 
     bool isBold() const {
-        return bold;
+        return getFlag(Bold);
     }
 
     void setBold(bool on) {
-        bold = on;
+        setFlag(Bold, on);
         update();
     }
 
     bool isItalic() const {
-        return italic;
+        return getFlag(Italic);
     }
 
     void setItalic(bool on) {
-        italic = on;
+        setFlag(Italic, on);
         update();
     }
 
@@ -177,7 +202,7 @@ public:
     }
 
     /**
-     * Width of the text box used for line wrapping (not supported).
+     * Width of the text box used for line wrapping.
      */
     double getTextWidth() const {
         return textWidth;
@@ -246,6 +271,10 @@ public:
     }
 
     void setXScale(double xScale) {
+        // only positive xScale for MText:
+        if (xScale<=0) {
+            xScale = 1;
+        }
         this->xScale = xScale;
         update();
     }
@@ -255,21 +284,39 @@ public:
     }
 
     void setSimple(bool on) {
-        simple = on;
+        setFlag(Simple, on);
         update();
     }
 
     bool isSimple() const {
-        return simple;
+        return getFlag(Simple);
+    }
+
+    void setBackward(bool on) {
+        setFlag(Backward, isSimple() && on);
+        update();
+    }
+
+    bool isBackward() const {
+        return isSimple() && getFlag(Backward);
+    }
+
+    void setUpsideDown(bool on) {
+        setFlag(UpsideDown, isSimple() && on);
+        update();
+    }
+
+    bool isUpsideDown() const {
+        return isSimple() && getFlag(UpsideDown);
     }
 
     void setDimensionLabel(bool on) {
-        dimensionLabel = on;
+        setFlag(DimensionLabel, on);
         update();
     }
 
     bool isDimensionLabel() const {
-        return dimensionLabel;
+        return getFlag(DimensionLabel);
     }
 
     void setSelected(bool on) {
@@ -278,17 +325,16 @@ public:
     }
 
     void setHighlighted(bool on) {
-        highlighted = on;
+        setFlag(Highlighted, on);
     }
 
     bool isHighlighted() const {
-        return highlighted;
+        return getFlag(Highlighted);
     }
 
     virtual QList<RRefPoint> getReferencePoints(RS::ProjectionRenderingHint hint = RS::RenderTop) const;
 
-    virtual bool moveReferencePoint(const RVector& referencePoint, 
-        const RVector& targetPoint);
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
     virtual bool move(const RVector& offset);
     virtual bool rotate(double rotation, const RVector& center);
@@ -313,7 +359,7 @@ public:
     virtual bool isDirty() const;
 
     virtual QList<RPainterPath> getPainterPaths(bool draft = false, double pixelSizeHint = RDEFAULT_MIN1) const;
-    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false) const;
+    virtual QList<QSharedPointer<RShape> > getShapes(const RBox& queryBox = RDEFAULT_RBOX, bool ignoreComplex = false, bool segment = false, QList<RObject::Id>* entityIds = NULL) const;
     virtual QList<QSharedPointer<RShape> > getExploded() const;
 
     virtual QSharedPointer<RShape> getClosestShape(const RVector& pos, double range = RNANDOUBLE, bool ignoreComplex = false) const {
@@ -327,7 +373,7 @@ public:
 
     QList<RTextLayout> getTextLayouts() const;
 
-    QList<RTextBasedData> getSimpleTextBlocks() const;
+    QList<RTextBasedData> getSimpleTextBlocks();
 
 //    virtual RTextBasedData getRenderedTextData() const {
 //        return *this;
@@ -354,8 +400,10 @@ public:
         return textProxy;
     }
 
-    static QString toEscapedText(const QTextDocument& textDocument, const RColor& initialColor, double fontHeightFactor=1.0);
+    static QString toEscapedText(const QTextDocument& textDocument, const RColor& initialColor, double fontHeightFactor=1.0, bool simpleText = false);
     static QString toRichText(const QString& escapedText, const QFont& mainFont, double fontHeightFactor=1.0);
+
+    virtual void to2D();
 
 protected:
     QString text;
@@ -370,13 +418,9 @@ protected:
     double lineSpacingFactor;
     QString fontName;
     QString fontFile;
-    bool bold;
-    bool italic;
     double angle;
     double xScale;
-    bool simple;
-    bool dimensionLabel;
-    bool highlighted;
+    TextFlags flags;
 
     mutable double height;
     mutable double width;
@@ -397,5 +441,7 @@ Q_DECLARE_METATYPE(RTextBasedData*)
 Q_DECLARE_METATYPE(const RTextBasedData*)
 Q_DECLARE_METATYPE(QSharedPointer<RTextBasedData>)
 Q_DECLARE_METATYPE(QSharedPointer<RTextBasedData>*)
+Q_DECLARE_METATYPE(RTextBasedData::TextFlag)
+Q_DECLARE_METATYPE(RTextBasedData::TextFlag*)
 
 #endif

@@ -45,13 +45,13 @@ class RTransaction;
  * \ingroup core
  * \scriptable
  * \sharedPointerSupport
- * \copyable
  */
 class QCADCORE_EXPORT RLinetype: public RObject {
 
     //Q_DECLARE_TR_FUNCTIONS(RLinetype);
 
 public:
+    static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyName;
     static RPropertyTypeId PropertyDescription;
     static RPropertyTypeId PropertyMetric;
@@ -60,10 +60,15 @@ public:
 public:
     RLinetype(RDocument* document=NULL);
     RLinetype(RDocument* document, const RLinetypePattern& pattern);
+    RLinetype(const RLinetype& other);
 
     virtual ~RLinetype();
 
     static void init();
+
+    static RS::EntityType getRtti() {
+        return RS::ObjectLinetype;
+    }
 
     virtual RS::EntityType getType() const {
         return RS::ObjectLinetype;
@@ -113,11 +118,9 @@ public:
 
     virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
     virtual bool setProperty(RPropertyTypeId propertyTypeId,
             const QVariant& value, RTransaction* transaction=NULL);
-
-    virtual bool isSelectedForPropertyEditing();
 
     RLinetypePattern getPattern() const;
     void setPattern(const RLinetypePattern& p);

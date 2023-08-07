@@ -24,13 +24,15 @@
 
 #include <QList>
 #include <QMetaType>
+#if QT_VERSION < 0x060000
 #include <QScriptEngine>
+#endif
 
 #include "RPluginInterface.h"
 #include "RPluginInfo.h"
 
 /**
- * Loads and registeres plugins.
+ * Loads and registers plugins.
  *
  * \ingroup core
  * \scriptable
@@ -43,7 +45,7 @@ public:
     static void unloadPlugins();
     static void loadPlugin(QObject* plugin, bool init, const QString& fileName = QString(), const QString& errorString = QString());
     static void unloadPlugin(const QString& fileName, bool remove = false);
-    static void unloadPlugin(const QObject* plugin, bool remove = false);
+    static void unloadPlugin(QObject* plugin, bool remove = false);
 
     static void postInitPlugins(RPluginInterface::InitStatus status);
 
@@ -52,6 +54,7 @@ public:
      */
     static void postInitPlugin(QObject* plugin, RPluginInterface::InitStatus status);
 
+#if QT_VERSION < 0x060000
     /**
      * \nonscriptable
      */
@@ -61,6 +64,17 @@ public:
      * \nonscriptable
      */
     static void initScriptExtensions(QObject* plugin, QScriptEngine& engine);
+#else
+    static void initScriptExtensions(RScriptHandler& handler);
+    static void initScriptExtensions(QObject* plugin, RScriptHandler& handler);
+#endif
+
+    static void initTranslations();
+
+    /**
+     * \nonscriptable
+     */
+    static void initTranslations(QObject* plugin);
 
     static int countPlugins() {
         return pluginsInfo.count();
@@ -71,6 +85,9 @@ public:
 
     static QString getPluginsPath();
     static bool hasPlugin(const QString& id);
+
+    static bool checkPluginLicenses();
+    static bool checkPluginLicense(QObject* plugin);
 
 private:
     static QList<RPluginInfo> pluginsInfo;

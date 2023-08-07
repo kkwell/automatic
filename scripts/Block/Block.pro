@@ -1,10 +1,9 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-    ts \
+    dir \
     AddBlock \
     CreateBlock \
-    CreateLibraryItem \
     DeselectBlockReferences \
     EditBlock \
     EditFromReference \

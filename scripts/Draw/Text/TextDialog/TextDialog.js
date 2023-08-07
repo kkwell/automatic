@@ -55,8 +55,8 @@ function TextDialog(mode) {
     this.sourceEdit = undefined;
 
     this.actionTextBold = undefined;
-    //this.actionTextUnderline = undefined;
     this.actionTextItalic = undefined;
+    this.actionTextUnderline = undefined;
 
     this.actionSubscript = undefined;
     this.actionSuperscript = undefined;
@@ -84,6 +84,8 @@ function TextDialog(mode) {
     this.initialColor = new RColor();
 }
 
+TextDialog.prototype = {};
+
 TextDialog.Mode = {
     Text : 0,
     Attribute : 1,
@@ -95,7 +97,7 @@ TextDialog.prototype.setMode = function(mode) {
 };
 
 TextDialog.prototype.getTextDocument = function() {
-    if (RSettings.isQt(5)) {
+    if (RSettings.getQtVersion() >= 0x050000) {
         return this.textEdit.document;
     }
     else {
@@ -122,7 +124,6 @@ TextDialog.prototype.show =  function(textDataIn) {
     }
 
     this.dialog = WidgetFactory.createDialog(TextDialog.basePath, "TextDialog.ui", EAction.getMainWindow());
-    this.dialog.windowIcon = new QIcon(autoIconPath(TextDialog.basePath + "/../Text.svg"));
 
     // initialize dialog controls:
     this.textEdit = this.dialog.findChild("Text");
@@ -136,23 +137,23 @@ TextDialog.prototype.show =  function(textDataIn) {
     initFontComboBox(comboMainFont);
     initFontComboBox(comboFont);
 
-    comboMainFont.currentFontChanged.connect(this, "mainFontChanged");
+    comboMainFont.currentFontChanged.connect(this, this.mainFontChanged);
 
     // main font height:
     var editMainHeight = this.dialog.findChild("MainHeight");
-    editMainHeight.valueChanged.connect(this, "mainFontChanged");
+    editMainHeight.valueChanged.connect(this, this.mainFontChanged);
 
     // main font bold:
     var checkMainBold = this.dialog.findChild("MainBold");
-    checkMainBold.toggled.connect(this, "mainFontChanged");
+    checkMainBold.toggled.connect(this, this.mainFontChanged);
 
     // main font italic:
     var checkMainItalic = this.dialog.findChild("MainItalic");
-    checkMainItalic.toggled.connect(this, "mainFontChanged");
+    checkMainItalic.toggled.connect(this, this.mainFontChanged);
 
     // default line spacing:
     //var checkBoxDefaultLineSpacing = this.dialog.findChild("DefaultLineSpacing");
-    //checkBoxDefaultLineSpacing.toggled.connect(this, "useDefaultLineSpacing");
+    //checkBoxDefaultLineSpacing.toggled.connect(this, this.useDefaultLineSpacing);
 
     // line spacing:
     var editLineSpacingFactor = this.dialog.findChild("LineSpacingFactor");
@@ -171,31 +172,31 @@ TextDialog.prototype.show =  function(textDataIn) {
     this.setupTextActions();
 
     // update status buttons bold / italic / underline:
-    this.textEdit.currentCharFormatChanged.connect(this, "currentCharFormatChanged");
-    this.textEdit.cursorPositionChanged.connect(this, "cursorPositionChanged");
+    this.textEdit.currentCharFormatChanged.connect(this, this.currentCharFormatChanged);
+    this.textEdit.cursorPositionChanged.connect(this, this.cursorPositionChanged);
 
     var td = this.getTextDocument();
-    td.undoAvailable.connect(this.actionUndo, "setEnabled");
-    td.redoAvailable.connect(this.actionRedo, "setEnabled");
+    td.undoAvailable.connect(this.actionUndo, this.actionUndo.setEnabled);
+    td.redoAvailable.connect(this.actionRedo, this.actionRedo.setEnabled);
 
     this.actionUndo.setEnabled(td.isUndoAvailable());
     this.actionRedo.setEnabled(td.isRedoAvailable());
 
-    this.actionUndo.triggered.connect(this.textEdit, "undo");
-    this.actionRedo.triggered.connect(this.textEdit, "redo");
+    this.actionUndo.triggered.connect(this.textEdit, this.textEdit.undo);
+    this.actionRedo.triggered.connect(this.textEdit, this.textEdit.redo);
 
     this.actionCut.setEnabled(false);
     this.actionCopy.setEnabled(false);
 
-    this.actionCut.triggered.connect(this.textEdit, "cut");
-    this.actionCopy.triggered.connect(this.textEdit, "copy");
-    this.actionPaste.triggered.connect(this.textEdit, "paste");
+    this.actionCut.triggered.connect(this.textEdit, this.textEdit.cut);
+    this.actionCopy.triggered.connect(this.textEdit, this.textEdit.copy);
+    this.actionPaste.triggered.connect(this.textEdit, this.textEdit.paste);
 
-    this.textEdit.copyAvailable.connect(this.actionCut, "setEnabled");
-    this.textEdit.copyAvailable.connect(this.actionCopy, "setEnabled");
+    this.textEdit.copyAvailable.connect(this.actionCut, this.actionCut.setEnabled);
+    this.textEdit.copyAvailable.connect(this.actionCopy, this.actionCopy.setEnabled);
 
     var cbSimpleText = this.dialog.findChild("SimpleText");
-    cbSimpleText.toggled.connect(this, "simpleTextToggled");
+    cbSimpleText.toggled.connect(this, this.simpleTextToggled);
 
     var buttonTopLeft = this.dialog.findChild("AlignTopLeft");
     var buttonTopCenter = this.dialog.findChild("AlignTopCenter");
@@ -210,7 +211,7 @@ TextDialog.prototype.show =  function(textDataIn) {
     var buttonBottomCenter = this.dialog.findChild("AlignBottomCenter");
     var buttonBottomRight = this.dialog.findChild("AlignBottomRight");
 
-    getClipboard().dataChanged.connect(this, "clipboardDataChanged");
+    getClipboard().dataChanged.connect(this, this.clipboardDataChanged);
 
     // change dialog into attribute / attribute definition dialog:
     if (this.mode === TextDialog.Mode.AttributeDefinition ||
@@ -236,7 +237,7 @@ TextDialog.prototype.show =  function(textDataIn) {
     }
 
     // sync rich text / source:
-    this.tabWidget["currentChanged(int)"].connect(this, "tabChanged");
+    this.tabWidget["currentChanged(int)"].connect(this, this.tabChanged);
 
     if (this.mode === TextDialog.Mode.AttributeDefinition) {
         this.dialog.findChild("ValueLabel").text = qsTr("Default value:");
@@ -250,8 +251,10 @@ TextDialog.prototype.show =  function(textDataIn) {
         checkMainBold.checked = textDataIn.isBold();
         checkMainItalic.checked = textDataIn.isItalic();
         editMainHeight.setValue(textDataIn.getTextHeight());
+
         this.sourceEdit.setPlainText(textDataIn.getEscapedText());
         this.updateRichText(true);
+        //qDebug("this.sourceEdit:", this.sourceEdit.plainText);
         if (textDataIn.getVAlign()==RS.VAlignTop) {
             if (textDataIn.getHAlign()==RS.HAlignLeft || textDataIn.getHAlign()==RS.HAlignFit || textDataIn.getHAlign()==RS.HAlignAlign) {
                 buttonTopLeft.checked = true;
@@ -394,6 +397,7 @@ TextDialog.prototype.show =  function(textDataIn) {
     }
 
     this.mainFontChanged();
+
     this.colorChanged(this.textEdit.textColor());
     this.colorChanged(this.initialColor);
 
@@ -415,7 +419,12 @@ TextDialog.prototype.show =  function(textDataIn) {
         this.updateSource(true);
     }
 
-    // analize dialog input:
+    if (RSettings.getQtVersion() >= 0x060000) {
+        // disconnect clipboard from changed event handler:
+        getClipboard().dataChanged.disconnect(this, this.clipboardDataChanged);
+    }
+
+    // analyze dialog input:
     var textDataOut;
     if (isNull(textDataIn)) {
         if (this.mode === TextDialog.Mode.Attribute) {
@@ -489,7 +498,7 @@ TextDialog.prototype.show =  function(textDataIn) {
     RSettings.setValue("TextDialog/HAlignment", textDataOut.getHAlign());
     RSettings.setValue("TextDialog/MainFont", textDataOut.getFontName());
 
-    this.dialog.destroy();
+    destr(this.dialog);
     EAction.activateMainWindow();
 
     if (res) {
@@ -530,43 +539,41 @@ TextDialog.prototype.setupEditActions = function() {
 
 TextDialog.prototype.setupTextActions = function() {
     this.actionTextBold = new QAction(new QIcon(autoIconPath(TextDialog.basePath + "/Bold.svg")), qsTr("&Bold"), this.dialog);
-    this.actionTextBold.shortcut = new QKeySequence(Qt.ControlModifier | Qt.Key_B);
+    this.actionTextBold.shortcut = new QKeySequence("Ctrl+B");
     var bold = new QFont();
     bold.setBold(true);
     this.actionTextBold.font = bold;
-    this.actionTextBold.triggered.connect(this, "textBold");
+    this.actionTextBold.triggered.connect(this, this.textBold);
     this.actionTextBold.checkable = true;
     this.dialog.findChild("Bold").setDefaultAction(this.actionTextBold);
 
     this.actionTextItalic = new QAction(new QIcon(autoIconPath(TextDialog.basePath + "/Italic.svg")), qsTr("&Italic"), this.dialog);
-    this.actionTextItalic.shortcut = new QKeySequence(Qt.ControlModifier | Qt.Key_I);
+    this.actionTextItalic.shortcut = new QKeySequence("Ctrl+I");
     var italic = new QFont();
     italic.setItalic(true);
     this.actionTextItalic.font = italic;
-    this.actionTextItalic.triggered.connect(this, "textItalic");
+    this.actionTextItalic.triggered.connect(this, this.textItalic);
     this.actionTextItalic.checkable = true;
     this.dialog.findChild("Italic").setDefaultAction(this.actionTextItalic);
 
-    /*
     this.actionTextUnderline = new QAction(new QIcon(autoIconPath(TextDialog.basePath + "/Underline.svg")), qsTr("&Underline"), this.dialog);
-    this.actionTextUnderline.shortcut = Qt.CTRL + Qt.Key_U;
+    this.actionTextUnderline.shortcut = new QKeySequence("Ctrl+U");
     var underline = new QFont();
     underline.setUnderline(true);
     this.actionTextUnderline.font = underline;
-    this.actionTextUnderline.triggered.connect(this, "textUnderline");
+    this.actionTextUnderline.triggered.connect(this, this.textUnderline);
     this.actionTextUnderline.checkable = true;
     this.dialog.findChild("Underline").setDefaultAction(this.actionTextUnderline);
-    */
 
     this.actionSubscript = new QAction(new QIcon(autoIconPath(TextDialog.basePath + "/Subscript.svg")), qsTr("&Subscript"), this.dialog);
-    this.actionSubscript.shortcut = new QKeySequence(Qt.ShiftModifier | Qt.ControlModifier | Qt.Key_B);
-    this.actionSubscript.triggered.connect(this, "textSubscript");
+    this.actionSubscript.shortcut = new QKeySequence("Shift+Ctrl+B");
+    this.actionSubscript.triggered.connect(this, this.textSubscript);
     this.actionSubscript.checkable = true;
     this.dialog.findChild("Subscript").setDefaultAction(this.actionSubscript);
 
     this.actionSuperscript = new QAction(new QIcon(autoIconPath(TextDialog.basePath + "/Superscript.svg")), qsTr("&Superscript"), this.dialog);
-    this.actionSuperscript.shortcut = new QKeySequence(Qt.ShiftModifier | Qt.ControlModifier | Qt.Key_P);
-    this.actionSuperscript.triggered.connect(this, "textSuperscript");
+    this.actionSuperscript.shortcut = new QKeySequence("Shift+Ctrl+P");
+    this.actionSuperscript.triggered.connect(this, this.textSuperscript);
     this.actionSuperscript.checkable = true;
     this.dialog.findChild("Superscript").setDefaultAction(this.actionSuperscript);
 
@@ -581,23 +588,35 @@ TextDialog.prototype.setupTextActions = function() {
 //    this.dialog.findChild("ZoomOut").setDefaultAction(this.actionZoomOut);
 
     var pix = new QPixmap(16, 16);
-    pix.fill(Qt.black);
+    pix.fill(new QColor(Qt.black));
     this.actionTextColor = new QAction(new QIcon(pix), qsTr("&Color..."), this.dialog);
-    this.actionTextColor.triggered.connect(this, "textColor");
+    this.actionTextColor.triggered.connect(this, this.textColor);
     this.dialog.findChild("Color").setDefaultAction(this.actionTextColor);
 
     this.actionTextSymbol = new QAction(new QIcon(autoIconPath(TextDialog.basePath + "/Symbol.svg")), qsTr("&Special Characters..."), this.dialog);
-    this.actionTextSymbol.triggered.connect(this, "textSymbol");
+    this.actionTextSymbol.triggered.connect(this, this.textSymbol);
     this.dialog.findChild("Symbol").setDefaultAction(this.actionTextSymbol);
     
     this.comboFont = this.dialog.findChild("Font");
-    this.comboFont["activated(QString)"].connect(this, "textFamily");
+    if (RSettings.getQtVersion() >= 0x060000) {
+        this.comboFont.textActivated.connect(this, this.textFamily);
+    }
+    else {
+        this.comboFont["activated(QString)"].connect(this, this.textFamily);
+    }
+
 
     this.comboSize = this.dialog.findChild("Height");
     this.comboSize.editable = true;
-    this.comboSize["activated(QString)"].connect(this, "textSize");
+    if (RSettings.getQtVersion() >= 0x060000) {
+        this.comboSize.textActivated.connect(this, this.textSize);
+    }
+    else {
+        this.comboSize["activated(QString)"].connect(this, this.textSize);
+    }
+
     this.comboSize.setEditText("1.0");
-    this.comboSize.editTextChanged.connect(this, "textSize");
+    this.comboSize.editTextChanged.connect(this, this.textSize);
 };
 
 /**
@@ -611,7 +630,10 @@ TextDialog.prototype.getMainFont = function() {
     var font = comboMainFont.currentFont;
 
     var editMainHeight = this.dialog.findChild("MainHeight");
-    font.setPointSizeF(editMainHeight.getValue());
+    var h = editMainHeight.getValue();
+    if (isNumber(h) && h>0.0) {
+        font.setPointSizeF(h);
+    }
 
     var checkMainBold = this.dialog.findChild("MainBold");
     font.setBold(checkMainBold.checked);
@@ -628,7 +650,12 @@ TextDialog.prototype.getMainFont = function() {
  */
 TextDialog.prototype.mainFontChanged = function() {
     var font = this.getMainFont();
-    this.fontHeightFactor = 14.0 / font.pointSizeF();
+    if (font.pointSizeF()>RS.PointTolerance) {
+        this.fontHeightFactor = RSettings.getDoubleValue("Text/PreviewFontSize", 14.0) / font.pointSizeF();
+    }
+    else {
+        this.fontHeightFactor = 10.0;
+    }
 
     if (this.tabWidget.currentIndex===1) {
         this.updateRichText(true);
@@ -696,7 +723,13 @@ TextDialog.prototype.fixHtml = function(html) {
     // keeps content formatting by adding font style with previous
     // default font to all content:
     var dom = new QDomDocument();
-    dom.setContent(htmlNbsp, false);
+    if (RSettings.getQtVersion()>=0x060500) {
+        dom.setContent(htmlNbsp);
+    }
+    else {
+        dom.setContent(htmlNbsp, false);
+    }
+
     var docElem = dom.documentElement();
 
     //qDebug("initial font color: ", this.initialColor);
@@ -707,17 +740,23 @@ TextDialog.prototype.fixHtml = function(html) {
         if(!e.isNull()) {
             if (e.tagName().toLowerCase()==="body") {
                 var qcol = this.initialColor.toCompat();
-                e.setAttribute("style",
-                               ("font-family:'%1';" +
-                               "font-size:%2pt;" +
-                               "font-weight:%3;" +
-                               "font-style:%4;" +
-                               "color:%5;")
-                               .arg(font.family())
-                               .arg(font.pointSizeF() * this.fontHeightFactor)
-                               .arg(font.weight()<=QFont.Normal ? "normal" : "bold")
-                               .arg(font.italic() ? "italic" : "normal")
-                               .arg(qcol.name()));
+                var bodyStyle = ("font-family:'%1';" +
+                        "font-size:%2pt;" +
+                        "font-weight:%3;" +
+                        "font-style:%4;" +
+                        "color:%5;")
+                        .arg(font.family())
+                        .arg(font.pointSizeF() * this.fontHeightFactor)
+                        .arg(font.weight()<=QFont.Normal ? "normal" : "bold")
+                        .arg(font.italic() ? "italic" : "normal")
+                        .arg(qcol.name());
+
+                // brighter background of text area in macOS dark mode:
+                if (RSettings.hasDarkGuiBackground() && RS.getSystemId()==="osx") {
+                    bodyStyle += "background-color:#dddddd;";
+                }
+
+                e.setAttribute("style", bodyStyle);
             }
         }
         n = n.nextSibling();
@@ -775,13 +814,11 @@ TextDialog.prototype.textItalic = function() {
 /**
  * Called when user clicks underline button.
  */
-/*
 TextDialog.prototype.textUnderline = function() {
     var fmt = new QTextCharFormat();
     fmt.setFontUnderline(this.actionTextUnderline.checked);
     this.mergeFormatOnWordOrSelection(fmt);
 };
-*/
 
 /**
  * Called when user clicks subscript button.
@@ -806,7 +843,9 @@ TextDialog.prototype.textSuperscript = function() {
  */
 TextDialog.prototype.textFamily = function(f) {
     var fmt = new QTextCharFormat();
-    fmt.setFontFamily(f);
+    // Qt 5.13, 5.14, 5.15 bug: appends the font as fall-back instead of setting the font:
+    //fmt.setFontFamily(f);
+    fmt.setFontFamilies([f]);
     this.mergeFormatOnWordOrSelection(fmt);
 };
 
@@ -826,15 +865,26 @@ TextDialog.prototype.textSize = function(p) {
  * Called when user changes font color.
  */
 TextDialog.prototype.textColor = function() {
+    var colorNameList = RColor.getNameList(false);
+    var colorList = RColor.getColorList(false);
+    if (colorNameList.length!==colorList.length) {
+        qWarning("Not same number of colors as color names. Aborting...");
+        return;
+    }
+
     var menu = new QMenu(this.dialog);
+    for (var i=0; i < colorNameList.length; ++i) {
+        var label = colorNameList[i];
+        var color = colorList[i];
 
-    var colorList = RColor.getList(false);
-
-    for (var i=0; i < colorList.length; ++i) {
-        var label = colorList[i][0];
-        var color = colorList[i][1];
-        var action = menu.addAction(RColor.getIcon(color, new QSize(16,16)), label);
-        action.setProperty("color", color);
+        if (label==="---") {
+            menu.addSeparator();
+        }
+        else {
+            var action = menu.addAction(RColor.getIcon(color, new QSize(16,16)), label);
+            action.setProperty("color", color);
+            action.iconVisibleInMenu = true;
+        }
     }
 
     var chosenAction = menu.exec(QCursor.pos());
@@ -864,7 +914,7 @@ TextDialog.prototype.textColor = function() {
     }
 
     var fmt = new QTextCharFormat();
-    fmt.setForeground(chosenColor);
+    fmt.setForeground(new QBrush(chosenColor));
     this.mergeFormatOnWordOrSelection(fmt);
     this.colorChanged(chosenColor);
 };
@@ -886,7 +936,7 @@ TextDialog.prototype.textSymbol = function() {
         var character = charsMap.get(keys[i])[1];
         action = menu.addAction(str + "\t" + character);
         var menuData = new SymbolMenuData(textWidget, character);
-        action.triggered.connect(menuData, "triggered");
+        action.triggered.connect(menuData, menuData.triggered);
     }
 
     // other characters
@@ -923,18 +973,20 @@ TextDialog.prototype.fontChanged = function(font) {
 
     this.actionTextBold.setChecked(font.bold());
     this.actionTextItalic.setChecked(font.italic());
-    //this.actionTextUnderline.setChecked(font.underline());
+    this.actionTextUnderline.setChecked(font.underline());
 };
 
 /**
  * Called when user changes the current color or the color under the cursor changed.
  */
 TextDialog.prototype.colorChanged = function(c) {
-    // make sure that very bright text is readable:
-    if (c.lightness()>240) {
-        var p = this.textEdit.palette;
-        p.setColor(QPalette.Active, QPalette.Base, new QColor(Qt.lightGray));
-        this.textEdit.palette = p;
+    if (!RSettings.hasDarkGuiBackground()) {
+        // make sure that very bright text is readable:
+        if (c.lightness()>240) {
+            var p = this.textEdit.palette;
+            p.setColor(QPalette.Active, QPalette.Base, new QColor(Qt.lightGray));
+            this.textEdit.palette = p;
+        }
     }
 
     var pix = new QPixmap(16, 16);
@@ -989,10 +1041,13 @@ TextDialog.prototype.updateSource = function(force) {
     if (this.getTextDocument().modified || force===true) {
         var html = this.textEdit.html;
         html = this.fixHtml(html);
+
         var textDocument = new QTextDocument();
         textDocument.setHtml(html);
         textDocument.defaultFont = this.getTextDocument().defaultFont;
-        var source = RTextBasedData.toEscapedText(textDocument, this.initialColor, this.fontHeightFactor);
+        var cbSimpleText = this.dialog.findChild("SimpleText");
+        var source = RTextBasedData.toEscapedText(textDocument, this.initialColor, this.fontHeightFactor, cbSimpleText.checked);
+        //qDebug("source: \n\n", source, "\n\n");
         this.sourceEdit.setPlainText(source);
         this.getTextDocument().modified = false;
     }
@@ -1008,6 +1063,9 @@ TextDialog.prototype.updateRichText = function(force) {
         var richText = RTextBasedData.toRichText(source, this.getMainFont(), this.fontHeightFactor);
         //richText = richText.replace("<html>", "<html xmlns='http://www.w3.org/1999/xhtml' xml:space='preserve'>");
         //qDebug("richText: \n\n", richText, "\n\n");
+
+        // TODO: preserve tabs (img with arrow?)
+
         this.textEdit.setHtml(richText);
         //qDebug("HTML from text edit: \n\n", this.textEdit.html, "\n\n");
         this.getSourceDocument().modified = false;

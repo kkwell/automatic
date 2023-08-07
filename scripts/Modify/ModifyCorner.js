@@ -159,6 +159,11 @@ ModifyCorner.prototype.pickEntity = function(event, preview) {
     var pos = event.getModelPosition();
     var op;
 
+    if (!this.isEntitySnappable(entity)) {
+        // entity not on a snappable layer:
+        return;
+    }
+
     switch (this.state) {
     case ModifyCorner.State.ChoosingEntity1:
         if (isNull(entity)) {
@@ -383,4 +388,8 @@ ModifyCorner.prototype.slotIndividualEdgesChanged = function(value) {
     else {
         this.setState(ModifyCorner.State.ChoosingCorner);
     }
+};
+
+ModifyCorner.prototype.slotSingleClickChanged = function(value) {
+    this.slotIndividualEdgesChanged(!value);
 };

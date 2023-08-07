@@ -28,7 +28,21 @@ ColorSettings.getPreferencesCategory = function(appPreferences) {
 };
 
 ColorSettings.getPreferencesScope = function() {
+    // print color settings apply to the current layout block:
     return "block";
+};
+
+ColorSettings.initPreferences = function(pageWidget, calledByPrefDialog, document) {
+    var defaults = [
+                [ "BackgroundColor", "#ffffff" ],
+    ];
+
+    for (var i=0; i<defaults.length; i++) {
+        var def = defaults[i];
+
+        var cb = pageWidget.findChild(def[0]);
+        cb.setColor(new RColor(def[1]));
+    }
 };
 
 ColorSettings.applyPreferences = function(doc, mdiChild) {

@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Line.js");
+include("scripts/Draw/Line/Line.js");
 
 /**
  * \class LineBisector
@@ -27,7 +27,7 @@ include("../Line.js");
 function LineBisector(guiAction) {
     Line.call(this, guiAction);
 
-    this.length = undefined;
+    this.len = undefined;
     this.number = undefined;
     this.line1 = undefined;
     this.pos1 = undefined;
@@ -56,6 +56,7 @@ LineBisector.prototype.setState = function(state) {
     this.getDocumentInterface().setClickMode(RAction.PickEntity);
     this.setCrosshairCursor();
 
+    var tr;
     var appWin = RMainWindowQt.getMainWindow();
     switch (this.state) {
     case LineBisector.State.ChoosingLine1:
@@ -63,11 +64,15 @@ LineBisector.prototype.setState = function(state) {
         this.pos1 = undefined;
         this.line2 = undefined;
         this.pos2 = undefined;
-        this.setLeftMouseTip(qsTr("First line"));
+        tr = qsTr("First line");
+        this.setLeftMouseTip(tr);
+        this.setCommandPrompt(tr);
         break;
 
     case LineBisector.State.ChoosingLine2:
-        this.setLeftMouseTip(qsTr("Second line"));
+        tr = qsTr("Second line");
+        this.setLeftMouseTip(tr);
+        this.setCommandPrompt(tr);
         break;
     }
 
@@ -147,13 +152,21 @@ LineBisector.prototype.pickEntity = function(event, preview) {
 LineBisector.prototype.getOperation = function(preview) {
     if (isNull(this.pos1) || isNull(this.pos2) ||
         isNull(this.line1) || isNull(this.line2) ||
-        !isNumber(this.length) || !isNumber(this.number)) {
+        !isNumber(this.len) || !isNumber(this.number)) {
 
         return undefined;
     }
 
     // get intersection of the two chosen lines:
-    var ips = this.line1.getIntersectionPoints(this.line2.data(), false);
+    var d;
+    if (isFunction(this.line2.data)) {
+        d = this.line2.data();
+    }
+    else {
+        d = this.line2;
+    }
+
+    var ips = this.line1.getIntersectionPoints(d, false);
 
     if (ips.length===0) {
         return undefined;
@@ -176,7 +189,7 @@ LineBisector.prototype.getOperation = function(preview) {
 
         // create vector from intersection to bisected angle / length:
         var vector = new RVector();
-        vector.setPolar(this.length, angle);
+        vector.setPolar(this.len, angle);
 
         var line = this.createLineEntity(doc, ip, ip.operator_add(vector));
 
@@ -197,7 +210,7 @@ LineBisector.prototype.update = function() {
 };
 
 LineBisector.prototype.slotLengthChanged = function(value) {
-    this.length = value;
+    this.len = value;
     this.update();
 };
 

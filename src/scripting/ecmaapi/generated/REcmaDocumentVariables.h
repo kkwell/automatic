@@ -51,13 +51,13 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getType
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         clone
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
-        isSelectedForPropertyEditing
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getProperty
@@ -109,6 +109,12 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setDimensionFont
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        addAutoVariable
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getAutoVariables
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         print

@@ -23,6 +23,7 @@
 RPropertyTypeId RPointEntity::PropertyCustom;
 RPropertyTypeId RPointEntity::PropertyHandle;
 RPropertyTypeId RPointEntity::PropertyProtected;
+RPropertyTypeId RPointEntity::PropertyWorkingSet;
 RPropertyTypeId RPointEntity::PropertyType;
 RPropertyTypeId RPointEntity::PropertyBlock;
 RPropertyTypeId RPointEntity::PropertyLayer;
@@ -54,21 +55,23 @@ RPointEntity::~RPointEntity() {
 }
 
 void RPointEntity::init() {
-    RPointEntity::PropertyCustom.generateId(typeid(RPointEntity), RObject::PropertyCustom);
-    RPointEntity::PropertyHandle.generateId(typeid(RPointEntity), RObject::PropertyHandle);
-    RPointEntity::PropertyProtected.generateId(typeid(RPointEntity), RObject::PropertyProtected);
-    RPointEntity::PropertyType.generateId(typeid(RPointEntity), REntity::PropertyType);
-    RPointEntity::PropertyBlock.generateId(typeid(RPointEntity), REntity::PropertyBlock);
-    RPointEntity::PropertyLayer.generateId(typeid(RPointEntity), REntity::PropertyLayer);
-    RPointEntity::PropertyLinetype.generateId(typeid(RPointEntity), REntity::PropertyLinetype);
-    RPointEntity::PropertyLinetypeScale.generateId(typeid(RPointEntity), REntity::PropertyLinetypeScale);
-    RPointEntity::PropertyLineweight.generateId(typeid(RPointEntity), REntity::PropertyLineweight);
-    RPointEntity::PropertyColor.generateId(typeid(RPointEntity), REntity::PropertyColor);
-    RPointEntity::PropertyDisplayedColor.generateId(typeid(RPointEntity), REntity::PropertyDisplayedColor);
-    RPointEntity::PropertyDrawOrder.generateId(typeid(RPointEntity), REntity::PropertyDrawOrder);
-    RPointEntity::PropertyPositionX.generateId(typeid(RPointEntity), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "X"));
-    RPointEntity::PropertyPositionY.generateId(typeid(RPointEntity), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Y"));
-    RPointEntity::PropertyPositionZ.generateId(typeid(RPointEntity), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Z"));
+    RPointEntity::PropertyCustom.generateId(RPointEntity::getRtti(), RObject::PropertyCustom);
+    RPointEntity::PropertyHandle.generateId(RPointEntity::getRtti(), RObject::PropertyHandle);
+    RPointEntity::PropertyProtected.generateId(RPointEntity::getRtti(), RObject::PropertyProtected);
+    RPointEntity::PropertyWorkingSet.generateId(RPointEntity::getRtti(), RObject::PropertyWorkingSet);
+    RPointEntity::PropertyType.generateId(RPointEntity::getRtti(), REntity::PropertyType);
+    RPointEntity::PropertyBlock.generateId(RPointEntity::getRtti(), REntity::PropertyBlock);
+    RPointEntity::PropertyLayer.generateId(RPointEntity::getRtti(), REntity::PropertyLayer);
+    RPointEntity::PropertyLinetype.generateId(RPointEntity::getRtti(), REntity::PropertyLinetype);
+    RPointEntity::PropertyLinetypeScale.generateId(RPointEntity::getRtti(), REntity::PropertyLinetypeScale);
+    RPointEntity::PropertyLineweight.generateId(RPointEntity::getRtti(), REntity::PropertyLineweight);
+    RPointEntity::PropertyColor.generateId(RPointEntity::getRtti(), REntity::PropertyColor);
+    RPointEntity::PropertyDisplayedColor.generateId(RPointEntity::getRtti(), REntity::PropertyDisplayedColor);
+    RPointEntity::PropertyDrawOrder.generateId(RPointEntity::getRtti(), REntity::PropertyDrawOrder);
+
+    RPointEntity::PropertyPositionX.generateId(RPointEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "X"), false, RPropertyAttributes::Geometry);
+    RPointEntity::PropertyPositionY.generateId(RPointEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Y"), false, RPropertyAttributes::Geometry);
+    RPointEntity::PropertyPositionZ.generateId(RPointEntity::getRtti(), QT_TRANSLATE_NOOP("REntity", "Position"), QT_TRANSLATE_NOOP("REntity", "Z"), false, RPropertyAttributes::Geometry);
 }
 
 bool RPointEntity::setProperty(RPropertyTypeId propertyTypeId,
@@ -81,7 +84,7 @@ bool RPointEntity::setProperty(RPropertyTypeId propertyTypeId,
 }
 
 QPair<QVariant, RPropertyAttributes> RPointEntity::getProperty(
-        RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes) {
+        RPropertyTypeId& propertyTypeId, bool humanReadable, bool noAttributes, bool showOnRequest) {
     if (propertyTypeId == PropertyPositionX) {
         return qMakePair(QVariant(data.position.x), RPropertyAttributes());
     } else if (propertyTypeId == PropertyPositionY) {
@@ -89,7 +92,7 @@ QPair<QVariant, RPropertyAttributes> RPointEntity::getProperty(
     } else if (propertyTypeId == PropertyPositionZ) {
         return qMakePair(QVariant(data.position.z), RPropertyAttributes());
     }
-    return REntity::getProperty(propertyTypeId, humanReadable, noAttributes);
+    return REntity::getProperty(propertyTypeId, humanReadable, noAttributes, showOnRequest);
 }
 
 

@@ -65,9 +65,13 @@
 
     // methods:
     
+            REcmaHelper::registerFunction(&engine, proto, isValid, "isValid");
+            
             REcmaHelper::registerFunction(&engine, proto, getShapeType, "getShapeType");
             
             REcmaHelper::registerFunction(&engine, proto, clone, "clone");
+            
+            REcmaHelper::registerFunction(&engine, proto, cloneToSharedPointer, "cloneToSharedPointer");
             
             REcmaHelper::registerFunction(&engine, proto, isInterpolated, "isInterpolated");
             
@@ -95,6 +99,8 @@
             
             REcmaHelper::registerFunction(&engine, proto, getDistanceTo, "getDistanceTo");
             
+            REcmaHelper::registerFunction(&engine, proto, getMaxDistanceTo, "getMaxDistanceTo");
+            
             REcmaHelper::registerFunction(&engine, proto, isOnShape, "isOnShape");
             
             REcmaHelper::registerFunction(&engine, proto, filterOnShape, "filterOnShape");
@@ -107,6 +113,12 @@
             
             REcmaHelper::registerFunction(&engine, proto, getCenterPoints, "getCenterPoints");
             
+            REcmaHelper::registerFunction(&engine, proto, getArcReferencePoints, "getArcReferencePoints");
+            
+            REcmaHelper::registerFunction(&engine, proto, getPointOnShape, "getPointOnShape");
+            
+            REcmaHelper::registerFunction(&engine, proto, getPointCloud, "getPointCloud");
+            
             REcmaHelper::registerFunction(&engine, proto, getPointsWithDistanceToEnd, "getPointsWithDistanceToEnd");
             
             REcmaHelper::registerFunction(&engine, proto, getPointWithDistanceToStart, "getPointWithDistanceToStart");
@@ -118,6 +130,8 @@
             REcmaHelper::registerFunction(&engine, proto, getAngleAtPoint, "getAngleAtPoint");
             
             REcmaHelper::registerFunction(&engine, proto, getPointAtPercent, "getPointAtPercent");
+            
+            REcmaHelper::registerFunction(&engine, proto, getAngleAtPercent, "getAngleAtPercent");
             
             REcmaHelper::registerFunction(&engine, proto, intersectsWith, "intersectsWith");
             
@@ -203,6 +217,8 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, isRayShape, "isRayShape");
             
+            REcmaHelper::registerFunction(&engine, &ctor, getOrderedShapes, "getOrderedShapes");
+            
             REcmaHelper::registerFunction(&engine, &ctor, order, "order");
             
             REcmaHelper::registerFunction(&engine, &ctor, getIntersectionPointsLL, "getIntersectionPointsLL");
@@ -261,7 +277,21 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, trim, "trim");
             
+            REcmaHelper::registerFunction(&engine, &ctor, roundCorners, "roundCorners");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, roundShapes, "roundShapes");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, xLineToRay, "xLineToRay");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, rayToLine, "rayToLine");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, scaleArc, "scaleArc");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, ellipseToArcCircleEllipse, "ellipseToArcCircleEllipse");
+            
             REcmaHelper::registerFunction(&engine, &ctor, getErrorCode, "getErrorCode");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, hasProxy, "hasProxy");
             
 
     // static properties:
@@ -379,6 +409,55 @@
 
     // public methods:
      QScriptValue
+        REcmaShape::isValid
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::isValid", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::isValid";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RShape* self = 
+                        getSelf("isValid", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->isValid();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.isValid().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::isValid", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaShape::getShapeType
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -1134,6 +1213,55 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaShape::clone", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::cloneToSharedPointer
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::cloneToSharedPointer", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::cloneToSharedPointer";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RShape* self = 
+                        getSelf("cloneToSharedPointer", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QSharedPointer < RShape >'
+    QSharedPointer < RShape > cppResult =
+        
+               self->cloneToSharedPointer();
+        // return type: QSharedPointer < RShape >
+                // Shared pointer to shape, cast to best match:
+                result = REcmaHelper::toScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.cloneToSharedPointer().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::cloneToSharedPointer", context, engine);
             return result;
         }
          QScriptValue
@@ -2301,6 +2429,172 @@
             return result;
         }
          QScriptValue
+        REcmaShape::getMaxDistanceTo
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::getMaxDistanceTo", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::getMaxDistanceTo";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RShape* self = 
+                        getSelf("getMaxDistanceTo", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isArray()
+        ) /* type: QList < RVector > */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QList < RVector >
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        
+               self->getMaxDistanceTo(a0);
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isArray()
+        ) /* type: QList < RVector > */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QList < RVector >
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        
+               self->getMaxDistanceTo(a0
+        ,
+    a1);
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isArray()
+        ) /* type: QList < RVector > */
+     && (
+            context->argument(1).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QList < RVector >
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    bool
+                    a1 =
+                    (bool)
+                    
+                    context->argument( 1 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    double
+                    a2 =
+                    (double)
+                    
+                    context->argument( 2 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        
+               self->getMaxDistanceTo(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.getMaxDistanceTo().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::getMaxDistanceTo", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaShape::isOnShape
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -2529,7 +2823,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -2565,7 +2859,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -2614,7 +2908,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -2882,6 +3176,164 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaShape::getCenterPoints", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::getArcReferencePoints
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::getArcReferencePoints", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::getArcReferencePoints";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RShape* self = 
+                        getSelf("getArcReferencePoints", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getArcReferencePoints();
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.getArcReferencePoints().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::getArcReferencePoints", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::getPointOnShape
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::getPointOnShape", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::getPointOnShape";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RShape* self = 
+                        getSelf("getPointOnShape", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'RVector'
+    RVector cppResult =
+        
+               self->getPointOnShape();
+        // return type: RVector
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.getPointOnShape().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::getPointOnShape", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::getPointCloud
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::getPointCloud", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::getPointCloud";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RShape* self = 
+                        getSelf("getPointCloud", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getPointCloud(a0);
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.getPointCloud().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::getPointCloud", context, engine);
             return result;
         }
          QScriptValue
@@ -3344,6 +3796,66 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaShape::getPointAtPercent", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::getAngleAtPercent
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::getAngleAtPercent", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::getAngleAtPercent";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RShape* self = 
+                        getSelf("getAngleAtPercent", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        
+               self->getAngleAtPercent(a0);
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.getAngleAtPercent().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::getAngleAtPercent", context, engine);
             return result;
         }
          QScriptValue
@@ -4117,6 +4629,38 @@
     QList < RVector > cppResult =
         
                self->getSelfIntersectionPoints();
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        
+               self->getSelfIntersectionPoints(a0);
         // return type: QList < RVector >
                 // List of ...:
                 result = REcmaHelper::listToScriptValue(engine, cppResult);
@@ -5894,6 +6438,57 @@
             return result;
         }
          QScriptValue
+        REcmaShape::getOrderedShapes
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::getOrderedShapes", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::getOrderedShapes";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isArray()
+        ) /* type: QList < QSharedPointer < RShape > > */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QList < QSharedPointer < RShape > >
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < QSharedPointer < RShape > >'
+    QList < QSharedPointer < RShape > > cppResult =
+        RShape::
+       getOrderedShapes(a0);
+        // return type: QList < QSharedPointer < RShape > >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.getOrderedShapes().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::getOrderedShapes", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaShape::order
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -5913,7 +6508,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < QList < QSharedPointer < RShape > > >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -9879,6 +10474,114 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    5 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RSpline */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RSpline */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(3).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(4).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RSpline*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RSpline*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 0 is not of type RSpline.",
+                               context);                    
+                    }
+                    RSpline 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RSpline*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RSpline*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 1 is not of type RSpline.",
+                               context);                    
+                    }
+                    RSpline 
+                    a1 = 
+                    *ap1;
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a3 =
+                    (bool)
+                    
+                    context->argument( 3 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    double
+                    a4 =
+                    (double)
+                    
+                    context->argument( 4 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < RVector >'
+    QList < RVector > cppResult =
+        RShape::
+       getIntersectionPointsSS(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3
+        ,
+    a4);
+        // return type: QList < RVector >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RShape.getIntersectionPointsSS().",
                    context);
@@ -10794,7 +11497,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < QSharedPointer < RShape > >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -10855,7 +11558,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -11046,6 +11749,710 @@
             return result;
         }
          QScriptValue
+        REcmaShape::roundCorners
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::roundCorners", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::roundCorners";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isArray()
+        ) /* type: QList < QSharedPointer < RShape > > */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QList < QSharedPointer < RShape > >
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+                    // argument isStandardType
+                    double
+                    a1 =
+                    (double)
+                    
+                    context->argument( 1 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < QSharedPointer < RShape > >'
+    QList < QSharedPointer < RShape > > cppResult =
+        RShape::
+       roundCorners(a0
+        ,
+    a1);
+        // return type: QList < QSharedPointer < RShape > >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.roundCorners().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::roundCorners", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::roundShapes
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::roundShapes", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::roundShapes";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    8 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QSharedPointer < RShape > */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(2).isVariant() || 
+            context->argument(2).isQObject() || 
+            context->argument(2).isNull()
+        ) /* type: QSharedPointer < RShape > */
+     && (
+            context->argument(3).isVariant() || 
+            context->argument(3).isQObject() || 
+            context->argument(3).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(4).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(5).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(6).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(7).isVariant() || 
+            context->argument(7).isQObject() || 
+            context->argument(7).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is SharedPointer
+                    QSharedPointer < RShape > 
+                    a0;
+
+                    // argument might be a simple pointer:
+                     RShape * o0 = 
+                    qscriptvalue_cast < RShape * > (context->argument(0));
+
+                    if (o0!=NULL) {
+                        a0 =
+                        
+                          // always clone shape if we expect a shared pointer (might be a simple object on stack):
+                          QSharedPointer < RShape >(o0->clone());
+                        
+                    }
+                    else {
+                        // qscriptvalue_cast to QSharedPointer<BaseClass> does not work
+                        QSharedPointer < RShape >*
+                        p0;
+
+                        p0 =
+                        qscriptvalue_cast <QSharedPointer < RShape >* > (context->argument(0));
+
+                        if (p0==NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 0 is not of type  RShape .", context);                    
+                        }
+
+                        a0 = *p0;
+
+                           //return REcmaHelper::throwError("RShape: Argument 0 is not of type  RShape .",
+                           //    context);                    
+                    }
+
+                    //QSharedPointer < RShape > 
+                    //a0 =
+                    //QSharedPointer < RShape >(o0->clone());
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+                    // argument is SharedPointer
+                    QSharedPointer < RShape > 
+                    a2;
+
+                    // argument might be a simple pointer:
+                     RShape * o2 = 
+                    qscriptvalue_cast < RShape * > (context->argument(2));
+
+                    if (o2!=NULL) {
+                        a2 =
+                        
+                          // always clone shape if we expect a shared pointer (might be a simple object on stack):
+                          QSharedPointer < RShape >(o2->clone());
+                        
+                    }
+                    else {
+                        // qscriptvalue_cast to QSharedPointer<BaseClass> does not work
+                        QSharedPointer < RShape >*
+                        p2;
+
+                        p2 =
+                        qscriptvalue_cast <QSharedPointer < RShape >* > (context->argument(2));
+
+                        if (p2==NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 2 is not of type  RShape .", context);                    
+                        }
+
+                        a2 = *p2;
+
+                           //return REcmaHelper::throwError("RShape: Argument 2 is not of type  RShape .",
+                           //    context);                    
+                    }
+
+                    //QSharedPointer < RShape > 
+                    //a2 =
+                    //QSharedPointer < RShape >(o2->clone());
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap3 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        3
+                        )
+                    );
+                    if (ap3 == NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 3 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a3 = 
+                    *ap3;
+                
+                    // argument isStandardType
+                    bool
+                    a4 =
+                    (bool)
+                    
+                    context->argument( 4 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    bool
+                    a5 =
+                    (bool)
+                    
+                    context->argument( 5 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    double
+                    a6 =
+                    (double)
+                    
+                    context->argument( 6 ).
+                    toNumber();
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap7 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        7
+                        )
+                    );
+                    if (ap7 == NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 7 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a7 = 
+                    *ap7;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QList < QSharedPointer < RShape > >'
+    QList < QSharedPointer < RShape > > cppResult =
+        RShape::
+       roundShapes(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3
+        ,
+    a4
+        ,
+    a5
+        ,
+    a6
+        ,
+    a7);
+        // return type: QList < QSharedPointer < RShape > >
+                // List of ...:
+                result = REcmaHelper::listToScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.roundShapes().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::roundShapes", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::xLineToRay
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::xLineToRay", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::xLineToRay";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QSharedPointer < RShape > */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is SharedPointer
+                    QSharedPointer < RShape > 
+                    a0;
+
+                    // argument might be a simple pointer:
+                     RShape * o0 = 
+                    qscriptvalue_cast < RShape * > (context->argument(0));
+
+                    if (o0!=NULL) {
+                        a0 =
+                        
+                          // always clone shape if we expect a shared pointer (might be a simple object on stack):
+                          QSharedPointer < RShape >(o0->clone());
+                        
+                    }
+                    else {
+                        // qscriptvalue_cast to QSharedPointer<BaseClass> does not work
+                        QSharedPointer < RShape >*
+                        p0;
+
+                        p0 =
+                        qscriptvalue_cast <QSharedPointer < RShape >* > (context->argument(0));
+
+                        if (p0==NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 0 is not of type  RShape .", context);                    
+                        }
+
+                        a0 = *p0;
+
+                           //return REcmaHelper::throwError("RShape: Argument 0 is not of type  RShape .",
+                           //    context);                    
+                    }
+
+                    //QSharedPointer < RShape > 
+                    //a0 =
+                    //QSharedPointer < RShape >(o0->clone());
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QSharedPointer < RShape >'
+    QSharedPointer < RShape > cppResult =
+        RShape::
+       xLineToRay(a0);
+        // return type: QSharedPointer < RShape >
+                // Shared pointer to shape, cast to best match:
+                result = REcmaHelper::toScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.xLineToRay().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::xLineToRay", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::rayToLine
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::rayToLine", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::rayToLine";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QSharedPointer < RShape > */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is SharedPointer
+                    QSharedPointer < RShape > 
+                    a0;
+
+                    // argument might be a simple pointer:
+                     RShape * o0 = 
+                    qscriptvalue_cast < RShape * > (context->argument(0));
+
+                    if (o0!=NULL) {
+                        a0 =
+                        
+                          // always clone shape if we expect a shared pointer (might be a simple object on stack):
+                          QSharedPointer < RShape >(o0->clone());
+                        
+                    }
+                    else {
+                        // qscriptvalue_cast to QSharedPointer<BaseClass> does not work
+                        QSharedPointer < RShape >*
+                        p0;
+
+                        p0 =
+                        qscriptvalue_cast <QSharedPointer < RShape >* > (context->argument(0));
+
+                        if (p0==NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 0 is not of type  RShape .", context);                    
+                        }
+
+                        a0 = *p0;
+
+                           //return REcmaHelper::throwError("RShape: Argument 0 is not of type  RShape .",
+                           //    context);                    
+                    }
+
+                    //QSharedPointer < RShape > 
+                    //a0 =
+                    //QSharedPointer < RShape >(o0->clone());
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QSharedPointer < RShape >'
+    QSharedPointer < RShape > cppResult =
+        RShape::
+       rayToLine(a0);
+        // return type: QSharedPointer < RShape >
+                // Shared pointer to shape, cast to best match:
+                result = REcmaHelper::toScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.rayToLine().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::rayToLine", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::scaleArc
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::scaleArc", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::scaleArc";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RShape */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    RShape*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RShape*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RShape: Argument 0 is not of type RShape*.",
+                               context);                    
+                    }
+                    RShape& a0 = *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QSharedPointer < RShape >'
+    QSharedPointer < RShape > cppResult =
+        RShape::
+       scaleArc(a0
+        ,
+    a1);
+        // return type: QSharedPointer < RShape >
+                // Shared pointer to shape, cast to best match:
+                result = REcmaHelper::toScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RShape */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(2).isVariant() || 
+            context->argument(2).isQObject() || 
+            context->argument(2).isNull()
+        ) /* type: RVector */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    RShape*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RShape*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RShape: Argument 0 is not of type RShape*.",
+                               context);                    
+                    }
+                    RShape& a0 = *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap2 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        2
+                        )
+                    );
+                    if (ap2 == NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 2 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a2 = 
+                    *ap2;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QSharedPointer < RShape >'
+    QSharedPointer < RShape > cppResult =
+        RShape::
+       scaleArc(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: QSharedPointer < RShape >
+                // Shared pointer to shape, cast to best match:
+                result = REcmaHelper::toScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.scaleArc().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::scaleArc", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::ellipseToArcCircleEllipse
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::ellipseToArcCircleEllipse", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::ellipseToArcCircleEllipse";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: REllipse */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    REllipse*
+                    ap0 =
+                    qscriptvalue_cast<
+                    REllipse*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RShape: Argument 0 is not of type REllipse.",
+                               context);                    
+                    }
+                    REllipse 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QSharedPointer < RShape >'
+    QSharedPointer < RShape > cppResult =
+        RShape::
+       ellipseToArcCircleEllipse(a0);
+        // return type: QSharedPointer < RShape >
+                // Shared pointer to shape, cast to best match:
+                result = REcmaHelper::toScriptValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.ellipseToArcCircleEllipse().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::ellipseToArcCircleEllipse", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaShape::getErrorCode
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -11126,6 +12533,45 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaShape::dump", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaShape::hasProxy
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaShape::hasProxy", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaShape::hasProxy";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RShape::
+       hasProxy();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RShape.hasProxy().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaShape::hasProxy", context, engine);
             return result;
         }
          QScriptValue REcmaShape::toString

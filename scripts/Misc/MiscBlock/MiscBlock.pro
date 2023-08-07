@@ -1,7 +1,8 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-    ts \
+    dir \
     BlockFixNames \
     BlockListAttributes \
-    BlockListExport
+    BlockListExport \
+    BlockRefExport

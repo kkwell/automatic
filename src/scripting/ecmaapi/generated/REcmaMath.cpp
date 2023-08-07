@@ -93,6 +93,8 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, gra2deg, "gra2deg");
             
+            REcmaHelper::registerFunction(&engine, &ctor, isBetween, "isBetween");
+            
             REcmaHelper::registerFunction(&engine, &ctor, getGcd, "getGcd");
             
             REcmaHelper::registerFunction(&engine, &ctor, isAngleBetween, "isAngleBetween");
@@ -128,6 +130,8 @@
             REcmaHelper::registerFunction(&engine, &ctor, parseScale, "parseScale");
             
             REcmaHelper::registerFunction(&engine, &ctor, parseCoordinate, "parseCoordinate");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getMd5Hash, "getMd5Hash");
             
 
     // static properties:
@@ -1121,6 +1125,179 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaMath::gra2deg", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMath::isBetween
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMath::isBetween", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMath::isBetween";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(3).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    double
+                    a1 =
+                    (double)
+                    
+                    context->argument( 1 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    double
+                    a2 =
+                    (double)
+                    
+                    context->argument( 2 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    bool
+                    a3 =
+                    (bool)
+                    
+                    context->argument( 3 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RMath::
+       isBetween(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    5 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: double */
+     && (
+            context->argument(3).isBool()
+        ) /* type: bool */
+     && (
+            context->argument(4).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    double
+                    a1 =
+                    (double)
+                    
+                    context->argument( 1 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    double
+                    a2 =
+                    (double)
+                    
+                    context->argument( 2 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    bool
+                    a3 =
+                    (bool)
+                    
+                    context->argument( 3 ).
+                    toBool();
+                
+                    // argument isStandardType
+                    double
+                    a4 =
+                    (double)
+                    
+                    context->argument( 4 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RMath::
+       isBetween(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3
+        ,
+    a4);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMath.isBetween().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMath::isBetween", context, engine);
             return result;
         }
          QScriptValue
@@ -2455,7 +2632,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < double >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -2504,7 +2681,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < double >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -2710,6 +2887,56 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaMath::parseCoordinate", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaMath::getMd5Hash
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaMath::getMd5Hash", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaMath::getMd5Hash";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        RMath::
+       getMd5Hash(a0);
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RMath.getMd5Hash().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaMath::getMd5Hash", context, engine);
             return result;
         }
          QScriptValue REcmaMath::toString

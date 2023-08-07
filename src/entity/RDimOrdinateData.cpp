@@ -56,6 +56,15 @@ bool RDimOrdinateData::isSane() const {
             definingPoint.isSane();
 }
 
+RBox RDimOrdinateData::getBoundingBox(bool ignoreEmpty) const {
+    RBox ret = RDimensionData::getBoundingBox(ignoreEmpty);
+    if (!ignoreEmpty) {
+        // include definition point in bounding box, so the origin can be moved when stretching:
+        ret.growToInclude(definitionPoint);
+    }
+    return ret;
+}
+
 QList<RRefPoint> RDimOrdinateData::getReferencePoints(RS::ProjectionRenderingHint hint) const {
     QList<RRefPoint> ret = RDimensionData::getReferencePoints(hint);
 
@@ -65,10 +74,8 @@ QList<RRefPoint> RDimOrdinateData::getReferencePoints(RS::ProjectionRenderingHin
     return ret;
 }
 
-bool RDimOrdinateData::moveReferencePoint(const RVector& referencePoint,
-        const RVector& targetPoint) {
-
-    bool ret = RDimensionData::moveReferencePoint(referencePoint, targetPoint);
+bool RDimOrdinateData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers) {
+    bool ret = RDimensionData::moveReferencePoint(referencePoint, targetPoint, modifiers);
 
     if (referencePoint.equalsFuzzy(leaderEndPoint)) {
         leaderEndPoint = targetPoint;
@@ -125,14 +132,20 @@ bool RDimOrdinateData::stretch(const RPolyline& area, const RVector& offset) {
     RDimensionData::stretch(area, offset);
     leaderEndPoint.stretch(area, offset);
     definingPoint.stretch(area, offset);
+    definitionPoint.stretch(area, offset);
+    if (!autoTextPos) {
+        textPositionCenter.stretch(area, offset);
+    }
     update();
     return true;
 }
 
-QList<QSharedPointer<RShape> > RDimOrdinateData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment) const {
+/*
+QList<QSharedPointer<RShape> > RDimOrdinateData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment, QList<RObject::Id>* entityIds) const {
     Q_UNUSED(queryBox)
     Q_UNUSED(ignoreComplex)
     Q_UNUSED(segment)
+    Q_UNUSED(entityIds)
 
     QSharedPointer<RBlockReferenceEntity> dimBlockReference = getDimensionBlockReference();
     if (!dimBlockReference.isNull()) {
@@ -150,6 +163,7 @@ QList<QSharedPointer<RShape> > RDimOrdinateData::getShapes(const RBox& queryBox,
     RVector knee1;
     RVector knee2;
     RVector textOffsetV;   // normal vector in direction of text offset
+    double legSize = getDimasz()*2;
 
     // vertical, measuring X
     if (isMeasuringXAxis()) {
@@ -157,21 +171,21 @@ QList<QSharedPointer<RShape> > RDimOrdinateData::getShapes(const RBox& queryBox,
         knee2.x = leaderEndPoint.x;
 
         if (definingPoint.y < leaderEndPoint.y) {
-            knee1.y = leaderEndPoint.y - 0.36*2;
-            if (knee1.y < definingPoint.y + 0.36) {
-                knee1.y = definingPoint.y + 0.36;
+            knee1.y = leaderEndPoint.y - legSize*2;
+            if (knee1.y < definingPoint.y + legSize) {
+                knee1.y = definingPoint.y + legSize;
             }
 
-            knee2.y = leaderEndPoint.y - 0.36;
+            knee2.y = leaderEndPoint.y - legSize;
             textOffsetV = RVector(0,1);
         }
         else {
-            knee1.y = leaderEndPoint.y + 0.36*2;
-            if (knee1.y > definingPoint.y - 0.36) {
-                knee1.y = definingPoint.y - 0.36;
+            knee1.y = leaderEndPoint.y + legSize*2;
+            if (knee1.y > definingPoint.y - legSize) {
+                knee1.y = definingPoint.y - legSize;
             }
 
-            knee2.y = leaderEndPoint.y + 0.36;
+            knee2.y = leaderEndPoint.y + legSize;
             textOffsetV = RVector(0,-1);
         }
     }
@@ -182,21 +196,21 @@ QList<QSharedPointer<RShape> > RDimOrdinateData::getShapes(const RBox& queryBox,
         knee2.y = leaderEndPoint.y;
 
         if (definingPoint.x < leaderEndPoint.x) {
-            knee1.x = leaderEndPoint.x - 0.36*2;
-            if (knee1.x < definingPoint.x + 0.36) {
-                knee1.x = definingPoint.x + 0.36;
+            knee1.x = leaderEndPoint.x - legSize*2;
+            if (knee1.x < definingPoint.x + legSize) {
+                knee1.x = definingPoint.x + legSize;
             }
 
-            knee2.x = leaderEndPoint.x - 0.36;
+            knee2.x = leaderEndPoint.x - legSize;
             textOffsetV = RVector(1,0);
         }
         else {
-            knee1.x = leaderEndPoint.x + 0.36*2;
-            if (knee1.x > definingPoint.x - 0.36) {
-                knee1.x = definingPoint.x - 0.36;
+            knee1.x = leaderEndPoint.x + legSize*2;
+            if (knee1.x > definingPoint.x - legSize) {
+                knee1.x = definingPoint.x - legSize;
             }
 
-            knee2.x = leaderEndPoint.x + 0.36;
+            knee2.x = leaderEndPoint.x + legSize;
             textOffsetV = RVector(-1,0);
         }
     }
@@ -205,6 +219,8 @@ QList<QSharedPointer<RShape> > RDimOrdinateData::getShapes(const RBox& queryBox,
 
     if (definingPoint.getDistanceTo(knee1) > dimexo) {
         line = RLine(definingPoint + textOffsetV*dimexo, knee1);
+        RLine dummy;
+        adjustExtensionLineFixLength(line, dummy, false);
         ret.append(QSharedPointer<RLine>(new RLine(line)));
     }
 
@@ -229,7 +245,7 @@ QList<QSharedPointer<RShape> > RDimOrdinateData::getShapes(const RBox& queryBox,
     //textData.getBoundingBox();
 
     RVector textPos;
-    //if (textPosition.isValid() /*&& !autoText*/) {
+    //if (textPosition.isValid() / *&& !autoText * /) {
     if (!autoTextPos) {
         textPos = textPositionCenter;
         //autoTextPos = false;
@@ -249,13 +265,14 @@ QList<QSharedPointer<RShape> > RDimOrdinateData::getShapes(const RBox& queryBox,
 
     return ret;
 }
+*/
 
 double RDimOrdinateData::getMeasuredValue() const {
     if (isMeasuringXAxis()) {
-        return qAbs(definingPoint.x-definitionPoint.x);
+        return qAbs(definingPoint.x-definitionPoint.x) * getDimlfac();
     }
     else {
-        return qAbs(definingPoint.y-definitionPoint.y);
+        return qAbs(definingPoint.y-definitionPoint.y) * getDimlfac();
     }
 }
 

@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Dimension.js");
+include("scripts/Draw/Dimension/Dimension.js");
 
 /**
  * \class DimOrdinate
@@ -94,7 +94,10 @@ DimOrdinate.prototype.pickCoordinate = function(event, preview) {
     switch (this.state) {
     case DimOrdinate.State.SettingDefiningPoint:
         this.data.setDefiningPoint(event.getModelPosition());
-        if (!preview) {
+        if (preview) {
+            this.updatePreview();
+        }
+        else {
             di.setRelativeZero(event.getModelPosition());
             this.setState(DimOrdinate.State.SettingLeaderEndPoint);
         }
@@ -134,7 +137,12 @@ DimOrdinate.prototype.getOperation = function(preview) {
     }
 
     var doc = this.getDocument();
-    var entity = new RDimOrdinateEntity(doc, this.data);
+    var factor = this.getFactor();
+    var scaled_data = this.data;
+
+    scaled_data.setLinearFactor(factor);
+
+    var entity = new RDimOrdinateEntity(doc, scaled_data);
     if (!isEntity(entity)) {
         return undefined;
     }

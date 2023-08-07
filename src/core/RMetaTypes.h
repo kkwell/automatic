@@ -43,6 +43,7 @@
 #include <QDragMoveEvent>
 #include <QDragLeaveEvent>
 #include <QDropEvent>
+#include <QEasingCurve>
 #include <QEvent>
 #include <QFocusEvent>
 #include <QFocusFrame>
@@ -54,7 +55,6 @@
 #include <QFileSystemModel>
 #include <QFrame>
 #include <QGestureEvent>
-#include <QGLWidget>
 #include <QGraphicsItem>
 #include <QGraphicsView>
 #include <QGridLayout>
@@ -110,8 +110,8 @@
 #include <QSwipeGesture>
 #include <QTabBar>
 #include <QTemporaryFile>
+#include <QTextCharFormat>
 #include <QTextBrowser>
-#include <QTextCodec>
 #include <QTextEdit>
 #include <QTextLayout>
 #include <QThread>
@@ -127,10 +127,7 @@
 #include <QVector>
 #include <QWheelEvent>
 #include <QWidget>
-#include <QXmlContentHandler>
-#include <QXmlResultItems>
 #include <QXmlStreamWriter>
-#include <QXmlQuery>
 
 //#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
 //#  if QT_VERSION <= 0x050500
@@ -140,8 +137,12 @@
 
 #include "RSingleApplication.h"
 
+#if QT_VERSION <= 0x060000
+
 Q_DECLARE_METATYPE(int*)
+#ifdef _LP64
 Q_DECLARE_METATYPE(unsigned int*)
+#endif
 Q_DECLARE_METATYPE(qint64*)
 
 #if !defined Q_OS_WIN && !defined Q_OS_LINUX && !defined Q_OS_FREEBSD
@@ -197,7 +198,6 @@ Q_DECLARE_METATYPE(QFontMetrics*)
 Q_DECLARE_METATYPE(QFontDatabase*)
 Q_DECLARE_METATYPE(QFrame*)
 Q_DECLARE_METATYPE(QGestureEvent*)
-Q_DECLARE_METATYPE(QGLWidget*)
 Q_DECLARE_METATYPE(QGraphicsView*)
 Q_DECLARE_METATYPE(QGridLayout*)
 Q_DECLARE_METATYPE(QHelpEvent*)
@@ -208,6 +208,7 @@ Q_DECLARE_METATYPE(QInputEvent*)
 Q_DECLARE_METATYPE(QInputMethodEvent*)
 Q_DECLARE_METATYPE(QItemDelegate*)
 Q_DECLARE_METATYPE(QItemSelection*)
+Q_DECLARE_METATYPE(QItemSelectionModel*)
 Q_DECLARE_METATYPE(QKeyEvent*)
 Q_DECLARE_METATYPE(QKeySequence*)
 Q_DECLARE_METATYPE(QLayout*)
@@ -271,8 +272,8 @@ Q_DECLARE_METATYPE(QTextDocument*)
 Q_DECLARE_METATYPE(QTabBar*)
 Q_DECLARE_METATYPE(QTabletEvent*)
 Q_DECLARE_METATYPE(QTemporaryFile*)
+Q_DECLARE_METATYPE(QTextCharFormat*)
 Q_DECLARE_METATYPE(QTextBrowser*)
-Q_DECLARE_METATYPE(QTextCodec*)
 Q_DECLARE_METATYPE(QTextEdit*)
 Q_DECLARE_METATYPE(QTextLayout*)
 Q_DECLARE_METATYPE(QSharedPointer<QTextLayout>)
@@ -296,11 +297,8 @@ Q_DECLARE_METATYPE(QVariant*)
 //#endif
 Q_DECLARE_METATYPE(QWheelEvent*)
 Q_DECLARE_METATYPE(QWidget*)
-Q_DECLARE_METATYPE(QXmlQuery)
-Q_DECLARE_METATYPE(QXmlQuery*)
 Q_DECLARE_METATYPE(QXmlStreamWriter*)
-Q_DECLARE_METATYPE(QXmlContentHandler*)
-Q_DECLARE_METATYPE(QXmlResultItems*)
+Q_DECLARE_METATYPE(QTextStream*)
 
 Q_DECLARE_METATYPE(QFlags<Qt::MouseButton>)
 Q_DECLARE_METATYPE(QFlags<Qt::KeyboardModifier>)
@@ -308,12 +306,16 @@ Q_DECLARE_METATYPE(QFlags<Qt::Orientation>)
 Q_DECLARE_METATYPE(QFlags<QDir::Filter>*)
 
 Q_DECLARE_METATYPE(QList<int>)
+Q_DECLARE_METATYPE(QList<int>*)
 Q_DECLARE_METATYPE(QList<double>)
 Q_DECLARE_METATYPE(QList<QGraphicsItem*>)
 Q_DECLARE_METATYPE(QList<QString>)
 Q_DECLARE_METATYPE(QList<QKeySequence>)
 typedef QPair<int, double> _RPairIntDouble;
 Q_DECLARE_METATYPE(QList<_RPairIntDouble>)
+typedef QPair<int, int> _RPairIntInt;
+Q_DECLARE_METATYPE(QList<_RPairIntInt>)
+Q_DECLARE_METATYPE(QList<_RPairIntInt>*)
 
 Q_DECLARE_METATYPE(QSet<QString>)
 typedef QMap<int, QVariant> _RMapIntVariant;
@@ -331,7 +333,6 @@ typedef QMap<int, QSet<int> > _RMapIntSetInt;
 Q_DECLARE_METATYPE(_RMapIntSetInt)
 Q_DECLARE_METATYPE(_RMapIntSetInt*)
 
-Q_DECLARE_METATYPE(QVector<qreal>)
 Q_DECLARE_METATYPE(QVector<qreal>*)
 Q_DECLARE_METATYPE(QVector<float>)
 Q_DECLARE_METATYPE(QVector<float>*)
@@ -339,22 +340,31 @@ Q_DECLARE_METATYPE(QVector<uint>)
 Q_DECLARE_METATYPE(QVector<uint>*)
 
 Q_DECLARE_METATYPE(QEvent::Type)
+Q_DECLARE_METATYPE(QKeySequence::SequenceFormat)
+Q_DECLARE_METATYPE(QKeySequence::SequenceFormat*)
+Q_DECLARE_METATYPE(Qt::Axis)
+Q_DECLARE_METATYPE(Qt::Axis*)
 Q_DECLARE_METATYPE(Qt::DropActions)
 Q_DECLARE_METATYPE(Qt::CursorShape)
 Q_DECLARE_METATYPE(Qt::GlobalColor)
 Q_DECLARE_METATYPE(Qt::MouseButton)
 Q_DECLARE_METATYPE(Qt::Orientation)
+#if QT_VERSION >= 0x060000
+Q_DECLARE_METATYPE(QPageLayout::Orientation)
+#else
+Q_DECLARE_METATYPE(QPrinter::Orientation)
+#endif
 Q_DECLARE_METATYPE(Qt::PenStyle)
 Q_DECLARE_METATYPE(Qt::BrushStyle)
 Q_DECLARE_METATYPE(Qt::ItemDataRole)
 Q_DECLARE_METATYPE(Qt::WindowFlags)
 Q_DECLARE_METATYPE(Qt::WidgetAttribute)
 Q_DECLARE_METATYPE(Qt::WidgetAttribute*)
-#if !defined(Q_OS_IOS)
-Q_DECLARE_METATYPE(QPrinter::PaperSize)
-#endif
-Q_DECLARE_METATYPE(QVariant::Type)
+//Q_DECLARE_METATYPE(QVariant::Type)
 Q_DECLARE_METATYPE(QAbstractItemView::ScrollHint)
+Q_DECLARE_METATYPE(QEasingCurve::Type)
+Q_DECLARE_METATYPE(QMetaType::Type)
+Q_DECLARE_METATYPE(QMetaType::Type*)
 
 Q_DECLARE_METATYPE(QtMsgType*)
 Q_DECLARE_METATYPE(QtMsgType)
@@ -363,5 +373,28 @@ Q_DECLARE_METATYPE(QSet<int>)
 Q_DECLARE_METATYPE(QSet<int>*)
 
 //Q_DECLARE_METATYPE(QtScriptShell_QListView*)
+
+
+#if QT_VERSION >= 0x060000
+#else
+#include <QTextCodec>
+#include <QXmlContentHandler>
+#include <QXmlResultItems>
+#include <QXmlQuery>
+
+Q_DECLARE_METATYPE(QVector<qreal>)
+Q_DECLARE_METATYPE(QTextCodec*)
+Q_DECLARE_METATYPE(QXmlQuery)
+Q_DECLARE_METATYPE(QXmlQuery*)
+Q_DECLARE_METATYPE(QXmlContentHandler*)
+Q_DECLARE_METATYPE(QXmlResultItems*)
+
+#if !defined(Q_OS_IOS)
+Q_DECLARE_METATYPE(QPrinter::PaperSize)
+#endif
+#endif
+
+#endif // Qt < 6
+
 
 #endif

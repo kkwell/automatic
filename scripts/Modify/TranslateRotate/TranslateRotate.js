@@ -51,7 +51,7 @@ TranslateRotate.prototype.showDialog = function() {
     widgets["Angle"].setValue(this.angle);
 
     if (!dialog.exec()) {
-        dialog.destroy();
+        destr(dialog);
         EAction.activateMainWindow();
         return false;
     }
@@ -71,25 +71,25 @@ TranslateRotate.prototype.showDialog = function() {
 
     WidgetFactory.saveState(dialog);
 
-    dialog.destroy();
+    destr(dialog);
     EAction.activateMainWindow();
     return true;
 };
 
 TranslateRotate.prototype.getOperation = function(preview, selectResult) {
     // skip implementation from class Translate and use
-    // Transform implementaiton instead:
+    // Transform implementation instead:
     return Transform.prototype.getOperation.call(this, preview, selectResult);
 };
 
 /**
  * Callback function for Transform.getOperation.
  */
-TranslateRotate.prototype.transform = function(entity, k, op, preview, forceNew) {
+TranslateRotate.prototype.transform = function(entity, k, op, preview, flags) {
     entity.rotate(this.angle * k, this.referencePoint);
     var delta = this.targetPoint.operator_subtract(this.referencePoint);
     entity.move(delta.operator_multiply(k));
-    op.addObject(entity, this.useCurrentAttributes, forceNew);
+    op.addObject(entity, flags);
 };
 
 TranslateRotate.prototype.slotAngleChanged = function(value) {

@@ -1,7 +1,7 @@
 function init(basePath) {
     var title;
     if (RS.getSystemId()==="osx") {
-        // don't translate quit menu under OS X:
+        // don't translate quit menu under macOS:
         title = "&Quit";
     }
     else {
@@ -21,5 +21,5 @@ function init(basePath) {
     action.setWidgetNames(["FileMenu"]);
 
     var appWin = EAction.getMainWindow();
-    action.triggered.connect(appWin, "quit");
+    action.triggered.connect(function() { appWin.quit(); });
 }

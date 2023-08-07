@@ -29,8 +29,8 @@ void RPainterPathExporter::exportLineSegment(const RLine& line, double angle) {
         else {
             // Qt won't export a zero length line as point:
             // e.g. dot in a dash/dot line:
-            RVector startPoint = line.startPoint - RVector::createPolar(0.01, angle);
-            RVector endPoint = line.endPoint + RVector::createPolar(0.01, angle);
+            RVector startPoint = line.startPoint - RVector::createPolar(0.01 * scaleHint, angle);
+            RVector endPoint = line.endPoint + RVector::createPolar(0.01 * scaleHint, angle);
             path.moveTo(startPoint);
             path.lineTo(endPoint);
 //            path.moveTo(line.getStartPoint()-RVector(0.01,0));
@@ -47,7 +47,9 @@ void RPainterPathExporter::exportLineSegment(const RLine& line, double angle) {
     }
 }
 
-void RPainterPathExporter::exportPainterPaths(const QList<RPainterPath>& paths) {
+void RPainterPathExporter::exportPainterPaths(const QList<RPainterPath>& paths, double z) {
+    Q_UNUSED(z)
+
     for (int i=0; i<paths.length(); i++) {
         path.addPath(paths[i]);
     }
@@ -61,4 +63,13 @@ RPainterPath RPainterPathExporter::getPainterPath() {
     RPainterPath ret = path;
     path = RPainterPath();
     return ret;
+}
+
+double RPainterPathExporter::getLineTypePatternScale(const RLinetypePattern& p) const {
+    if (ignoreLineTypePatternScale) {
+        return 1.0;
+    }
+    else {
+        return RExporter::getLineTypePatternScale(p);
+    }
 }

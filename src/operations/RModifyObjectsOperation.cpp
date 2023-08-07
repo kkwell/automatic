@@ -77,7 +77,18 @@ void RModifyObjectsOperation::transformSelection(RTransformation* transformation
                 entity->move(translationOffset * k);
             }
 
-            addObject(entity, useCurrentAttributes, !move);
+            //QSet<RPropertyTypeId> props = entity->getPropertyTypeIds(RPropertyAttributes::Location);
+
+            RAddObjectsOperation::Flags flags = RAddObjectsOperation::NoFlags;
+            if (!useCurrentAttributes) {
+                flags = flags | RAddObjectsOperation::UseAttributes | RAddObjectsOperation::GeometryOnly;
+            }
+
+            if (!move) {
+                flags = flags | RAddObjectsOperation::ForceNew;
+            }
+
+            addObject(entity, flags);
         }
         endCycle();
     }

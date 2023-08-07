@@ -20,7 +20,7 @@
 
 // All actions are derived from class EAction, so we need to 
 // include this class definition here:
-include("../EAction.js");
+include("scripts/EAction.js");
 
 // Constructor calls base class constructor:
 function MyScripts(guiAction) {
@@ -42,8 +42,8 @@ MyScripts.getMenu = function() {
 MyScripts.getToolBar = function() {
     // EAction.getToolBar is a helper function that returns an existing 
     // or new QToolBar object with the given title and object name.
-    // The object name (here "MyScriptToolBar") must be unique. 
-    return EAction.getToolBar(MyScripts.getTitle(), "MyScriptToolBar");
+    // The object name (here "MyScriptsToolBar") must be unique.
+    return EAction.getToolBar(MyScripts.getTitle(), "MyScriptsToolBar");
 };
 
 // This static function defines and returns the title of the menu 

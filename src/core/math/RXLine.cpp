@@ -188,6 +188,11 @@ QList<RVector> RXLine::getPointsWithDistanceToEnd(double distance, int from) con
     return QList<RVector>();
 }
 
+QList<RVector> RXLine::getPointCloud(double segmentLength) const {
+    Q_UNUSED(segmentLength)
+    return QList<RVector>();
+}
+
 double RXLine::getAngleAt(double distance, RS::From from) const {
     Q_UNUSED(distance)
     Q_UNUSED(from)
@@ -290,7 +295,7 @@ QList<QSharedPointer<RShape> > RXLine::splitAt(const QList<RVector>& points) con
     ret.append(QSharedPointer<RShape>(new RRay(sortedPoints[0], -directionVector)));
 
     for (int i=0; i<sortedPoints.length()-1; i++) {
-        if (sortedPoints[i].equalsFuzzy(points[i+1])) {
+        if (sortedPoints[i].equalsFuzzy(sortedPoints[i+1])) {
             continue;
         }
 

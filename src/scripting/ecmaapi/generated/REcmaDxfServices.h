@@ -49,6 +49,9 @@
         reset
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getSafeBlockName
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         fixBlockName
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -118,12 +121,6 @@
         fixVersion2HatchData
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        getCodec
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
-        setCodec
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
         numberToColor24
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -158,6 +155,18 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         autoFixLinetypePattern
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getFileQCADVersion
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        initAci
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getAci
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getColor
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

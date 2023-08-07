@@ -73,7 +73,7 @@ ExFileImporter.prototype.importFile = function(fileName, nameFilter) {
     var fi = new QFileInfo(fileName);
 
     var file = new QFile(fi.absoluteFilePath());
-    var flags = new QIODevice.OpenMode(QIODevice.ReadOnly | QIODevice.Text);
+    var flags = makeQIODeviceOpenMode(QIODevice.ReadOnly, QIODevice.Text);
     if (!file.open(flags)) {
         return false;
     }
@@ -81,13 +81,14 @@ ExFileImporter.prototype.importFile = function(fileName, nameFilter) {
     this.startImport();
 
     var ts = new QTextStream(file);
+    setUtf8Codec(ts);
     var line;
 
     do {
         line = ts.readLine();
 
         if (!isNull(this.messageHandler)) {
-            this.messageHandler.handleUserMessage(qsTr("Read from file: '%1'").arg(line));
+            this.messageHandler.handleUserMessage(qsTr("Read from file: \"%1\"").arg(line));
         }
 
         // use importObject to import an object read from the file:
@@ -123,7 +124,7 @@ ExRegisterFileImporter.prototype.beginEvent = function() {
     QMessageBox.information(
         appWin,
         qsTr("Info"),
-        qsTr("Registered a file importer for file type '.example'. Use File > Open to see the filter in action.")
+        qsTr("Registered a file importer for file type \".example\". Use File > Open to see the filter in action.")
     );
 };
 

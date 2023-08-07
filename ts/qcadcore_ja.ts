@@ -112,7 +112,7 @@
 <context>
     <name>RColor</name>
     <message>
-        <location filename="../src/core/RColor.cpp" line="+287"/>
+        <location filename="../src/core/RColor.cpp" line="+340"/>
         <source>By Layer</source>
         <translation>画層による</translation>
     </message>
@@ -207,7 +207,7 @@
         <translation>明るい灰色</translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+3"/>
         <source>Others...</source>
         <translation>その他...</translation>
     </message>
@@ -215,7 +215,7 @@
 <context>
     <name>RDocumentVariables</name>
     <message>
-        <location filename="../src/core/RDocumentVariables.cpp" line="+45"/>
+        <location filename="../src/core/RDocumentVariables.cpp" line="+48"/>
         <source>Current Layer ID</source>
         <translation>現在のレイヤー</translation>
     </message>
@@ -238,11 +238,12 @@
 <context>
     <name>REntity</name>
     <message>
+        <location filename="../src/core/RBlockReferenceEntity.cpp" line="+94"/>
         <source>Referenced Block</source>
-        <translation type="obsolete">参照ブロック</translation>
+        <translation>参照先ブロック</translation>
     </message>
     <message>
-        <location filename="../src/core/RBlockReferenceEntity.cpp" line="+93"/>
+        <location line="+1"/>
         <location line="+1"/>
         <location line="+1"/>
         <location filename="../src/core/RViewportEntity.cpp" line="+73"/>
@@ -254,18 +255,18 @@
     <message>
         <location filename="../src/core/RBlock.cpp" line="+65"/>
         <source>Pixel Unit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">画素数単位</translation>
     </message>
     <message>
         <location line="+1"/>
         <location filename="../src/core/RBlockReferenceEntity.cpp" line="-2"/>
         <location line="+3"/>
-        <location filename="../src/core/RLayout.cpp" line="+82"/>
+        <location filename="../src/core/RLayout.cpp" line="+84"/>
         <location line="+3"/>
         <location line="+3"/>
         <location line="+3"/>
         <location line="+3"/>
-        <location filename="../src/core/RTextBasedEntity.cpp" line="+72"/>
+        <location filename="../src/core/RTextBasedEntity.cpp" line="+75"/>
         <location filename="../src/core/RViewportEntity.cpp" line="-2"/>
         <location line="+8"/>
         <location line="+2"/>
@@ -349,21 +350,20 @@
         <translation>行間</translation>
     </message>
     <message>
-        <location filename="../src/core/REntity.cpp" line="+86"/>
-        <location filename="../src/core/RObject.cpp" line="+62"/>
+        <location line="+3"/>
+        <source>Attributes</source>
+        <translation>属性</translation>
+    </message>
+    <message>
+        <location filename="../src/core/REntity.cpp" line="+96"/>
+        <location filename="../src/core/RObject.cpp" line="+69"/>
         <source>Type</source>
         <translation>タイプ</translation>
     </message>
     <message>
-        <location filename="../src/core/RBlockReferenceEntity.cpp" line="-11"/>
+        <location line="+1"/>
         <source>Block</source>
         <translation>ブロック</translation>
-    </message>
-    <message>
-        <location filename="../src/core/REntity.cpp" line="+1"/>
-        <source>Block ID</source>
-        <translatorcomment>never shown to user</translatorcomment>
-        <translation>Block ID</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -372,7 +372,7 @@
     </message>
     <message>
         <location line="+1"/>
-        <location filename="../src/core/RLayer.cpp" line="+99"/>
+        <location filename="../src/core/RLayer.cpp" line="+102"/>
         <source>Linetype</source>
         <translation>ラインタイプ</translation>
     </message>
@@ -402,6 +402,11 @@
         <location line="+1"/>
         <source>Draw Order</source>
         <translation>描画順序</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Parent Id</source>
+        <translation type="unfinished">親 ID</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -437,7 +442,7 @@
     </message>
     <message>
         <location filename="../src/core/RObject.cpp" line="-1"/>
-        <location filename="../src/core/RPropertyTypeId.cpp" line="+108"/>
+        <location filename="../src/core/RPropertyTypeId.cpp" line="+161"/>
         <source>Custom</source>
         <translation>カスタム</translation>
     </message>
@@ -450,6 +455,21 @@
         <location line="+1"/>
         <source>Protected</source>
         <translation>保護されています</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Selected</source>
+        <translation type="unfinished">選択された</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Object Invisible</source>
+        <translation type="unfinished">オブジェクト・インビジブル</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Working Set</source>
+        <translation type="unfinished">ワーキングセット</translation>
     </message>
     <message>
         <location filename="../src/core/REntity.cpp" line="+2"/>
@@ -505,6 +525,11 @@
     </message>
     <message>
         <location line="+1"/>
+        <source>Text Width</source>
+        <translation>テキストの幅</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>Text Angle</source>
         <translation>テキスト角度</translation>
     </message>
@@ -545,6 +570,16 @@
         <translation>垂直</translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>Backward</source>
+        <translation type="unfinished">バックワード</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Upside Down</source>
+        <translation type="unfinished">アップサイドダウン</translation>
+    </message>
+    <message>
         <location filename="../src/core/RViewportEntity.cpp" line="+2"/>
         <source>Rotation</source>
         <translation>回転</translation>
@@ -575,6 +610,7 @@
     <message>
         <location filename="../src/core/RBlock.cpp" line="-6"/>
         <location filename="../src/core/RLayer.cpp" line="-8"/>
+        <location filename="../src/core/RLayerState.cpp" line="+46"/>
         <location filename="../src/core/RLayout.cpp" line="-24"/>
         <source>Name</source>
         <translation>名前</translation>
@@ -602,22 +638,22 @@
     <message>
         <location line="+1"/>
         <source>Collapsed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">折りたたみ</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Plottable</source>
-        <translation type="unfinished"></translation>
+        <translation>プロット可能</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Snappable</source>
-        <translation type="unfinished"></translation>
+        <translation>スナップ可能</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Off is Freeze</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">オフはフリーズです</translation>
     </message>
     <message>
         <location filename="../src/core/RLayout.cpp" line="+1"/>
@@ -660,139 +696,148 @@
         <translation>最大範囲</translation>
     </message>
     <message>
-        <location filename="../src/core/RBlockReferenceData.cpp" line="+627"/>
+        <location filename="../src/core/RBlockReferenceData.cpp" line="+856"/>
         <source>Circular (recursive) block referencing detected:</source>
-        <translation>回状（再起的）ブロック参照が検出されました:</translation>
+        <translation>循環的な（再帰的な）ブロック参照が検出されました:</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Block name:</source>
         <translation>ブロック名:</translation>
     </message>
+    <message>
+        <location filename="../src/core/RDimStyle.cpp" line="+71"/>
+        <source>Style</source>
+        <translation type="unfinished">スタイル</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Overall scale</source>
+        <translation type="unfinished">全体規模</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Linear measurement factor</source>
+        <translation type="unfinished">リニア測定係数</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text height</source>
+        <translation>テキストの高さ</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dimension line gap</source>
+        <translation type="unfinished">寸法線のギャップ</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow size</source>
+        <translation>矢印のサイズ</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dimension line increment</source>
+        <translation type="unfinished">ディメンションラインインクリメント</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Extension line extension</source>
+        <translation type="unfinished">エクステンションラインの延長</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Extension line offset</source>
+        <translation type="unfinished">内線オフセット</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text position vertical</source>
+        <translation type="unfinished">テキスト位置縦</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text horizontal</source>
+        <translation type="unfinished">テキスト水平</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Tick size</source>
+        <translation type="unfinished">ティックサイズ</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Linear format</source>
+        <translation type="unfinished">リニア方式</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Decimal places</source>
+        <translation type="unfinished">小数点以下の桁数</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Decimal separator</source>
+        <translation type="unfinished">小数点以下のセパレータ</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Zero suppression</source>
+        <translation type="unfinished">ゼロサプレス</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular format</source>
+        <translation type="unfinished">アンギュラフォーマット</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular decimal places</source>
+        <translation type="unfinished">角度のある小数点以下の桁数</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Angular zero suppression</source>
+        <translation type="unfinished">角度ゼロサプレッション</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Architectur tick</source>
+        <translation type="unfinished">アーキテクチャー・チック</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Text color</source>
+        <translation type="unfinished">文字色</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block</source>
+        <translation type="unfinished">アローブロック</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block 1</source>
+        <translation type="unfinished">アローブロック1</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arrow block 2</source>
+        <translation type="unfinished">アローブロック2</translation>
+    </message>
 </context>
 <context>
     <name>RGuiAction</name>
     <message>
-        <location filename="../src/core/RGuiAction.cpp" line="+184"/>
+        <location filename="../src/core/RGuiAction.cpp" line="+202"/>
         <source>Requires selection</source>
         <translation>選択が必要です</translation>
     </message>
 </context>
 <context>
-    <name>RLayer</name>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">画層名</translation>
-    </message>
-    <message>
-        <source>Frozen</source>
-        <translation type="vanished">凍結</translation>
-    </message>
-    <message>
-        <source>Locked</source>
-        <translation type="vanished">ロック</translation>
-    </message>
-    <message>
-        <source>Color</source>
-        <translation type="vanished">色</translation>
-    </message>
-    <message>
-        <source>Linetype</source>
-        <translation type="vanished">ラインタイプ</translation>
-    </message>
-    <message>
-        <source>Lineweight</source>
-        <translation type="vanished">ラインの太さ</translation>
-    </message>
-</context>
-<context>
     <name>RLinetype</name>
     <message>
-        <source>By Layer</source>
-        <translation type="vanished">画層による</translation>
-    </message>
-    <message>
-        <source>By Block</source>
-        <translation type="vanished">ブロックによる</translation>
-    </message>
-    <message>
-        <source>Continuous</source>
-        <translation type="vanished">連続</translation>
-    </message>
-    <message>
-        <source>Dot</source>
-        <translation type="vanished">点</translation>
-    </message>
-    <message>
-        <source>Dot (small)</source>
-        <translation type="vanished">点（小）</translation>
-    </message>
-    <message>
-        <source>Dot (large)</source>
-        <translation type="vanished">点（大）</translation>
-    </message>
-    <message>
-        <source>Dash</source>
-        <translation type="vanished">ダッシュ</translation>
-    </message>
-    <message>
-        <source>Dash (small)</source>
-        <translation type="vanished">ダッシュ（小）</translation>
-    </message>
-    <message>
-        <source>Dash (large)</source>
-        <translation type="vanished">ダッシュ（大）</translation>
-    </message>
-    <message>
-        <source>Dash Dot</source>
-        <translation type="vanished">ダッシュドット</translation>
-    </message>
-    <message>
-        <source>Dash Dot (small)</source>
-        <translation type="vanished">ダッシュドット（小）</translation>
-    </message>
-    <message>
-        <source>Dash Dot (large)</source>
-        <translation type="vanished">ダッシュドット（大）</translation>
-    </message>
-    <message>
-        <source>Divide</source>
-        <translation type="vanished">分割</translation>
-    </message>
-    <message>
-        <source>Divide (small)</source>
-        <translation type="vanished">分割（小）</translation>
-    </message>
-    <message>
-        <source>Divide (large)</source>
-        <translation type="vanished">分割（大）</translation>
-    </message>
-    <message>
-        <source>Center</source>
-        <translation type="vanished">センター</translation>
-    </message>
-    <message>
-        <source>Center (small)</source>
-        <translation type="vanished">センター（小）</translation>
-    </message>
-    <message>
-        <source>Center (large)</source>
-        <translation type="vanished">センター（大）</translation>
-    </message>
-    <message>
-        <source>Border</source>
-        <translation type="vanished">ボーダー</translation>
-    </message>
-    <message>
-        <source>Border (small)</source>
-        <translation type="vanished">ボーダー（小）</translation>
-    </message>
-    <message>
-        <source>Border (large)</source>
-        <translation type="vanished">ボーダー（大）</translation>
-    </message>
-    <message>
-        <location filename="../src/core/RLinetype.cpp" line="+48"/>
+        <location filename="../src/core/RLinetype.cpp" line="+54"/>
         <source>Name</source>
         <translation>名前</translation>
     </message>
@@ -815,7 +860,7 @@
 <context>
     <name>RLinetypePattern</name>
     <message>
-        <location filename="../src/core/RLinetypePattern.cpp" line="+856"/>
+        <location filename="../src/core/RLinetypePattern.cpp" line="+912"/>
         <source>By Layer</source>
         <translation>画層による</translation>
     </message>
@@ -997,6 +1042,11 @@
     </message>
     <message>
         <location line="+2"/>
+        <source>Water</source>
+        <translation type="unfinished">水</translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>Drainage</source>
         <translation>排水</translation>
     </message>
@@ -1004,6 +1054,41 @@
         <location line="+1"/>
         <source>Drainage Reversed</source>
         <translation>排水逆勾配</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Communication</source>
+        <translation type="unfinished">コミュニケーション</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Electric</source>
+        <translation type="unfinished">電気</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Low Voltage</source>
+        <translation type="unfinished">低電圧</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>High Voltage</source>
+        <translation type="unfinished">高電圧</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Overhead Power</source>
+        <translation type="unfinished">オーバーヘッドパワー</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Foul</source>
+        <translation type="unfinished">ファール</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Foul Rising</source>
+        <translation type="unfinished">ファウルライジング</translation>
     </message>
 </context>
 <context>
@@ -1142,21 +1227,6 @@
         <location line="+1"/>
         <source>2.11mm</source>
         <translation>2.11mm</translation>
-    </message>
-</context>
-<context>
-    <name>RObject</name>
-    <message>
-        <source>Custom</source>
-        <translation type="vanished">カスタム</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation type="obsolete">タイプ</translation>
-    </message>
-    <message>
-        <source>Handle</source>
-        <translation type="vanished">ハンドル</translation>
     </message>
 </context>
 </TS>

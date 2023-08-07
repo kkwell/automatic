@@ -24,6 +24,7 @@
 #include "RMainWindowQt.h"
 #include "RMdiChildQt.h"
 
+#include <QApplication>
 #include <QPainter>
 
 /**
@@ -36,7 +37,7 @@ RRulerQt::RRulerQt(QWidget* parent) :
     lastSize(0,0),
     viewportChanged(false),
     darkGuiBackground(-1) {
-    
+
     qreal dpr = 1.0;
 #if QT_VERSION >= 0x050000
     dpr = devicePixelRatio();
@@ -44,13 +45,23 @@ RRulerQt::RRulerQt(QWidget* parent) :
     cursorArrow.moveTo(0,0);
     cursorArrow.lineTo(-3*dpr,-3*dpr);
     cursorArrow.lineTo(3*dpr,-3*dpr);
+
+    RMainWindow* appWin = RMainWindow::getMainWindow();
+    if (appWin!=NULL) {
+        appWin->addPaletteListener(this);
+    }
 }
 
 
 /**
  * Destructor
  */
-RRulerQt::~RRulerQt() {}
+RRulerQt::~RRulerQt() {
+    RMainWindow* appWin = RMainWindow::getMainWindow();
+    if (appWin!=NULL) {
+        appWin->removePaletteListener(this);
+    }
+}
 
 
 QSize RRulerQt::sizeHint() const {
@@ -152,9 +163,7 @@ void RRulerQt::paintEvent(QPaintEvent* e) {
     dpr = devicePixelRatio();
 #endif
 
-    if (darkGuiBackground<0) {
-        darkGuiBackground = RSettings::hasDarkGuiBackground();
-    }
+    darkGuiBackground = RSettings::hasDarkGuiBackground();
 
     if (orientation == Qt::Horizontal) {
         if (sizeHint().height()*dpr != lastSize.height()) {
@@ -183,7 +192,13 @@ void RRulerQt::paintEvent(QPaintEvent* e) {
     }
 
     if (viewportChanged) {
-        buffer.fill(Qt::transparent);
+        // 20190515: bug with rulers displayed on top of each other:
+        //buffer.fill(Qt::transparent);
+        //qDebug() << "palette().color(QPalette::Window):" << palette().color(QPalette::Window);
+        //qDebug() << "QApp palette().color(QPalette::Window):" << QApplication::palette("QWidget").color(QPalette::Window);
+        //buffer.fill(palette().color(QPalette::Window));
+        buffer.fill(QApplication::palette("QWidget").color(QPalette::Window));
+
         painter = new QPainter(&buffer);
         painter->setPen(Qt::black);
         painter->setFont(getFont());

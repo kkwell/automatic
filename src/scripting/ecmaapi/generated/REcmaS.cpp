@@ -65,6 +65,8 @@
             
             REcmaHelper::registerFunction(&engine, &ctor, getCpuCores, "getCpuCores");
             
+            REcmaHelper::registerFunction(&engine, &ctor, getIdealThreadCount, "getIdealThreadCount");
+            
             REcmaHelper::registerFunction(&engine, &ctor, getBuildCpuArchitecture, "getBuildCpuArchitecture");
             
             REcmaHelper::registerFunction(&engine, &ctor, getHostId, "getHostId");
@@ -72,6 +74,8 @@
             REcmaHelper::registerFunction(&engine, &ctor, getSystemId, "getSystemId");
             
             REcmaHelper::registerFunction(&engine, &ctor, getWindowManagerId, "getWindowManagerId");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, showInFileManager, "showInFileManager");
             
             REcmaHelper::registerFunction(&engine, &ctor, getDirectoryList, "getDirectoryList");
             
@@ -82,6 +86,30 @@
             REcmaHelper::registerFunction(&engine, &ctor, getPatternList, "getPatternList");
             
             REcmaHelper::registerFunction(&engine, &ctor, getLinetypeList, "getLinetypeList");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, sortAlphanumerical, "sortAlphanumerical");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, compareChunkify, "compareChunkify");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, compareAlphanumerical, "compareAlphanumerical");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, lessThanAlphanumerical, "lessThanAlphanumerical");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getFontFamily, "getFontFamily");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getPageSizeId, "getPageSizeId");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getPageSize, "getPageSize");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, setUtf8Codec, "setUtf8Codec");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, escape, "escape");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getScreenCount, "getScreenCount");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getAvailableGeometry, "getAvailableGeometry");
+            
+            REcmaHelper::registerFunction(&engine, &ctor, getMetaType, "getMetaType");
             
 
     // static properties:
@@ -94,9 +122,289 @@
                 qScriptValueFromValue(&engine, RS::AngleTolerance),
                 QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
             
+            ctor.setProperty("MiddleButton",
+                qScriptValueFromValue(&engine, RS::MiddleButton),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("Portrait",
+                qScriptValueFromValue(&engine, RS::Portrait),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("Landscape",
+                qScriptValueFromValue(&engine, RS::Landscape),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("Portrait",
+                qScriptValueFromValue(&engine, RS::Portrait),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
+            ctor.setProperty("Landscape",
+                qScriptValueFromValue(&engine, RS::Landscape),
+                QScriptValue::SkipInEnumeration | QScriptValue::ReadOnly);
+            
 
     // enum values:
     
+
+    ctor.setProperty("Bool",
+    QScriptValue(RS::Bool),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Char",
+    QScriptValue(RS::Char),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Double",
+    QScriptValue(RS::Double),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Int",
+    QScriptValue(RS::Int),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("UnknownType",
+    QScriptValue(RS::UnknownType),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("LongLong",
+    QScriptValue(RS::LongLong),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("BitArray",
+    QScriptValue(RS::BitArray),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Bitmap",
+    QScriptValue(RS::Bitmap),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Brush",
+    QScriptValue(RS::Brush),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("ByteArray",
+    QScriptValue(RS::ByteArray),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Color",
+    QScriptValue(RS::Color),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Cursor",
+    QScriptValue(RS::Cursor),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Date",
+    QScriptValue(RS::Date),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("DateTime",
+    QScriptValue(RS::DateTime),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("EasingCurve",
+    QScriptValue(RS::EasingCurve),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Font",
+    QScriptValue(RS::Font),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Hash",
+    QScriptValue(RS::Hash),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Icon",
+    QScriptValue(RS::Icon),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Image",
+    QScriptValue(RS::Image),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("KeySequence",
+    QScriptValue(RS::KeySequence),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Line",
+    QScriptValue(RS::Line),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("LineF",
+    QScriptValue(RS::LineF),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("List",
+    QScriptValue(RS::List),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Locale",
+    QScriptValue(RS::Locale),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Map",
+    QScriptValue(RS::Map),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Matrix4x4",
+    QScriptValue(RS::Matrix4x4),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Palette",
+    QScriptValue(RS::Palette),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Pen",
+    QScriptValue(RS::Pen),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Pixmap",
+    QScriptValue(RS::Pixmap),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Point",
+    QScriptValue(RS::Point),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("PointF",
+    QScriptValue(RS::PointF),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Polygon",
+    QScriptValue(RS::Polygon),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Rect",
+    QScriptValue(RS::Rect),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("RectF",
+    QScriptValue(RS::RectF),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Region",
+    QScriptValue(RS::Region),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Size",
+    QScriptValue(RS::Size),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("SizeF",
+    QScriptValue(RS::SizeF),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("SizePolicy",
+    QScriptValue(RS::SizePolicy),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("String",
+    QScriptValue(RS::String),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("StringList",
+    QScriptValue(RS::StringList),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("TextFormat",
+    QScriptValue(RS::TextFormat),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("TextLength",
+    QScriptValue(RS::TextLength),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Time",
+    QScriptValue(RS::Time),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Transform",
+    QScriptValue(RS::Transform),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Url",
+    QScriptValue(RS::Url),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Vector2D",
+    QScriptValue(RS::Vector2D),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Vector3D",
+    QScriptValue(RS::Vector3D),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Vector4D",
+    QScriptValue(RS::Vector4D),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Quaternion",
+    QScriptValue(RS::Quaternion),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("UInt",
+    QScriptValue(RS::UInt),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("ULongLong",
+    QScriptValue(RS::ULongLong),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("UserType",
+    QScriptValue(RS::UserType),
+    QScriptValue::ReadOnly);
+
 
     ctor.setProperty("Print",
     QScriptValue(RS::Print),
@@ -133,8 +441,8 @@
     QScriptValue::ReadOnly);
 
 
-    ctor.setProperty("ObjectBlock",
-    QScriptValue(RS::ObjectBlock),
+    ctor.setProperty("ObjectLinetype",
+    QScriptValue(RS::ObjectLinetype),
     QScriptValue::ReadOnly);
 
 
@@ -143,18 +451,23 @@
     QScriptValue::ReadOnly);
 
 
-    ctor.setProperty("ObjectLinetype",
-    QScriptValue(RS::ObjectLinetype),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("ObjectView",
-    QScriptValue(RS::ObjectView),
+    ctor.setProperty("ObjectBlock",
+    QScriptValue(RS::ObjectBlock),
     QScriptValue::ReadOnly);
 
 
     ctor.setProperty("ObjectLayout",
     QScriptValue(RS::ObjectLayout),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("ObjectLayerState",
+    QScriptValue(RS::ObjectLayerState),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("ObjectView",
+    QScriptValue(RS::ObjectView),
     QScriptValue::ReadOnly);
 
 
@@ -165,6 +478,11 @@
 
     ctor.setProperty("ObjectDocumentVariable",
     QScriptValue(RS::ObjectDocumentVariable),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("ObjectDimStyle",
+    QScriptValue(RS::ObjectDimStyle),
     QScriptValue::ReadOnly);
 
 
@@ -303,6 +621,21 @@
     QScriptValue::ReadOnly);
 
 
+    ctor.setProperty("EntityDimAngular2L",
+    QScriptValue(RS::EntityDimAngular2L),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("EntityDimAngular3P",
+    QScriptValue(RS::EntityDimAngular3P),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("EntityDimArcLength",
+    QScriptValue(RS::EntityDimArcLength),
+    QScriptValue::ReadOnly);
+
+
     ctor.setProperty("EntityDimOrdinate",
     QScriptValue(RS::EntityDimOrdinate),
     QScriptValue::ReadOnly);
@@ -333,6 +666,11 @@
     QScriptValue::ReadOnly);
 
 
+    ctor.setProperty("EntityTolerance",
+    QScriptValue(RS::EntityTolerance),
+    QScriptValue::ReadOnly);
+
+
     ctor.setProperty("EntityUser",
     QScriptValue(RS::EntityUser),
     QScriptValue::ReadOnly);
@@ -355,6 +693,21 @@
 
     ctor.setProperty("RenderThreeD",
     QScriptValue(RS::RenderThreeD),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OrthoVertical",
+    QScriptValue(RS::OrthoVertical),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OrthoHorizonal",
+    QScriptValue(RS::OrthoHorizonal),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Orthogonal",
+    QScriptValue(RS::Orthogonal),
     QScriptValue::ReadOnly);
 
 
@@ -483,18 +836,13 @@
     QScriptValue::ReadOnly);
 
 
-    ctor.setProperty("FromStart",
-    QScriptValue(RS::FromStart),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("FromEnd",
-    QScriptValue(RS::FromEnd),
-    QScriptValue::ReadOnly);
-
-
     ctor.setProperty("AlongPolyline",
     QScriptValue(RS::AlongPolyline),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("NoProjection",
+    QScriptValue(RS::NoProjection),
     QScriptValue::ReadOnly);
 
 
@@ -588,28 +936,8 @@
     QScriptValue::ReadOnly);
 
 
-    ctor.setProperty("Top",
-    QScriptValue(RS::Top),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("Isometric",
-    QScriptValue(RS::Isometric),
-    QScriptValue::ReadOnly);
-
-
     ctor.setProperty("IsoBottom",
     QScriptValue(RS::IsoBottom),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("Bottom",
-    QScriptValue(RS::Bottom),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("Isometric",
-    QScriptValue(RS::Isometric),
     QScriptValue::ReadOnly);
 
 
@@ -618,28 +946,8 @@
     QScriptValue::ReadOnly);
 
 
-    ctor.setProperty("Left",
-    QScriptValue(RS::Left),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("Isometric",
-    QScriptValue(RS::Isometric),
-    QScriptValue::ReadOnly);
-
-
     ctor.setProperty("IsoLeftBack",
     QScriptValue(RS::IsoLeftBack),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("LeftBack",
-    QScriptValue(RS::LeftBack),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("Isometric",
-    QScriptValue(RS::Isometric),
     QScriptValue::ReadOnly);
 
 
@@ -648,28 +956,8 @@
     QScriptValue::ReadOnly);
 
 
-    ctor.setProperty("Right",
-    QScriptValue(RS::Right),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("Isometric",
-    QScriptValue(RS::Isometric),
-    QScriptValue::ReadOnly);
-
-
     ctor.setProperty("IsoRightBack",
     QScriptValue(RS::IsoRightBack),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("RightBack",
-    QScriptValue(RS::RightBack),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("Isometric",
-    QScriptValue(RS::Isometric),
     QScriptValue::ReadOnly);
 
 
@@ -795,11 +1083,6 @@
 
     ctor.setProperty("MaxUnit",
     QScriptValue(RS::MaxUnit),
-    QScriptValue::ReadOnly);
-
-
-    ctor.setProperty("Parsec",
-    QScriptValue(RS::Parsec),
     QScriptValue::ReadOnly);
 
 
@@ -1668,13 +1951,33 @@
     QScriptValue::ReadOnly);
 
 
-    ctor.setProperty("WORLDVIEW",
-    QScriptValue(RS::WORLDVIEW),
+    ctor.setProperty("INVALID",
+    QScriptValue(RS::INVALID),
     QScriptValue::ReadOnly);
 
 
-    ctor.setProperty("INVALID",
-    QScriptValue(RS::INVALID),
+    ctor.setProperty("VarTypeBool",
+    QScriptValue(RS::VarTypeBool),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("VarTypeInt",
+    QScriptValue(RS::VarTypeInt),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("VarTypeDouble",
+    QScriptValue(RS::VarTypeDouble),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("VarTypeColor",
+    QScriptValue(RS::VarTypeColor),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("VarTypeUnknown",
+    QScriptValue(RS::VarTypeUnknown),
     QScriptValue::ReadOnly);
 
 
@@ -1783,8 +2086,220 @@
     QScriptValue::ReadOnly);
 
 
+    ctor.setProperty("Linear",
+    QScriptValue(RS::Linear),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InQuad",
+    QScriptValue(RS::InQuad),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutQuad",
+    QScriptValue(RS::OutQuad),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InOutQuad",
+    QScriptValue(RS::InOutQuad),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutInQuad",
+    QScriptValue(RS::OutInQuad),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InCubic",
+    QScriptValue(RS::InCubic),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutCubic",
+    QScriptValue(RS::OutCubic),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InOutCubic",
+    QScriptValue(RS::InOutCubic),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutInCubic",
+    QScriptValue(RS::OutInCubic),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InQuart",
+    QScriptValue(RS::InQuart),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutQuart",
+    QScriptValue(RS::OutQuart),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InOutQuart",
+    QScriptValue(RS::InOutQuart),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutInQuart",
+    QScriptValue(RS::OutInQuart),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InQuint",
+    QScriptValue(RS::InQuint),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutQuint",
+    QScriptValue(RS::OutQuint),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InOutQuint",
+    QScriptValue(RS::InOutQuint),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutInQuint",
+    QScriptValue(RS::OutInQuint),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InSine",
+    QScriptValue(RS::InSine),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutSine",
+    QScriptValue(RS::OutSine),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InOutSine",
+    QScriptValue(RS::InOutSine),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutInSine",
+    QScriptValue(RS::OutInSine),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InExpo",
+    QScriptValue(RS::InExpo),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutExpo",
+    QScriptValue(RS::OutExpo),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InOutExpo",
+    QScriptValue(RS::InOutExpo),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutInExpo",
+    QScriptValue(RS::OutInExpo),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InCirc",
+    QScriptValue(RS::InCirc),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutCirc",
+    QScriptValue(RS::OutCirc),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InOutCirc",
+    QScriptValue(RS::InOutCirc),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutInCirc",
+    QScriptValue(RS::OutInCirc),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InElastic",
+    QScriptValue(RS::InElastic),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutElastic",
+    QScriptValue(RS::OutElastic),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InOutElastic",
+    QScriptValue(RS::InOutElastic),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutInElastic",
+    QScriptValue(RS::OutInElastic),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InBack",
+    QScriptValue(RS::InBack),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutBack",
+    QScriptValue(RS::OutBack),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InOutBack",
+    QScriptValue(RS::InOutBack),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutInBack",
+    QScriptValue(RS::OutInBack),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InBounce",
+    QScriptValue(RS::InBounce),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutBounce",
+    QScriptValue(RS::OutBounce),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("InOutBounce",
+    QScriptValue(RS::InOutBounce),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("OutInBounce",
+    QScriptValue(RS::OutInBounce),
+    QScriptValue::ReadOnly);
+
+
     // enum conversions:
     
+    qScriptRegisterMetaType<RS::MetaType>(
+        &engine,
+        toScriptValueEnumMetaType,
+        fromScriptValueEnumMetaType,
+        ctor.property(QString::fromLatin1("prototype"))
+    );
+
     qScriptRegisterMetaType<RS::MessageType>(
         &engine,
         toScriptValueEnumMessageType,
@@ -1803,6 +2318,13 @@
         &engine,
         toScriptValueEnumProjectionRenderingHint,
         fromScriptValueEnumProjectionRenderingHint,
+        ctor.property(QString::fromLatin1("prototype"))
+    );
+
+    qScriptRegisterMetaType<RS::OrthoMode>(
+        &engine,
+        toScriptValueEnumOrthoMode,
+        fromScriptValueEnumOrthoMode,
         ctor.property(QString::fromLatin1("prototype"))
     );
 
@@ -1904,6 +2426,13 @@
         ctor.property(QString::fromLatin1("prototype"))
     );
 
+    qScriptRegisterMetaType<RS::KnownVariableType>(
+        &engine,
+        toScriptValueEnumKnownVariableType,
+        fromScriptValueEnumKnownVariableType,
+        ctor.property(QString::fromLatin1("prototype"))
+    );
+
     qScriptRegisterMetaType<RS::BooleanOperation>(
         &engine,
         toScriptValueEnumBooleanOperation,
@@ -1936,6 +2465,13 @@
         &engine,
         toScriptValueEnumEndType,
         fromScriptValueEnumEndType,
+        ctor.property(QString::fromLatin1("prototype"))
+    );
+
+    qScriptRegisterMetaType<RS::Easing>(
+        &engine,
+        toScriptValueEnumEasing,
+        fromScriptValueEnumEasing,
         ctor.property(QString::fromLatin1("prototype"))
     );
 
@@ -2098,6 +2634,84 @@
         
     
     if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNumber() || 
+            context->argument(0).isString() || 
+            context->argument(0).isBool() || 
+            context->argument(0).isArray() || 
+            context->argument(0).isNull() || 
+            context->argument(0).isUndefined()
+        ) /* type: QVariant */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNumber() || 
+            context->argument(1).isString() || 
+            context->argument(1).isBool() || 
+            context->argument(1).isArray() || 
+            context->argument(1).isNull() || 
+            context->argument(1).isUndefined()
+        ) /* type: QVariant */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable or pointer
+                    QVariant
+                    a0 =
+                    qscriptvalue_cast<
+                    QVariant
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                
+                    // argument isCopyable or pointer
+                    QVariant
+                    a1 =
+                    qscriptvalue_cast<
+                    QVariant
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RS::
+       compare(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
     2 && (
             context->argument(0).isVariant() || 
             context->argument(0).isQObject() || 
@@ -2161,6 +2775,84 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QPair < QVariant , RPropertyAttributes > */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: QPair < QVariant , RPropertyAttributes > */
+     && (
+            context->argument(2).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    QPair < QVariant , RPropertyAttributes >*
+                    ap0 =
+                    qscriptvalue_cast<
+                    QPair < QVariant , RPropertyAttributes >*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RS: Argument 0 is not of type QPair < QVariant , RPropertyAttributes >*.",
+                               context);                    
+                    }
+                    QPair < QVariant , RPropertyAttributes >& a0 = *ap0;
+                
+                    // argument is reference
+                    QPair < QVariant , RPropertyAttributes >*
+                    ap1 =
+                    qscriptvalue_cast<
+                    QPair < QVariant , RPropertyAttributes >*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if( ap1 == NULL ){
+                           return REcmaHelper::throwError("RS: Argument 1 is not of type QPair < QVariant , RPropertyAttributes >*.",
+                               context);                    
+                    }
+                    QPair < QVariant , RPropertyAttributes >& a1 = *ap1;
+                
+                    // argument isStandardType
+                    bool
+                    a2 =
+                    (bool)
+                    
+                    context->argument( 2 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RS::
+       compare(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RS.compare().",
                    context);
@@ -2205,6 +2897,45 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaS::getCpuCores", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::getIdealThreadCount
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::getIdealThreadCount", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::getIdealThreadCount";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        RS::
+       getIdealThreadCount();
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.getIdealThreadCount().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::getIdealThreadCount", context, engine);
             return result;
         }
          QScriptValue
@@ -2361,6 +3092,56 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaS::getWindowManagerId", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::showInFileManager
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::showInFileManager", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::showInFileManager";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RS::
+       showInFileManager(a0);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.showInFileManager().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::showInFileManager", context, engine);
             return result;
         }
          QScriptValue
@@ -2615,6 +3396,647 @@
             //REcmaHelper::functionEnd("REcmaS::getLinetypeList", context, engine);
             return result;
         }
+         QScriptValue
+        REcmaS::sortAlphanumerical
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::sortAlphanumerical", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::sortAlphanumerical";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isArray()
+        ) /* type: QStringList */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isArray or QVariantMap
+                    QStringList
+                    a0;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(0),
+                        a0
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QStringList'
+    QStringList cppResult =
+        RS::
+       sortAlphanumerical(a0);
+        // return type: QStringList
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.sortAlphanumerical().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::sortAlphanumerical", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::compareChunkify
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::compareChunkify", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::compareChunkify";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QStringList'
+    QStringList cppResult =
+        RS::
+       compareChunkify(a0);
+        // return type: QStringList
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.compareChunkify().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::compareChunkify", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::compareAlphanumerical
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::compareAlphanumerical", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::compareAlphanumerical";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        RS::
+       compareAlphanumerical(a0
+        ,
+    a1);
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.compareAlphanumerical().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::compareAlphanumerical", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::lessThanAlphanumerical
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::lessThanAlphanumerical", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::lessThanAlphanumerical";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+     && (
+            context->argument(1).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+                    // argument isStandardType
+                    QString
+                    a1 =
+                    (QString)
+                    
+                    context->argument( 1 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        RS::
+       lessThanAlphanumerical(a0
+        ,
+    a1);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.lessThanAlphanumerical().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::lessThanAlphanumerical", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::getFontFamily
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::getFontFamily", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::getFontFamily";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QTextCharFormat */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    QTextCharFormat*
+                    ap0 =
+                    qscriptvalue_cast<
+                    QTextCharFormat*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RS: Argument 0 is not of type QTextCharFormat*.",
+                               context);                    
+                    }
+                    QTextCharFormat& a0 = *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        RS::
+       getFontFamily(a0);
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.getFontFamily().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::getFontFamily", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::getPageSizeId
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::getPageSizeId", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::getPageSizeId";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        RS::
+       getPageSizeId(a0);
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.getPageSizeId().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::getPageSizeId", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::getPageSize
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::getPageSize", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::getPageSize";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QSizeF'
+    QSizeF cppResult =
+        RS::
+       getPageSize(a0);
+        // return type: QSizeF
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.getPageSize().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::getPageSize", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::setUtf8Codec
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::setUtf8Codec", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::setUtf8Codec";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QTextStream */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is reference
+                    QTextStream*
+                    ap0 =
+                    qscriptvalue_cast<
+                    QTextStream*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if( ap0 == NULL ){
+                           return REcmaHelper::throwError("RS: Argument 0 is not of type QTextStream*.",
+                               context);                    
+                    }
+                    QTextStream& a0 = *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    RS::
+       setUtf8Codec(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.setUtf8Codec().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::setUtf8Codec", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::escape
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::escape", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::escape";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isString()
+        ) /* type: QString */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    QString
+                    a0 =
+                    (QString)
+                    
+                    context->argument( 0 ).
+                    toString();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QString'
+    QString cppResult =
+        RS::
+       escape(a0);
+        // return type: QString
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.escape().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::escape", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::getScreenCount
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::getScreenCount", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::getScreenCount";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        RS::
+       getScreenCount();
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.getScreenCount().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::getScreenCount", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::getAvailableGeometry
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::getAvailableGeometry", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::getAvailableGeometry";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'QSize'
+    QSize cppResult =
+        RS::
+       getAvailableGeometry(a0);
+        // return type: QSize
+                // not standard type nor reference
+                result = qScriptValueFromValue(engine, cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.getAvailableGeometry().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::getAvailableGeometry", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaS::getMetaType
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaS::getMetaType", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaS::getMetaType";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNumber() || 
+            context->argument(0).isString() || 
+            context->argument(0).isBool() || 
+            context->argument(0).isArray() || 
+            context->argument(0).isNull() || 
+            context->argument(0).isUndefined()
+        ) /* type: QVariant */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable or pointer
+                    QVariant
+                    a0 =
+                    qscriptvalue_cast<
+                    QVariant
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        RS::
+       getMetaType(a0);
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RS.getMetaType().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaS::getMetaType", context, engine);
+            return result;
+        }
          QScriptValue REcmaS::toString
     (QScriptContext *context, QScriptEngine *engine)
     
@@ -2692,6 +4114,16 @@
 
 
         }
+         QScriptValue REcmaS::toScriptValueEnumMetaType(QScriptEngine* engine, const RS::MetaType& value)
+    
+        {
+            return QScriptValue(engine, (int)value);
+        }
+         void REcmaS::fromScriptValueEnumMetaType(const QScriptValue& value, RS::MetaType& out)
+    
+        {
+            out = qvariant_cast<RS::MetaType>(value.toVariant());
+        }
          QScriptValue REcmaS::toScriptValueEnumMessageType(QScriptEngine* engine, const RS::MessageType& value)
     
         {
@@ -2721,6 +4153,16 @@
     
         {
             out = qvariant_cast<RS::ProjectionRenderingHint>(value.toVariant());
+        }
+         QScriptValue REcmaS::toScriptValueEnumOrthoMode(QScriptEngine* engine, const RS::OrthoMode& value)
+    
+        {
+            return QScriptValue(engine, (int)value);
+        }
+         void REcmaS::fromScriptValueEnumOrthoMode(const QScriptValue& value, RS::OrthoMode& out)
+    
+        {
+            out = qvariant_cast<RS::OrthoMode>(value.toVariant());
         }
          QScriptValue REcmaS::toScriptValueEnumSide(QScriptEngine* engine, const RS::Side& value)
     
@@ -2862,6 +4304,16 @@
         {
             out = qvariant_cast<RS::KnownVariable>(value.toVariant());
         }
+         QScriptValue REcmaS::toScriptValueEnumKnownVariableType(QScriptEngine* engine, const RS::KnownVariableType& value)
+    
+        {
+            return QScriptValue(engine, (int)value);
+        }
+         void REcmaS::fromScriptValueEnumKnownVariableType(const QScriptValue& value, RS::KnownVariableType& out)
+    
+        {
+            out = qvariant_cast<RS::KnownVariableType>(value.toVariant());
+        }
          QScriptValue REcmaS::toScriptValueEnumBooleanOperation(QScriptEngine* engine, const RS::BooleanOperation& value)
     
         {
@@ -2911,5 +4363,15 @@
     
         {
             out = qvariant_cast<RS::EndType>(value.toVariant());
+        }
+         QScriptValue REcmaS::toScriptValueEnumEasing(QScriptEngine* engine, const RS::Easing& value)
+    
+        {
+            return QScriptValue(engine, (int)value);
+        }
+         void REcmaS::fromScriptValueEnumEasing(const QScriptValue& value, RS::Easing& out)
+    
+        {
+            out = qvariant_cast<RS::Easing>(value.toVariant());
         }
         

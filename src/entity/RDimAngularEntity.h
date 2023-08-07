@@ -29,7 +29,7 @@ class RDocument;
 class RExporter;
 
 /**
- * Aligned dimension entity class.
+ * Angular dimension entity base class.
  *
  * \scriptable
  * \sharedPointerSupport
@@ -43,6 +43,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -60,19 +61,45 @@ public:
     static RPropertyTypeId PropertyUpperTolerance;
     static RPropertyTypeId PropertyLowerTolerance;
     static RPropertyTypeId PropertyMeasuredValue;
-    static RPropertyTypeId PropertyFontName;
 
-    static RPropertyTypeId PropertyExtensionLine1StartX;
-    static RPropertyTypeId PropertyExtensionLine1StartY;
-    static RPropertyTypeId PropertyExtensionLine1StartZ;
+    static RPropertyTypeId PropertyDimscale;
+    //static RPropertyTypeId PropertyDimlfac;
+    static RPropertyTypeId PropertyDimtxt;
+    static RPropertyTypeId PropertyDimgap;
+    static RPropertyTypeId PropertyDimasz;
+    //static RPropertyTypeId PropertyDimdli;
+    static RPropertyTypeId PropertyDimexe;
+    static RPropertyTypeId PropertyDimexo;
+    static RPropertyTypeId PropertyDimtad;
+    static RPropertyTypeId PropertyDimtih;
+    static RPropertyTypeId PropertyDimtsz;
+    //static RPropertyTypeId PropertyDimlunit;
+    //static RPropertyTypeId PropertyDimdec;
+    static RPropertyTypeId PropertyDimdsep;
+    //static RPropertyTypeId PropertyDimzin;
+    static RPropertyTypeId PropertyDimaunit;
+    static RPropertyTypeId PropertyDimadec;
+    static RPropertyTypeId PropertyDimazin;
+    static RPropertyTypeId PropertyArchTick;
+    static RPropertyTypeId PropertyDimclrt;
+
+    //static RPropertyTypeId PropertyDimScale;
+    static RPropertyTypeId PropertyDimBlockName;
+    static RPropertyTypeId PropertyAutoTextPos;
+    static RPropertyTypeId PropertyFontName;
+    static RPropertyTypeId PropertyArrow1Flipped;
+    static RPropertyTypeId PropertyArrow2Flipped;
+
+    static RPropertyTypeId PropertyExtLineFix;
+    static RPropertyTypeId PropertyExtLineFixLength;
+
+    static RPropertyTypeId PropertyCenterX;
+    static RPropertyTypeId PropertyCenterY;
+    static RPropertyTypeId PropertyCenterZ;
 
     static RPropertyTypeId PropertyExtensionLine1EndX;
     static RPropertyTypeId PropertyExtensionLine1EndY;
     static RPropertyTypeId PropertyExtensionLine1EndZ;
-
-    static RPropertyTypeId PropertyExtensionLine2StartX;
-    static RPropertyTypeId PropertyExtensionLine2StartY;
-    static RPropertyTypeId PropertyExtensionLine2StartZ;
 
     static RPropertyTypeId PropertyExtensionLine2EndX;
     static RPropertyTypeId PropertyExtensionLine2EndY;
@@ -83,44 +110,13 @@ public:
     static RPropertyTypeId PropertyDimArcPositionZ;
 
 public:
-    RDimAngularEntity(RDocument* document, const RDimAngularData& data);
+    RDimAngularEntity(RDocument* document);
     virtual ~RDimAngularEntity();
 
     static void init();
 
-    static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RDimAngularEntity));
-    }
-
-    virtual RDimAngularEntity* clone() const {
-        return new RDimAngularEntity(*this);
-    }
-
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
-        RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
-            RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
-
-    virtual RDimAngularData& getData() {
-        return data;
-    }
-
-    void setData(RDimAngularData& d) {
-        data = d;
-    }
-
-    virtual const RDimAngularData& getData() const {
-        return data;
-    }
-
-    void setExtensionLine1Start(const RVector& p) {
-        getData().setExtensionLine1Start(p);
-    }
-
-    RVector getExtensionLine1Start() const {
-        return getData().getExtensionLine1Start();
-    }
+    virtual RDimAngularData& getData() = 0;
+    virtual const RDimAngularData& getData() const = 0;
 
     void setExtensionLine1End(const RVector& p) {
         getData().setExtensionLine1End(p);
@@ -128,14 +124,6 @@ public:
 
     RVector getExtensionLine1End() const {
         return getData().getExtensionLine1End();
-    }
-
-    void setExtensionLine2Start(const RVector& p) {
-        getData().setExtensionLine2Start(p);
-    }
-
-    RVector getExtensionLine2Start() const {
-        return getData().getExtensionLine2Start();
     }
 
     void setExtensionLine2End(const RVector& p) {
@@ -154,11 +142,15 @@ public:
         return getData().getDimArcPosition();
     }
 
+    virtual RArc getDimensionArc() const {
+        return getData().getDimensionArc();
+    }
+
 protected:
     virtual void print(QDebug dbg) const;
 
-protected:
-    RDimAngularData data;
+//protected:
+    //RDimAngularData data;
 };
 
 Q_DECLARE_METATYPE(RDimAngularEntity*)

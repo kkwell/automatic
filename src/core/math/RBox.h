@@ -24,9 +24,12 @@
 
 #include <QRectF>
 
+#include "RShape.h"
 #include "RVector.h"
-#include "RTriangle.h"
+//#include "RTriangle.h"
 
+class RLine;
+class RTriangle;
 class RPolyline;
 
 #define RDEFAULT_RBOX RBox()
@@ -52,6 +55,9 @@ public:
     bool isValid() const;
     bool isSane() const;
 
+    bool equalsFuzzy(const RBox& b, double tol = RS::PointTolerance) const;
+    bool equalsFuzzy2D(const RBox& b, double tol = RS::PointTolerance) const;
+
     RBox get2D() const {
         return RBox(c1.get2D(), c2.get2D());
     }
@@ -59,6 +65,7 @@ public:
     double getWidth() const;
     double getHeight() const;
     RVector getSize() const;
+    double getArea() const;
     RVector getCenter() const;
     RVector getMinimum() const;
     RVector getMaximum() const;
@@ -104,8 +111,10 @@ public:
 
     RBox& grow(double offset);
     RBox& growXY(double offset);
+    RBox& growXY(double offsetX, double offsetY);
 
     void move(const RVector& offset);
+    bool scaleByReference(const RVector& referencePoint, const RVector& targetPoint, bool keepAspectRatio = false, bool fromCenter = false);
 
     QRectF toQRectF() const;
 
@@ -113,6 +122,18 @@ public:
     bool operator !=(const RBox& other) const {
         return !operator==(other);
     }
+
+    void transform(QTransform& t);
+
+#if QT_VERSION >= 0x060000
+    /**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */
+    RBox copy() const {
+        return *this;
+    }
+#endif
 
 public:
     /**

@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Help.js");
+include("scripts/Help/Help.js");
 
 function ReportBug(guiAction) {
     Help.call(this, guiAction);
@@ -28,6 +28,6 @@ ReportBug.prototype = new Help();
 ReportBug.prototype.beginEvent = function() {
     Help.prototype.beginEvent.call(this);
 
-    Help.openUrl("http://www.qcad.org/bugtracker/index.php?do=newtask&project=1");
+    Help.openUrl("https://qcad.org/bugtracker/index.php?do=newtask&project=1");
 };
 

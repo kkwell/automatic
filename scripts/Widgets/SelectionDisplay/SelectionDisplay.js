@@ -32,7 +32,7 @@ SelectionDisplay.postInit = function(basePath) {
     var appWin = EAction.getMainWindow();
     var adapter = new RSelectionListenerAdapter();
     appWin.addSelectionListener(adapter);
-    adapter.selectionChanged.connect(SelectionDisplay, "selectionChanged");
+    adapter.selectionChanged.connect(SelectionDisplay.selectionChanged);
 };
 
 SelectionDisplay.selectionChanged = function(documentInterface) {
@@ -67,7 +67,7 @@ SelectionDisplay.selectionChanged = function(documentInterface) {
         if (entityId == undefined || entityId == "") {
             continue;
         }
-        var entity = doc.queryEntity(entityId);
+        var entity = doc.queryEntityDirect(entityId);
         typesSingular.push(entity.getType());
         layers.push(entity.getLayerName());
     }
@@ -78,14 +78,14 @@ SelectionDisplay.selectionChanged = function(documentInterface) {
     if (typesSingular.length == 1) {
         var typeStr = entityTypeToString(typesSingular[0], count>1);
         if (layers.length == 1 ) {
-            str = qsTr("%1 %2 on Layer '%3'").arg(entities.length).arg(typeStr).arg(layers[0]);
+            str = qsTr("%1 %2 on Layer \"%3\"").arg(entities.length).arg(typeStr).arg(layers[0]);
         }
         else {
             str = qsTr("%1 %2 on %3 Layers").arg(entities.length).arg(typeStr).arg(layers.length);
         }
     } else {
         if (layers.length == 1 ) {
-            str = qsTr("%n Entities on Layer '%1'", "", entities.length).arg(layers[0]);
+            str = qsTr("%n Entities on Layer \"%1\"", "", entities.length).arg(layers[0]);
         }
         else {
             str = qsTr("%n Entities", "", entities.length) + " " + qsTr("on") + " " + qsTr("%n Layers", "", layers.length);

@@ -28,7 +28,11 @@
 #include "RPluginInfo.h"
 
 class QString;
+#if QT_VERSION < 0x060000
 class QScriptEngine;
+#else
+class RScriptHandler;
+#endif
 
 /**
  * Interface for all C++ QCAD plugins.
@@ -71,6 +75,7 @@ public:
      */
     virtual void postInit(RPluginInterface::InitStatus status) = 0;
 
+#if QT_VERSION < 0x060000
     /**
      * Called whenever a new script engine is instantiated.
      * Implementations may register their own script extensions by making
@@ -79,6 +84,16 @@ public:
      * \nonscriptable
      */
     virtual void initScriptExtensions(QScriptEngine& engine) = 0;
+#else
+    virtual void initScriptExtensions(RScriptHandler& handler) {}
+#endif
+
+    /**
+     * Called when the user chosen language changed.
+     *
+     * \nonscriptable
+     */
+    virtual void initTranslations() = 0;
 
     /**
      * \return An RPluginInfo object with at least the following keys:
@@ -91,6 +106,11 @@ public:
      * This is typically used by an about dialog or debugging / developer tools.
      */
     virtual RPluginInfo getPluginInfo() = 0;
+
+    /**
+     * \return True if the plugin license is valid.
+     */
+    virtual bool checkLicense() = 0;
 };
 
 QT_BEGIN_NAMESPACE

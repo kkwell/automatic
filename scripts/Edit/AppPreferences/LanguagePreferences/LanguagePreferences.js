@@ -17,11 +17,18 @@
  * along with QCAD.
  */
 
-include("../../EAction.js");
-include("../../WidgetFactory.js");
+include("scripts/EAction.js");
+include("scripts/WidgetFactory.js");
+
+function LanguagePreferences(guiAction) {
+    //EAction.call(this, guiAction);
+}
+
+LanguagePreferences.prototype = {}; //new EAction();
 
 LanguagePreferences.localLanguageName = [];
 LanguagePreferences.localLanguageName["cs"] = "Čeština";
+LanguagePreferences.localLanguageName["da"] = "Dansk";
 LanguagePreferences.localLanguageName["de"] = "Deutsch";
 LanguagePreferences.localLanguageName["de_DE"] = "Deutsch";
 LanguagePreferences.localLanguageName["en"] = "English";
@@ -33,7 +40,9 @@ LanguagePreferences.localLanguageName["hu"] = "Magyar";
 LanguagePreferences.localLanguageName["hr"] = "Hrvatski";
 LanguagePreferences.localLanguageName["it"] = "Italiano";
 LanguagePreferences.localLanguageName["ja"] = "日本語";
+LanguagePreferences.localLanguageName["ko"] = "한국어";
 LanguagePreferences.localLanguageName["lt"] = "Lietuvių kalba";
+LanguagePreferences.localLanguageName["nb"] = "Norsk";
 LanguagePreferences.localLanguageName["nl"] = "Nederlands";
 LanguagePreferences.localLanguageName["pl"] = "Polski";
 LanguagePreferences.localLanguageName["pt"] = "Português";
@@ -43,14 +52,10 @@ LanguagePreferences.localLanguageName["sk"] = "Slovenčina";
 LanguagePreferences.localLanguageName["sl"] = "Slovenščina";
 LanguagePreferences.localLanguageName["sv"] = "Svenska";
 LanguagePreferences.localLanguageName["tr"] = "Türkçe";
-LanguagePreferences.localLanguageName["zh_TW"] = "臺灣話";
-LanguagePreferences.localLanguageName["zh_ZN"] = "普通话";
-
-function LanguagePreferences(guiAction) {
-    EAction.call(this, guiAction);
-}
-
-LanguagePreferences.prototype = new EAction();
+LanguagePreferences.localLanguageName["uk"] = "Українська";
+LanguagePreferences.localLanguageName["zh_TW"] = "繁體中文";
+LanguagePreferences.localLanguageName["zh"] = "简体中文";
+LanguagePreferences.localLanguageName["zh_CN"] = "简体中文";
 
 LanguagePreferences.getPreferencesCategory = function() {
     return [qsTr("Language Settings"), qsTr("Language")];
@@ -68,9 +73,17 @@ LanguagePreferences.initPreferences = function(pageWidget, calledByPrefDialog, d
     }
     language.model().sort(0);
     
-    language["currentIndexChanged(QString)"].connect(this, function(text) {
-        RSettings.setValue("LibraryBrowser/RebuildDatabase", true);
-    });
+//    if (RSettings.getQtVersion() >= 0x060000) {
+//        language.currentTextChanged.connect(this, function(text) {
+//            RSettings.setValue("LibraryBrowser/RebuildDatabase", true);
+//        });
+//    }
+//    else {
+//        language["currentIndexChanged(QString)"].connect(this, function(text) {
+//            RSettings.setValue("LibraryBrowser/RebuildDatabase", true);
+//        });
+//    }
+
     
 //  var contents = pageWidget.findChild("LanguagePage");
 //  WidgetFactory.restoreState(pageWidget);
@@ -115,7 +128,7 @@ LanguagePreferences.getLanguages = function(dirName) {
     var codes = [];
     
     var dir = new QDir(dirName);
-    var sortFlags = new QDir.SortFlags(QDir.NoSort);
+    var sortFlags = makeQDirSortFlags(QDir.NoSort);
     /*
     var dirFilter = new QDir.Filters(QDir.NoDotAndDotDot, QDir.Readable,
             QDir.Dirs);
@@ -126,7 +139,7 @@ LanguagePreferences.getLanguages = function(dirName) {
     }
     */
     
-    var fileFilter = new QDir.Filters(QDir.Readable, QDir.Files);
+    var fileFilter = makeQDirFilters(QDir.Readable, QDir.Files);
     var files = dir.entryInfoList(["*.qm"], fileFilter, sortFlags);
     for (var j = 0; j < files.length; ++j) {
         var fileName = files[j].baseName();

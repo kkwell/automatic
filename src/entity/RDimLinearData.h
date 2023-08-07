@@ -87,8 +87,7 @@ public:
 //        Q_UNUSED(newDimLineGrip)
 //    }
 
-    virtual bool moveReferencePoint(const RVector& referencePoint, 
-        const RVector& targetPoint);
+    virtual bool moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
     virtual bool move(const RVector& offset);
     virtual bool rotate(double rotation, const RVector& center);
@@ -96,7 +95,13 @@ public:
     virtual bool mirror(const RLine& axis);
     virtual bool stretch(const RPolyline& area, const RVector& offset);
 
-    virtual void updateTextData() const;
+    //virtual void updateTextData() const;
+
+    virtual void to2D() {
+        RDimensionData::to2D();
+        extensionPoint1.z = 0.0;
+        extensionPoint2.z = 0.0;
+    }
 
 protected:
     /** Definition point. Startpoint of the first extension line. */

@@ -34,6 +34,10 @@
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RPoint.h"</cpp:file></cpp:include>
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RVector.h"</cpp:file></cpp:include>
 
+<cpp:ifndef>#<cpp:directive>ifndef</cpp:directive> <name>RDEFAULT_MIN1</name></cpp:ifndef>
+<cpp:define>#<cpp:directive>define</cpp:directive> <name>RDEFAULT_MIN1</name> -1</cpp:define>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+
 <comment type="block">/**
  * Stores and manages all data that defines the geometry and
  * appearance of a hatch or solid fill entity.
@@ -69,9 +73,15 @@
         <return>return <expr><name>pattern</name></expr>;</return>
     }</block></function>
 
+    <function><type><name>void</name></type> <name>setCustomPattern</name><parameter_list>(<param><decl><type><name>const</name> <name>RPattern</name>&amp;</type> <name>p</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>pattern</name> = <name>p</name></expr>;</expr_stmt>
+    }</block></function>
+
     <function><type><name>virtual</name> <name>bool</name></type> <name>cloneOnChange</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
         <comment type="line">// force clone to preserve custom pattern for undo:</comment>
-        <return>return <expr><call><name>hasCustomPattern</name><argument_list>()</argument_list></call></expr>;</return>
+        <comment type="line">//return hasCustomPattern();</comment>
+        <comment type="line">// 20190510: always clone (since allowing non-uniform scaling of hatches)</comment>
+        <return>return <expr><name>true</name></expr>;</return>
     }</block></function>
 
     <function_decl><type><name>virtual</name> <name>RBox</name></type> <name>getBoundingBox</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>ignoreEmpty</name>=<init><expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
@@ -82,7 +92,7 @@
 
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RRefPoint</name></argument>&gt;</argument_list></name></type> <name>getReferencePoints</name><parameter_list>(<param><decl><type><name><name>RS</name>::<name>ProjectionRenderingHint</name></name></type> <name>hint</name> =<init> <expr><name><name>RS</name>::<name>RenderTop</name></name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
-    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>moveReferencePoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>targetPoint</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>moveReferencePoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>referencePoint</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>targetPoint</name></decl></param>, <param><decl><type><name><name>Qt</name>::<name>KeyboardModifiers</name></name></type> <name>modifiers</name> =<init> <expr><name><name>Qt</name>::<name>NoModifier</name></name></expr></init></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>move</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>offset</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>bool</name></type> <name>rotate</name><parameter_list>(<param><decl><type><name>double</name></type> <name>rotation</name></decl></param>, <param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name> =<init> <expr><name>RDEFAULT_RVECTOR</name></expr></init></decl></param>)</parameter_list>;</function_decl>
@@ -94,7 +104,7 @@
         <return>return <expr><name>NULL</name></expr>;</return>
     }</block></function>
 
-    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getShapes</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>segment</name> =<init> <expr><name>false</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getShapes</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>queryBox</name> =<init> <expr><name>RDEFAULT_RBOX</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>ignoreComplex</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>bool</name></type> <name>segment</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>QList<argument_list>&lt;<argument><name><name>RObject</name>::<name>Id</name></name></argument>&gt;</argument_list></name>*</type> <name>entityIds</name> =<init> <expr><name>NULL</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getExploded</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function><type><name>bool</name></type> <name>isSolid</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
@@ -128,9 +138,11 @@
         <return>return <expr><name>originPoint</name></expr>;</return>
     }</block></function>
 
-    <function><type><name>void</name></type> <name>setOriginPoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>op</name></decl></param>)</parameter_list> <block>{
+    <function><type><name>void</name></type> <name>setOriginPoint</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>op</name></decl></param>, <param><decl><type><name>bool</name></type> <name>clearCustom</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list> <block>{
         <expr_stmt><expr><name>originPoint</name> = <name>op</name></expr>;</expr_stmt>
-        <constructor_decl><name>clearCustomPattern</name><parameter_list>()</parameter_list>;</constructor_decl>
+        <if>if <condition>(<expr><name>clearCustom</name></expr>)</condition><then> <block>{
+            <constructor_decl><name>clearCustomPattern</name><parameter_list>()</parameter_list>;</constructor_decl>
+        }</block></then></if>
     }</block></function>
 
     <function><type><name>QString</name></type> <name>getPatternName</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
@@ -142,14 +154,27 @@
         <constructor_decl><name>clearCustomPattern</name><parameter_list>()</parameter_list>;</constructor_decl>
     }</block></function>
 
-    <function><type><name>void</name></type> <name>clearCustomPattern</name><parameter_list>()</parameter_list> <block>{
-        <expr_stmt><expr><name>pattern</name>.<call><name>clear</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
-        <constructor_decl><name>update</name><parameter_list>()</parameter_list>;</constructor_decl>
+    <function><type><name>int</name></type> <name>getTransparency</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <return>return <expr><name>transparency</name></expr>;</return>
     }</block></function>
+
+    <function><type><name>void</name></type> <name>setTransparency</name><parameter_list>(<param><decl><type><name>int</name></type> <name>t</name></decl></param>)</parameter_list> <block>{
+        <expr_stmt><expr><name>transparency</name> = <name>t</name></expr>;</expr_stmt>
+    }</block></function>
+
+    <function_decl><type><name>double</name></type> <name>getLength</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>double</name></type> <name>getArea</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function_decl><type><name>void</name></type> <name>clearCustomPattern</name><parameter_list>()</parameter_list>;</function_decl>
 
     <function_decl><type><name>void</name></type> <name>newLoop</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>cancelLoop</name><parameter_list>()</parameter_list>;</function_decl>
-    <function_decl><type><name>void</name></type> <name>addBoundary</name><parameter_list>(<param><decl><type><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></type> <name>shape</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>addBoundary</name><parameter_list>(<param><decl><type><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></type> <name>shape</name></decl></param>, <param><decl><type><name>bool</name></type> <name>addAutoLoops</name> =<init> <expr><name>true</name></expr></init></decl></param>)</parameter_list>;</function_decl>
+    <function><type><name>void</name></type> <name>addBoundaryShape</name><parameter_list>(<param><decl><type><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></type> <name>shape</name></decl></param>, <param><decl><type><name>int</name></type> <name>loop</name></decl></param>)</parameter_list> <block>{
+        <if>if <condition>(<expr><name>loop</name> &lt; <name>boundary</name>.<call><name>length</name><argument_list>()</argument_list></call></expr>)</condition><then> <block>{
+            <expr_stmt><expr><name><name>boundary</name><index>[<expr><name>loop</name></expr>]</index></name>.<call><name>append</name><argument_list>(<argument><expr><name>shape</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+        }</block></then></if>
+    }</block></function>
     <function_decl><type><name>RPainterPath</name></type> <name>getBoundaryPath</name><parameter_list>(<param><decl><type><name>double</name></type> <name>pixelSizeHint</name> =<init> <expr><name>RDEFAULT_MIN1</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
     <function_decl><type><name>virtual</name> <name>QList<argument_list>&lt;<argument><name>RPainterPath</name></argument>&gt;</argument_list></name></type> <name>getPainterPaths</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>draft</name> =<init> <expr><name>false</name></expr></init></decl></param>, <param><decl><type><name>double</name></type> <name>pixelSizeHint</name> =<init> <expr><name>RDEFAULT_MIN1</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
@@ -171,12 +196,35 @@
 
     <function_decl><type><name>QList<argument_list>&lt;<argument><name>QSharedPointer<argument_list>&lt;<argument><name>RShape</name></argument>&gt;</argument_list></name></argument> &gt;</argument_list></name></type> <name>getLoopBoundary</name><parameter_list>(<param><decl><type><name>int</name></type> <name>index</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
-    <function_decl><type><name>QList<argument_list>&lt;<argument><name>RPolyline</name></argument>&gt;</argument_list></name></type> <name>getBoundaryAsPolylines</name><parameter_list>(<param><decl><type><name>double</name></type> <name>segmentLength</name></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+    <function_decl><type><name>QList<argument_list>&lt;<argument><name>RPolyline</name></argument>&gt;</argument_list></name></type> <name>getBoundaryAsPolylines</name><parameter_list>(<param><decl><type><name>double</name></type> <name>segmentLength</name> =<init> <expr><name>RDEFAULT_MIN1</name></expr></init></decl></param>)</parameter_list> <specifier>const</specifier>;</function_decl>
+
+    <function><type><name>void</name></type> <name>autoCloseLoops</name><parameter_list>()</parameter_list> <block>{
+        <if>if <condition>(<expr><name>hatchProxy</name>!=<name>NULL</name></expr>)</condition><then> <block>{
+            <expr_stmt><expr><name>hatchProxy</name>-&gt;<call><name>autoCloseLoops</name><argument_list>(<argument><expr>*<name>this</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+        }</block></then></if>
+    }</block></function>
 
     <function_decl><type><name>int</name></type> <name>getComplexity</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
     <function><type><name>void</name></type> <name>setPattern</name><parameter_list>(<param><decl><type><name>const</name> <name>RPattern</name>&amp;</type> <name>p</name></decl></param>)</parameter_list> <block>{
         <expr_stmt><expr><name>pattern</name> = <name>p</name></expr>;</expr_stmt>
+    }</block></function>
+
+    <function><type><name>virtual</name> <name>RColor</name></type> <name>getColor</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{
+        <decl_stmt><decl><type><name>RColor</name></type> <name>c</name> =<init> <expr><call><name><name>REntityData</name>::<name>getColor</name></name><argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+        <expr_stmt><expr><name>c</name>.<call><name>setAlpha</name><argument_list>(<argument><expr><name>transparency</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+        <return>return <expr><name>c</name></expr>;</return>
+    }</block></function>
+
+    <function><type><name>virtual</name> <name>RColor</name></type> <name>getColor</name><parameter_list>(<param><decl><type><name>const</name> <name>RColor</name>&amp;</type> <name>unresolvedColor</name></decl></param>, <param><decl><type><name>const</name> <name>QStack<argument_list>&lt;<argument><name>REntity</name> *</argument>&gt;</argument_list></name>&amp;</type> <name>blockRefStack</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <decl_stmt><decl><type><name>RColor</name></type> <name>c</name> =<init> <expr><call><name><name>REntityData</name>::<name>getColor</name></name><argument_list>(<argument><expr><name>unresolvedColor</name></expr></argument>, <argument><expr><name>blockRefStack</name></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
+        <expr_stmt><expr><name>c</name>.<call><name>setAlpha</name><argument_list>(<argument><expr><name>transparency</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+        <return>return <expr><name>c</name></expr>;</return>
+    }</block></function>
+    <function><type><name>virtual</name> <name>RColor</name></type> <name>getColor</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>resolve</name></decl></param>, <param><decl><type><name>const</name> <name>QStack<argument_list>&lt;<argument><name>REntity</name> *</argument>&gt;</argument_list></name>&amp;</type> <name>blockRefStack</name></decl></param>)</parameter_list> <specifier>const</specifier> <block>{
+        <decl_stmt><decl><type><name>RColor</name></type> <name>c</name> =<init> <expr><call><name><name>REntityData</name>::<name>getColor</name></name><argument_list>(<argument><expr><name>resolve</name></expr></argument>, <argument><expr><name>blockRefStack</name></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
+        <expr_stmt><expr><name>c</name>.<call><name>setAlpha</name><argument_list>(<argument><expr><name>transparency</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+        <return>return <expr><name>c</name></expr>;</return>
     }</block></function>
 
     <function><type><name>static</name> <name>bool</name></type> <name>hasProxy</name><parameter_list>()</parameter_list> <block>{
@@ -209,6 +257,7 @@
     <decl_stmt><decl><type><name>double</name></type> <name>angle</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>QString</name></type> <name>patternName</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>RVector</name></type> <name>originPoint</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>int</name></type> <name>transparency</name></decl>;</decl_stmt>
 
     <comment type="block">/**
      * Hatch boundary, ordered by loops, in strictly defined order.

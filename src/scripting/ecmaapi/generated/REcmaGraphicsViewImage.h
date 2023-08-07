@@ -48,6 +48,12 @@
 
     // public methods:
     static  QScriptValue
+        getNumThreads
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setNumThreads
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         clear
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -243,7 +249,16 @@
         paintEntities
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        paintEntity
+        paintEntitiesMulti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        paintEntitiesThread
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        paintEntityThread
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        paintOverlay
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getBuffer
@@ -258,12 +273,6 @@
         emitUpdateTextLabel
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        emitDecorateBackground
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
-        emitDecorateForeground
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
         clearBackground
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -273,6 +282,12 @@
         setBackgroundTransform
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        clearOverlay
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        addToOverlay
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         setColorCorrectionOverride
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -280,6 +295,15 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setMinimumLineweight
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getMinimumLineweight
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setMaximumLineweight
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getMaximumLineweight
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setPaintOffset

@@ -97,11 +97,11 @@
             
             REcmaHelper::registerFunction(&engine, proto, mirror, "mirror");
             
-            REcmaHelper::registerFunction(&engine, proto, getShapes, "getShapes");
-            
             REcmaHelper::registerFunction(&engine, proto, getMeasuredValue, "getMeasuredValue");
             
             REcmaHelper::registerFunction(&engine, proto, getAutoLabel, "getAutoLabel");
+            
+            REcmaHelper::registerFunction(&engine, proto, to2D, "to2D");
             
         engine.setDefaultPrototype(
             qMetaTypeId<RDimRadialData*>(), *proto);
@@ -866,6 +866,88 @@
 
 
         
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(1).isVariant() || 
+            context->argument(1).isQObject() || 
+            context->argument(1).isNull()
+        ) /* type: RVector */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: Qt::KeyboardModifiers */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RDimRadialData: Argument 0 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a0 = 
+                    *ap0;
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RVector*
+                    ap1 =
+                    qscriptvalue_cast<
+                    RVector*
+                        >(
+                        context->argument(
+                        1
+                        )
+                    );
+                    if (ap1 == NULL) {
+                           return REcmaHelper::throwError("RDimRadialData: Argument 1 is not of type RVector.",
+                               context);                    
+                    }
+                    RVector 
+                    a1 = 
+                    *ap1;
+                
+                    // argument isStandardType
+                    Qt::KeyboardModifiers
+                    a2 =
+                    (Qt::KeyboardModifiers)
+                    (int)
+                    context->argument( 2 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->moveReferencePoint(a0
+        ,
+    a1
+        ,
+    a2);
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
             {
                return REcmaHelper::throwError("Wrong number/types of arguments for RDimRadialData.moveReferencePoint().",
                    context);
@@ -1200,226 +1282,6 @@
             return result;
         }
          QScriptValue
-        REcmaDimRadialData::getShapes
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaDimRadialData::getShapes", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaDimRadialData::getShapes";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RDimRadialData* self = 
-                        getSelf("getShapes", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    0
-    ){
-    // prepare arguments:
-    
-    // end of arguments
-
-    // call C++ function:
-    // return type 'QList < QSharedPointer < RShape > >'
-    QList < QSharedPointer < RShape > > cppResult =
-        
-               self->getShapes();
-        // return type: QList < QSharedPointer < RShape > >
-                // List of ...:
-                result = REcmaHelper::listToScriptValue(engine, cppResult);
-            
-    } else
-
-
-        
-    
-    if( context->argumentCount() ==
-    1 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RBox */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RBox*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RBox*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimRadialData: Argument 0 is not of type RBox.",
-                               context);                    
-                    }
-                    RBox 
-                    a0 = 
-                    *ap0;
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'QList < QSharedPointer < RShape > >'
-    QList < QSharedPointer < RShape > > cppResult =
-        
-               self->getShapes(a0);
-        // return type: QList < QSharedPointer < RShape > >
-                // List of ...:
-                result = REcmaHelper::listToScriptValue(engine, cppResult);
-            
-    } else
-
-
-        
-    
-    if( context->argumentCount() ==
-    2 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RBox */
-     && (
-            context->argument(1).isBool()
-        ) /* type: bool */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RBox*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RBox*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimRadialData: Argument 0 is not of type RBox.",
-                               context);                    
-                    }
-                    RBox 
-                    a0 = 
-                    *ap0;
-                
-                    // argument isStandardType
-                    bool
-                    a1 =
-                    (bool)
-                    
-                    context->argument( 1 ).
-                    toBool();
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'QList < QSharedPointer < RShape > >'
-    QList < QSharedPointer < RShape > > cppResult =
-        
-               self->getShapes(a0
-        ,
-    a1);
-        // return type: QList < QSharedPointer < RShape > >
-                // List of ...:
-                result = REcmaHelper::listToScriptValue(engine, cppResult);
-            
-    } else
-
-
-        
-    
-    if( context->argumentCount() ==
-    3 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: RBox */
-     && (
-            context->argument(1).isBool()
-        ) /* type: bool */
-     && (
-            context->argument(2).isBool()
-        ) /* type: bool */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument isCopyable and has default constructor and isSimpleClass 
-                    RBox*
-                    ap0 =
-                    qscriptvalue_cast<
-                    RBox*
-                        >(
-                        context->argument(
-                        0
-                        )
-                    );
-                    if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RDimRadialData: Argument 0 is not of type RBox.",
-                               context);                    
-                    }
-                    RBox 
-                    a0 = 
-                    *ap0;
-                
-                    // argument isStandardType
-                    bool
-                    a1 =
-                    (bool)
-                    
-                    context->argument( 1 ).
-                    toBool();
-                
-                    // argument isStandardType
-                    bool
-                    a2 =
-                    (bool)
-                    
-                    context->argument( 2 ).
-                    toBool();
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'QList < QSharedPointer < RShape > >'
-    QList < QSharedPointer < RShape > > cppResult =
-        
-               self->getShapes(a0
-        ,
-    a1
-        ,
-    a2);
-        // return type: QList < QSharedPointer < RShape > >
-                // List of ...:
-                result = REcmaHelper::listToScriptValue(engine, cppResult);
-            
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RDimRadialData.getShapes().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaDimRadialData::getShapes", context, engine);
-            return result;
-        }
-         QScriptValue
         REcmaDimRadialData::getMeasuredValue
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -1515,6 +1377,50 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaDimRadialData::getAutoLabel", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaDimRadialData::to2D
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaDimRadialData::to2D", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaDimRadialData::to2D";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RDimRadialData* self = 
+                        getSelf("to2D", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->to2D();
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RDimRadialData.to2D().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaDimRadialData::to2D", context, engine);
             return result;
         }
          QScriptValue REcmaDimRadialData::toString

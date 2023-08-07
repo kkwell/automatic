@@ -72,6 +72,10 @@
             
             REcmaHelper::registerFunction(&engine, proto, setSecondary, "setSecondary");
             
+            REcmaHelper::registerFunction(&engine, proto, isTertiary, "isTertiary");
+            
+            REcmaHelper::registerFunction(&engine, proto, setTertiary, "setTertiary");
+            
             REcmaHelper::registerFunction(&engine, proto, isIgnore, "isIgnore");
             
             REcmaHelper::registerFunction(&engine, proto, setIgnore, "setIgnore");
@@ -87,6 +91,14 @@
             REcmaHelper::registerFunction(&engine, proto, isEnd, "isEnd");
             
             REcmaHelper::registerFunction(&engine, proto, setEnd, "setEnd");
+            
+            REcmaHelper::registerFunction(&engine, proto, isArrow, "isArrow");
+            
+            REcmaHelper::registerFunction(&engine, proto, setArrow, "setArrow");
+            
+            REcmaHelper::registerFunction(&engine, proto, isSelected, "isSelected");
+            
+            REcmaHelper::registerFunction(&engine, proto, setSelected, "setSelected");
             
             REcmaHelper::registerFunction(&engine, proto, setFlag, "setFlag");
             
@@ -131,6 +143,11 @@
     QScriptValue::ReadOnly);
 
 
+    ctor.setProperty("Tertiary",
+    QScriptValue(RRefPoint::Tertiary),
+    QScriptValue::ReadOnly);
+
+
     ctor.setProperty("Center",
     QScriptValue(RRefPoint::Center),
     QScriptValue::ReadOnly);
@@ -148,6 +165,16 @@
 
     ctor.setProperty("End",
     QScriptValue(RRefPoint::End),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Arrow",
+    QScriptValue(RRefPoint::Arrow),
+    QScriptValue::ReadOnly);
+
+
+    ctor.setProperty("Selected",
+    QScriptValue(RRefPoint::Selected),
     QScriptValue::ReadOnly);
 
 
@@ -603,7 +630,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RRefPoint >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -654,7 +681,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -690,7 +717,7 @@
     ){
     // prepare arguments:
     
-                    // argument isArray
+                    // argument isArray or QVariantMap
                     QList < RVector >
                     a0;
                     REcmaHelper::fromScriptValue(
@@ -833,6 +860,110 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaRefPoint::setSecondary", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaRefPoint::isTertiary
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaRefPoint::isTertiary", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaRefPoint::isTertiary";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RRefPoint* self = 
+                        getSelf("isTertiary", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->isTertiary();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RRefPoint.isTertiary().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaRefPoint::isTertiary", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaRefPoint::setTertiary
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaRefPoint::setTertiary", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaRefPoint::setTertiary";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RRefPoint* self = 
+                        getSelf("setTertiary", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setTertiary(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RRefPoint.setTertiary().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaRefPoint::setTertiary", context, engine);
             return result;
         }
          QScriptValue
@@ -1249,6 +1380,214 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaRefPoint::setEnd", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaRefPoint::isArrow
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaRefPoint::isArrow", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaRefPoint::isArrow";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RRefPoint* self = 
+                        getSelf("isArrow", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->isArrow();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RRefPoint.isArrow().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaRefPoint::isArrow", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaRefPoint::setArrow
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaRefPoint::setArrow", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaRefPoint::setArrow";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RRefPoint* self = 
+                        getSelf("setArrow", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setArrow(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RRefPoint.setArrow().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaRefPoint::setArrow", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaRefPoint::isSelected
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaRefPoint::isSelected", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaRefPoint::isSelected";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RRefPoint* self = 
+                        getSelf("isSelected", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'bool'
+    bool cppResult =
+        
+               self->isSelected();
+        // return type: bool
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RRefPoint.isSelected().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaRefPoint::isSelected", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaRefPoint::setSelected
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaRefPoint::setSelected", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaRefPoint::setSelected";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RRefPoint* self = 
+                        getSelf("setSelected", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isBool()
+        ) /* type: bool */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    bool
+                    a0 =
+                    (bool)
+                    
+                    context->argument( 0 ).
+                    toBool();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setSelected(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RRefPoint.setSelected().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaRefPoint::setSelected", context, engine);
             return result;
         }
          QScriptValue

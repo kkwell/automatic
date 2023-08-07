@@ -57,6 +57,9 @@
         init
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getRtti
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getStaticPropertyTypeIds
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -75,9 +78,6 @@
         getProperty
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        isVisible
-        (QScriptContext* context, QScriptEngine* engine) 
-        ;static  QScriptValue
         exportEntity
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -91,6 +91,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setInvisible
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isSelectable
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

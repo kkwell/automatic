@@ -1,16 +1,20 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-    ts \
+    dir \
     Counter \
     Cross \
     DrawBoundingBox \
+    DrawFmsLanes \
+    LeaderFromText \
     LineBoxJoint \
     LineDove \
     LineRadicalAxis \
     LineSimilarityAxes \
     PointPole \
     PointPowerCenter \
+    PolylineBreakSymbol \
+    TextAlignedLeader \
     TextAlong \
     XLineHorizontal \
     XLineVertical

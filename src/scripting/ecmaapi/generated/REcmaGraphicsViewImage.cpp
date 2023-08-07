@@ -15,6 +15,8 @@
             
                 #include "RGraphicsSceneQt.h"
             
+                #include "RGraphicsSceneDrawable.h"
+            
                 #include "RLine.h"
             
                 #include "RSnap.h"
@@ -79,6 +81,10 @@
 
     // methods:
     
+            REcmaHelper::registerFunction(&engine, proto, getNumThreads, "getNumThreads");
+            
+            REcmaHelper::registerFunction(&engine, proto, setNumThreads, "setNumThreads");
+            
             REcmaHelper::registerFunction(&engine, proto, clear, "clear");
             
             REcmaHelper::registerFunction(&engine, proto, setViewportNumber, "setViewportNumber");
@@ -209,7 +215,13 @@
             
             REcmaHelper::registerFunction(&engine, proto, paintEntities, "paintEntities");
             
-            REcmaHelper::registerFunction(&engine, proto, paintEntity, "paintEntity");
+            REcmaHelper::registerFunction(&engine, proto, paintEntitiesMulti, "paintEntitiesMulti");
+            
+            REcmaHelper::registerFunction(&engine, proto, paintEntitiesThread, "paintEntitiesThread");
+            
+            REcmaHelper::registerFunction(&engine, proto, paintEntityThread, "paintEntityThread");
+            
+            REcmaHelper::registerFunction(&engine, proto, paintOverlay, "paintOverlay");
             
             REcmaHelper::registerFunction(&engine, proto, getBuffer, "getBuffer");
             
@@ -219,21 +231,27 @@
             
             REcmaHelper::registerFunction(&engine, proto, emitUpdateTextLabel, "emitUpdateTextLabel");
             
-            REcmaHelper::registerFunction(&engine, proto, emitDecorateBackground, "emitDecorateBackground");
-            
-            REcmaHelper::registerFunction(&engine, proto, emitDecorateForeground, "emitDecorateForeground");
-            
             REcmaHelper::registerFunction(&engine, proto, clearBackground, "clearBackground");
             
             REcmaHelper::registerFunction(&engine, proto, addToBackground, "addToBackground");
             
             REcmaHelper::registerFunction(&engine, proto, setBackgroundTransform, "setBackgroundTransform");
             
+            REcmaHelper::registerFunction(&engine, proto, clearOverlay, "clearOverlay");
+            
+            REcmaHelper::registerFunction(&engine, proto, addToOverlay, "addToOverlay");
+            
             REcmaHelper::registerFunction(&engine, proto, setColorCorrectionOverride, "setColorCorrectionOverride");
             
             REcmaHelper::registerFunction(&engine, proto, getColorCorrectionOverride, "getColorCorrectionOverride");
             
             REcmaHelper::registerFunction(&engine, proto, setMinimumLineweight, "setMinimumLineweight");
+            
+            REcmaHelper::registerFunction(&engine, proto, getMinimumLineweight, "getMinimumLineweight");
+            
+            REcmaHelper::registerFunction(&engine, proto, setMaximumLineweight, "setMaximumLineweight");
+            
+            REcmaHelper::registerFunction(&engine, proto, getMaximumLineweight, "getMaximumLineweight");
             
             REcmaHelper::registerFunction(&engine, proto, setPaintOffset, "setPaintOffset");
             
@@ -357,6 +375,110 @@
 
     // public methods:
      QScriptValue
+        REcmaGraphicsViewImage::getNumThreads
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::getNumThreads", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::getNumThreads";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGraphicsViewImage* self = 
+                        getSelf("getNumThreads", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'int'
+    int cppResult =
+        
+               self->getNumThreads();
+        // return type: int
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.getNumThreads().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::getNumThreads", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGraphicsViewImage::setNumThreads
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::setNumThreads", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::setNumThreads";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGraphicsViewImage* self = 
+                        getSelf("setNumThreads", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setNumThreads(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.setNumThreads().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::setNumThreads", context, engine);
+            return result;
+        }
+         QScriptValue
         REcmaGraphicsViewImage::clear
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -4442,19 +4564,181 @@
             return result;
         }
          QScriptValue
-        REcmaGraphicsViewImage::paintEntity
+        REcmaGraphicsViewImage::paintEntitiesMulti
         (QScriptContext* context, QScriptEngine* engine) 
         
         {
-            //REcmaHelper::functionStart("REcmaGraphicsViewImage::paintEntity", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::paintEntity";
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::paintEntitiesMulti", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::paintEntitiesMulti";
             //QCoreApplication::processEvents();
 
             QScriptValue result = engine->undefinedValue();
             
                     // public function: can be called from ECMA wrapper of ECMA shell:
                     RGraphicsViewImage* self = 
-                        getSelf("paintEntity", context);
+                        getSelf("paintEntitiesMulti", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: RBox */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RBox*
+                    ap0 =
+                    qscriptvalue_cast<
+                    RBox*
+                        >(
+                        context->argument(
+                        0
+                        )
+                    );
+                    if (ap0 == NULL) {
+                           return REcmaHelper::throwError("RGraphicsViewImage: Argument 0 is not of type RBox.",
+                               context);                    
+                    }
+                    RBox 
+                    a0 = 
+                    *ap0;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->paintEntitiesMulti(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.paintEntitiesMulti().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::paintEntitiesMulti", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGraphicsViewImage::paintEntitiesThread
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::paintEntitiesThread", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::paintEntitiesThread";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGraphicsViewImage* self = 
+                        getSelf("paintEntitiesThread", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    4 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+     && (
+            context->argument(1).isArray()
+        ) /* type: QList < REntity::Id > */
+     && (
+            context->argument(2).isNumber()
+        ) /* type: int */
+     && (
+            context->argument(3).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isArray or QVariantMap
+                    QList < REntity::Id >
+                    a1;
+                    REcmaHelper::fromScriptValue(
+                        engine,
+                        context->argument(1),
+                        a1
+                    );
+                
+                    // argument isStandardType
+                    int
+                    a2 =
+                    (int)
+                    
+                    context->argument( 2 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    int
+                    a3 =
+                    (int)
+                    
+                    context->argument( 3 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->paintEntitiesThread(a0
+        ,
+    a1
+        ,
+    a2
+        ,
+    a3);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.paintEntitiesThread().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::paintEntitiesThread", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGraphicsViewImage::paintEntityThread
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::paintEntityThread", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::paintEntityThread";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGraphicsViewImage* self = 
+                        getSelf("paintEntityThread", context);
                   
 
                 //Q_ASSERT(self!=NULL);
@@ -4465,10 +4749,8 @@
     
     if( context->argumentCount() ==
     2 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: QPainter * */
+            context->argument(0).isNumber()
+        ) /* type: int */
      && (
             context->argument(1).isNumber()
         ) /* type: REntity::Id */
@@ -4476,18 +4758,13 @@
     ){
     // prepare arguments:
     
-                    // argument is pointer
-                    QPainter * a0 = NULL;
-
-                    a0 = 
-                        REcmaHelper::scriptValueTo<QPainter >(
-                            context->argument(0)
-                        );
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
                     
-                    if (a0==NULL && 
-                        !context->argument(0).isNull()) {
-                        return REcmaHelper::throwError("RGraphicsViewImage: Argument 0 is not of type QPainter *QPainter *.", context);                    
-                    }
+                    context->argument( 0 ).
+                    toNumber();
                 
                     // argument isStandardType
                     REntity::Id
@@ -4502,7 +4779,7 @@
     // call C++ function:
     // return type 'void'
     
-               self->paintEntity(a0
+               self->paintEntityThread(a0
         ,
     a1);
     } else
@@ -4512,10 +4789,8 @@
     
     if( context->argumentCount() ==
     3 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: QPainter * */
+            context->argument(0).isNumber()
+        ) /* type: int */
      && (
             context->argument(1).isNumber()
         ) /* type: REntity::Id */
@@ -4526,18 +4801,13 @@
     ){
     // prepare arguments:
     
-                    // argument is pointer
-                    QPainter * a0 = NULL;
-
-                    a0 = 
-                        REcmaHelper::scriptValueTo<QPainter >(
-                            context->argument(0)
-                        );
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
                     
-                    if (a0==NULL && 
-                        !context->argument(0).isNull()) {
-                        return REcmaHelper::throwError("RGraphicsViewImage: Argument 0 is not of type QPainter *QPainter *.", context);                    
-                    }
+                    context->argument( 0 ).
+                    toNumber();
                 
                     // argument isStandardType
                     REntity::Id
@@ -4560,7 +4830,7 @@
     // call C++ function:
     // return type 'void'
     
-               self->paintEntity(a0
+               self->paintEntityThread(a0
         ,
     a1
         ,
@@ -4570,10 +4840,72 @@
 
         
             {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.paintEntity().",
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.paintEntityThread().",
                    context);
             }
-            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::paintEntity", context, engine);
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::paintEntityThread", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGraphicsViewImage::paintOverlay
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::paintOverlay", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::paintOverlay";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGraphicsViewImage* self = 
+                        getSelf("paintOverlay", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isVariant() || 
+            context->argument(0).isQObject() || 
+            context->argument(0).isNull()
+        ) /* type: QPainter * */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument is pointer
+                    QPainter * a0 = NULL;
+
+                    a0 = 
+                        REcmaHelper::scriptValueTo<QPainter >(
+                            context->argument(0)
+                        );
+                    
+                    if (a0==NULL && 
+                        !context->argument(0).isNull()) {
+                        return REcmaHelper::throwError("RGraphicsViewImage: Argument 0 is not of type QPainter *QPainter *.", context);                    
+                    }
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->paintOverlay(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.paintOverlay().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::paintOverlay", context, engine);
             return result;
         }
          QScriptValue
@@ -4824,130 +5156,6 @@
             return result;
         }
          QScriptValue
-        REcmaGraphicsViewImage::emitDecorateBackground
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaGraphicsViewImage::emitDecorateBackground", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::emitDecorateBackground";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RGraphicsViewImage* self = 
-                        getSelf("emitDecorateBackground", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    1 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: QPainter * */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument is pointer
-                    QPainter * a0 = NULL;
-
-                    a0 = 
-                        REcmaHelper::scriptValueTo<QPainter >(
-                            context->argument(0)
-                        );
-                    
-                    if (a0==NULL && 
-                        !context->argument(0).isNull()) {
-                        return REcmaHelper::throwError("RGraphicsViewImage: Argument 0 is not of type QPainter *QPainter *.", context);                    
-                    }
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'void'
-    
-               self->emitDecorateBackground(a0);
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.emitDecorateBackground().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::emitDecorateBackground", context, engine);
-            return result;
-        }
-         QScriptValue
-        REcmaGraphicsViewImage::emitDecorateForeground
-        (QScriptContext* context, QScriptEngine* engine) 
-        
-        {
-            //REcmaHelper::functionStart("REcmaGraphicsViewImage::emitDecorateForeground", context, engine);
-            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::emitDecorateForeground";
-            //QCoreApplication::processEvents();
-
-            QScriptValue result = engine->undefinedValue();
-            
-                    // public function: can be called from ECMA wrapper of ECMA shell:
-                    RGraphicsViewImage* self = 
-                        getSelf("emitDecorateForeground", context);
-                  
-
-                //Q_ASSERT(self!=NULL);
-                if (self==NULL) {
-                    return REcmaHelper::throwError("self is NULL", context);
-                }
-                
-    
-    if( context->argumentCount() ==
-    1 && (
-            context->argument(0).isVariant() || 
-            context->argument(0).isQObject() || 
-            context->argument(0).isNull()
-        ) /* type: QPainter * */
-    
-    ){
-    // prepare arguments:
-    
-                    // argument is pointer
-                    QPainter * a0 = NULL;
-
-                    a0 = 
-                        REcmaHelper::scriptValueTo<QPainter >(
-                            context->argument(0)
-                        );
-                    
-                    if (a0==NULL && 
-                        !context->argument(0).isNull()) {
-                        return REcmaHelper::throwError("RGraphicsViewImage: Argument 0 is not of type QPainter *QPainter *.", context);                    
-                    }
-                
-    // end of arguments
-
-    // call C++ function:
-    // return type 'void'
-    
-               self->emitDecorateForeground(a0);
-    } else
-
-
-        
-            {
-               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.emitDecorateForeground().",
-                   context);
-            }
-            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::emitDecorateForeground", context, engine);
-            return result;
-        }
-         QScriptValue
         REcmaGraphicsViewImage::clearBackground
         (QScriptContext* context, QScriptEngine* engine) 
         
@@ -5018,26 +5226,26 @@
             context->argument(0).isVariant() || 
             context->argument(0).isQObject() || 
             context->argument(0).isNull()
-        ) /* type: RPainterPath */
+        ) /* type: RGraphicsSceneDrawable */
     
     ){
     // prepare arguments:
     
                     // argument isCopyable and has default constructor and isSimpleClass 
-                    RPainterPath*
+                    RGraphicsSceneDrawable*
                     ap0 =
                     qscriptvalue_cast<
-                    RPainterPath*
+                    RGraphicsSceneDrawable*
                         >(
                         context->argument(
                         0
                         )
                     );
                     if (ap0 == NULL) {
-                           return REcmaHelper::throwError("RGraphicsViewImage: Argument 0 is not of type RPainterPath.",
+                           return REcmaHelper::throwError("RGraphicsViewImage: Argument 0 is not of type RGraphicsSceneDrawable.",
                                context);                    
                     }
-                    RPainterPath 
+                    RGraphicsSceneDrawable 
                     a0 = 
                     *ap0;
                 
@@ -5136,6 +5344,194 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaGraphicsViewImage::setBackgroundTransform", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGraphicsViewImage::clearOverlay
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::clearOverlay", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::clearOverlay";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGraphicsViewImage* self = 
+                        getSelf("clearOverlay", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->clearOverlay(a0);
+    } else
+
+
+        
+    
+    if( context->argumentCount() ==
+    2 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: RObject::Id */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    RObject::Id
+                    a1 =
+                    (RObject::Id)
+                    (int)
+                    context->argument( 1 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->clearOverlay(a0
+        ,
+    a1);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.clearOverlay().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::clearOverlay", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGraphicsViewImage::addToOverlay
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::addToOverlay", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::addToOverlay";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGraphicsViewImage* self = 
+                        getSelf("addToOverlay", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    3 && (
+            context->argument(0).isNumber()
+        ) /* type: int */
+     && (
+            context->argument(1).isNumber()
+        ) /* type: RObject::Id */
+     && (
+            context->argument(2).isVariant() || 
+            context->argument(2).isQObject() || 
+            context->argument(2).isNull()
+        ) /* type: RGraphicsSceneDrawable */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    int
+                    a0 =
+                    (int)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+                    // argument isStandardType
+                    RObject::Id
+                    a1 =
+                    (RObject::Id)
+                    (int)
+                    context->argument( 1 ).
+                    toNumber();
+                
+                    // argument isCopyable and has default constructor and isSimpleClass 
+                    RGraphicsSceneDrawable*
+                    ap2 =
+                    qscriptvalue_cast<
+                    RGraphicsSceneDrawable*
+                        >(
+                        context->argument(
+                        2
+                        )
+                    );
+                    if (ap2 == NULL) {
+                           return REcmaHelper::throwError("RGraphicsViewImage: Argument 2 is not of type RGraphicsSceneDrawable.",
+                               context);                    
+                    }
+                    RGraphicsSceneDrawable 
+                    a2 = 
+                    *ap2;
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->addToOverlay(a0
+        ,
+    a1
+        ,
+    a2);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.addToOverlay().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::addToOverlay", context, engine);
             return result;
         }
          QScriptValue
@@ -5295,6 +5691,159 @@
                    context);
             }
             //REcmaHelper::functionEnd("REcmaGraphicsViewImage::setMinimumLineweight", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGraphicsViewImage::getMinimumLineweight
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::getMinimumLineweight", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::getMinimumLineweight";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGraphicsViewImage* self = 
+                        getSelf("getMinimumLineweight", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        
+               self->getMinimumLineweight();
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.getMinimumLineweight().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::getMinimumLineweight", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGraphicsViewImage::setMaximumLineweight
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::setMaximumLineweight", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::setMaximumLineweight";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGraphicsViewImage* self = 
+                        getSelf("setMaximumLineweight", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    1 && (
+            context->argument(0).isNumber()
+        ) /* type: double */
+    
+    ){
+    // prepare arguments:
+    
+                    // argument isStandardType
+                    double
+                    a0 =
+                    (double)
+                    
+                    context->argument( 0 ).
+                    toNumber();
+                
+    // end of arguments
+
+    // call C++ function:
+    // return type 'void'
+    
+               self->setMaximumLineweight(a0);
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.setMaximumLineweight().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::setMaximumLineweight", context, engine);
+            return result;
+        }
+         QScriptValue
+        REcmaGraphicsViewImage::getMaximumLineweight
+        (QScriptContext* context, QScriptEngine* engine) 
+        
+        {
+            //REcmaHelper::functionStart("REcmaGraphicsViewImage::getMaximumLineweight", context, engine);
+            //qDebug() << "ECMAScript WRAPPER: REcmaGraphicsViewImage::getMaximumLineweight";
+            //QCoreApplication::processEvents();
+
+            QScriptValue result = engine->undefinedValue();
+            
+                    // public function: can be called from ECMA wrapper of ECMA shell:
+                    RGraphicsViewImage* self = 
+                        getSelf("getMaximumLineweight", context);
+                  
+
+                //Q_ASSERT(self!=NULL);
+                if (self==NULL) {
+                    return REcmaHelper::throwError("self is NULL", context);
+                }
+                
+    
+    if( context->argumentCount() ==
+    0
+    ){
+    // prepare arguments:
+    
+    // end of arguments
+
+    // call C++ function:
+    // return type 'double'
+    double cppResult =
+        
+               self->getMaximumLineweight();
+        // return type: double
+                // standard Type
+                result = QScriptValue(cppResult);
+            
+    } else
+
+
+        
+            {
+               return REcmaHelper::throwError("Wrong number/types of arguments for RGraphicsViewImage.getMaximumLineweight().",
+                   context);
+            }
+            //REcmaHelper::functionEnd("REcmaGraphicsViewImage::getMaximumLineweight", context, engine);
             return result;
         }
          QScriptValue

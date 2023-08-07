@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>606</width>
-    <height>634</height>
+    <width>604</width>
+    <height>558</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,8 +21,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>604</width>
-     <height>632</height>
+     <width>602</width>
+     <height>556</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -79,6 +79,33 @@
         </widget>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QWidget" name="widget_2" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>10</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="DoubleClickEditBlockInPlace">
+           <property name="text">
+            <string>Edit block reference in-place</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QCheckBox" name="DoubleClickSelectContour">
          <property name="text">
           <string>Double-click to select contour</string>
@@ -87,6 +114,27 @@
           <bool>true</bool>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QWidget" name="widget" native="true"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Tolerance:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="RMathLineEdit" name="DoubleClickSelectContourTolerance">
+           <property name="text">
+            <string notr="true">0.001</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QCheckBox" name="RightDoubleClickToReset">
@@ -281,6 +329,77 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RMathLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>RMathLineEdit.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>RightClickToDeselect</tabstop>
+  <tabstop>DoubleClickEditText</tabstop>
+  <tabstop>DoubleClickEditHatch</tabstop>
+  <tabstop>DoubleClickEditBlock</tabstop>
+  <tabstop>DoubleClickEditBlockInPlace</tabstop>
+  <tabstop>DoubleClickSelectContour</tabstop>
+  <tabstop>DoubleClickSelectContourTolerance</tabstop>
+  <tabstop>RightDoubleClickToReset</tabstop>
+  <tabstop>SelectBlockWithAttribute</tabstop>
+  <tabstop>HideAttributeWithBlock</tabstop>
+  <tabstop>SnapRange</tabstop>
+  <tabstop>PickRange</tabstop>
+  <tabstop>HighlightEntity</tabstop>
+ </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>DoubleClickSelectContour</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>label_3</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>175</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>101</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DoubleClickSelectContour</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>DoubleClickSelectContourTolerance</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>216</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>305</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DoubleClickEditBlock</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>DoubleClickEditBlockInPlace</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>113</x>
+     <y>146</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>110</x>
+     <y>169</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

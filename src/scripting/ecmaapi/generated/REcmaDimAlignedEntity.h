@@ -31,7 +31,9 @@
     ;
 
     // conversion functions for base classes:
-    static  QScriptValue getRDimensionEntity(QScriptContext *context,
+    static  QScriptValue getRDimLinearEntity(QScriptContext *context,
+            QScriptEngine *engine)
+        ;static  QScriptValue getRDimensionEntity(QScriptContext *context,
             QScriptEngine *engine)
         ;static  QScriptValue getREntity(QScriptContext *context,
             QScriptEngine *engine)
@@ -53,6 +55,9 @@
     // public methods:
     static  QScriptValue
         init
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getRtti
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getStaticPropertyTypeIds
@@ -83,6 +88,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getExtensionPoint2
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        getAngle
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue toString
     (QScriptContext *context, QScriptEngine *engine)

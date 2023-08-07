@@ -1,7 +1,12 @@
 include( ../../shared.pri )
 
+QT += concurrent
+
 SOURCES += \
     RShortcutLineEdit.cpp \
+    RCadToolBar.cpp \
+    RCadToolBarPanel.cpp \
+    RColumnLayout.cpp \
     RCharacterWidget.cpp \
     RColorCombo.cpp \
     RCommandLine.cpp \
@@ -22,6 +27,7 @@ SOURCES += \
     RListView.cpp \
     RListWidget.cpp \
     RMainWindowQt.cpp \
+    RMathComboBox.cpp \
     RMathLineEdit.cpp \
     RMdiArea.cpp \
     RMdiChildQt.cpp \
@@ -33,6 +39,9 @@ SOURCES += \
 
 HEADERS += \
     RShortcutLineEdit.h \
+    RCadToolBar.h \
+    RCadToolBarPanel.h \
+    RColumnLayout.h \
     RCharacterWidget.h \
     RCloseCurrentEvent.h \
     RColorCombo.h \
@@ -54,6 +63,7 @@ HEADERS += \
     RListView.h \
     RListWidget.h \
     RMainWindowQt.h \
+    RMathComboBox.h \
     RMathLineEdit.h \
     RMdiArea.h \
     RMdiChildQt.h \

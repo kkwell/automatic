@@ -8,6 +8,16 @@ xmlns:rs="http://www.ribbonsoft.com">
   hasStreamOperator="true" isAbstract="false" isScriptable="true">
     <baseClass name="REntityData" specifier="public" />
     <baseClass name="RPainterPathSource" specifier="public" />
+    <enum name="TextFlag">
+      <value name="NoFlags" />
+      <value name="Bold" />
+      <value name="Italic" />
+      <value name="Simple" />
+      <value name="DimensionLabel" />
+      <value name="Highlighted" />
+      <value name="Backward" />
+      <value name="UpsideDown" />
+    </enum>
     <constructor>
       <variant>
         <arg type="RDocument *" typeName="RDocument *"
@@ -49,9 +59,31 @@ xmlns:rs="http://www.ribbonsoft.com">
         isConst="false" />
       </variant>
     </constructor>
+    <method name="getRtti" cppName="getRtti" specifier="public"
+    isStatic="true" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="RS::EntityType" isPureVirtual="false" />
+    </method>
     <method name="getType" cppName="getType" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
       <variant returnType="RS::EntityType" isPureVirtual="false" />
+    </method>
+    <method name="setFlag" cppName="setFlag" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RTextBasedData::TextFlag"
+        typeName="RTextBasedData::TextFlag" name="flag"
+        isConst="false" />
+        <arg type="bool" typeName="bool" name="on"
+        hasDefault="true" default="true" isConst="false" />
+      </variant>
+    </method>
+    <method name="getFlag" cppName="getFlag" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false">
+        <arg type="RTextBasedData::TextFlag"
+        typeName="RTextBasedData::TextFlag" name="flag"
+        isConst="false" />
+      </variant>
     </method>
     <method name="isValid" cppName="isValid" specifier="public"
     isStatic="false" isVirtual="true" isScriptOverwritable="true">
@@ -359,6 +391,32 @@ xmlns:rs="http://www.ribbonsoft.com">
     isStatic="false" isVirtual="false" isScriptOverwritable="true">
       <variant returnType="bool" isPureVirtual="false" />
     </method>
+    <method name="setBackward" cppName="setBackward"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="isBackward" cppName="isBackward"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
+    <method name="setUpsideDown" cppName="setUpsideDown"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="on"
+        isConst="false" />
+      </variant>
+    </method>
+    <method name="isUpsideDown" cppName="isUpsideDown"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="bool" isPureVirtual="false" />
+    </method>
     <method name="setDimensionLabel" cppName="setDimensionLabel"
     specifier="public" isStatic="false" isVirtual="false"
     isScriptOverwritable="true">
@@ -412,6 +470,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         name="referencePoint" isConst="true" />
         <arg type="RVector &amp;" typeName="RVector"
         name="targetPoint" isConst="true" />
+        <arg type="Qt::KeyboardModifiers"
+        typeName="Qt::KeyboardModifiers" name="modifiers"
+        hasDefault="true" default="Qt :: NoModifier"
+        isConst="false" />
       </variant>
     </method>
     <method name="move" cppName="move" specifier="public"
@@ -528,6 +590,9 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="segment"
         hasDefault="true" default="false" isConst="false" />
+        <arg type="QList &lt; RObject::Id &gt; *"
+        typeName="QList &lt; RObject::Id &gt; *" name="entityIds"
+        hasDefault="true" default="NULL" isConst="false" />
       </variant>
     </method>
     <method name="getExploded" cppName="getExploded"
@@ -588,6 +653,8 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="double" typeName="double"
         name="fontHeightFactor" hasDefault="true" default="1.0"
         isConst="false" />
+        <arg type="bool" typeName="bool" name="simpleText"
+        hasDefault="true" default="false" isConst="false" />
       </variant>
     </method>
     <method name="toRichText" cppName="toRichText"
@@ -602,6 +669,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         name="fontHeightFactor" hasDefault="true" default="1.0"
         isConst="false" />
       </variant>
+    </method>
+    <method name="to2D" cppName="to2D" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false" />
     </method>
   </class>
 </unit>

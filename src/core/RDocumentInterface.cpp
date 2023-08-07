@@ -41,6 +41,7 @@
 #include "ROperation.h"
 #include "RPoint.h"
 #include "RPolyline.h"
+#include "RRestrictOrthogonal.h"
 #include "RScriptAction.h"
 #include "RScriptHandler.h"
 #include "RScriptHandlerRegistry.h"
@@ -65,6 +66,7 @@ RDocumentInterface::RDocumentInterface(RDocument& document)
     defaultAction(NULL),
     currentSnap(NULL),
     currentSnapRestriction(NULL),
+    lastSnapState(RSnap::Unknown),
     relativeZero(RVector(0,0)),
     relativeZeroLocked(false),
     snapLocked(false),
@@ -76,7 +78,9 @@ RDocumentInterface::RDocumentInterface(RDocument& document)
     deleting(false),
     cursorOverride(false),
     keepPreviewOnce(false),
-    mouseTrackingEnabled(true) {
+    mouseTrackingEnabled(true),
+    allowSnapInterruption(true),
+    previewDocument(NULL) {
     //pressEvent(NULL) {
 
     RDebug::incCounter("RDocumentInterface");
@@ -103,6 +107,7 @@ RDocumentInterface::~RDocumentInterface() {
     }
 
     if (defaultAction!=NULL) {
+        defaultAction->suspendEvent();
         defaultAction->finishEvent();
         defaultAction->terminate();
         delete defaultAction;
@@ -134,6 +139,10 @@ RDocumentInterface::~RDocumentInterface() {
     }
     scriptHandlers.clear();
 
+    if (previewDocument!=NULL) {
+        delete previewDocument;
+        previewDocument = NULL;
+    }
     delete &document;
 }
 
@@ -171,9 +180,17 @@ RStorage& RDocumentInterface::getStorage() {
     return document.getStorage();
 }
 
+void RDocumentInterface::deleteScriptHandler(const QString& extension) {
+    if (scriptHandlers.contains(extension)) {
+        delete scriptHandlers[extension];
+        scriptHandlers.remove(extension);
+    }
+}
+
 RScriptHandler* RDocumentInterface::getScriptHandler(const QString& extension) {
     if (!scriptHandlers.contains(extension)) {
         scriptHandlers[extension] = RScriptHandlerRegistry::createScriptHandler(extension);
+        scriptHandlers[extension]->init();
     }
     return scriptHandlers[extension];
 }
@@ -229,14 +246,51 @@ void RDocumentInterface::removeLayerListener(RLayerListener* l) {
 }
 
 /**
- * Notifies local layer listeners only interesed in layer events from this
+ * Notifies local layer listeners only interested in layer events from this
  * particular document. Used for layer lists other than the global one
  * (e.g. in preferences).
  */
-void RDocumentInterface::notifyLayerListeners() {
+void RDocumentInterface::notifyLayerListeners(QList<RLayer::Id>& layerIds) {
     QList<RLayerListener*>::iterator it;
     for (it = layerListeners.begin(); it != layerListeners.end(); ++it) {
-        (*it)->updateLayers(this);
+        (*it)->updateLayers(this, layerIds);
+    }
+}
+
+int RDocumentInterface::addTransactionListener(RTransactionListener* l) {
+    // find first available key:
+    for (int i=0; i<1e6; i++) {
+        if (!transactionListeners.contains(i)) {
+            transactionListeners[i] = l;
+            return i;
+        }
+    }
+    return -1;
+}
+
+void RDocumentInterface::removeTransactionListener(int key) {
+    transactionListeners.remove(key);
+}
+
+void RDocumentInterface::removeTransactionListener(RTransactionListener* l) {
+    QList<int> keys = transactionListeners.keys();
+    for (int i=0; i<keys.length(); i++) {
+        int key = keys[i];
+        if (transactionListeners[key]==l) {
+            transactionListeners.remove(key);
+            break;
+        }
+    }
+}
+
+/**
+ * Notifies local transaction listeners only interested in transaction events from this
+ * particular document.
+ */
+void RDocumentInterface::notifyTransactionListeners(RTransaction* t) {
+    QMap<int, RTransactionListener*>::iterator it;
+    for (it = transactionListeners.begin(); it != transactionListeners.end(); ++it) {
+        (*it)->updateTransactionListener(&document, t);
     }
 }
 
@@ -256,6 +310,8 @@ void RDocumentInterface::clear(bool beforeLoad) {
 
     //qDebug() << "RDocumentInterface::clear: modified: " << document.isModified();
     document.setModified(false);
+
+    //deleteScriptHandler("js");
 }
 
 /**
@@ -281,6 +337,19 @@ RGraphicsView* RDocumentInterface::getGraphicsViewWithFocus() {
     }
 
     return ret;
+}
+
+/**
+ * \return The graphics scene that currently has the focus or the
+ *      first attached scene or NULL if no scene is attached.
+ */
+RGraphicsScene* RDocumentInterface::getGraphicsSceneWithFocus() {
+    RGraphicsView* view = getGraphicsViewWithFocus();
+    if (view!=NULL) {
+        return view->getScene();
+    }
+
+    return NULL;
 }
 
 /**
@@ -551,6 +620,7 @@ RAction::ClickMode RDocumentInterface::getClickMode() {
 
 void RDocumentInterface::setCursor(const QCursor& cursor, bool global) {
     if (global) {
+        // set cursor for all document interfaces:
         RMainWindow* appWin = RMainWindow::getMainWindow();
         if (appWin!=NULL) {
             appWin->setGraphicsViewCursor(cursor);
@@ -559,6 +629,7 @@ void RDocumentInterface::setCursor(const QCursor& cursor, bool global) {
         return;
     }
 
+    // set cursor for this document interface and attached views:
     QList<RGraphicsScene*>::iterator it;
     for (it = scenes.begin(); it != scenes.end(); it++) {
         (*it)->setCursor(cursor);
@@ -603,6 +674,10 @@ void RDocumentInterface::disableMouseTracking() {
     mouseTrackingEnabled = false;
 }
 
+void RDocumentInterface::setAllowSnapInterruption(bool on) {
+    allowSnapInterruption = on;
+}
+
 /**
  * Marks all entities with any kind of caching as dirty, so they are
  * regenerated next time regenerate is called.
@@ -615,14 +690,13 @@ void RDocumentInterface::updateAllEntities() {
  * Regenerates all scenes attached to this document interface by exporting
  * the document into them.
  */
-void RDocumentInterface::regenerateScenes(bool undone) {
+void RDocumentInterface::regenerateScenes(bool undone, bool invisible) {
     if (!allowUpdate) {
         return;
     }
 
-    QList<RGraphicsScene*>::iterator it;
-    for (it=scenes.begin(); it!=scenes.end(); it++) {
-        (*it)->regenerate(undone);
+    for (int i=0; i<scenes.length(); i++) {
+        scenes[i]->regenerate(undone, invisible);
     }
 }
 
@@ -873,7 +947,7 @@ void RDocumentInterface::handleClickEvent(RAction& action, RMouseEvent& event) {
                     ce.setModelPosition(event.getModelPosition());
                 }
                 else {
-                    ce.setModelPosition(snap(event, false));
+                    ce.setModelPosition(action.snap(event, false));
                 }
                 // 20160811: send event even if it is invalid to make sure status is updated
                 // fixes FS#1456 - Drag and drop: requires two clicks with auto snap
@@ -918,7 +992,7 @@ void RDocumentInterface::previewClickEvent(RAction& action, RMouseEvent& event) 
                 ce.setModelPosition(event.getModelPosition());
             }
             else {
-                ce.setModelPosition(snap(event, true));
+                ce.setModelPosition(action.snap(event, true));
             }
             if (ce.isValid()) {
                 cursorPosition = ce.getModelPosition();
@@ -1047,7 +1121,7 @@ void RDocumentInterface::zoomChangeEvent(RGraphicsView& view) {
 }
 
 RDocumentInterface::IoErrorCode RDocumentInterface::importUrl(const QUrl& url,
-        const QString& nameFilter, bool notify) {
+        const QString& nameFilter, bool notify, const QVariantMap& params) {
     // URL points to local file:
 #if QT_VERSION >= 0x040800
     if (url.isLocalFile()) {
@@ -1096,7 +1170,7 @@ RDocumentInterface::IoErrorCode RDocumentInterface::importUrl(const QUrl& url,
     if (file.open(QIODevice::WriteOnly)) {
         file.write(data);
         file.close();
-        ret = importFile(file.fileName(), nameFilter, notify);
+        ret = importFile(file.fileName(), nameFilter, notify, params);
         if (!file.remove()) {
             qWarning() << "cannot remove file " << file.fileName();
         }
@@ -1113,7 +1187,7 @@ RDocumentInterface::IoErrorCode RDocumentInterface::importUrl(const QUrl& url,
  * file type.
  */
 RDocumentInterface::IoErrorCode RDocumentInterface::importFile(
-        const QString& fileName, const QString& nameFilter, bool notify) {
+        const QString& fileName, const QString& nameFilter, bool notify, const QVariantMap& params) {
 
     // TODO: improve detection of downloadable URLs:
     if (fileName.toLower().startsWith("http://") ||
@@ -1126,18 +1200,24 @@ RDocumentInterface::IoErrorCode RDocumentInterface::importFile(
 
     RMainWindow* mainWindow = RMainWindow::getMainWindow();
 
+    bool docNotify = document.getNotifyListeners();
+
     // clear before loading
     // RNewDocumentListeners are notified that we're intending to load a document:
     clear(true);
     clearCaches();
+
+    document.setNotifyListeners(docNotify);
 
     QFileInfo fi(fileName);
     if (!fi.exists()) {
         return RDocumentInterface::IoErrorNotFound;
     }
 
-    if (fi.size()==0) {
-        return RDocumentInterface::IoErrorZeroSize;
+    if (RSettings::getBoolValue("SaveAs/OpenZeroSizeFile", false)==false) {
+        if (fi.size()==0) {
+            return RDocumentInterface::IoErrorZeroSize;
+        }
     }
 
     if (!fi.isReadable()) {
@@ -1193,7 +1273,7 @@ RDocumentInterface::IoErrorCode RDocumentInterface::importFile(
         mainWindow->notifyImportListenersPre(this);
     }
 
-    if (fileImporter->importFile(fileName, nameFilter)) {
+    if (fileImporter->importFile(fileName, nameFilter, params)) {
         document.setModified(false);
     } else {
         document.setFileName(previousFileName);
@@ -1247,7 +1327,12 @@ bool RDocumentInterface::exportFile(const QString& fileName, const QString& file
         document.setVariable("ViewportHeight", b.getHeight());
     }
 
+    bool ngl = notifyGlobalListeners;
+    setNotifyListeners(false);
+
     bool success = fileExporter->exportFile(fileName, fileVersion, resetModified);
+
+    setNotifyListeners(ngl);
 
     document.removeVariable("ViewportCenter");
     document.removeVariable("ViewportWidth");
@@ -1257,7 +1342,7 @@ bool RDocumentInterface::exportFile(const QString& fileName, const QString& file
         // Note: exporter might set the file name of the document
         // to the new name if desired
         if (resetModified) {
-            document.setFileVersion(fileVersion);
+            //document.setFileVersion(fileVersion);
             document.setModified(false);
         }
 
@@ -1276,19 +1361,50 @@ bool RDocumentInterface::exportFile(const QString& fileName, const QString& file
     return success;
 }
 
+void RDocumentInterface::tagState(const QString& tag) {
+    RStorage& storage = getStorage();
+    tags.insert(tag, storage.getLastTransactionId());
+}
+
+/**
+ * Rollback to given transaction ID:
+ */
+void RDocumentInterface::undoToTag(const QString& tag) {
+    if (!tags.contains(tag)) {
+        qWarning() << "tag not found: '" << tag << "'";
+        return;
+    }
+
+    int tid = tags.value(tag);
+    RStorage& storage = getStorage();
+    while (storage.getLastTransactionId()>tid) {
+        undo();
+    }
+}
+
 /**
  * Transaction based undo.
  */
 void RDocumentInterface::undo() {
+    RMainWindow* mainWindow = RMainWindow::getMainWindow();
     clearPreview();
 
     QList<RTransaction> t = document.undo();
     for (int i=0; i<t.length(); i++) {
-        QList<RObject::Id> objectIds = t[i].getAffectedObjects();
-        objectChangeEvent(objectIds);
+        t[i].setType(RTransaction::Undo);
+
+        //QList<RObject::Id> objectIds = t[i].getAffectedObjects();
+        objectChangeEvent(t[i]);
 
         if (RMainWindow::hasMainWindow()) {
+            // notify global listeners:
             RMainWindow::getMainWindow()->postTransactionEvent(t[i]);
+        }
+        // notify document specific listeners:
+        notifyTransactionListeners(&t[i]);
+
+        if (i==0 && mainWindow!=NULL) {
+            mainWindow->handleUserMessage(QString("Undo:") + " " + t[i].getText());
         }
     }
 }
@@ -1297,16 +1413,26 @@ void RDocumentInterface::undo() {
  * Transaction based redo.
  */
 void RDocumentInterface::redo() {
+    RMainWindow* mainWindow = RMainWindow::getMainWindow();
     clearPreview();
 
     QList<RTransaction> t = document.redo();
 
     for (int i=0; i<t.length(); i++) {
-        QList<RObject::Id> objectIds = t[i].getAffectedObjects();
-        objectChangeEvent(objectIds);
+        t[i].setType(RTransaction::Redo);
+
+        //QList<RObject::Id> objectIds = t[i].getAffectedObjects();
+        objectChangeEvent(t[i]);
 
         if (RMainWindow::hasMainWindow()) {
+            // notify global listeners:
             RMainWindow::getMainWindow()->postTransactionEvent(t[i]);
+        }
+        // notify document specific listeners:
+        notifyTransactionListeners(&t[i]);
+
+        if (i==t.length()-1 && mainWindow!=NULL) {
+            mainWindow->handleUserMessage(QString("Redo:") + " " + t[i].getText());
         }
     }
 }
@@ -1315,8 +1441,8 @@ void RDocumentInterface::redo() {
  * Flush transactions.
  */
 void RDocumentInterface::flushTransactions() {
-    document.resetTransactionStack();
     document.getStorage().deleteTransactionsFrom(0);
+    document.resetTransactionStack();
 
     if (RMainWindow::hasMainWindow()) {
         //RMainWindow::getMainWindow()->postTransactionEvent();
@@ -1390,20 +1516,32 @@ RVector RDocumentInterface::snap(RMouseEvent& event, bool preview) {
     if (currentSnap!=NULL) {
         // only allow interruption by mouse move if this is a preview and no buttons are pressed:
         //if (preview && (!RSettings::getPositionByMousePress() || event.buttons()==Qt::NoButton)) {
-        if (preview) {
+        if (preview && allowSnapInterruption) {
+#if QT_VERSION >= 0x060000
+            RMouseEvent::setOriginalMousePos(event.globalPosition().toPoint());
+#else
             RMouseEvent::setOriginalMousePos(event.globalPos());
+#endif
         }
         RVector ret = currentSnap->snap(event);
+        lastSnapState = currentSnap->getStatus();
         if (preview) {
             RMouseEvent::resetOriginalMousePos();
         }
         if (currentSnapRestriction!=NULL) {
             ret = currentSnapRestriction->restrictSnap(ret, getRelativeZero());
         }
+        if (event.modifiers()==Qt::AltModifier) {
+            ret = restrictOrtho(ret, getRelativeZero(), RS::Orthogonal);
+        }
         
-        QSet<REntity::Id> entityIds = currentSnap->getEntityIds();
-        QSet<REntity::Id>::iterator it;
+        QList<REntity::Id> entityIds = currentSnap->getEntityIds();
+        QList<REntity::Id>::iterator it;
         for (it=entityIds.begin(); it!=entityIds.end(); ++it) {
+            // don't highlight entities that are part of the block (negative):
+            if (*it<0) {
+                continue;
+            }
             highlightEntity(*it);
         }
 
@@ -1411,6 +1549,78 @@ RVector RDocumentInterface::snap(RMouseEvent& event, bool preview) {
     }
 
     return event.getModelPosition();
+}
+
+RVector RDocumentInterface::restrictOrtho(const RVector& position, const RVector& relativeZero, RS::OrthoMode mode) {
+    RVector ret;
+    RVector retX;
+    RVector retY;
+
+    RGraphicsView* view = getLastKnownViewWithFocus();
+    if (view==NULL) {
+        return ret;
+    }
+
+    RGrid* grid = view->getGrid();
+    RS::IsoProjectionType projection = RS::NoProjection;
+    if (grid!=NULL) {
+        projection = grid->getProjection();
+    }
+
+    //if (projection!=RS::NoProjection) {
+    if (grid!=NULL && grid->isIsometric()) {
+        double d1, d2;
+        double a1, a2;
+
+        switch (projection) {
+        default:
+        case RS::IsoTop:
+            a1 = RMath::deg2rad(30);
+            a2 = RMath::deg2rad(150);
+            // d1 = x / cos(30):
+            d1 = (position.x - relativeZero.x) / (sqrt(3.0)/2);
+            d2 = -d1;
+            break;
+        case RS::IsoLeft:
+            a1 = RMath::deg2rad(150);
+            a2 = RMath::deg2rad(90);
+            d1 = (position.x - relativeZero.x) / (-sqrt(3.0)/2);
+            d2 = (position.y - relativeZero.y);
+            break;
+        case RS::IsoRight:
+            a1 = RMath::deg2rad(30);
+            a2 = RMath::deg2rad(90);
+            d1 = (position.x - relativeZero.x) / (sqrt(3.0)/2);
+            d2 = (position.y - relativeZero.y);
+            break;
+        }
+
+        retX = relativeZero + RVector::createPolar(d1, a1);
+        retY = relativeZero + RVector::createPolar(d2, a2);
+    }
+    else {
+        retX = RVector(relativeZero.x, position.y);
+        retY = RVector(position.x, relativeZero.y);
+    }
+
+    switch (mode) {
+    case RS::OrthoVertical:
+        ret = retX;
+        break;
+    case RS::OrthoHorizonal:
+        ret = retY;
+        break;
+    case RS::Orthogonal:
+        if (retX.getDistanceTo(position) > retY.getDistanceTo(position)) {
+            ret = retY;
+        }
+        else {
+            ret = retX;
+        }
+        break;
+    }
+
+    return ret;
 }
 
 /**
@@ -1539,14 +1749,18 @@ void RDocumentInterface::selectBoxXY(const RBox& box, bool add) {
     QSet<REntity::Id> entityIds;
 
     if (box.c2.x<box.c1.x) {
+        // cross selection:
         entityIds = document.queryIntersectedEntitiesXY(box);
     }
     else {
+        // contained selection:
         entityIds = document.queryContainedEntitiesXY(box);
     }
 
     QSet<REntity::Id> affectedEntities;
     document.selectEntities(entityIds, add, &affectedEntities);
+    // 20210914: also re-gen all entities that were already selected to make sure reference points are exported:
+    affectedEntities.unite(entityIds);
     updateSelectionStatus(affectedEntities, true);
 
     if (RMainWindow::hasMainWindow()) {
@@ -1559,7 +1773,7 @@ void RDocumentInterface::selectBoxXY(const RBox& box, bool add) {
  */
 void RDocumentInterface::selectAll() {
     QSet<REntity::Id> entityIds;
-    document.selectAllEntites(&entityIds);
+    document.selectAllEntities(&entityIds);
     updateSelectionStatus(entityIds, true);
 
     if (RMainWindow::hasMainWindow()) {
@@ -1602,20 +1816,38 @@ bool RDocumentInterface::hasSelection() {
  * while drawing a window to magnify an area.
  */
 void RDocumentInterface::addZoomBoxToPreview(const RBox& box) {
+    RPainterPath pp;
+    pp.moveTo(RVector(box.c1.x, box.c1.y));
+    pp.lineTo(RVector(box.c2.x, box.c1.y));
+    pp.lineTo(RVector(box.c2.x, box.c2.y));
+    pp.lineTo(RVector(box.c1.x, box.c2.y));
+    pp.lineTo(RVector(box.c1.x, box.c1.y));
+    pp.setPixelWidth(true);
+    int width = (RSettings::getHighResolutionGraphicsView() ? (int)RSettings::getDevicePixelRatio() : 1);
+    QPen pen(QBrush(RSettings::getColor("GraphicsViewColors/ZoomBoxColor", RColor(127,0,0))), width);
+    pen.setStyle(Qt::CustomDashLine);
+    QVector<qreal> dashPattern;
+    dashPattern << 10 << 5;
+    pen.setDashPattern(dashPattern);
+    pp.setPen(pen);
+
     QList<RGraphicsScene*>::iterator it;
     for (it = scenes.begin(); it != scenes.end(); it++) {
         RGraphicsScene* scene = *it;
-        scene->beginPreview();
-        scene->setColor(RSettings::getColor("GraphicsViewColors/ZoomBoxColor", RColor(127,0,0)));
-        scene->setBrush(Qt::NoBrush);
-        scene->setLineweight(RLineweight::Weight000);
-        scene->setStyle(Qt::DashLine);
-        scene->setLinetypeId(document.getLinetypeId("CONTINUOUS"));
+//        scene->beginPreview();
+//        scene->setColor(RSettings::getColor("GraphicsViewColors/ZoomBoxColor", RColor(127,0,0)));
+//        scene->setBrush(Qt::NoBrush);
+//        //scene->setLineweight(RLineweight::Weight000);
+//        scene->setLineweight(RLineweight::Weight200);
+//        scene->setStyle(Qt::DashLine);
+//        scene->setLinetypeId(document.getLinetypeId("CONTINUOUS"));
+//        scene->exportShape(QSharedPointer<RShape>(pl.clone()));
+//        //RPainterPath pp = scene->getCurrentPainterPath();
+//        scene->endPreview();
 
-        RPolyline pl = box.getPolyline2d();
-        scene->exportShape(QSharedPointer<RShape>(pl.clone()));
-        scene->endPreview();
+        scene->addToPreview(REntity::INVALID_ID, pp);
     }
+
 }
 
 void RDocumentInterface::addShapeToPreview(RShape& shape, const RColor& color,
@@ -1767,7 +1999,7 @@ void RDocumentInterface::setCursorPosition(const RVector& p) {
 
 /**
  * Force cursor to be shown. Used for e.g. snap to intersection manual where we
- * want to show the cursor eventhough we are in entity picking mode.
+ * want to show the cursor even though we are in entity picking mode.
  */
 void RDocumentInterface::setCursorOverride(bool on) {
     cursorOverride = on;
@@ -1926,9 +2158,19 @@ void RDocumentInterface::previewOperation(ROperation* operation) {
         return;
     }
 
-    RSpatialIndexSimple* si = new RSpatialIndexSimple();
-    RLinkedStorage* ls = new RLinkedStorage(document.getStorage());
-    RDocument* previewDocument = new RDocument(*ls, *si);
+    // reuse preview document:
+    RLinkedStorage* ls = NULL;
+    if (previewDocument==NULL) {
+        RSpatialIndexSimple* si = new RSpatialIndexSimple();
+        ls = new RLinkedStorage(document.getStorage());
+        previewDocument = new RDocument(*ls, *si);
+    }
+    else {
+        RStorage* s = &previewDocument->getStorage();
+        ls = (RLinkedStorage*)s;
+        ls->clearLinked();
+    }
+
     //previewDocument->setUnit(document.getUnit());
 
     // copy document settings (unit, current layer, etc) from source doc:
@@ -1974,7 +2216,9 @@ void RDocumentInterface::previewOperation(ROperation* operation) {
         (*it)->endPreview();
     }
 
-    delete previewDocument;
+    // 20210829: keep same preview document:
+    //delete previewDocument;
+    //previewDocument = NULL;
 }
 
 /**
@@ -1992,6 +2236,7 @@ RTransaction RDocumentInterface::applyOperation(ROperation* operation) {
     }
 
     RTransaction transaction = operation->apply(document, false);
+    transaction.setTypes(operation->getTransactionTypes());
     if (transaction.isFailed()) {
         qWarning() << "RDocumentInterface::applyOperation: "
                 "transaction failed";
@@ -2000,18 +2245,22 @@ RTransaction RDocumentInterface::applyOperation(ROperation* operation) {
         }
     }
 
-    QList<RObject::Id> objectIds = transaction.getAffectedObjects();
+    //QList<RObject::Id> objectIds = transaction.getAffectedObjects();
 
     clearPreview();
 
-    objectChangeEvent(objectIds);
+    objectChangeEvent(transaction);
 
     if (RMainWindow::hasMainWindow() && notifyGlobalListeners) {
+        // notify global listeners:
         RMainWindow::getMainWindow()->postTransactionEvent(transaction,
                     transaction.hasOnlyChanges(), operation->getEntityTypeFilter());
     }
 
     delete operation;
+
+    // notify document specific listeners:
+    notifyTransactionListeners(&transaction);
 
     return transaction;
 }
@@ -2019,99 +2268,181 @@ RTransaction RDocumentInterface::applyOperation(ROperation* operation) {
 /**
  * Triggers an objectChangeEvent for every object in the given set.
  */
-void RDocumentInterface::objectChangeEvent(QList<RObject::Id>& objectIds) {
+void RDocumentInterface::objectChangeEvent(RTransaction& transaction) {
+    if (transaction.isType(RTransaction::CurrentLayerChange) ||
+        transaction.isType(RTransaction::CurrentLayerSelectionChange)) {
+
+        // optimization for layer change / layer selection change:
+        if (!transaction.isType(RTransaction::Undo) && !transaction.isType(RTransaction::Redo)) {
+            return;
+        }
+    }
+
+    bool dimStyleHasChanged = false;
     bool ucsHasChanged = false;
     bool linetypeHasChanged = false;
-    bool layerHasChanged = false;
+    //bool layerHasChanged = false;
+    QSet<RLayer::Id> changedLayerIds;
     bool blockHasChanged = false;
     bool layoutHasChanged = false;
     bool viewHasChanged = false;
     bool entityHasChanged = false;
+    bool entityDeleted = false;
+
+    QList<RObject::Id> objectIds = transaction.getAffectedObjects();
 
     QSet<REntity::Id> entityIdsToRegenerate;
 
     QList<RObject::Id>::iterator it;
     for (it=objectIds.begin(); it!=objectIds.end(); ++it) {
-        QSharedPointer<RObject> object = document.queryObjectDirect(*it);
+        RObject::Id objectId = *it;
+        QSharedPointer<RObject> object = document.queryObjectDirect(objectId);
         if (object.isNull()) {
             continue;
         }
 
-        QSharedPointer<RDocumentVariables> docVars = object.dynamicCast<RDocumentVariables> ();
-        if (!docVars.isNull()) {
-            ucsHasChanged = true;
-            linetypeHasChanged = true;
-            layerHasChanged = true;
-            blockHasChanged = true;
-            layoutHasChanged = true;
-            viewHasChanged = true;
-            continue;
+        RS::EntityType type = object->getType();
+
+        switch (type) {
+        case RS::ObjectDocumentVariable:
+            {
+                QSharedPointer<RDocumentVariables> docVars = object.dynamicCast<RDocumentVariables> ();
+                if (!docVars.isNull()) {
+                    ucsHasChanged = true;
+                    linetypeHasChanged = true;
+                    //layerHasChanged = true;
+                    blockHasChanged = true;
+                    layoutHasChanged = true;
+                    viewHasChanged = true;
+                    continue;
+                }
+            }
+            break;
+
+        case RS::ObjectDimStyle:
+            if (!dimStyleHasChanged) {
+                QSharedPointer<RDimStyle> dimStyle = object.dynamicCast<RDimStyle> ();
+                if (!dimStyle.isNull()) {
+                    dimStyleHasChanged = true;
+                    continue;
+                }
+            }
+            break;
+
+        case RS::ObjectUcs:
+            if (!ucsHasChanged) {
+                QSharedPointer<RUcs> ucs = object.dynamicCast<RUcs> ();
+                if (!ucs.isNull()) {
+                    ucsHasChanged = true;
+                    continue;
+                }
+            }
+            break;
+
+        case RS::ObjectLinetype:
+            if (!linetypeHasChanged) {
+                QSharedPointer<RLinetype> linetype = object.dynamicCast<RLinetype> ();
+                if (!linetype.isNull()) {
+                    linetypeHasChanged = true;
+                    continue;
+                }
+            }
+            break;
+
+        case RS::ObjectLayout:
+            if (!layoutHasChanged) {
+                QSharedPointer<RLayout> layout = object.dynamicCast<RLayout> ();
+                if (!layout.isNull()) {
+                    layoutHasChanged = true;
+                    continue;
+                }
+            }
+            break;
+
+        case RS::ObjectView:
+            if (!viewHasChanged) {
+                QSharedPointer<RView> view = object.dynamicCast<RView> ();
+                if (!view.isNull()) {
+                    viewHasChanged = true;
+                    continue;
+                }
+            }
+            break;
+
+        default:
+            break;
         }
 
         QSharedPointer<REntity> entity = object.dynamicCast<REntity> ();
         if (!entity.isNull()) {
             entityHasChanged = true;
             entityIdsToRegenerate.insert(entity->getId());
+            if (entity->isUndone()) {
+                entityDeleted = true;
+            }
             continue;
         }
 
-        QSharedPointer<RUcs> ucs = object.dynamicCast<RUcs> ();
-        if (!ucs.isNull()) {
-            ucsHasChanged = true;
-            continue;
+        if (type==RS::ObjectLayer) {
+            QSharedPointer<RLayer> layer = object.dynamicCast<RLayer> ();
+            if (!layer.isNull()) {
+                changedLayerIds.insert(objectId);
+
+                // deselect entities on locked or invisible layer:
+                if (layer->isLocked() || layer->isOffOrFrozen()) {
+                    if (document.hasSelection()) {
+                        QSet<RObject::Id> ids = document.querySelectedLayerEntities(*it);
+
+                        deselectEntities(ids);
+                    }
+                }
+
+                if (transaction.isType(RTransaction::LayerVisibilityStatusChange)) {
+                    // tag all block references as changed as they might contain entities on that layer:
+                    // TODO: only tag if they do contain entities on that layer
+                    QSet<RObject::Id> blockReferenceIds = document.queryAllBlockReferences();
+                    entityIdsToRegenerate.unite(blockReferenceIds);
+
+                    QSet<RObject::Id> viewportIds = document.queryAllViewports();
+                    entityIdsToRegenerate.unite(viewportIds);
+                }
+                continue;
+            }
         }
 
-        QSharedPointer<RLinetype> linetype = object.dynamicCast<RLinetype> ();
-        if (!linetype.isNull()) {
-            linetypeHasChanged = true;
-            continue;
-        }
+        if (type==RS::ObjectBlock) {
+            QSharedPointer<RBlock> block = object.dynamicCast<RBlock> ();
+            if (!block.isNull()) {
+                //if (block->getId()!=document.getModelSpaceBlockId()) {
+                if (block->getId()!=document.getCurrentBlockId()) {
+                    blockHasChanged = true;
+                    //document.queryBlockReferences(block->getId());
+                }
+                else {
+                    QList<RPropertyChange> propertyChanges = transaction.getPropertyChanges(objectId);
+                    for (int i=0; i<propertyChanges.length(); i++) {
+                        if (propertyChanges[i].getPropertyTypeId()==RBlock::PropertyName) {
+                            // current block renamed (needs block list update):
+                            blockHasChanged = true;
+                        }
+                    }
+                }
 
-        QSharedPointer<RLayer> layer = object.dynamicCast<RLayer> ();
-        if (!layer.isNull()) {
-            layerHasChanged = true;
-
-            // deselect entities on locked or invisible layer:
-            if (layer->isLocked() || layer->isOffOrFrozen()) {
-                if (document.hasSelection()) {
-                    QSet<RObject::Id> ids = document.queryLayerEntities(*it);
+                // deselect block reference entities of hidden block:
+                if (block->isFrozen()) {
+                    QSet<RObject::Id> ids = document.queryBlockReferences(*it);
                     deselectEntities(ids);
                 }
+                continue;
             }
-            continue;
-        }
-
-        QSharedPointer<RBlock> block = object.dynamicCast<RBlock> ();
-        if (!block.isNull()) {
-            if (block->getId()!=document.getModelSpaceBlockId()) {
-                blockHasChanged = true;
-                //document.queryBlockReferences(block->getId());
-            }
-
-            // deselect block reference entities of hidden block:
-            if (block->isFrozen()) {
-                QSet<RObject::Id> ids = document.queryBlockReferences(*it);
-                deselectEntities(ids);
-            }
-            continue;
-        }
-
-        QSharedPointer<RLayout> layout = object.dynamicCast<RLayout> ();
-        if (!layout.isNull()) {
-            layoutHasChanged = true;
-            continue;
-        }
-
-        QSharedPointer<RView> view = object.dynamicCast<RView> ();
-        if (!view.isNull()) {
-            viewHasChanged = true;
-            continue;
         }
     }
 
+    QList<RLayer::Id> changedLayerIdList = RS::toList<RLayer::Id>(changedLayerIds);
+
     // notify local listeners:
-    if (layerHasChanged) {
-        notifyLayerListeners();
+    if (!changedLayerIds.isEmpty()) {
+        notifyLayerListeners(changedLayerIdList);
     }
 
     // notify global listeners if this is not the clipboard document interface:
@@ -2123,8 +2454,8 @@ void RDocumentInterface::objectChangeEvent(QList<RObject::Id>& objectIds) {
             // TODO:
             //RMainWindow::getMainWindow()->notifyLinetypeListeners(this);
         }
-        if (layerHasChanged) {
-            RMainWindow::getMainWindow()->notifyLayerListeners(this);
+        if (!changedLayerIds.isEmpty()) {
+            RMainWindow::getMainWindow()->notifyLayerListeners(this, changedLayerIdList);
         }
         if (blockHasChanged || layoutHasChanged) {
             RMainWindow::getMainWindow()->notifyBlockListeners(this);
@@ -2134,9 +2465,59 @@ void RDocumentInterface::objectChangeEvent(QList<RObject::Id>& objectIds) {
         }
     }
 
-    if (layerHasChanged || blockHasChanged || linetypeHasChanged) {
+    if (transaction.isType(RTransaction::LayerLockStatusChange)) {
+        // only lock status has changed, no regen:
+        return;
+    }
+
+    if (transaction.isType(RTransaction::LayerVisibilityStatusChange)) {
+        // only visibility has changed, regen block references only:
+        // TODO: this can still be slow for drawings with many / complex block references
+        // TODO: find out which block references really need a regen or store layer info with
+        //       painter paths to switch off easily
+        regenerateScenes(entityIdsToRegenerate, false);
+        regenerateViews(entityIdsToRegenerate);
+        return;
+    }
+
+    if (dimStyleHasChanged) {
+        RTransaction* t = new RTransaction(getStorage(), "Change document setting", true);
+        t->setType(RTransaction::ChangeDocumentSetting);
+
+        // update global document settings based on a modified dim style:
+        QSharedPointer<RDimStyle> dimStyle = document.queryDimStyleDirect();
+        document.setKnownVariable(RS::DIMSCALE, dimStyle->getDouble(RS::DIMSCALE), t);
+        document.setKnownVariable(RS::DIMTXT, dimStyle->getDouble(RS::DIMTXT), t);
+        document.setKnownVariable(RS::DIMGAP, dimStyle->getDouble(RS::DIMGAP), t);
+        document.setKnownVariable(RS::DIMASZ, dimStyle->getDouble(RS::DIMASZ), t);
+        document.setKnownVariable(RS::DIMEXE, dimStyle->getDouble(RS::DIMEXE), t);
+        document.setKnownVariable(RS::DIMEXO, dimStyle->getDouble(RS::DIMEXO), t);
+        document.setKnownVariable(RS::DIMTAD, dimStyle->getInt(RS::DIMTAD), t);
+        document.setKnownVariable(RS::DIMTIH, dimStyle->getBool(RS::DIMTIH), t);
+
+        //t->addObject(docVars);
+        t->end();
+        delete t;
+    }
+
+    if (/*layerHasChanged ||*/ !changedLayerIds.isEmpty() || blockHasChanged || linetypeHasChanged) {
         if (allowRegeneration) {
-            regenerateScenes(true);
+            // this also regenerates the views:
+            if (!changedLayerIds.isEmpty()) {
+                // also export invisible entities (e.g. layer color changed of invisible layer):
+                regenerateScenes(false, true);
+            }
+            else {
+                if (entityDeleted) {
+                    // entity deleted: regen to update reference points:
+                    regenerateScenes(entityIdsToRegenerate, false);
+                    regenerateViews(entityIdsToRegenerate);
+                }
+                else {
+                    regenerateScenes(false, false);
+                }
+            }
+            return;
         }
         else {
             regenerateScenes(entityIdsToRegenerate, false);
@@ -2185,16 +2566,18 @@ RLinetypePattern RDocumentInterface::getCurrentLinetypePattern() {
  * Sets the current layer based on the given layer name.
  */
 void RDocumentInterface::setCurrentLayer(const QString& layerName) {
+    RLayer::Id previousLayerId = document.getCurrentLayerId();
     document.setCurrentLayer(layerName);
     if (RMainWindow::hasMainWindow() && notifyGlobalListeners) {
-        RMainWindow::getMainWindow()->notifyLayerListenersCurrentLayer(this);
+        RMainWindow::getMainWindow()->notifyLayerListenersCurrentLayer(this, previousLayerId);
     }
 }
 
 void RDocumentInterface::setCurrentLayer(RLayer::Id layerId) {
+    RLayer::Id previousLayerId = document.getCurrentLayerId();
     document.setCurrentLayer(layerId);
     if (RMainWindow::hasMainWindow() && notifyGlobalListeners) {
-        RMainWindow::getMainWindow()->notifyLayerListenersCurrentLayer(this);
+        RMainWindow::getMainWindow()->notifyLayerListenersCurrentLayer(this, previousLayerId);
     }
 }
 
@@ -2216,6 +2599,12 @@ void RDocumentInterface::setCurrentBlock(RBlock::Id blockId) {
     if (RMainWindow::hasMainWindow() && notifyGlobalListeners) {
         RMainWindow::getMainWindow()->notifyBlockListenersCurrentBlock(this);
     }
+
+    QMap<int, RTransactionListener*>::iterator it;
+    for (it = transactionListeners.begin(); it != transactionListeners.end(); ++it) {
+        (*it)->setCurrentBlock(&document);
+    }
+
     regenerateScenes();
 }
 

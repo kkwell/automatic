@@ -17,8 +17,8 @@
  * along with QCAD.
  */
 
-include("../Block.js");
-include("../BlockDialog.js");
+include("scripts/Block/Block.js");
+include("scripts/Block/BlockDialog.js");
 
 /**
  * \class CreateBlock
@@ -48,7 +48,9 @@ CreateBlock.prototype.setState = function(state) {
     this.setCrosshairCursor();
     this.getDocumentInterface().setClickMode(RAction.PickCoordinate);
 
-    this.setLeftMouseTip(qsTr("Reference Point"));
+    var trRefPoint = qsTr("Reference Point");
+    this.setCommandPrompt(trRefPoint);
+    this.setLeftMouseTip(trRefPoint);
     this.setRightMouseTip(EAction.trCancel);
 
     EAction.showSnapTools();
@@ -84,8 +86,9 @@ CreateBlock.prototype.coordinateEvent = function(event) {
  * \param select True to select created block reference.
  * \param copy True to copy the entities into the new block, false to move entities.
  * \param createReference True to create a block reference in place of the entities.
+ * \param startTransactionGroup True to start a transaction group, reuse current transaction group otherwise
  */
-CreateBlock.createBlock = function(di, block, referencePoint, entityIds, title, select, copy, createReference) {
+CreateBlock.createBlock = function(di, block, referencePoint, entityIds, title, select, copy, createReference, startTransactionGroup) {
     if (isNull(select)) {
         select = false;
     }
@@ -95,12 +98,20 @@ CreateBlock.createBlock = function(di, block, referencePoint, entityIds, title, 
     if (isNull(createReference)) {
         createReference = true;
     }
+    if (isNull(startTransactionGroup)) {
+        startTransactionGroup = true;
+    }
 
-    var i, entity;
+    var i, entity, op;
     var doc = di.getDocument();
     var storage = doc.getStorage();
 
-    var op = new RAddObjectsOperation();
+    if (startTransactionGroup) {
+        doc.startTransactionGroup();
+    }
+
+    op = new RAddObjectsOperation();
+    op.setTransactionGroup(doc.getTransactionGroup());
     op.setText(title);
     op.addObject(block);
 
@@ -123,12 +134,17 @@ CreateBlock.createBlock = function(di, block, referencePoint, entityIds, title, 
         blockId = storage.getMaxObjectId();
     }
 
+    // map old block reference IDs to block reference entities:
+    var blockReferenceMap = {};
+    // list of attribute entities:
+    var attributeEntities = [];
+
+    // deselect original entities:
+    di.deselectEntities(entityIds);
+
     // add selection to new block:
     for (i=0; i<entityIds.length; i++) {
         var id = entityIds[i];
-
-        // deselect original entity:
-        di.deselectEntity(id);
 
         entity = doc.queryEntity(id);
         if (isNull(entity)) {
@@ -142,6 +158,15 @@ CreateBlock.createBlock = function(di, block, referencePoint, entityIds, title, 
         entity.move(referencePoint.getNegated());
 
         op.addObject(entity, false, copy);
+
+        if (copy) {
+            if (isBlockReferenceEntity(entity)) {
+                blockReferenceMap[id] = entity;
+            }
+            else if (isAttributeEntity(entity)) {
+                attributeEntities.push(entity);
+            }
+        }
     }
 
     // create block reference from selection:
@@ -155,6 +180,34 @@ CreateBlock.createBlock = function(di, block, referencePoint, entityIds, title, 
     }
 
     di.applyOperation(op);
+
+    if (copy) {
+        op = new RAddObjectsOperation();
+        op.setTransactionGroup(doc.getTransactionGroup());
+        op.setText(title);
+
+        // fix attribute links to block references:
+        for (i=0; i<attributeEntities.length; i++) {
+            var attributeEntity = attributeEntities[i];
+            // find parent entity of attribute:
+            var blockReferenceEntity = blockReferenceMap[attributeEntity.getParentId()];
+            if (!isNull(blockReferenceEntity)) {
+
+                // update parent ID:
+                storage.setEntityParentId(getPtr(attributeEntity), blockReferenceEntity.getId());
+                op.addObject(attributeEntity, false);
+            }
+        }
+
+        di.applyOperation(op);
+
+//        for (var oldId in blockReferenceMap) {
+//            entity = blockReferenceMap[oldId];
+//            var newId = entity.getId();
+//            qDebug("old:", oldId);
+//            qDebug("new:", newId);
+//        }
+    }
 
     if (isNull(blockReference)) {
         return RObject.INVALID_ID;

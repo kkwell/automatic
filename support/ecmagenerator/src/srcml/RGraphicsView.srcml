@@ -142,8 +142,8 @@
     <function_decl><type><name>void</name></type> <name>restoreViewport</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>zoomIn</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>zoomOut</name><parameter_list>()</parameter_list>;</function_decl>
-    <function_decl><type><name>void</name></type> <name>zoomIn</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name></decl></param>)</parameter_list>;</function_decl>
-    <function_decl><type><name>void</name></type> <name>zoomOut</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>zoomIn</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name></decl></param>, <param><decl><type><name>double</name></type> <name>factor</name>=<init><expr>1.2</expr></init></decl></param>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>zoomOut</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name></decl></param>, <param><decl><type><name>double</name></type> <name>factor</name>=<init><expr>1.2</expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>zoom</name><parameter_list>(<param><decl><type><name>const</name> <name>RVector</name>&amp;</type> <name>center</name></decl></param>, <param><decl><type><name>double</name></type> <name>factor</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>zoomTo</name><parameter_list>(<param><decl><type><name>const</name> <name>RBox</name>&amp;</type> <name>window</name></decl></param>, <param><decl><type><name>int</name></type> <name>margin</name> =<init> <expr>0</expr></init></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>zoomPrevious</name><parameter_list>()</parameter_list>;</function_decl>
@@ -221,18 +221,7 @@
         <return>return <expr><name>grid</name></expr>;</return>
     }</block></function>
 
-    <comment type="block">/**
-     * Sets the current grid. This graphics view takes ownership
-     * of the grid. The previous grid is deleted. Setting the grid
-     * to NULL disables the grid.
-     */</comment>
-    <function><type><name>void</name></type> <name>setGrid</name><parameter_list>(<param><decl><type><name>RGrid</name>*</type> <name>g</name></decl></param>)</parameter_list> <block>{
-        <if>if <condition>(<expr><name>grid</name>!=<name>NULL</name></expr>)</condition><then> <block>{
-            <expr_stmt><expr>delete <name>grid</name></expr>;</expr_stmt>
-            <expr_stmt><expr><name>grid</name> = <name>NULL</name></expr>;</expr_stmt>
-        }</block></then></if>
-        <expr_stmt><expr><name>grid</name> = <name>g</name></expr>;</expr_stmt>
-    }</block></function>
+    <function_decl><type><name>void</name></type> <name>setGrid</name><parameter_list>(<param><decl><type><name>RGrid</name>*</type> <name>g</name></decl></param>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>void</name></type> <name>setGridVisible</name><parameter_list>(<param><decl><type><name>bool</name></type> <name>on</name></decl></param>)</parameter_list>;</function_decl>
     <function_decl><type><name>bool</name></type> <name>isGridVisible</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>

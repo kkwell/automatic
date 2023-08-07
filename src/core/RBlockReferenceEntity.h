@@ -41,6 +41,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -71,21 +72,25 @@ public:
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityBlockRef;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RBlockReferenceEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RBlockReferenceEntity::getRtti());
     }
 
     virtual RBlockReferenceEntity* clone() const {
         return new RBlockReferenceEntity(*this);
     }
 
-    virtual QSet<RPropertyTypeId> getPropertyTypeIds() const;
+    virtual QSet<RPropertyTypeId> getPropertyTypeIds(RPropertyAttributes::Option option = RPropertyAttributes::NoOptions) const;
 
     virtual bool setProperty(RPropertyTypeId propertyTypeId,
             const QVariant& value, RTransaction* transaction=NULL);
     virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
 //    virtual void setSelected(bool on);
 
@@ -155,6 +160,10 @@ public:
         data.setReferencedBlockId(blockId);
     }
 
+    void setReferencedBlockName(const QString& blockName) {
+        data.setReferencedBlockName(blockName);
+    }
+
     RBlock::Id getReferencedBlockId() const {
         return data.getReferencedBlockId();
     }
@@ -173,11 +182,18 @@ public:
         data.update(entityId);
     }
 
-    QSharedPointer<REntity> queryEntity(REntity::Id entityId) const {
-        return data.queryEntity(entityId);
+    QSharedPointer<REntity> queryEntity(REntity::Id entityId, bool transform = false, bool ignoreAttDef = true) const {
+        return data.queryEntity(entityId, transform, ignoreAttDef);
     }
 
     bool applyTransformationTo(REntity& entity) const {
+        return data.applyTransformationTo(entity);
+    }
+
+    /**
+     * \nonscriptable
+     */
+    bool applyTransformationTo(QSharedPointer<REntity>& entity) const {
         return data.applyTransformationTo(entity);
     }
 

@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Line.js");
+include("scripts/Draw/Line/Line.js");
 include("scripts/Snap/RestrictAngleLength/RestrictAngleLength.js");
 
 /**
@@ -77,7 +77,7 @@ Line2P.prototype.setState = function(state) {
         var trNextPoint = qsTr("Next point");
         this.setCommandPrompt(trNextPoint);
         this.setLeftMouseTip(trNextPoint);
-        this.setRightMouseTip(qsTr("Done"));
+        this.setRightMouseTip(EAction.trDone);
         break;
     }
 
@@ -304,6 +304,8 @@ Line2P.prototype.getLineEntityId = function(trans) {
             return obj.getId();
         }
     }
+
+    return RObject.INVALID_ID;
 };
 
 /**

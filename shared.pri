@@ -1,13 +1,38 @@
+linux-g++:QMAKE_TARGET.arch = $$QMAKE_HOST.arch
+linux-g++-32:QMAKE_TARGET.arch = x86
+linux-g++-64:QMAKE_TARGET.arch = x86_64
+
+macx {
+    arch = $$system("uname -m")
+    equals(arch, "arm64") {
+        QMAKE_APPLE_DEVICE_ARCHS=arm64
+        QMAKE_LFLAGS+=-L/usr/lib -lstdc++
+    }
+}
+
+linux-* {
+    arch = $$system("uname -m")
+    equals(arch, "x86_64") {
+        QMAKE_TARGET.arch=x86_64
+    }
+}
+
 greaterThan(QT_MAJOR_VERSION, 4) {
     cache()
     DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x000000
     QT += printsupport
-    macx {
-        QT += macextras
+    lessThan(QT_MAJOR_VERSION, 6) {
+        macx {
+            QT += macextras
+        }
     }
 }
 else {
     QT += webkit
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += qml
 }
 
 DEFINES += QCAD_DLL
@@ -61,6 +86,13 @@ win32-msvc2010 {
     CONFIG+=win32-msvc
 }
 
+win32-msvc2015 {
+    contains(QMAKE_TARGET.arch, x86_64) {
+        # fix wrong library path under MSVC 2015 64bit:
+        LIBS += -L"C:\Program Files (x86)\Windows Kits\8.1\lib\winv6.3\um\x64"
+    }
+}
+
 # building for Mac OS X on the PowerPC platform:
 macx {
     rppc {
@@ -73,29 +105,29 @@ macx {
     }
 }
 
-# settings for all Mac OS X builds:
+# settings for all macOS builds:
 macx {
     QMAKE_CXXFLAGS_X86 += -Werror=return-type
-    macx-clang* {
-        QMAKE_CXXFLAGS += -mmacosx-version-min=10.7
-        exists(/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX) {
-            # nothing
-            #message("SDK")
-            #QMAKE_MAC_SDK = macosx
-        }
-        else:exists(/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk) {
-            #QMAKE_MAC_SDK = macosx10.12
-        }
-        else:exists(/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk) {
-            #QMAKE_MAC_SDK = macosx10.11
-        }
-        else:exists(/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk) {
-            #QMAKE_MAC_SDK = macosx10.9
-        }
+    #macx-clang* {
+        #QMAKE_CXXFLAGS += -mmacosx-version-min=10.7
+        #exists(/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX) {
+        #    # nothing
+        #    #message("SDK")
+        #    #QMAKE_MAC_SDK = macosx
+        #}
+        #else:exists(/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk) {
+        #    #QMAKE_MAC_SDK = macosx10.12
+        #}
+        #else:exists(/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk) {
+        #    #QMAKE_MAC_SDK = macosx10.11
+        #}
+        #else:exists(/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk) {
+        #    #QMAKE_MAC_SDK = macosx10.9
+        #}
         #exists(/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1) {
         #    INCLUDEPATH += /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1
         #}
-    }
+    #}
 
     greaterThan(QT_MAJOR_VERSION, 4) {
         QMAKE_LFLAGS += -F/System/Library/Frameworks
@@ -132,16 +164,20 @@ else {
 TARGET = $$join(TARGET,,$$RLIBNAME,)
 
 QT += core \
-    script \
-    scripttools \
     sql \
     svg \
     opengl \
     network \
-    xml \
-    xmlpatterns
+    xml
 
-# make sure that the QtHelp framework is included in the app bundle under Mac OS X:
+lessThan(QT_MAJOR_VERSION, 6) {
+    QT += core \
+        script \
+        scripttools \
+        xmlpatterns
+}
+
+# make sure that the QtHelp framework is included in the app bundle under macOS:
 greaterThan(QT_MAJOR_VERSION, 4) {
     QT += help \
         uitools

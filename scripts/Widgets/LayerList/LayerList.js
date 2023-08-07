@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../../WidgetFactory.js");
+include("scripts/WidgetFactory.js");
 
 function RLayerListQt(parent) {
     RListWidget.call(this, parent);
@@ -30,14 +30,29 @@ function RLayerListQt(parent) {
     var appWin = EAction.getMainWindow();
     var adapter = new RLayerListenerAdapter();
     appWin.addLayerListener(adapter);
-    adapter.layersUpdated.connect(this, "updateLayers");
-    adapter.currentLayerSet.connect(this, "updateLayers");
-    adapter.layersCleared.connect(this, "clearLayers");
-    this.setProperty("listener", adapter);
+    if (RSettings.getQtVersion() < 0x060000) {
+        adapter.layersUpdated.connect(this, "updateLayers");
+        adapter.currentLayerSet.connect(this, "updateLayers");
+        adapter.layersCleared.connect(this, "clearLayers");
 
-    this.itemSelectionChanged.connect(this, "layerActivated");
-    this.itemDoubleClicked.connect(this, "moveSelectionToLayer");
-    this.iconClicked.connect(this, "iconClickedSlot");
+        this.setProperty("listener", adapter);
+
+        this.itemSelectionChanged.connect(this, "layerActivated");
+        this.itemDoubleClicked.connect(this, "moveSelectionToLayer");
+        this.iconClicked.connect(this, "iconClickedSlot");
+    }
+    else {
+        adapter.layersUpdated.connect(this, this.updateLayers);
+        adapter.currentLayerSet.connect(this, this.updateLayers);
+        adapter.layersCleared.connect(this, this.clearLayers);
+
+        this.setProperty("listener", adapter);
+
+        this.itemSelectionChanged.connect(this, this.layerActivated);
+        this.itemDoubleClicked.connect(this, this.moveSelectionToLayer);
+        this.iconClicked.connect(this, this.iconClickedSlot);
+    }
+
     this.basePath = includeBasePath;
 }
 
@@ -69,7 +84,7 @@ RLayerListQt.prototype.contextMenuEvent = function(e) {
     e.ignore();
 };
 
-RLayerListQt.prototype.updateLayers = function(documentInterface) {
+RLayerListQt.prototype.updateLayers = function(documentInterface, previousLayerId) {
     this.di = documentInterface;
     var layer;
 
@@ -85,13 +100,14 @@ RLayerListQt.prototype.updateLayers = function(documentInterface) {
     for ( var i = 0; i < result.length; ++i) {
         var id = result[i];
         layer = doc.queryLayer(id);
-        if (layer.isNull()) {
+
+        if (isFunction(layer.isNull) && layer.isNull()) {
             continue;
         }
         var item = new QListWidgetItem(layer.getName(), this);
-        var iconName = this.basePath
+        var iconName = autoIconPath(this.basePath
                 + "/layerstatus_%1%2.svg".arg(Number(layer.isFrozen()))
-                .arg(Number(layer.isLocked()));
+                .arg(Number(layer.isLocked())));
         item.setIcon(new QIcon(iconName));
         if (layer.isProtected()) {
             item.setData(Qt.UserRole, true);
@@ -101,7 +117,7 @@ RLayerListQt.prototype.updateLayers = function(documentInterface) {
     this.sortItems();
 
     layer = doc.queryCurrentLayer();
-    if (!layer.isNull()) {
+    if (!isFunction(layer.isNull) || !layer.isNull()) {
         var items = this.findItems(layer.getName(), Qt.MatchExactly);
         if (items.length !== 0) {
             this.blockSignals(true);
@@ -123,7 +139,7 @@ RLayerListQt.prototype.iconClickedSlot = function(x, item) {
 
     var doc = this.di.getDocument();
     var layer = doc.queryLayer(item.text());
-    if (layer.isNull()) {
+    if (isFunction(layer.isNull) && layer.isNull()) {
         return;
     }
 
@@ -188,10 +204,10 @@ RLayerListQt.prototype.layerActivated = function() {
 
 
 function LayerList(guiAction) {
-    Widgets.call(this, guiAction);
+    EAction.call(this, guiAction);
 }
 
-LayerList.prototype = new Widgets();
+LayerList.prototype = new EAction();
 
 LayerList.getPreferencesCategory = function() {
     return [ qsTr("Widgets"), qsTr("Layer List") ];
@@ -199,7 +215,7 @@ LayerList.getPreferencesCategory = function() {
 
 LayerList.applyPreferences = function(doc, mdiChild) {
     var appWin = RMainWindowQt.getMainWindow();
-    appWin.notifyLayerListeners(EAction.getDocumentInterface());
+    appWin.notifyLayerListeners(EAction.getDocumentInterface(), []);
 
     //if (RSettings.getBoolValue("LayerList/AlternatingRowColors", false)===true) {
         var layerList = appWin.findChild("LayerList");
@@ -212,11 +228,11 @@ LayerList.applyPreferences = function(doc, mdiChild) {
  * Shows / hides the layer list.
  */
 LayerList.prototype.beginEvent = function() {
-    Widgets.prototype.beginEvent.call(this);
+    EAction.prototype.beginEvent.call(this);
 
     var appWin = RMainWindowQt.getMainWindow();
     var dock = appWin.findChild("LayerListDock");
-    if (!QCoreApplication.arguments().contains("-no-show")) {
+    if (!RSettings.getOriginalArguments().contains("-no-show")) {
         dock.visible = !dock.visible;
         if (dock.visible) dock.raise();
     }
@@ -240,7 +256,7 @@ LayerList.uninit = function() {
     }
     var basicDock = appWin.findChild("LayerListDock");
     if (!isNull(basicDock)) {
-        basicDock.destroy();
+        destr(basicDock);
     }
     LayerList.getPreferencesCategory = undefined;
 };
@@ -260,7 +276,7 @@ LayerList.init = function(basePath) {
 
     var formWidget = WidgetFactory.createWidget(basePath, "LayerList.ui");
     var layout = formWidget.findChild("verticalLayout");
-    var layerList = new RLayerListQt(layout);
+    var layerList = new RLayerListQt(formWidget);
     layerList.objectName = "LayerList";
     layout.addWidget(layerList, 1, 0);
 

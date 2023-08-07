@@ -36,7 +36,7 @@ QList<RFileImporterFactory*> RFileImporterRegistry::factories;
  *
  * \param factoryFunction The function that can be used to instantiate
  *      the importer.
- * \param checkFunction The function tht can be used to check whether
+ * \param checkFunction The function that can be used to check whether
  *      the importer can import a given file.
  */
 void RFileImporterRegistry::registerFileImporter(RFileImporterFactory* factory) {
@@ -48,7 +48,7 @@ void RFileImporterRegistry::registerFileImporter(RFileImporterFactory* factory) 
  *
  * \param factoryFunction The function that can be used to instantiate
  *      the importer.
- * \param checkFunction The function tht can be used to check whether
+ * \param checkFunction The function that can be used to check whether
  *      the importer can import a given file.
  */
 void RFileImporterRegistry::unregisterFileImporter(RFileImporterFactory* factory) {
@@ -114,18 +114,26 @@ QStringList RFileImporterRegistry::getFilterExtensions() {
         QStringList filterStrings = (*it)->getFilterStrings();
         for (int i=0; i<filterStrings.count(); i++) {
             QString filterString = filterStrings[i];
-            QRegExp rx("\\*\\.([^ )]*)");
+            QRegularExpression rx("\\*\\.([^ )]*)");
+#if QT_VERSION >= 0x050000
+            qsizetype pos = 0;
+            QRegularExpressionMatch match;
+            while ((pos = filterString.indexOf(rx, pos, &match)) != -1)  {
+                ret.append(match.captured(1));
+                pos += match.capturedLength();
+            }
+#else
             int pos = 0;
-             
             while ((pos = rx.indexIn(filterString, pos)) != -1)  {
                 ret.append(rx.cap(1));
                 pos += rx.matchedLength();
             }
+#endif
         }
     }
 
     // unique:
-    ret = ret.toSet().toList();
+    ret = RS::unique<QString>(ret);
 
     return ret;
 }

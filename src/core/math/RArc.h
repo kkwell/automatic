@@ -26,6 +26,7 @@
 #include "RVector.h"
 
 class RBox;
+class RLine;
 class RPolyline;
 
 /**
@@ -44,7 +45,6 @@ public:
          double endAngle, bool reversed = false);
     RArc(const RVector& center, double radius, double startAngle,
             double endAngle, bool reversed = false);
-    virtual ~RArc();
 
     virtual RShape::Type getShapeType() const {
         return Arc;
@@ -64,7 +64,7 @@ public:
     virtual QList<double> getDoubleProperties() const;
     virtual QList<bool> getBoolProperties() const;
 
-    bool isValid() const;
+    virtual bool isValid() const;
     bool isFullCircle(double tolerance = RS::AngleTolerance) const;
 
     static RArc createFrom3Points(const RVector& startPoint,
@@ -85,8 +85,10 @@ public:
     virtual QList<RVector> getEndPoints() const;
     virtual QList<RVector> getMiddlePoints() const;
     virtual QList<RVector> getCenterPoints() const;
+    virtual QList<RVector> getArcReferencePoints() const;
     virtual QList<RVector> getPointsWithDistanceToEnd(
         double distance, int from = RS::FromAny) const;
+    virtual QList<RVector> getPointCloud(double segmentLength) const;
 
     virtual RVector getVectorTo(const RVector& point,
             bool limited = true, double strictRange = RMAXDOUBLE) const;
@@ -128,8 +130,8 @@ public:
     virtual double getAngleAt(double distance, RS::From from = RS::FromStart) const;
     virtual RVector getMiddlePoint() const;
 
-    void moveStartPoint(const RVector& pos);
-    void moveEndPoint(const RVector& pos);
+    void moveStartPoint(const RVector& pos, bool keepRadius = true);
+    void moveEndPoint(const RVector& pos, bool keepRadius = true);
     void moveMiddlePoint(const RVector& pos);
     double getBulge() const;
 
@@ -153,8 +155,8 @@ public:
     }
     virtual double getDistanceFromStart(const RVector& p) const;
 
-    RPolyline approximateWithLines(double segmentLength) const;
-    RPolyline approximateWithLinesTan(double segmentLength) const;
+    RPolyline approximateWithLines(double segmentLength, double angle = 0.0) const;
+    RPolyline approximateWithLinesTan(double segmentLength, double angle = 0.0) const;
 
     QList<RLine> getTangents(const RVector& point) const;
 
@@ -165,6 +167,16 @@ public:
     virtual QList<QSharedPointer<RShape> > splitAt(const QList<RVector>& points) const;
 
     QList<RArc> splitAtQuadrantLines() const;
+
+#if QT_VERSION >= 0x060000
+    /**
+     * copy function for Qt 6 scripts:
+     * \nonscriptable
+     */
+    RArc copy() const {
+        return *this;
+    }
+#endif
 
 protected:
     virtual void print(QDebug dbg) const;

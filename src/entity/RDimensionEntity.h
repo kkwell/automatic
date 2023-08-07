@@ -43,6 +43,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -63,11 +64,17 @@ public:
     static RPropertyTypeId PropertyUpperTolerance;
     static RPropertyTypeId PropertyLowerTolerance;
 
-    static RPropertyTypeId PropertyLinearFactor;
-    static RPropertyTypeId PropertyDimScale;
+    //static RPropertyTypeId PropertyLinearFactor;
+    //static RPropertyTypeId PropertyDimScale;
     static RPropertyTypeId PropertyDimBlockName;
     static RPropertyTypeId PropertyAutoTextPos;
     static RPropertyTypeId PropertyFontName;
+    //static RPropertyTypeId PropertyTextColor;
+    static RPropertyTypeId PropertyArrow1Flipped;
+    static RPropertyTypeId PropertyArrow2Flipped;
+
+    static RPropertyTypeId PropertyExtLineFix;
+    static RPropertyTypeId PropertyExtLineFixLength;
     //static RPropertyTypeId PropertyHeight;
     //static RPropertyTypeId PropertyAngle;
     //static RPropertyTypeId PropertyLineSpacingFactor;
@@ -77,27 +84,58 @@ public:
     static RPropertyTypeId PropertyAutoLabel;
     static RPropertyTypeId PropertyMeasuredValue;
 
+    static RPropertyTypeId PropertyDimscale;
+    static RPropertyTypeId PropertyDimlfac;
+    static RPropertyTypeId PropertyDimtxt;
+    static RPropertyTypeId PropertyDimgap;
+    static RPropertyTypeId PropertyDimasz;
+    //static RPropertyTypeId PropertyDimdli;
+    static RPropertyTypeId PropertyDimexe;
+    static RPropertyTypeId PropertyDimexo;
+    static RPropertyTypeId PropertyDimtad;
+    static RPropertyTypeId PropertyDimtih;
+    static RPropertyTypeId PropertyDimtsz;
+    static RPropertyTypeId PropertyDimlunit;
+    static RPropertyTypeId PropertyDimdec;
+    static RPropertyTypeId PropertyDimdsep;
+    static RPropertyTypeId PropertyDimzin;
+    static RPropertyTypeId PropertyDimaunit;
+    static RPropertyTypeId PropertyDimadec;
+    static RPropertyTypeId PropertyDimazin;
+    static RPropertyTypeId PropertyArchTick;
+    static RPropertyTypeId PropertyDimclrt;
+
 public:
     RDimensionEntity(RDocument* document);
     virtual ~RDimensionEntity();
 
     static void init();
 
-    static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RDimensionEntity));
+    static RS::EntityType getRtti() {
+        return RS::EntityDimension;
     }
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
+        return RPropertyTypeId::getPropertyTypeIds(RDimensionEntity::getRtti());
+    }
+
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     virtual void exportEntity(RExporter& e, bool preview=false, bool forceSelected=false) const;
+
+    static void renderDimensionText(RExporter& e, const RDocument* doc, RTextData& textData, bool isSelected=false, bool forceSelected=false);
 
     virtual RDimensionData& getData() = 0;
 
     virtual const RDimensionData& getData() const = 0;
+
+    void clearStyleOverrides() {
+        getData().clearStyleOverrides();
+    }
 
     void setDefinitionPoint(const RVector& p) {
         getData().setDefinitionPoint(p);
@@ -123,6 +161,19 @@ public:
         return getData().getTextData();
     }
 
+    void updateBoundingBox(const RBox& b) const {
+        getData().updateBoundingBox(b);
+    }
+    void updateTextPositionCenter(const RVector& p) const {
+        getData().updateTextPositionCenter(p);
+    }
+    void updateTextData(const RTextData& d) const {
+        getData().updateTextData(d);
+    }
+    void updateShapes(const QList<QSharedPointer<RShape> >& s) const {
+        getData().updateShapes(s);
+    }
+
     void setTextPosition(const RVector& p) {
         getData().setTextPosition(p);
     }
@@ -138,6 +189,14 @@ public:
     QString getFontName() const {
         return getData().getFontName();
     }
+
+//    void setTextColor(const QString& tc) {
+//        getData().setTextColor(RColor(tc));
+//    }
+
+//    RColor getTextColor() const {
+//        return getData().getTextColor();
+//    }
 
     bool hasCustomTextPosition() const {
         return getData().hasCustomTextPosition();
@@ -167,12 +226,12 @@ public:
         getData().setLinearFactor(f);
     }
 
-    double getDimScale(bool fromDocument=true) const {
-        return getData().getDimScale(fromDocument);
+    double getDimscale() const {
+        return getData().getDimscale();
     }
 
-    void setDimScale(double f) {
-        getData().setDimScale(f);
+    void setDimscale(double f) {
+        getData().setDimscale(f);
     }
 
     QString getDimBlockName() const {
@@ -181,6 +240,37 @@ public:
 
     bool hasDimensionBlockReference() const {
         return getData().hasDimensionBlockReference();
+    }
+
+    bool isArrow1Flipped() const {
+        return getData().isArrow1Flipped();
+    }
+    void setArrow1Flipped(bool on) {
+        getData().setArrow1Flipped(on);
+    }
+    bool isArrow2Flipped() const {
+        return getData().isArrow2Flipped();
+    }
+    void setArrow2Flipped(bool on) {
+        getData().setArrow2Flipped(on);
+    }
+
+    bool isExtLineFix() const {
+        return getData().isExtLineFix();
+    }
+    void setExtLineFix(bool on) {
+        getData().setExtLineFix(on);
+    }
+
+    double getExtLineFixLength() const {
+        return getData().getExtLineFixLength();
+    }
+    void setExtLineFixLength(double v) {
+        getData().setExtLineFixLength(v);
+    }
+
+    bool hasOverride(RS::KnownVariable key) const {
+        return getData().hasOverride(key);
     }
 
     static QSet<QString> getDimensionBlockNames(RDocument* doc);

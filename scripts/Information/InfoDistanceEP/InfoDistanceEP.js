@@ -17,7 +17,7 @@
  * along with QCAD.
  */
 
-include("../Information.js");
+include("scripts/Information/Information.js");
 
 /**
  * \class InfoDistanceEP
@@ -67,7 +67,7 @@ InfoDistanceEP.prototype.setState = function(state) {
         var trSecondPoint = qsTr("Specify point");
         this.setCommandPrompt(trSecondPoint);
         this.setLeftMouseTip(trSecondPoint);
-        this.setRightMouseTip(qsTr("Done"));
+        this.setRightMouseTip(EAction.trDone);
         break;
     }
 
@@ -90,7 +90,7 @@ InfoDistanceEP.prototype.pickEntity = function(event, preview) {
                 di.previewOperation(op);
             }
             else {
-                op.destroy();
+                destr(op);
             }
         }
     }
@@ -139,14 +139,23 @@ InfoDistanceEP.prototype.pickCoordinate = function(event, preview) {
             di.setRelativeZero(this.point2);
         }
         else {
-            op.destroy();
+            destr(op);
         }
     }
 
     if (!preview) {
-        this.setState(InfoDistanceEP.State.SettingShape);
         var distance = this.point1.getDistanceTo(this.point2);
         EAction.getMainWindow().handleUserInfo(qsTr("Distance:") + " " + this.formatLinearResultCmd(distance));
+
+        if (this.autoTerminate) {
+            this.updateLineEdit(distance);
+            this.setNoState(false);
+            this.terminate();
+            return;
+        }
+        else {
+            this.setState(InfoDistanceEP.State.SettingShape);
+        }
     }
 };
 

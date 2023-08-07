@@ -67,6 +67,9 @@
         getShapes
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getClosestSubEntityId
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getClosestShape
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -74,6 +77,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getBoundingBox
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        copyAttributesFrom
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         to2D
@@ -101,6 +107,12 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         setSelected
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isSelectedWorkingSet
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setSelectedWorkingSet
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getDrawOrder
@@ -190,6 +202,9 @@
         getCenterPoints
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        getArcReferencePoints
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         getPointsWithDistanceToEnd
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
@@ -212,6 +227,9 @@
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         intersectsWith
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        clickReferencePoint
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         moveReferencePoint

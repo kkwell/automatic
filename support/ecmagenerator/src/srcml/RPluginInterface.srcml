@@ -29,7 +29,11 @@
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"RPluginInfo.h"</cpp:file></cpp:include>
 
 <class_decl>class <name>QString</name>;</class_decl>
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &lt; 0x060000</expr></cpp:if>
 <class_decl>class <name>QScriptEngine</name>;</class_decl>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+<class_decl>class <name>RScriptHandler</name>;</class_decl>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
 
 <comment type="block">/**
  * Interface for all C++ QCAD plugins.
@@ -72,6 +76,7 @@
      */</comment>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>postInit</name><parameter_list>(<param><decl><type><name><name>RPluginInterface</name>::<name>InitStatus</name></name></type> <name>status</name></decl></param>)</parameter_list> <specifier>= 0</specifier>;</function_decl>
 
+<cpp:if>#<cpp:directive>if</cpp:directive> <expr><name>QT_VERSION</name> &lt; 0x060000</expr></cpp:if>
     <comment type="block">/**
      * Called whenever a new script engine is instantiated.
      * Implementations may register their own script extensions by making
@@ -80,6 +85,16 @@
      * \nonscriptable
      */</comment>
     <function_decl><type><name>virtual</name> <name>void</name></type> <name>initScriptExtensions</name><parameter_list>(<param><decl><type><name>QScriptEngine</name>&amp;</type> <name>engine</name></decl></param>)</parameter_list> <specifier>= 0</specifier>;</function_decl>
+<cpp:else>#<cpp:directive>else</cpp:directive></cpp:else>
+    <function><type><name>virtual</name> <name>void</name></type> <name>initScriptExtensions</name><parameter_list>(<param><decl><type><name>RScriptHandler</name>&amp;</type> <name>handler</name></decl></param>)</parameter_list> <block>{}</block></function>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+
+    <comment type="block">/**
+     * Called when the user chosen language changed.
+     *
+     * \nonscriptable
+     */</comment>
+    <function_decl><type><name>virtual</name> <name>void</name></type> <name>initTranslations</name><parameter_list>()</parameter_list> <specifier>= 0</specifier>;</function_decl>
 
     <comment type="block">/**
      * \return An RPluginInfo object with at least the following keys:
@@ -92,6 +107,11 @@
      * This is typically used by an about dialog or debugging / developer tools.
      */</comment>
     <function_decl><type><name>virtual</name> <name>RPluginInfo</name></type> <name>getPluginInfo</name><parameter_list>()</parameter_list> <specifier>= 0</specifier>;</function_decl>
+
+    <comment type="block">/**
+     * \return True if the plugin license is valid.
+     */</comment>
+    <function_decl><type><name>virtual</name> <name>bool</name></type> <name>checkLicense</name><parameter_list>()</parameter_list> <specifier>= 0</specifier>;</function_decl>
 </public>}</block>;</class>
 
 <decl_stmt><decl><type><name>QT_BEGIN_NAMESPACE</name></type>

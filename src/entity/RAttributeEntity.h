@@ -44,6 +44,7 @@ public:
     static RPropertyTypeId PropertyCustom;
     static RPropertyTypeId PropertyHandle;
     static RPropertyTypeId PropertyProtected;
+    static RPropertyTypeId PropertyWorkingSet;
     static RPropertyTypeId PropertyType;
     static RPropertyTypeId PropertyBlock;
     static RPropertyTypeId PropertyLayer;
@@ -54,12 +55,15 @@ public:
     static RPropertyTypeId PropertyDisplayedColor;
     static RPropertyTypeId PropertyDrawOrder;
 
+    static RPropertyTypeId PropertyParentId;
+
     static RPropertyTypeId PropertyAngle;
     static RPropertyTypeId PropertyXScale;
     static RPropertyTypeId PropertyBold;
     static RPropertyTypeId PropertyFontName;
     static RPropertyTypeId PropertyHAlign;
     static RPropertyTypeId PropertyHeight;
+    static RPropertyTypeId PropertyWidth;
     static RPropertyTypeId PropertyItalic;
     static RPropertyTypeId PropertyLineSpacingFactor;
     static RPropertyTypeId PropertyPositionX;
@@ -70,6 +74,8 @@ public:
     static RPropertyTypeId PropertyPlainText;
     static RPropertyTypeId PropertyVAlign;
     static RPropertyTypeId PropertyInvisible;
+    static RPropertyTypeId PropertyBackward;
+    static RPropertyTypeId PropertyUpsideDown;
 
 public:
     RAttributeEntity(RDocument* document, const RAttributeData& data);
@@ -77,8 +83,12 @@ public:
 
     static void init();
 
+    static RS::EntityType getRtti() {
+        return RS::EntityAttribute;
+    }
+
     static QSet<RPropertyTypeId> getStaticPropertyTypeIds() {
-        return RPropertyTypeId::getPropertyTypeIds(typeid(RAttributeEntity));
+        return RPropertyTypeId::getPropertyTypeIds(RAttributeEntity::getRtti());
     }
 
     virtual RAttributeEntity* clone() const {
@@ -98,13 +108,11 @@ public:
     }
 
 
-    bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
+    virtual bool setProperty(RPropertyTypeId propertyTypeId, const QVariant& value,
         RTransaction* transaction=NULL);
-    QPair<QVariant, RPropertyAttributes> getProperty(
+    virtual QPair<QVariant, RPropertyAttributes> getProperty(
             RPropertyTypeId& propertyTypeId,
-            bool humanReadable = false, bool noAttributes = false);
-
-    virtual bool isVisible() const;
+            bool humanReadable = false, bool noAttributes = false, bool showOnRequest = false);
 
     void exportEntity(RExporter& e, bool preview, bool forceSelected=false) const;
 
@@ -122,6 +130,10 @@ public:
 
     void setInvisible(bool i) {
         data.setInvisible(i);
+    }
+
+    virtual bool isSelectable() const {
+        return !isInvisible() && RTextBasedEntity::isSelectable();
     }
 
 protected:

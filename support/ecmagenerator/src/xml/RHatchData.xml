@@ -50,6 +50,14 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="RPattern" isPureVirtual="false" />
     </method>
+    <method name="setCustomPattern" cppName="setCustomPattern"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="RPattern &amp;" typeName="RPattern" name="p"
+        isConst="true" />
+      </variant>
+    </method>
     <method name="cloneOnChange" cppName="cloneOnChange"
     specifier="public" isStatic="false" isVirtual="true"
     isScriptOverwritable="true">
@@ -111,6 +119,10 @@ xmlns:rs="http://www.ribbonsoft.com">
         name="referencePoint" isConst="true" />
         <arg type="RVector &amp;" typeName="RVector"
         name="targetPoint" isConst="true" />
+        <arg type="Qt::KeyboardModifiers"
+        typeName="Qt::KeyboardModifiers" name="modifiers"
+        hasDefault="true" default="Qt :: NoModifier"
+        isConst="false" />
       </variant>
     </method>
     <method name="move" cppName="move" specifier="public"
@@ -171,6 +183,9 @@ xmlns:rs="http://www.ribbonsoft.com">
         hasDefault="true" default="false" isConst="false" />
         <arg type="bool" typeName="bool" name="segment"
         hasDefault="true" default="false" isConst="false" />
+        <arg type="QList &lt; RObject::Id &gt; *"
+        typeName="QList &lt; RObject::Id &gt; *" name="entityIds"
+        hasDefault="true" default="NULL" isConst="false" />
       </variant>
     </method>
     <method name="getExploded" cppName="getExploded"
@@ -223,6 +238,8 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="void" isPureVirtual="false">
         <arg type="RVector &amp;" typeName="RVector" name="op"
         isConst="true" />
+        <arg type="bool" typeName="bool" name="clearCustom"
+        hasDefault="true" default="true" isConst="false" />
       </variant>
     </method>
     <method name="getPatternName" cppName="getPatternName"
@@ -237,6 +254,26 @@ xmlns:rs="http://www.ribbonsoft.com">
         <arg type="QString &amp;" typeName="QString" name="n"
         isConst="true" />
       </variant>
+    </method>
+    <method name="getTransparency" cppName="getTransparency"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="int" isPureVirtual="false" />
+    </method>
+    <method name="setTransparency" cppName="setTransparency"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="int" typeName="int" name="t" isConst="false" />
+      </variant>
+    </method>
+    <method name="getLength" cppName="getLength" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="double" isPureVirtual="false" />
+    </method>
+    <method name="getArea" cppName="getArea" specifier="public"
+    isStatic="false" isVirtual="false" isScriptOverwritable="true">
+      <variant returnType="double" isPureVirtual="false" />
     </method>
     <method name="clearCustomPattern" cppName="clearCustomPattern"
     specifier="public" isStatic="false" isVirtual="false"
@@ -258,6 +295,19 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="void" isPureVirtual="false">
         <arg type="QSharedPointer &lt; RShape &gt;"
         typeName="QSharedPointer &lt; RShape &gt;" name="shape"
+        isConst="false" />
+        <arg type="bool" typeName="bool" name="addAutoLoops"
+        hasDefault="true" default="true" isConst="false" />
+      </variant>
+    </method>
+    <method name="addBoundaryShape" cppName="addBoundaryShape"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false">
+        <arg type="QSharedPointer &lt; RShape &gt;"
+        typeName="QSharedPointer &lt; RShape &gt;" name="shape"
+        isConst="false" />
+        <arg type="int" typeName="int" name="loop"
         isConst="false" />
       </variant>
     </method>
@@ -316,8 +366,14 @@ xmlns:rs="http://www.ribbonsoft.com">
       <variant returnType="QList &lt; RPolyline &gt;"
       isPureVirtual="false">
         <arg type="double" typeName="double" name="segmentLength"
+        hasDefault="true" default="RDEFAULT_MIN1"
         isConst="false" />
       </variant>
+    </method>
+    <method name="autoCloseLoops" cppName="autoCloseLoops"
+    specifier="public" isStatic="false" isVirtual="false"
+    isScriptOverwritable="true">
+      <variant returnType="void" isPureVirtual="false" />
     </method>
     <method name="getComplexity" cppName="getComplexity"
     specifier="public" isStatic="false" isVirtual="false"
@@ -329,6 +385,24 @@ xmlns:rs="http://www.ribbonsoft.com">
     isScriptOverwritable="true">
       <variant returnType="void" isPureVirtual="false">
         <arg type="RPattern &amp;" typeName="RPattern" name="p"
+        isConst="true" />
+      </variant>
+    </method>
+    <method name="getColor" cppName="getColor" specifier="public"
+    isStatic="false" isVirtual="true" isScriptOverwritable="true">
+      <variant returnType="RColor" isPureVirtual="false" />
+      <variant returnType="RColor" isPureVirtual="false">
+        <arg type="RColor &amp;" typeName="RColor"
+        name="unresolvedColor" isConst="true" />
+        <arg type="QStack &lt; REntity * &gt; &amp;"
+        typeName="QStack &lt; REntity * &gt;" name="blockRefStack"
+        isConst="true" />
+      </variant>
+      <variant returnType="RColor" isPureVirtual="false">
+        <arg type="bool" typeName="bool" name="resolve"
+        isConst="false" />
+        <arg type="QStack &lt; REntity * &gt; &amp;"
+        typeName="QStack &lt; REntity * &gt;" name="blockRefStack"
         isConst="true" />
       </variant>
     </method>

@@ -133,10 +133,22 @@
         setSum
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        isOnRequest
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setOnRequest
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         isLabel
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
+        isCustom
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
         isDimensionLabel
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setInteger
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         isInteger
@@ -157,10 +169,31 @@
         setNumericallySorted
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        getPropertyTypeId
+        isScaleType
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
-        setPropertyTypeId
+        setScaleType
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isAreaType
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setAreaType
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isUnitLess
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setUnitLess
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isPercentage
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        isCustomApp001
+        (QScriptContext* context, QScriptEngine* engine) 
+        ;static  QScriptValue
+        setCustomApp001
         (QScriptContext* context, QScriptEngine* engine) 
         ;static  QScriptValue
         getLabel

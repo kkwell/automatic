@@ -18,8 +18,8 @@
  */
 
  
-include("../File.js");
-include("../AutoSave/AutoSave.js");
+include("scripts/File/File.js");
+include("scripts/File/AutoSave/AutoSave.js");
 
 /**
  * This action handles all user interaction to save the current drawing. If the current
@@ -62,21 +62,35 @@ Save.prototype.save = function(fileName, fileVersion, overwriteWarning) {
 
     var appWin = EAction.getMainWindow();
     var di = EAction.getDocumentInterface();
+    var buttons, ret;
+
+//    var editingWorkingSet = di.getDocument().isEditingWorkingSet();
+//    if (editingWorkingSet) {
+//        buttons = new QMessageBox.StandardButtons(QMessageBox.Yes, QMessageBox.Cancel);
+//        ret = QMessageBox.warning(
+//                    appWin,
+//                    qsTr("Block editing in progress"),
+//                    qsTr("A block is currently exploded and being edited. Please save the block before saving your drawing.") + " " +
+//                    qsTr("Saving will save the block contents exploded.") + " " +
+//                    qsTr("Save anyway?"), buttons);
+//        if (ret===QMessageBox.Cancel) {
+//            return true;
+//        }
+//    }
 
     fileVersion = isNull(fileVersion) ? "" : fileVersion;
 
     fileName = di.getCorrectedFileName(fileName, fileVersion);
 
-    var buttons, ret;
     var saveAs = false;
 
     if (overwriteWarning) {
         if (new QFileInfo(fileName).exists()) {
-            buttons = new QMessageBox.StandardButtons(QMessageBox.Yes, QMessageBox.No);
+            buttons = makeQMessageBoxStandardButtons(QMessageBox.Yes, QMessageBox.No);
             ret = QMessageBox.warning(
                         appWin,
                         qsTr("Overwrite File?"),
-                        qsTr("The file '%1' already exists. Do you wish to overwrite it?").arg(fileName), buttons);
+                        qsTr("The file \"%1\" already exists. Do you wish to overwrite it?").arg(fileName), buttons);
             if (ret!=QMessageBox.Yes) {
                 saveAs = true;
             }
@@ -90,14 +104,14 @@ Save.prototype.save = function(fileName, fileVersion, overwriteWarning) {
         if (colorWarning) {
             // dxflib has no full color support:
             if (!fileVersion.contains("dxflib")) {
-                buttons = new QMessageBox.StandardButtons(QMessageBox.Yes, QMessageBox.No);
+                buttons = makeQMessageBoxStandardButtons(QMessageBox.Yes, QMessageBox.No);
                 ret = QMessageBox.warning(
                             appWin,
                             qsTr("File Format Version Not Recommended"),
-                            qsTr("The file format version you are using is not recommended: '%1'.").arg(fileVersion) + "\n"
+                            qsTr("The file format version you are using is not recommended: \"%1\".").arg(fileVersion) + "\n"
                             + qsTr("Custom properties will not be saved.") + "\n"
                             + qsTr("All black entities and layers will be saved as white.") + "\n"
-                            + qsTr("All custom colors will be 'rounded' to the nearest fixed color.") + " " + qsTr("Proceed?"), buttons);
+                            + qsTr("All custom colors will be adjusted to the nearest fixed color.") + " " + qsTr("Proceed?"), buttons);
                 if (ret!=QMessageBox.Yes) {
                     saveAs = true;
                 }
@@ -116,9 +130,9 @@ Save.prototype.save = function(fileName, fileVersion, overwriteWarning) {
     appWin.setProgressText(qsTr("Saving..."));
 
     if (noFullColor) {
-        EAction.handleUserWarning(qsTr("Saving to file format version '%1'.").arg(fileVersion));
+        EAction.handleUserWarning(qsTr("Saving to file format version \"%1\".").arg(fileVersion));
         EAction.handleUserWarning(qsTr("Black entities and layers are saved as white."));
-        EAction.handleUserWarning(qsTr("Custom colors are 'rounded' to the nearest fixed color."));
+        EAction.handleUserWarning(qsTr("Custom colors are adjusted to the nearest fixed color."));
     }
 
     var bakFileName = AutoSave.getAutoSaveFileNameCurrent();
@@ -133,14 +147,19 @@ Save.prototype.save = function(fileName, fileVersion, overwriteWarning) {
     AutoSave.cleanUp(bakFileName);
 
     // file name might have been changed by filter (extension added):
-    fileName = di.getDocument().getFileName();
+    var doc = di.getDocument();
+    fileName = doc.getFileName();
+    fileVersion = doc.getFileVersion()
+
     var mdiChild = EAction.getMdiChild();
     if (!isNull(mdiChild)) {
-        mdiChild.setWindowTitle(addDirtyFlag(new QFileInfo(fileName).fileName()));
+        var title = new QFileInfo(fileName).fileName();
+        title = title.replace(/&/g, "&&");
+        mdiChild.setWindowTitle(addDirtyFlag(title));
     }
     RSettings.addRecentFile(fileName);
 
-    appWin.handleUserMessage(qsTr("Saved drawing:") + " " + fileName);
+    appWin.handleUserMessage(qsTr("Saved file:") + " " + fileName);
     if (fileVersion.length!==0) {
         appWin.handleUserMessage(qsTr("Format:") + " " + fileVersion);
     }

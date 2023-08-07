@@ -61,8 +61,8 @@ QList<RRefPoint> RDimDiametricData::getReferencePoints(RS::ProjectionRenderingHi
     return ret;
 }
 
-bool RDimDiametricData::moveReferencePoint(const RVector& referencePoint,
-        const RVector& targetPoint) {
+bool RDimDiametricData::moveReferencePoint(const RVector& referencePoint, const RVector& targetPoint, Qt::KeyboardModifiers modifiers) {
+    Q_UNUSED(modifiers)
 
     bool ret = false;
 
@@ -92,7 +92,7 @@ bool RDimDiametricData::moveReferencePoint(const RVector& referencePoint,
     }
 
     if (!ret) {
-        ret = RDimensionData::moveReferencePoint(referencePoint, targetPoint);
+        ret = RDimensionData::moveReferencePoint(referencePoint, targetPoint, modifiers);
     }
 
     if (ret) {
@@ -130,10 +130,12 @@ bool RDimDiametricData::mirror(const RLine& axis) {
     return true;
 }
 
-QList<QSharedPointer<RShape> > RDimDiametricData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment) const {
+/*
+QList<QSharedPointer<RShape> > RDimDiametricData::getShapes(const RBox& queryBox, bool ignoreComplex, bool segment, QList<RObject::Id>* entityIds) const {
     Q_UNUSED(queryBox)
     Q_UNUSED(ignoreComplex)
     Q_UNUSED(segment)
+    Q_UNUSED(entityIds)
 
     QSharedPointer<RBlockReferenceEntity> dimBlockReference = getDimensionBlockReference();
     if (!dimBlockReference.isNull()) {
@@ -143,13 +145,14 @@ QList<QSharedPointer<RShape> > RDimDiametricData::getShapes(const RBox& queryBox
     QList<QSharedPointer<RShape> > ret;
 
     // dimension line:
-    ret.append(getDimensionLineShapes(
-                   chordPoint,
-                   definitionPoint,
-                   true, true));
+//    ret.append(getDimensionLineShapes(
+//                   chordPoint,
+//                   definitionPoint,
+//                   true, true));
 
     return ret;
 }
+*/
 
 double RDimDiametricData::getMeasuredValue() const {
     return definitionPoint.getDistanceTo(chordPoint);
@@ -157,35 +160,36 @@ double RDimDiametricData::getMeasuredValue() const {
 
 QString RDimDiametricData::getAutoLabel() const {
     double distance = getMeasuredValue();
-    distance *= linearFactor;
+    distance *= getDimlfac();
     return formatLabel(distance);
 }
 
-void RDimDiametricData::updateTextData() const {
-    initTextData();
+//void RDimDiametricData::updateTextData() const {
+//    initTextData();
+//    return;
 
-    double dimgap = getDimgap();
+//    double dimgap = getDimgap();
 
-    if (RMath::isNaN(defaultAngle)) {
-        // updates default angle:
-        getShapes();
-    }
+//    if (RMath::isNaN(defaultAngle)) {
+//        // updates default angle:
+//        getShapes();
+//    }
 
-    // move text to the side if appropriate:
-    if (!hasCustomTextPosition()) {
-        //RBox bbox = textData.getBoundingBox();
-        if (!RMath::isNaN(dimLineLength) && textData.getWidth()>dimLineLength) {
-            RVector distH;
-            distH.setPolar(textData.getWidth()/2.0
-                           +dimLineLength/2.0+dimgap, defaultAngle);
-            textPositionSide = textPositionCenter;
-            textPositionSide+=distH;
-        }
-        else {
-            textPositionSide = RVector::invalid;
-        }
-    }
+//    // move text to the side if appropriate:
+//    if (!hasCustomTextPosition()) {
+//        //RBox bbox = textData.getBoundingBox();
+//        if (!RMath::isNaN(dimLineLength) && textData.getWidth()>dimLineLength) {
+//            RVector distH;
+//            distH.setPolar(textData.getWidth()/2.0
+//                           +dimLineLength/2.0+dimgap, defaultAngle);
+//            textPositionSide = textPositionCenter;
+//            textPositionSide+=distH;
+//        }
+//        else {
+//            textPositionSide = RVector::invalid;
+//        }
+//    }
 
-    textData.rotate(defaultAngle, RVector(0,0));
-    textData.move(getTextPosition());
-}
+//    textData.rotate(defaultAngle, RVector(0,0));
+//    textData.move(getTextPosition());
+//}

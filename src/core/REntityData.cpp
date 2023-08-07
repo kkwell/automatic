@@ -26,7 +26,8 @@
 REntityData::REntityData(RDocument* document) :
     document(document),
     updatesEnabled(true),
-    selectionStatus(false), 
+    selectionStatus(false),
+    selectionStatusWorkingSet(false),
     autoUpdatesBlocked(false),
     drawOrder(RMININT),
     layerId(RLayer::INVALID_ID),
@@ -77,31 +78,8 @@ double REntityData::getLineweightInUnits(const QStack<REntity*>& blockRefStack) 
     return lw / 100.0;
 }
 
-/**
- * \return Color of this entity.
- *
- * \param resolve Resolve color if ByLayer or ByBlock.
- */
-RColor REntityData::getColor(bool resolve, const QStack<REntity*>& blockRefStack) const {
-    if (!resolve) {
-        return getColor();
-    }
-
-    if (getType()==RS::EntityAttribute && document!=NULL) {
-        if (getLayerId()==document->getLayer0Id() && RSettings::isLayer0CompatibilityOn()) {
-            REntity::Id blockRefId = getParentId();
-            QSharedPointer<REntity> parentEntity = document->queryEntityDirect(blockRefId);
-            QSharedPointer<RBlockReferenceEntity> blockRef = parentEntity.dynamicCast<RBlockReferenceEntity>();
-            if (!blockRef.isNull()) {
-                // delegate color of block attribute to block reference:
-                //qDebug() << "delegate color to block ref:";
-                //qDebug() << "color of block ref: " << blockRef->getColor(true, blockRefStack);
-                return blockRef->getColor(true, blockRefStack);
-            }
-        }
-    }
-
-    if (color.isByLayer()) {
+RColor REntityData::getColor(const RColor& unresolvedColor, const QStack<REntity*>& blockRefStack) const {
+    if (unresolvedColor.isByLayer()) {
         if (document==NULL) {
             qWarning() << "REntityData::getColor: "
                           "color is ByLayer but layer is NULL "
@@ -131,14 +109,45 @@ RColor REntityData::getColor(bool resolve, const QStack<REntity*>& blockRefStack
         return l->getColor();
     }
 
-    if (color.isByBlock()) {
+    if (unresolvedColor.isByBlock()) {
         if (blockRefStack.isEmpty()) {
             return RColor(Qt::white);
         }
         return blockRefStack.top()->getColor(true, blockRefStack);
     }
 
-    return getColor();
+    return unresolvedColor;
+}
+
+/**
+ * \return Color of this entity.
+ *
+ * \param resolve Resolve color if ByLayer or ByBlock.
+ */
+RColor REntityData::getColor(bool resolve, const QStack<REntity*>& blockRefStack) const {
+    if (!resolve) {
+        return getColor();
+    }
+
+    // this only applies for color by layer (?):
+    RColor entityColor = getColor();
+    if (entityColor.isByLayer()) {
+        if (getType()==RS::EntityAttribute && document!=NULL) {
+            if (getLayerId()==document->getLayer0Id() && RSettings::isLayer0CompatibilityOn()) {
+                REntity::Id blockRefId = getParentId();
+                QSharedPointer<REntity> parentEntity = document->queryEntityDirect(blockRefId);
+                QSharedPointer<RBlockReferenceEntity> blockRef = parentEntity.dynamicCast<RBlockReferenceEntity>();
+                if (!blockRef.isNull()) {
+                    // delegate color of block attribute to block reference:
+                    //qDebug() << "delegate color to block ref:";
+                    //qDebug() << "color of block ref: " << blockRef->getColor(true, blockRefStack);
+                    return blockRef->getColor(true, blockRefStack);
+                }
+            }
+        }
+    }
+
+    return getColor(getColor(), blockRefStack);
 }
 
 /**
@@ -195,14 +204,10 @@ RLineweight::Lineweight REntityData::getLineweight(bool resolve, const QStack<RE
         lw = blockRefStack.top()->getLineweight(true, blockRefStack);
     }
 
-    if (lw==RLineweight::WeightByLwDefault) {
-        // TODO: return default line weight:
-        lw = RLineweight::Weight000;
-    }
-
-    if (lw==RLineweight::WeightInvalid) {
-        // TODO: return default line weight:
-        lw = RLineweight::Weight000;
+    if (lw==RLineweight::WeightByLwDefault || lw==RLineweight::WeightInvalid) {
+        // return configured default line weight:
+        //lw = RLineweight::Weight000;
+        lw = (RLineweight::Lineweight)RSettings::getIntValue("GraphicsView/DefaultLineweight", RLineweight::Weight000);
     }
 
     if (lw<0) {
@@ -282,8 +287,8 @@ RLinetypePattern REntityData::getLinetypePattern() const {
  *                    Zero to only return distances that are strictly orthogonal to the entity.
  */
 double REntityData::getDistanceTo(const RVector& point, bool limited, double range, bool draft, double strictRange) const {
-    Q_UNUSED(range);
-    Q_UNUSED(draft);
+    Q_UNUSED(range)
+    Q_UNUSED(draft)
 
     RVector v = getVectorTo(point, limited, strictRange);
     if (v.isValid()) {
@@ -305,6 +310,23 @@ RBox REntityData::getBoundingBox(bool ignoreEmpty) const {
         ret.growToInclude(bb);
     }
     return ret;
+}
+
+void REntityData::copyAttributesFrom(const REntityData& entityData, bool copyBlockId) {
+    if (getDocument()!=entityData.getDocument()) {
+        qWarning("REntityData::copyAttributesFrom: source entity not from same document");
+        return;
+    }
+
+    setLayerId(entityData.getLayerId());
+    if (copyBlockId) {
+        setBlockId(entityData.getBlockId());
+    }
+    setColor(entityData.getColor());
+    setLineweight(entityData.getLineweight());
+    setLinetypeId(entityData.getLinetypeId());
+    setLinetypeScale(entityData.getLinetypeScale());
+    setDrawOrder(entityData.getDrawOrder());
 }
 
 void REntityData::to2D() {
@@ -338,27 +360,38 @@ RPolyline REntityData::getHull(double offset) const {
  *  inside a polygon.
  */
 RVector REntityData::getPointOnEntity() const {
-    QList<RVector> midPoints = getMiddlePoints();
-    if (midPoints.size()>0) {
-        return midPoints[0];
+    const RShape* s = castToConstShape();
+    if (s==NULL) {
+        return RVector::invalid;
     }
-
-    QList<RVector> endPoints = getEndPoints();
-    if (endPoints.size()>0) {
-        return endPoints[0];
-    }
-
-    return getClosestPointOnEntity(RVector(0.0,0.0));
+    return s->getPointOnShape();
 }
 
 /**
  * \return Vector of end points of this entity. Used for snap to end points.
  */
-QList<RVector> REntityData::getEndPoints(const RBox& queryBox) const {
+QList<RVector> REntityData::getEndPoints(const RBox& queryBox, QList<RObject::Id>* subEntityIds) const {
     QList<RVector> ret;
-    QList<QSharedPointer<RShape> > shapes = getShapes(queryBox, true);
-    for (int i=0; i<shapes.size(); i++) {
-        ret.append(shapes.at(i)->getEndPoints());
+    QList<QSharedPointer<RShape> > shapes;
+    QList<REntity::Id> entityIds;
+
+    if (subEntityIds!=NULL) {
+        shapes = getShapes(queryBox, true, false, &entityIds);
+        for (int i=0; i<shapes.size(); i++) {
+            QList<RVector> pts = shapes.at(i)->getEndPoints();
+            for (int k=0; k<pts.length(); k++) {
+                ret.append(pts[k]);
+                if (i<entityIds.length()) {
+                    subEntityIds->append(entityIds[i]);
+                }
+            }
+        }
+    }
+    else {
+        shapes = getShapes(queryBox, true);
+        for (int i=0; i<shapes.size(); i++) {
+            ret.append(shapes.at(i)->getEndPoints());
+        }
     }
     return ret;
 }
@@ -367,11 +400,28 @@ QList<RVector> REntityData::getEndPoints(const RBox& queryBox) const {
  * \return Vector of middle points of this entity. Used for snap to
  *        middle points.
  */
-QList<RVector> REntityData::getMiddlePoints(const RBox& queryBox) const {
+QList<RVector> REntityData::getMiddlePoints(const RBox& queryBox, QList<RObject::Id>* subEntityIds) const {
     QList<RVector> ret;
-    QList<QSharedPointer<RShape> > shapes = getShapes(queryBox, true);
-    for (int i=0; i<shapes.size(); i++) {
-        ret.append(shapes.at(i)->getMiddlePoints());
+    QList<QSharedPointer<RShape> > shapes;
+    QList<REntity::Id> entityIds;
+
+    if (subEntityIds!=NULL) {
+        shapes = getShapes(queryBox, true, false, &entityIds);
+        for (int i=0; i<shapes.size(); i++) {
+            QList<RVector> pts = shapes.at(i)->getMiddlePoints();
+            for (int k=0; k<pts.length(); k++) {
+                ret.append(pts[k]);
+                if (i<entityIds.length()) {
+                    subEntityIds->append(entityIds[i]);
+                }
+            }
+        }
+    }
+    else {
+        shapes = getShapes(queryBox, true);
+        for (int i=0; i<shapes.size(); i++) {
+            ret.append(shapes.at(i)->getMiddlePoints());
+        }
     }
     return ret;
 }
@@ -380,11 +430,42 @@ QList<RVector> REntityData::getMiddlePoints(const RBox& queryBox) const {
  * \return Vector of center points of this entity. Used for snap to
  *        center points.
  */
-QList<RVector> REntityData::getCenterPoints(const RBox& queryBox) const {
+QList<RVector> REntityData::getCenterPoints(const RBox& queryBox, QList<REntity::Id>* subEntityIds) const {
+    QList<RVector> ret;
+    QList<QSharedPointer<RShape> > shapes;
+    QList<REntity::Id> entityIds;
+
+    if (subEntityIds!=NULL) {
+        shapes = getShapes(queryBox, true, false, &entityIds);
+        for (int i=0; i<shapes.size(); i++) {
+            QList<RVector> pts = shapes.at(i)->getCenterPoints();
+            for (int k=0; k<pts.length(); k++) {
+                ret.append(pts[k]);
+                if (i<entityIds.length()) {
+                    subEntityIds->append(entityIds[i]);
+                }
+            }
+        }
+    }
+    else {
+        shapes = getShapes(queryBox, true);
+        for (int i=0; i<shapes.size(); i++) {
+            ret.append(shapes.at(i)->getCenterPoints());
+        }
+    }
+
+    return ret;
+}
+
+/**
+ * \return Vector of reference points of this entity. Used for snap to
+ *        reference points.
+ */
+QList<RVector> REntityData::getArcReferencePoints(const RBox& queryBox) const {
     QList<RVector> ret;
     QList<QSharedPointer<RShape> > shapes = getShapes(queryBox, true);
     for (int i=0; i<shapes.size(); i++) {
-        ret.append(shapes.at(i)->getCenterPoints());
+        ret.append(shapes.at(i)->getArcReferencePoints());
     }
     return ret;
 }
@@ -393,11 +474,28 @@ QList<RVector> REntityData::getCenterPoints(const RBox& queryBox) const {
  * \return Points on entity with given \c distance to either endpoint.
  * Used for snap to points with distance on entity.
  */
-QList<RVector> REntityData::getPointsWithDistanceToEnd(double distance, int from, const RBox& queryBox) const {
+QList<RVector> REntityData::getPointsWithDistanceToEnd(double distance, int from, const RBox& queryBox, QList<RObject::Id>* subEntityIds) const {
     QList<RVector> ret;
-    QList<QSharedPointer<RShape> > shapes = getShapes(queryBox, true);
-    for (int i=0; i<shapes.size(); i++) {
-        ret.append(shapes.at(i)->getPointsWithDistanceToEnd(distance, from));
+    QList<QSharedPointer<RShape> > shapes;
+    QList<RObject::Id> entityIds;
+
+    if (subEntityIds!=NULL) {
+        shapes = getShapes(queryBox, true, false, &entityIds);
+        for (int i=0; i<shapes.size(); i++) {
+            QList<RVector> pts = shapes[i]->getPointsWithDistanceToEnd(distance, from);
+            for (int k=0; k<pts.length(); k++) {
+                ret.append(pts[k]);
+                if (i<entityIds.length()) {
+                    subEntityIds->append(entityIds[i]);
+                }
+            }
+        }
+    }
+    else {
+        shapes = getShapes(queryBox, true);
+        for (int i=0; i<shapes.size(); i++) {
+            ret.append(shapes[i]->getPointsWithDistanceToEnd(distance, from));
+        }
     }
     return ret;
 }
@@ -407,19 +505,23 @@ QList<RVector> REntityData::getPointsWithDistanceToEnd(double distance, int from
  *        points on entity.
  */
 RVector REntityData::getClosestPointOnEntity(const RVector& point,
-    double range, bool limited) const {
+    double range, bool limited, REntity::Id* subEntityId) const {
 
     Q_UNUSED(range)
 
     RVector ret = RVector::invalid;
     double minDist = RMAXDOUBLE;
-    QList<QSharedPointer<RShape> > shapes = getShapes(RBox(), true);
+    QList<REntity::Id> entityIds;
+    QList<QSharedPointer<RShape> > shapes = getShapes(RBox(), true, false, &entityIds);
     for (int i=0; i<shapes.size(); i++) {
         RVector r = shapes.at(i)->getClosestPointOnShape(point, limited);
         double dist = r.getDistanceTo(point);
         if (!ret.isValid() || dist<minDist) {
             ret = r;
             minDist = dist;
+            if (subEntityId!=NULL && i<entityIds.length()) {
+                *subEntityId = entityIds[i];
+            }
         }
     }
     return ret;
@@ -487,19 +589,28 @@ bool REntityData::intersectsWith(const RShape& shape) const {
  *     from the same entity.
  */
 QList<RVector> REntityData::getIntersectionPoints(
-        const REntityData& other, bool limited, bool same, const RBox& queryBox, bool ignoreComplex) const {
+        const REntityData& other, bool limited, bool same, const RBox& queryBox, bool ignoreComplex,
+        QList<QPair<RObject::Id, RObject::Id> >* entityIds) const {
+
+    Q_UNUSED(same)
 
     QList<RVector> ret;
-    QList<QSharedPointer<RShape> > shapes1 = getShapes(queryBox, ignoreComplex, true);
+    QList<REntity::Id> entityIds1;
+    QList<QSharedPointer<RShape> > shapes1 = getShapes(queryBox, ignoreComplex, true, &entityIds1);
 
     if (RMouseEvent::hasMouseMoved()) {
         return QList<RVector>();
     }
 
-    QList<QSharedPointer<RShape> > shapes2 = other.getShapes(queryBox, ignoreComplex, true);
+    QList<REntity::Id> entityIds2;
+    QList<QSharedPointer<RShape> > shapes2 = other.getShapes(queryBox, ignoreComplex, true, &entityIds2);
 
     for (int i=0; i<shapes1.size(); i++) {
-        for (int k=0; k<shapes2.size(); k++) {
+        int kStart = 0;
+        if (same) {
+            kStart = i+1;
+        }
+        for (int k=kStart; k<shapes2.size(); k++) {
             if (RMouseEvent::hasMouseMoved()) {
                 return QList<RVector>();
             }
@@ -512,9 +623,23 @@ QList<RVector> REntityData::getIntersectionPoints(
 
             // the two shapes might originate from block references in which case
             // same is considered to be false:
-            ret.append(
-                shapes1.at(i)->getIntersectionPoints(*shapes2.at(k), limited, false)
-            );
+            QList<RVector> ips = shapes1.at(i)->getIntersectionPoints(*shapes2.at(k), limited, false);
+            ret.append(ips);
+
+            if (entityIds!=NULL) {
+                RObject::Id id1 = RObject::INVALID_ID;
+                RObject::Id id2 = RObject::INVALID_ID;
+                if (i<entityIds1.length()) {
+                    id1 = entityIds1.at(i);
+                }
+                if (k<entityIds2.length()) {
+                    id2 = entityIds2.at(k);
+                }
+                // make sure the indices in ret and entityIds match, insert duplicates if necessary:
+                for (int c=0; c<ips.length(); c++) {
+                    entityIds->append(QPair<RObject::Id, RObject::Id>(id1, id2));
+                }
+            }
         }
     }
 
@@ -616,15 +741,16 @@ bool REntityData::stretch(const RPolyline& area, const RVector& offset) {
  * \return The one shape that is part of this entity which is the
  *      closest to the given position.
  */
-QSharedPointer<RShape> REntityData::getClosestShape(const RVector& pos, double range, bool ignoreComplex) const {
+QSharedPointer<RShape> REntityData::getClosestShape(const RVector& pos, double range, bool ignoreComplex, REntity::Id* subEntityId) const {
     QSharedPointer<RShape> ret;
 
     QList<QSharedPointer<RShape> > shapes;
+    QList<RObject::Id> entityIds;
     if (RMath::isNaN(range)) {
-        shapes = getShapes(RBox(), ignoreComplex);
+        shapes = getShapes(RBox(), ignoreComplex, false, &entityIds);
     }
     else {
-        shapes = getShapes(RBox(pos, range), ignoreComplex);
+        shapes = getShapes(RBox(pos, range), ignoreComplex, false, &entityIds);
     }
 
     // entity not based on shape:
@@ -632,15 +758,18 @@ QSharedPointer<RShape> REntityData::getClosestShape(const RVector& pos, double r
         return ret;
     }
 
+    // single shape:
     if (shapes.size()==1) {
+        if (!entityIds.isEmpty() && subEntityId!=NULL) {
+            *subEntityId = entityIds[0];
+        }
         return shapes[0];
     }
 
     // entity based on one or more shapes, find closest:
     double minDistance = RMAXDOUBLE;
-    QList<QSharedPointer<RShape> >::const_iterator it;
-    for (it=shapes.constBegin(); it!=shapes.constEnd(); ++it) {
-        QSharedPointer<RShape> shape = (*it);
+    for (int i=0; i<shapes.length(); i++) {
+        QSharedPointer<RShape> shape = shapes[i];
 
         // explode shape if possible:
         QList<QSharedPointer<RShape> > subShapes;
@@ -661,6 +790,9 @@ QSharedPointer<RShape> REntityData::getClosestShape(const RVector& pos, double r
             if (distance<minDistance) {
                 minDistance = distance;
                 ret = shape2;
+                if (subEntityId!=NULL && i<entityIds.length()) {
+                    *subEntityId = entityIds[i];
+                }
             }
         }
     }
